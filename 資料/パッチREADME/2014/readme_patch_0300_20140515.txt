@@ -1,0 +1,22 @@
+
+eramaou v0.300用パッチです
+
+EXECUTION.ERB
+経験値を得る条件を削除
+経験値がレベルによって増えるように
+
+DUNGEON.ERB
+WALK変数入れ替え漏れ修正
+
+LABO_DUNGEON_MAP.ERB
+MAGIC.ERB
+D:0入れ替え漏れ修正
+
+DUNGEON_ROOM.ERB
+MONSTER_DATA.ERB
+代入演算子が==になっていたミス修正
+
+DUNGEON_BITCH.ERB
+PALAM条件を消去
+
+

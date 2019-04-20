@@ -1,0 +1,35 @@
+eramaou0.330_魔王通信修正
+
+※すでによそのダンジョンから勇者を迎えている場合
+global.sav初期化のため
+[2] よそのダンジョンの勇者に全員立ち去ってもらう
+を実行してから再度勇者を迎えてください
+
+
+SELL_CHARA_ESTIMATE.ERB	村娘Ｂにも元勇者ボーナスが発生しないように修正
+SYSTEM.ERB		侵攻中の勇者が洗脳の指輪を装備した時用に以下の処理を追加
+			CFLAG:A:506 = 1
+			CFLAG:A:507 = 0
+			CALL PARTY_DEL, A
+
+・魔王通信部分
+CHAR_MAKE.ERB		@CHAR_MAKE_INPORTに以下の処理を追加
+			SPLIT LOCALS:13, "/", RESULTS
+			FOR LOCAL, 0, RESULT-1
+				SPLIT RESULTS:LOCAL, ",", NUMS
+				CSTR:CHARA:TOINT(NUMS) = %NUMS:1%
+			NEXT
+MAOUNET.ERB		@INPORT_Bに以下の処理を追加
+			GLOBALS:LOCAL += "_"
+			FOR LOCAL:1, 0, VARSIZE("CSTR")
+				SIF STRLENS(CSTR:CHARA:(LOCAL:1))
+					GLOBALS:LOCAL += @"{LOCAL:1},%CSTR:CHARA:(LOCAL:1)%/"
+			NEXT
+
+
+・不具合報告
+知的口上の売却部分末尾に
+SIF TALENT:122 != 1
+	CALL SELL_MATURO_K0
+がないため売却末路口上が読み込まれない
+
