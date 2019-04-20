@@ -1,0 +1,191 @@
+eramaou_能力表示再構成_20140520
+
+●編集元
+eramaou0.300 + 2014/05/17付のパッチまとめ
+
+-------------------------------
+●適用するとどうなるか
+結婚式のあと即ターンエンドしない問題が解消されます。
+再構成が中心で機能の追加はありません。
+
+●何をしたのか
+「能力を表示」 以下を再構成
+SHOP.ERBをちょっと整理
+ファイル名を変更（なので適用に手間がかかります、詳しくは下記）
+
+●適用方法
+ERBフォルダを上書きしたあと不要になったERBを消して下さい。
+「不要になったERB」は容量が100バイト以下になっているので、
+サイズ順に並べると見つけやすいです。
+
+個別のファイル名は以下のとおり。
+INFO.ERB
+JOB_CHANGE.ERB
+MARRIAGE.ERB
+NAMING.ERB
+TEMPTATION.ERB
+
+-------------------------------
+●外部に影響しそうな点
+転職の際、CFLAG:80にゼロが代入されていたが、
+CFLAG:80は他の箇所で使われていなかったのでこの代入を削除した
+(フラグまとめにも記述がない)
+
+●残った問題
+@SELECT_TARGET(調教対象を選ぶ)と@SELECT_ASSI(助手を選ぶ)において
+候補リストの表示人数をBに代入しているのだけど、
+どこで使ってるのか分からなかったので残した
+（少なくとも「能力を表示」以下では使っていない）
+
+●どういう方針でやったか
+・1文字変数を減らす
+・TARGETへの代入を減らす
+・省略形を避ける
+
+
+
+
+
+-------------------------------
+●編集点を網羅的に書いたもの(長い)
+
+---------------
+○ファイル名を変更
+INFO.ERB	-> CHARA_INFO.ERB と CHARA_INFO_SHOW.ERB に分離　能力を表示のメイン部分
+JOB_CHANGE.ERB	-> CHARA_JOB_CHANGE.ERB　転職関係
+MARRIAGE.ERB	-> CHARA_MARRIAGE.ERB　結婚関係
+TEMPTATION.ERB	-> CHARA_TEMPTATION.ERB　魔の誘惑関係
+NAMING.ERB	-> CHARA_NAME_EDIT.ERB　名前変更関係
+
+SHOP.ERB で使う関数を SHOP_FUNCTION.ERB に出した
+
+---------------
+○ファイル内容の編集
+
+----
+<ABL.ERB>
+----
+@SHOW_JUEL
+　1文字変数をなくしただけ
+
+----
+<INFO.ERB>
+----
+@SAVEINFO をSYTEM.ERB に移動
+　セーブデータに関する関数がキャラ情報表示関係の間に挟まっていたので移した
+ファイルを分割
+　CHARA_INFO.ERB とCHARA_INFO_SHOW.ERB にした
+
+----
+<USERCOM.ERB>
+----
+@USERCOM
+　INFO.ERBに入っていた関数の名前が変わったのに合わせてCALL命令を書き換え
+
+----
+<SHOP.ERB>
+----
+@SELECT_TARGET、@SELECT_ASSI
+　1文字変数をなくした
+　リスト表示部分をSHOP_FUNCTION.ERB に出した
+@USERSHOP
+　[101]能力を表示から1が返って来たらBEGIN TURNENDするようにした
+
+--------
+<SHOP_FUNCTION.ERB> 新規
+----
+@SHOW_LIST_TRAINABLE
+　;調教可能奴隷の一覧表示
+　;表示した人数を返す
+@SHOW_LIST_ASSISTABLE
+　;助手可能奴隷の一覧表示
+　;ついでに助手可能人数を返す
+@IS_TRAINABLE(ARG)
+　;ARG番のキャラが調教可能なら0、ダメならそれ以外を返す式中関数
+@IS_ASSISTABLE(ARG)
+　;ARG番のキャラが助手可能なら0、ダメならそれ以外を返す式中関数
+@GET_JOB_NAME(ARG)
+　;ARG番のキャラの職業名(文字列)を返す式中関数、職業なしなら半角スペースを返す
+
+--------
+[101] 能力を表示 以下の処理関係
+
+----
+<CHARA_INFO.ERB> 新規
+----
+@CHARA_INFO
+　;キャラ情報一覧の処理。ここ→個別キャラ→コマンドと選択していく。
+　;関数USERSHOPから呼ばれる。
+@SHOW_CHARA_INFO_LIST
+　;存在するキャラの一覧表示
+@SHOW_CHARA_ACT(ARG)
+　;ARG番のキャラの状態（侵攻中とか）を表示する
+　;CHARA_INFOで使用
+
+@CHARA_INFO_INDIVIDUAL(ARG)
+　;ARG番のキャラ情報とコマンドを表示
+
+----
+<CHARA_INFO_SHOW.ERB> 新規
+----
+@SHOW_CHARA_INFO(ARG)
+;ARG番のキャラの個別情報を表示
+
+--------
+個別能力表示から派生するコマンド関係
+4つあるけど構成は共通
+
+----
+<CHARA_JOB_CHANGE.ERB> 新規
+----
+@SHOW_BUTTON_JOB_CHANGE(NUM, ARG)
+　;キャラの能力表示において[転職]ボタンを表示する
+　;引数NUMはボタンの数値、ARGは対象キャラの番号
+@CHECK_ABLE_TO_JOB_CHANGE(ARG)
+　;ARG番のキャラに対して、[転職]できるかの判断を行い、結果に対応する値を返す式中関数
+　;可なら0を返す
+@CHARA_INFO_JOB_CHANGE(ARG)
+　;ARG番のキャラの転職処理を行う
+　;キャラの能力表示において[転職]のボタンが押されるとここに来る
+
+----
+<CHARA_MARRIAGE.ERB> 新規
+----
+@SHOW_BUTTON_MARRIAGE(NUM, ARG)
+　;キャラの能力表示において[結婚]ボタンを表示する
+　;引数NUMはボタンの数値、ARGは対象キャラの番号
+@CHECK_ABLE_TO_MARRIAGE(ARG)
+　;ARG番のキャラに対して、[結婚]できるかの判断を行い、結果に対応する値を返す式中関数
+　;可なら0を返す
+@MARRIAGE(ARG)
+　;ARG番のキャラの結婚処理を行う
+　;キャラの能力表示において[結婚]のボタンが押されるとここに来る
+
+----
+<CHARA_TEMPTATION.ERB> 新規
+----
+@SHOW_BUTTON_TEMPTATION(NUM, ARG)
+　;キャラの能力表示において[魔の誘惑]ボタンを表示する
+　;引数NUMはボタンの数値、ARGは対象キャラの番号
+@CHECK_ABLE_TO_TEMPTATION(ARG)
+　;ARG番のキャラに対して、[魔の誘惑]できるかの判断を行い、結果に対応する値を返す式中関数
+　;可ならゼロを返す
+@TEMPTATION(ARG)
+　;ARG番のキャラの誘惑処理を行う
+　;キャラの能力表示において[魔の誘惑]のボタンが押されるとここに来る
+@TEMPTATION_TRY(ARG)
+　;魔王さまが誘惑を試みる処理
+
+----
+<CHARA_NAME_EDIT.ERB> 新規
+----
+@SHOW_BUTTON_NAME_EDIT(NUM, ARG, RESET = 0)
+　;キャラの能力表示において[名前を変更][名前を戻す]ボタンを表示する
+　;引数NUMはボタンの数値、ARGは対象キャラの番号
+　;引数RESETが0以外なら[戻す]時の処理になる
+@CHECK_ABLE_TO_NAME_EDIT(ARG)
+　;ARG番のキャラに対して、名前を変更できるかの判断を行い、結果に対応する値を返す式中関数
+　;可ならゼロを返す
+@CHARA_INFO_NAME_EDIT(ARG,RESET = 0)
+　;キャラの能力表示において[名前を変える][戻す]のボタンが押されるとここに来る
+　;引数RESETが0以外なら[戻す]時の処理になる

@@ -1,0 +1,823 @@
+﻿[-TRIM-]
+
+%SAVESTR:TARGET%(을)를
+%조사선택(SAVESTR:TARGET, "를")%
+
+%SAVESTR:TARGET%를
+%조사선택(SAVESTR:TARGET, "를")%
+
+%SAVESTR:TARGET%을
+%조사선택(SAVESTR:TARGET, "를")%
+
+%SAVESTR:TARGET%를(을)
+%조사선택(SAVESTR:TARGET, "를")%
+
+%SAVESTR:TARGET%(은)는
+%조사선택(SAVESTR:TARGET, "는")%
+
+%SAVESTR:TARGET%는(은)
+%조사선택(SAVESTR:TARGET, "는")%
+
+%SAVESTR:TARGET%은
+%조사선택(SAVESTR:TARGET, "는")%
+
+%SAVESTR:TARGET%는
+%조사선택(SAVESTR:TARGET, "는")%
+
+%SAVESTR:TARGET%(와)과
+%조사선택(SAVESTR:TARGET, "와")%
+
+%SAVESTR:TARGET%과(와)
+%조사선택(SAVESTR:TARGET, "와")%
+
+%SAVESTR:TARGET%과
+%조사선택(SAVESTR:TARGET, "와")%
+
+%SAVESTR:TARGET%와
+%조사선택(SAVESTR:TARGET, "와")%
+
+%SAVESTR:TARGET%(이)가
+%조사선택(SAVESTR:TARGET, "가")%
+
+%SAVESTR:TARGET%가(이)
+%조사선택(SAVESTR:TARGET, "가")%
+
+%SAVESTR:TARGET%가
+%조사선택(SAVESTR:TARGET, "가")%
+
+%SAVESTR:TARGET%이
+%조사선택(SAVESTR:TARGET, "가")%
+
+%SAVESTR:MASTER%(을)를
+%조사선택(SAVESTR:MASTER, "를")%
+
+%SAVESTR:MASTER%를
+%조사선택(SAVESTR:MASTER, "를")%
+
+%SAVESTR:MASTER%을
+%조사선택(SAVESTR:MASTER, "를")%
+
+%SAVESTR:MASTER%를(을)
+%조사선택(SAVESTR:MASTER, "를")%
+
+%SAVESTR:MASTER%(은)는
+%조사선택(SAVESTR:MASTER, "는")%
+
+%SAVESTR:MASTER%는(은)
+%조사선택(SAVESTR:MASTER, "는")%
+
+%SAVESTR:MASTER%은
+%조사선택(SAVESTR:MASTER, "는")%
+
+%SAVESTR:MASTER%는
+%조사선택(SAVESTR:MASTER, "는")%
+
+%SAVESTR:MASTER%(와)과
+%조사선택(SAVESTR:MASTER, "와")%
+
+%SAVESTR:MASTER%과(와)
+%조사선택(SAVESTR:MASTER, "와")%
+
+%SAVESTR:MASTER%과
+%조사선택(SAVESTR:MASTER, "와")%
+
+%SAVESTR:MASTER%와
+%조사선택(SAVESTR:MASTER, "와")%
+
+%SAVESTR:MASTER%(이)가
+%조사선택(SAVESTR:MASTER, "가")%
+
+%SAVESTR:MASTER%가(이)
+%조사선택(SAVESTR:MASTER, "가")%
+
+%SAVESTR:MASTER%가
+%조사선택(SAVESTR:MASTER, "가")%
+
+%SAVESTR:MASTER%이
+%조사선택(SAVESTR:MASTER, "가")%
+
+%SAVESTR:ASSI%(을)를
+%조사선택(SAVESTR:ASSI, "를")%
+
+%SAVESTR:ASSI%를
+%조사선택(SAVESTR:ASSI, "를")%
+
+%SAVESTR:ASSI%을
+%조사선택(SAVESTR:ASSI, "를")%
+
+%SAVESTR:ASSI%를(을)
+%조사선택(SAVESTR:ASSI, "를")%
+
+%SAVESTR:ASSI%(은)는
+%조사선택(SAVESTR:ASSI, "는")%
+
+%SAVESTR:ASSI%는(은)
+%조사선택(SAVESTR:ASSI, "는")%
+
+%SAVESTR:ASSI%은
+%조사선택(SAVESTR:ASSI, "는")%
+
+%SAVESTR:ASSI%는
+%조사선택(SAVESTR:ASSI, "는")%
+
+%SAVESTR:ASSI%(와)과
+%조사선택(SAVESTR:ASSI, "와")%
+
+%SAVESTR:ASSI%과(와)
+%조사선택(SAVESTR:ASSI, "와")%
+
+%SAVESTR:ASSI%과
+%조사선택(SAVESTR:ASSI, "와")%
+
+%SAVESTR:ASSI%와
+%조사선택(SAVESTR:ASSI, "와")%
+
+%SAVESTR:ASSI%(이)가
+%조사선택(SAVESTR:ASSI, "가")%
+
+%SAVESTR:ASSI%가(이)
+%조사선택(SAVESTR:ASSI, "가")%
+
+%SAVESTR:ASSI%가
+%조사선택(SAVESTR:ASSI, "가")%
+
+%SAVESTR:ASSI%이
+%조사선택(SAVESTR:ASSI, "가")%
+
+%SAVESTR:A%(을)를
+%조사선택(SAVESTR:A, "를")%
+
+%SAVESTR:A%를
+%조사선택(SAVESTR:A, "를")%
+
+%SAVESTR:A%을
+%조사선택(SAVESTR:A, "를")%
+
+%SAVESTR:A%를(을)
+%조사선택(SAVESTR:A, "를")%
+
+%SAVESTR:A%(은)는
+%조사선택(SAVESTR:A, "는")%
+
+%SAVESTR:A%는(은)
+%조사선택(SAVESTR:A, "는")%
+
+%SAVESTR:A%은
+%조사선택(SAVESTR:A, "는")%
+
+%SAVESTR:A%는
+%조사선택(SAVESTR:A, "는")%
+
+%SAVESTR:A%(와)과
+%조사선택(SAVESTR:A, "와")%
+
+%SAVESTR:A%과(와)
+%조사선택(SAVESTR:A, "와")%
+
+%SAVESTR:A%과
+%조사선택(SAVESTR:A, "와")%
+
+%SAVESTR:A%와
+%조사선택(SAVESTR:A, "와")%
+
+%SAVESTR:A%(이)가
+%조사선택(SAVESTR:A, "가")%
+
+%SAVESTR:A%가(이)
+%조사선택(SAVESTR:A, "가")%
+
+%SAVESTR:A%가
+%조사선택(SAVESTR:A, "가")%
+
+%SAVESTR:A%이
+%조사선택(SAVESTR:A, "가")%
+
+%SAVESTR:B%(을)를
+%조사선택(SAVESTR:B, "를")%
+
+%SAVESTR:B%를
+%조사선택(SAVESTR:B, "를")%
+
+%SAVESTR:B%을
+%조사선택(SAVESTR:B, "를")%
+
+%SAVESTR:B%를(을)
+%조사선택(SAVESTR:B, "를")%
+
+%SAVESTR:B%(은)는
+%조사선택(SAVESTR:B, "는")%
+
+%SAVESTR:B%는(은)
+%조사선택(SAVESTR:B, "는")%
+
+%SAVESTR:B%은
+%조사선택(SAVESTR:B, "는")%
+
+%SAVESTR:B%는
+%조사선택(SAVESTR:B, "는")%
+
+%SAVESTR:B%(와)과
+%조사선택(SAVESTR:B, "와")%
+
+%SAVESTR:B%과(와)
+%조사선택(SAVESTR:B, "와")%
+
+%SAVESTR:B%과
+%조사선택(SAVESTR:B, "와")%
+
+%SAVESTR:B%와
+%조사선택(SAVESTR:B, "와")%
+
+%SAVESTR:B%(이)가
+%조사선택(SAVESTR:B, "가")%
+
+%SAVESTR:B%가(이)
+%조사선택(SAVESTR:B, "가")%
+
+%SAVESTR:B%가
+%조사선택(SAVESTR:B, "가")%
+
+%SAVESTR:B%이
+%조사선택(SAVESTR:B, "가")%
+
+%SAVESTR:PLAYER%(을)를
+%조사선택(SAVESTR:PLAYER, "를")%
+
+%SAVESTR:PLAYER%를
+%조사선택(SAVESTR:PLAYER, "를")%
+
+%SAVESTR:PLAYER%을
+%조사선택(SAVESTR:PLAYER, "를")%
+
+%SAVESTR:PLAYER%를(을)
+%조사선택(SAVESTR:PLAYER, "를")%
+
+%SAVESTR:PLAYER%(은)는
+%조사선택(SAVESTR:PLAYER, "는")%
+
+%SAVESTR:PLAYER%는(은)
+%조사선택(SAVESTR:PLAYER, "는")%
+
+%SAVESTR:PLAYER%은
+%조사선택(SAVESTR:PLAYER, "는")%
+
+%SAVESTR:PLAYER%는
+%조사선택(SAVESTR:PLAYER, "는")%
+
+%SAVESTR:PLAYER%(와)과
+%조사선택(SAVESTR:PLAYER, "와")%
+
+%SAVESTR:PLAYER%과(와)
+%조사선택(SAVESTR:PLAYER, "와")%
+
+%SAVESTR:PLAYER%과
+%조사선택(SAVESTR:PLAYER, "와")%
+
+%SAVESTR:PLAYER%와
+%조사선택(SAVESTR:PLAYER, "와")%
+
+%SAVESTR:PLAYER%(이)가
+%조사선택(SAVESTR:PLAYER, "가")%
+
+%SAVESTR:PLAYER%가(이)
+%조사선택(SAVESTR:PLAYER, "가")%
+
+%SAVESTR:PLAYER%가
+%조사선택(SAVESTR:PLAYER, "가")%
+
+%SAVESTR:PLAYER%이
+%조사선택(SAVESTR:PLAYER, "가")%
+
+%CALLNAME:B%(을)를
+%조사선택(CALLNAME:B, "를")%
+
+%CALLNAME:B%를
+%조사선택(CALLNAME:B, "를")%
+
+%CALLNAME:B%을
+%조사선택(CALLNAME:B, "를")%
+
+%CALLNAME:B%를(을)
+%조사선택(CALLNAME:B, "를")%
+
+%CALLNAME:B%(은)는
+%조사선택(CALLNAME:B, "는")%
+
+%CALLNAME:B%는(은)
+%조사선택(CALLNAME:B, "는")%
+
+%CALLNAME:B%은
+%조사선택(CALLNAME:B, "는")%
+
+%CALLNAME:B%는
+%조사선택(CALLNAME:B, "는")%
+
+%CALLNAME:B%(와)과
+%조사선택(CALLNAME:B, "와")%
+
+%CALLNAME:B%과(와)
+%조사선택(CALLNAME:B, "와")%
+
+%CALLNAME:B%과
+%조사선택(CALLNAME:B, "와")%
+
+%CALLNAME:B%와
+%조사선택(CALLNAME:B, "와")%
+
+%CALLNAME:B%(이)가
+%조사선택(CALLNAME:B, "가")%
+
+%CALLNAME:B%가(이)
+%조사선택(CALLNAME:B, "가")%
+
+%CALLNAME:B%가
+%조사선택(CALLNAME:B, "가")%
+
+%CALLNAME:B%이
+%조사선택(CALLNAME:B, "가")%
+
+%SAVESTR:D%(을)를
+%조사선택(SAVESTR:D, "를")%
+
+%SAVESTR:D%를
+%조사선택(SAVESTR:D, "를")%
+
+%SAVESTR:D%을
+%조사선택(SAVESTR:D, "를")%
+
+%SAVESTR:D%를(을)
+%조사선택(SAVESTR:D, "를")%
+
+%SAVESTR:D%(은)는
+%조사선택(SAVESTR:D, "는")%
+
+%SAVESTR:D%는(은)
+%조사선택(SAVESTR:D, "는")%
+
+%SAVESTR:D%은
+%조사선택(SAVESTR:D, "는")%
+
+%SAVESTR:D%는
+%조사선택(SAVESTR:D, "는")%
+
+%SAVESTR:D%(와)과
+%조사선택(SAVESTR:D, "와")%
+
+%SAVESTR:D%과(와)
+%조사선택(SAVESTR:D, "와")%
+
+%SAVESTR:D%과
+%조사선택(SAVESTR:D, "와")%
+
+%SAVESTR:D%와
+%조사선택(SAVESTR:D, "와")%
+
+%SAVESTR:D%(이)가
+%조사선택(SAVESTR:D, "가")%
+
+%SAVESTR:D%가(이)
+%조사선택(SAVESTR:D, "가")%
+
+%SAVESTR:D%가
+%조사선택(SAVESTR:D, "가")%
+
+%SAVESTR:D%이
+%조사선택(SAVESTR:D, "가")%
+
+%ITEMNAME:(LOCAL:0)%(을)를
+%조사선택(ITEMNAME:(LOCAL:0), "를")%
+
+%ITEMNAME:(LOCAL:0)%를
+%조사선택(ITEMNAME:(LOCAL:0), "를")%
+
+%ITEMNAME:(LOCAL:0)%을
+%조사선택(ITEMNAME:(LOCAL:0), "를")%
+
+%ITEMNAME:(LOCAL:0)%를(을)
+%조사선택(ITEMNAME:(LOCAL:0), "를")%
+
+%ITEMNAME:(LOCAL:0)%(은)는
+%조사선택(ITEMNAME:(LOCAL:0), "는")%
+
+%ITEMNAME:(LOCAL:0)%는(은)
+%조사선택(ITEMNAME:(LOCAL:0), "는")%
+
+%ITEMNAME:(LOCAL:0)%은
+%조사선택(ITEMNAME:(LOCAL:0), "는")%
+
+%ITEMNAME:(LOCAL:0)%는
+%조사선택(ITEMNAME:(LOCAL:0), "는")%
+
+%ITEMNAME:(LOCAL:0)%(와)과
+%조사선택(ITEMNAME:(LOCAL:0), "와")%
+
+%ITEMNAME:(LOCAL:0)%과(와)
+%조사선택(ITEMNAME:(LOCAL:0), "와")%
+
+%ITEMNAME:(LOCAL:0)%과
+%조사선택(ITEMNAME:(LOCAL:0), "와")%
+
+%ITEMNAME:(LOCAL:0)%와
+%조사선택(ITEMNAME:(LOCAL:0), "와")%
+
+%ITEMNAME:(LOCAL:0)%(이)가
+%조사선택(ITEMNAME:(LOCAL:0), "가")%
+
+%ITEMNAME:(LOCAL:0)%가(이)
+%조사선택(ITEMNAME:(LOCAL:0), "가")%
+
+%ITEMNAME:(LOCAL:0)%가
+%조사선택(ITEMNAME:(LOCAL:0), "가")%
+
+%ITEMNAME:(LOCAL:0)%이
+%조사선택(ITEMNAME:(LOCAL:0), "가")%
+
+%ITEMNAME:X%(을)를
+%조사선택(ITEMNAME:X, "를")%
+
+%ITEMNAME:X%를
+%조사선택(ITEMNAME:X, "를")%
+
+%ITEMNAME:X%을
+%조사선택(ITEMNAME:X, "를")%
+
+%ITEMNAME:X%를(을)
+%조사선택(ITEMNAME:X, "를")%
+
+%ITEMNAME:X%(은)는
+%조사선택(ITEMNAME:X, "는")%
+
+%ITEMNAME:X%는(은)
+%조사선택(ITEMNAME:X, "는")%
+
+%ITEMNAME:X%은
+%조사선택(ITEMNAME:X, "는")%
+
+%ITEMNAME:X%는
+%조사선택(ITEMNAME:X, "는")%
+
+%ITEMNAME:X%(와)과
+%조사선택(ITEMNAME:X, "와")%
+
+%ITEMNAME:X%과(와)
+%조사선택(ITEMNAME:X, "와")%
+
+%ITEMNAME:X%과
+%조사선택(ITEMNAME:X, "와")%
+
+%ITEMNAME:X%와
+%조사선택(ITEMNAME:X, "와")%
+
+%ITEMNAME:X%(이)가
+%조사선택(ITEMNAME:X, "가")%
+
+%ITEMNAME:X%가(이)
+%조사선택(ITEMNAME:X, "가")%
+
+%ITEMNAME:X%가
+%조사선택(ITEMNAME:X, "가")%
+
+%ITEMNAME:X%이
+%조사선택(ITEMNAME:X, "가")%
+
+%ITEMNAME:Y%(을)를
+%조사선택(ITEMNAME:Y, "를")%
+
+%ITEMNAME:Y%를
+%조사선택(ITEMNAME:Y, "를")%
+
+%ITEMNAME:Y%을
+%조사선택(ITEMNAME:Y, "를")%
+
+%ITEMNAME:Y%를(을)
+%조사선택(ITEMNAME:Y, "를")%
+
+%ITEMNAME:Y%(은)는
+%조사선택(ITEMNAME:Y, "는")%
+
+%ITEMNAME:Y%는(은)
+%조사선택(ITEMNAME:Y, "는")%
+
+%ITEMNAME:Y%은
+%조사선택(ITEMNAME:Y, "는")%
+
+%ITEMNAME:Y%는
+%조사선택(ITEMNAME:Y, "는")%
+
+%ITEMNAME:Y%(와)과
+%조사선택(ITEMNAME:Y, "와")%
+
+%ITEMNAME:Y%과(와)
+%조사선택(ITEMNAME:Y, "와")%
+
+%ITEMNAME:Y%과
+%조사선택(ITEMNAME:Y, "와")%
+
+%ITEMNAME:Y%와
+%조사선택(ITEMNAME:Y, "와")%
+
+%ITEMNAME:Y%(이)가
+%조사선택(ITEMNAME:Y, "가")%
+
+%ITEMNAME:Y%가(이)
+%조사선택(ITEMNAME:Y, "가")%
+
+%ITEMNAME:Y%가
+%조사선택(ITEMNAME:Y, "가")%
+
+%ITEMNAME:Y%이
+%조사선택(ITEMNAME:Y, "가")%
+
+%ITEMNAME:RESULT%(을)를
+%조사선택(ITEMNAME:RESULT, "를")%
+
+%ITEMNAME:RESULT%를
+%조사선택(ITEMNAME:RESULT, "를")%
+
+%ITEMNAME:RESULT%을
+%조사선택(ITEMNAME:RESULT, "를")%
+
+%ITEMNAME:RESULT%를(을)
+%조사선택(ITEMNAME:RESULT, "를")%
+
+%ITEMNAME:RESULT%(은)는
+%조사선택(ITEMNAME:RESULT, "는")%
+
+%ITEMNAME:RESULT%는(은)
+%조사선택(ITEMNAME:RESULT, "는")%
+
+%ITEMNAME:RESULT%은
+%조사선택(ITEMNAME:RESULT, "는")%
+
+%ITEMNAME:RESULT%는
+%조사선택(ITEMNAME:RESULT, "는")%
+
+%ITEMNAME:RESULT%(와)과
+%조사선택(ITEMNAME:RESULT, "와")%
+
+%ITEMNAME:RESULT%과(와)
+%조사선택(ITEMNAME:RESULT, "와")%
+
+%ITEMNAME:RESULT%과
+%조사선택(ITEMNAME:RESULT, "와")%
+
+%ITEMNAME:RESULT%와
+%조사선택(ITEMNAME:RESULT, "와")%
+
+%ITEMNAME:RESULT%(이)가
+%조사선택(ITEMNAME:RESULT, "가")%
+
+%ITEMNAME:RESULT%가(이)
+%조사선택(ITEMNAME:RESULT, "가")%
+
+%ITEMNAME:RESULT%가
+%조사선택(ITEMNAME:RESULT, "가")%
+
+%ITEMNAME:RESULT%이
+%조사선택(ITEMNAME:RESULT, "가")%
+
+%ITEMNAME:BOUGHT%(을)를
+%조사선택(ITEMNAME:BOUGHT, "를")%
+
+%ITEMNAME:BOUGHT%를
+%조사선택(ITEMNAME:BOUGHT, "를")%
+
+%ITEMNAME:BOUGHT%을
+%조사선택(ITEMNAME:BOUGHT, "를")%
+
+%ITEMNAME:BOUGHT%를(을)
+%조사선택(ITEMNAME:BOUGHT, "를")%
+
+%ITEMNAME:BOUGHT%(은)는
+%조사선택(ITEMNAME:BOUGHT, "는")%
+
+%ITEMNAME:BOUGHT%는(은)
+%조사선택(ITEMNAME:BOUGHT, "는")%
+
+%ITEMNAME:BOUGHT%은
+%조사선택(ITEMNAME:BOUGHT, "는")%
+
+%ITEMNAME:BOUGHT%는
+%조사선택(ITEMNAME:BOUGHT, "는")%
+
+%ITEMNAME:BOUGHT%(와)과
+%조사선택(ITEMNAME:BOUGHT, "와")%
+
+%ITEMNAME:BOUGHT%과(와)
+%조사선택(ITEMNAME:BOUGHT, "와")%
+
+%ITEMNAME:BOUGHT%과
+%조사선택(ITEMNAME:BOUGHT, "와")%
+
+%ITEMNAME:BOUGHT%와
+%조사선택(ITEMNAME:BOUGHT, "와")%
+
+%ITEMNAME:BOUGHT%(이)가
+%조사선택(ITEMNAME:BOUGHT, "가")%
+
+%ITEMNAME:BOUGHT%가(이)
+%조사선택(ITEMNAME:BOUGHT, "가")%
+
+%ITEMNAME:BOUGHT%가
+%조사선택(ITEMNAME:BOUGHT, "가")%
+
+%ITEMNAME:BOUGHT%이
+%조사선택(ITEMNAME:BOUGHT, "가")%
+
+%ITEMNAME:B%(을)를
+%조사선택(ITEMNAME:B, "를")%
+
+%ITEMNAME:B%를
+%조사선택(ITEMNAME:B, "를")%
+
+%ITEMNAME:B%을
+%조사선택(ITEMNAME:B, "를")%
+
+%ITEMNAME:B%를(을)
+%조사선택(ITEMNAME:B, "를")%
+
+%ITEMNAME:B%(은)는
+%조사선택(ITEMNAME:B, "는")%
+
+%ITEMNAME:B%는(은)
+%조사선택(ITEMNAME:B, "는")%
+
+%ITEMNAME:B%은
+%조사선택(ITEMNAME:B, "는")%
+
+%ITEMNAME:B%는
+%조사선택(ITEMNAME:B, "는")%
+
+%ITEMNAME:B%(와)과
+%조사선택(ITEMNAME:B, "와")%
+
+%ITEMNAME:B%과(와)
+%조사선택(ITEMNAME:B, "와")%
+
+%ITEMNAME:B%과
+%조사선택(ITEMNAME:B, "와")%
+
+%ITEMNAME:B%와
+%조사선택(ITEMNAME:B, "와")%
+
+%ITEMNAME:B%(이)가
+%조사선택(ITEMNAME:B, "가")%
+
+%ITEMNAME:B%가(이)
+%조사선택(ITEMNAME:B, "가")%
+
+%ITEMNAME:B%가
+%조사선택(ITEMNAME:B, "가")%
+
+%ITEMNAME:B%이
+%조사선택(ITEMNAME:B, "가")%
+
+%SAVESTR:C%(을)를
+%조사선택(SAVESTR:C, "를")%
+
+%SAVESTR:C%를
+%조사선택(SAVESTR:C, "를")%
+
+%SAVESTR:C%을
+%조사선택(SAVESTR:C, "를")%
+
+%SAVESTR:C%를(을)
+%조사선택(SAVESTR:C, "를")%
+
+%SAVESTR:C%(은)는
+%조사선택(SAVESTR:C, "는")%
+
+%SAVESTR:C%는(은)
+%조사선택(SAVESTR:C, "는")%
+
+%SAVESTR:C%은
+%조사선택(SAVESTR:C, "는")%
+
+%SAVESTR:C%는
+%조사선택(SAVESTR:C, "는")%
+
+%SAVESTR:C%(와)과
+%조사선택(SAVESTR:C, "와")%
+
+%SAVESTR:C%과(와)
+%조사선택(SAVESTR:C, "와")%
+
+%SAVESTR:C%과
+%조사선택(SAVESTR:C, "와")%
+
+%SAVESTR:C%와
+%조사선택(SAVESTR:C, "와")%
+
+%SAVESTR:C%(이)가
+%조사선택(SAVESTR:C, "가")%
+
+%SAVESTR:C%가(이)
+%조사선택(SAVESTR:C, "가")%
+
+%SAVESTR:C%가
+%조사선택(SAVESTR:C, "가")%
+
+%SAVESTR:(ARG:0)%(을)를
+%조사선택(SAVESTR:(ARG:0), "를")%
+
+%SAVESTR:(ARG:0)%를
+%조사선택(SAVESTR:(ARG:0), "를")%
+
+%SAVESTR:(ARG:0)%을
+%조사선택(SAVESTR:(ARG:0), "를")%
+
+%SAVESTR:(ARG:0)%를(을)
+%조사선택(SAVESTR:(ARG:0), "를")%
+
+%SAVESTR:(ARG:0)%(은)는
+%조사선택(SAVESTR:(ARG:0), "는")%
+
+%SAVESTR:(ARG:0)%는(은)
+%조사선택(SAVESTR:(ARG:0), "는")%
+
+%SAVESTR:(ARG:0)%은
+%조사선택(SAVESTR:(ARG:0), "는")%
+
+%SAVESTR:(ARG:0)%는
+%조사선택(SAVESTR:(ARG:0), "는")%
+
+%SAVESTR:(ARG:0)%(와)과
+%조사선택(SAVESTR:(ARG:0), "와")%
+
+%SAVESTR:(ARG:0)%과(와)
+%조사선택(SAVESTR:(ARG:0), "와")%
+
+%SAVESTR:(ARG:0)%과
+%조사선택(SAVESTR:(ARG:0), "와")%
+
+%SAVESTR:(ARG:0)%와
+%조사선택(SAVESTR:(ARG:0), "와")%
+
+%SAVESTR:(ARG:0)%(이)가
+%조사선택(SAVESTR:(ARG:0), "가")%
+
+%SAVESTR:(ARG:0)%가(이)
+%조사선택(SAVESTR:(ARG:0), "가")%
+
+%SAVESTR:(ARG:0)%가
+%조사선택(SAVESTR:(ARG:0), "가")%
+
+%SAVESTR:(ARG:1)%(을)를
+%조사선택(SAVESTR:(ARG:1), "를")%
+
+%SAVESTR:(ARG:1)%를
+%조사선택(SAVESTR:(ARG:1), "를")%
+
+%SAVESTR:(ARG:1)%을
+%조사선택(SAVESTR:(ARG:1), "를")%
+
+%SAVESTR:(ARG:1)%를(을)
+%조사선택(SAVESTR:(ARG:1), "를")%
+
+%SAVESTR:(ARG:1)%(은)는
+%조사선택(SAVESTR:(ARG:1), "는")%
+
+%SAVESTR:(ARG:1)%는(은)
+%조사선택(SAVESTR:(ARG:1), "는")%
+
+%SAVESTR:(ARG:1)%은
+%조사선택(SAVESTR:(ARG:1), "는")%
+
+%SAVESTR:(ARG:1)%는
+%조사선택(SAVESTR:(ARG:1), "는")%
+
+%SAVESTR:(ARG:1)%(와)과
+%조사선택(SAVESTR:(ARG:1), "와")%
+
+%SAVESTR:(ARG:1)%과(와)
+%조사선택(SAVESTR:(ARG:1), "와")%
+
+%SAVESTR:(ARG:1)%과
+%조사선택(SAVESTR:(ARG:1), "와")%
+
+%SAVESTR:(ARG:1)%와
+%조사선택(SAVESTR:(ARG:1), "와")%
+
+%SAVESTR:(ARG:1)%(이)가
+%조사선택(SAVESTR:(ARG:1), "가")%
+
+%SAVESTR:(ARG:1)%가(이)
+%조사선택(SAVESTR:(ARG:1), "가")%
+
+%SAVESTR:(ARG:1)%가
+%조사선택(SAVESTR:(ARG:1), "가")%
+
+")%(를)
+")%
+
+")%(을)
+")%
+
+")%(가)
+")%
+
+")%(이)
+")%
+
+")%(는)
+")%

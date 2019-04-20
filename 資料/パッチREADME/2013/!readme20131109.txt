@@ -1,0 +1,34 @@
+eramaou_0270修正パッチまとめ20131109
+
+■パッチの当て方
+　eramaou Ver0.270に対して当ててください。
+　同名のフォルダを上書きしてください。
+
+■仕様
+　パッチを纏めるに当たって以下修正しました。
+　口上テンプレ→EVENT_KXX.ERB
+　COMF21.ERB→87行目を
+　SIF ASSIPLAY == 0 && EXP:0 == 0 && TEQUIP:89 == 0 && TEQUIP:55 == 0
+　に修正
+
+■以下のパッチを含んでいます
+	eramaou_人数制限緩和.zip
+	eramaou_LVUPと指輪表示の修正.zip
+	eramaou_ファーストキス.zip
+	eramaou_DRAW_MAINMENU_SHOP_処女献上ver2.zip
+	eramaou_侵略_フィルタ_実験室.zip
+	eramaou_売却_逆レイプ_逆レイプアナル.zip
+	eramaou_貞操帯＆母乳まとめ_20130929.zip
+	maou_mao_0.15.zip
+	eramaou_COLOSSEUM_0.05.zip
+	maou_maturo_20130906.zip
+	maou_ntr_20130830.zip
+	eramaou_侵略_20130815.zip
+	eramaou_event_train_message_b_20130808.zip
+	eramaou_jiai0.09_kouki0.09.zip
+	eramaou_jiai0.08.zip
+	eramaou0.270+eramaou_0270patch_修正パッチ.zip
+	ntr_patch.zip
+	eramaou_0270patch.zip
+
+

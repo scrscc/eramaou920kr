@@ -1,0 +1,27 @@
+20140521_eramaou_能力表示再構成の修正1
+
+●編集元
+eramaou0.300 + 2014/05/17付のパッチまとめ + eramaou_能力表示再構成_20140520
+
+-------------------------------
+●適用するとどうなるか
+eramaou_能力表示再構成_20140520 が修正される
+
+●適用方法
+eramaou_能力表示再構成_20140520 に上書きする
+
+-------------------------------
+●編集点
+[SHOP.ERB]
+@USERSHOP
+　151行目　CALL CHARA_INFO_INDIVIDUAL, TARGET にした
+　159行目　CALL CHARA_INFO_INDIVIDUAL, ASSI にした
+
+@SELECT_ASSI
+　うっかり残ってたPRINT文を削除
+
+[ENDING.ERB]
+全体
+　@SHOW_INFOを呼んでた部分を@SHOW_INFO_INDIVIDUAL にした
+
+

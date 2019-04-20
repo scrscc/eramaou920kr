@@ -1,0 +1,53 @@
+eramaou_武器素手パッチ20140222
+
+※(eramaou　ver.0.290推奨)
+
+加筆・改変・再アップロードはご自由にどうぞ。
+
+■使い方
+　全てのERBファイルをERBフォルダに上書きコピーしてください。
+　全てのCSVファイルをCSVフォルダに上書きコピーしてください。
+
+■仕様
+2014/2/22
+・武器を着替えで外した時に素手に表示するようにしました。
+・装飾品の指輪に色をつけました。
+・武器にレイピアを追加しました。
+
+■修正箇所
+　■EQUIP.ERB
+　576～590行目と727行目にレイピアの設定を追加。
+　770行目にSETCOLORBYNAME LightSalmonを追加。
+　820行目にRESETCOLORを追加
+
+　■SHOP_TAILOR.ERB
+　974行目を
+　CALL PRINT_EQUIPTYPE_WEAPON
+　PRINTL  
+　から
+　IF W:0 <= -1
+　	PRINTL 素手
+　ELSE
+　	CALL PRINT_EQUIPTYPE_WEAPON
+　	PRINTL  
+　ENDIF
+　に変更
+
+　1005行目を
+　	CFLAG:TARGET:550 = 0
+　から
+　	CFLAG:TARGET:550 = -1
+　に変更
+
+　■USE_EX_ITEM.ERB
+　67行目を
+　W:8 = RAND:11 + 340
+　に変更
+
+　■VariableSize.csv
+　SOURCEを1000に変更
+　
+　■Item.csv
+　350,レイピア,1,;連続攻撃が可能な装備、ダガーの上位互換
+　を追加
+

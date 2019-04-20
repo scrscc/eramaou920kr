@@ -1,0 +1,37 @@
+□Variablesize.csv
+	安全のためにRESULTSの数を増やしています
+	増やした頃とちょっと仕様を変えてるんで増やす必要はほぼないですがまぁ一応
+
+□CHAR_MAKE.ERB
+	@CHAR_MAKE_INPORTを追加
+	他データ勇者のデータを利用したキャラ生成をする関数です
+
+□ENTER_ENEMY.ERB
+	@CHAR_MAKE_INPORTの呼び出し処理を追加し
+	それが通った場合@CHAR_MAKEを呼ばないように変更
+	また、登場勇者選定の部分をリファクタリングしています
+
+□SHOP.ERB
+	[888] 通信を追加
+	詳しくは使用方法を
+
+□SYSTEM.ERB
+	@EVENTLOAD関数を追加しました
+	他のデータの内容を取る際の処置などをする関数の呼び出しをさせています
+
+□GLOBALSについて
+SPLITで内容を取り出すようになっています
+内容は
+ID_NO_LV_名前_ABL_BASE_MAXBASE_CFLAG_EXP_EQUIP_JUEL_TALENT_MARK
+
+となっており
+ABL以下は
+番号,数値/番号,数値/
+となっています
+
+ABL:1が3で、ABL;2が2のキャラは
+1,3/2,2/
+となっており
+ABL:1 = 3
+ABL:2 = 2
+といった操作でデータをうつしています

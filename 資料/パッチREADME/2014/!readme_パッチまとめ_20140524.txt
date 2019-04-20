@@ -1,0 +1,37 @@
+eramaou_v0.300_パッチまとめ20140524
+
+■パッチの当て方
+　eramaou Ver0.300に対して当ててください。
+　同名のフォルダを上書きしてください。
+　※パッチ適用後、EVENT_K_DUMMY.ERBとEVENT0.ERBを削除してください
+
+■以下のパッチを含んでいます
+　eramaou0.300_LVUPとST_UP修正.zip
+　eramaou_patch_20140522.zip
+　eramaou_能力表示再構成の修正1_20140521.zip
+　eramaou_能力表示再構成_20140520.zip
+　mayoi_patch.zip
+　eramaou_v0.300_パッチまとめ.zip
+
+■パッチを纏めるにあたって以下を修正しました。
+　■EVENT0.ERB
+　元のバリアントのままで残っていたのでファイルを削除してください。
+
+　■NTR.ERB
+　149、152行目に獣姦経験を追加。
+
+　■CHAR_MAKE.ERB
+　158行目と177行目のTALENTの指定が間違っていたので以下に修正。
+　ELSEIF X == 1  && (TALENT:A:161 == 1 || TALENT:A:163 == 1 || TALENT:A:164 == 1 || TALENT:A:166 == 1)
+
+　■EVENT_K0.ERB
+　パッチに入れてしまったのが自分用の勝手版（慈愛口上獣姦加筆・別人版の一部を使用）だったので0.300のオリジナルから修正しました。
+　別人版の人ごめんなさい。
+	以下の関数を追加。
+	BENKI_KOUJO_K0
+	ENTERENEMY_KOUJO_K0
+	GOHOUBI_REQUEST_KOUJO_K0
+	GOHOUBI_AFTER_KOUJO_K0
+	OSIOKI_KOUJO_K0
+
+

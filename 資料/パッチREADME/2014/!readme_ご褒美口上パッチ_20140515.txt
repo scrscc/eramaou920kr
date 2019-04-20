@@ -1,0 +1,51 @@
+eramaou_ご褒美口上パッチ_20140515
+
+※(eramaou　ver.0.300推奨)
+
+加筆・改変・再アップロードはご自由にどうぞ。
+
+■使い方
+　全てのERBファイルをERBフォルダに上書きコピーしてください。
+
+■仕様
+・ダンジョン攻略開始時、迎撃時のご褒美要求、迎撃成功時、迎撃失敗時の口上を分離して各口上に追加しました。
+・口上テンプレ更新。
+・EVENT_K.ERB、EVENT_K_DUMMY.ERBをTALENT:179まで対応。
+
+■追加・修正箇所
+　■EVENT_K1.ERB
+　■EVENT_K2.ERB
+　■EVENT_K3.ERB
+　■EVENT_K4.ERB
+　■EVENT_K5.ERB
+　■EVENT_K6.ERB
+　■EVENT_K7.ERB
+　■EVENT_K8.ERB
+　■EVENT_K9.ERB
+　■EVENT_K10.ERB
+　　末尾にダンジョン攻略開始時、迎撃時のご褒美要求、迎撃成功時、迎撃失敗時の口上関数を追加。
+
+　■EVENT_K.ERB
+　　・ENTERENEMY_KOUJO　GOHOUBI_REQUEST_KOUJO　GOHOUBI_AFTER_KOUJO　OSIOKI_KOUJO関数を追加。
+　　・性格素質TALENT:179まで対応。
+　　
+　■EVENT_K_DUMMY.ERB
+　　ダミー関数追加。
+
+　■ENTER_ENEMY.ERB
+　　87行目に「CALL ENTERENEMY_KOUJO」を追記
+
+　■SHOP_2.ERB
+　　GOHOUBI_REQUEST関数に追加。
+　　257～259行目に魔王が男性でもふたなりでもなかった場合はキスを要求する分岐追加。
+　　268行目に「A = SELECT」追記。
+　　
+　■DUNGEON_AFTER.ERB
+　　@GOHOUBI関数に各分岐に呼び出し用フラグにTFLAG:18を使用、「CALL GOHOUBI_AFTER_KOUJO」を追記
+　　@OSIOKI関数に各分岐に呼び出し用フラグにTFLAG:18を使用、「CALL OSIOKI_KOUJO」を追記
+
+
+
+
+
+

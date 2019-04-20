@@ -1,0 +1,57 @@
+eramaou_EVENT_TRAIN_MESSAGE_B
+
+このファイルはeramaou用のEVENT_TRAIN_MESSAGE_B.ERBのコロシアムパッチver0.02から修正したものです
+
+※(eramaou　ver.0.240推奨)
+
+加筆・改変・再アップロードはご自由にどうぞ。
+
+■使い方
+ERBファイルをERBフォルダに上書きコピーしてください。
+
+■仕様
+ワーム、素股でIF TALENT:85 && TALENT 76という死に分岐他があったので修正
+イラマチオに加筆追加
+
+■変更箇所
+「ワーム」
+IF EXP:0 >= 201 && TALENT:85
+ELSEIF EXP:0 >= 151 && EXP:0 <= 200 && TALENT:85
+ELSEIF EXP:0 >= 121 && EXP:0 <= 150 && TALENT:85
+ELSEIF EXP:0 >= 71 && EXP:0 <= 120 && TALENT:85
+ELSEIF EXP:0 >= 41 && EXP:0 <= 70 && TALENT:85
+以上にあった&& TALENT:85を削除
+
+IF TALENT:0 && TALENT:85 && TALENT:76
+となっていたところを以下に修正
+IF TALENT:0 && (TALENT:85 || TALENT:76) && ABL:11 >= 5
+
+ELSEIF EXP:0 >= 201 && TALENT:85
+ELSEIF EXP:0 >= 151 && EXP:0 <= 200 && TALENT:85
+ELSEIF EXP:0 >= 121 && EXP:0 <= 150 && TALENT:85
+ELSEIF EXP:0 >= 71 && EXP:0 <= 120 && TALENT:85
+ELSEIF EXP:0 >= 41 && EXP:0 <= 70 && TALENT:85
+ELSEIF EXP:0 >= 1 && EXP:0 <= 40 && TALENT:85
+以上にあった&& TALENT:85を削除
+
+「素股」
+IF TALENT:85 && TALENT:76 && PALAM:5 > PALAMLV:5
+となってたところを以下に修正
+IF (TALENT:85 || TALENT:76) && PALAM:5 > PALAMLV:5 && ABL:11 >= 5
+
+ELSEIF TALENT:85 && TALENT:76
+となってたところを以下に修正
+ELSEIF (TALENT:85 || TALENT:76) && PALAM:5 > PALAMLV:3
+
+「イラマチオ」
+PRINTFORML %SAVESTR:PLAYER%は%SAVESTR:TARGET%の口を乱暴に喉まで突き入れた…
+を以下に修正
+PRINTFORM %SAVESTR:PLAYER%は%SAVESTR:TARGET%の
+	IF TALENT:304 == 8
+		PRINT ツインテールを両手で掴むと
+	ENDIF
+PRINTFORML 喉の奥までペニスを乱暴に突き入れた…
+
+
+
+2012/12/02　ワーム、素股、イラマチオ部分を修正・追加

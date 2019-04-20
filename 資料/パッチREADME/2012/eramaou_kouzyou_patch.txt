@@ -1,0 +1,25 @@
+eramaou_kouzyou_patch
+
+eramaou用の口上「EVENT_K0～K6.ERB」と「EVENT_KXX.ERB」を修正したものです
+
+■使い方
+それぞれのフォルダに上書きしてください。
+
+■仕様
+;CFLAG:372以降に着脱フラグ
+;壺ワーム CFLAG:312　CFLAG:372
+;アナルワーム CFLAG:314　CFLAG:374
+;クリキャップ CFLAG:315　CFLAG:375
+;ニプルキャップ CFLAG:316　CFLAG:376
+;搾乳機(母乳体質のみ) CFLAG:317　CFLAG:377
+;オナホール(ふたなり/オトコのみ) CFLAG:318　CFLAG:378
+;アナルビーズ CFLAG:320　CFLAG:379
+;アイマスク CFLAG:344　CFLAG:380
+;縄 CFLAG:345　CFLAG:385
+;ボールギャグ CFLAG:346　CFLAG:386
+
+他一部フラグ修正。
+
+
+2012/05/01　EVENT_K0～K6.ERBとテンプレを修正
+

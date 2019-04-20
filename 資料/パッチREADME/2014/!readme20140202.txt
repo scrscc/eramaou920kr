@@ -1,0 +1,17 @@
+eramaou_0280修正パッチまとめ20140202
+
+■パッチの当て方
+　eramaou Ver0.280に対して当ててください。
+　同名のフォルダを上書きしてください。
+
+■仕様
+　パッチを纏めるに当たって以下を修正しました。
+　口上テンプレ→EVENT_KXX.ERBに剥製化を追加。
+
+■以下のパッチを含んでいます
+　eramaou処刑に剥製化を追加.zip
+　MARRIAGE_20140115.zip
+　SHOJO_SEAL.zip
+　eramaou_EXUCUTION_20131224.zip
+　battle_word_patch.zip
+

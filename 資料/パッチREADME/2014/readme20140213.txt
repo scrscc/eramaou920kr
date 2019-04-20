@@ -1,0 +1,10 @@
+eramaou0.280 素質分類表示の修正・簡略化 (要:素質分類表示パッチ)
+
+INFO.ERB	@SHOW_TALENT_GROUP(ARG)を作って冗長な記述を簡略化
+		#DIM NEWLINEと#DIMS TSTRINGを利用する部分を、一文字変数UとTSTR:0に変更(値渡し・文字列渡しが面倒なので)
+		改行処理をSTRLENSではなくUの値で判断するように変更
+		魅了の処理部分の
+			FOR LCOUNT, 90, 100 を FOR LCOUNT, 90, 99 に修正
+			SIF LCOUNT == 56 || LCOUNT == 57 CONTINUE を削除
+		技術が表示されていなかったので表示処理を追加
+

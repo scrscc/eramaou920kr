@@ -1,0 +1,4 @@
+eramaou0.290_着替えで武器名表示 (要:武器素手パッチ_20140222)
+
+SHOP_TAILOR.ERB		@LIFE_LIST_TAILORにおいて、武器の名前を表示する処理を追加
+

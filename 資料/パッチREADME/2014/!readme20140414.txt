@@ -1,0 +1,15 @@
+eramaou_0290修正パッチまとめ20140414
+
+■パッチの当て方
+　eramaou Ver0.290に対して当ててください。
+　同名のフォルダを上書きしてください。
+
+■以下のパッチを含んでいます
+	eramaou_arukana_20140329.zip
+	ダンジョン設定改造 .zip
+	eramaou_EVENT_PREGNANCY_20140307.zip
+	eramaou0.290_着替えで武器名表示.zip
+	eramaou_武器素手パッチ_20140222.zip
+	eramaou_k10_0.11.zip
+	CHAR_MAKE.zip
+	eramaou_ダンジョン罠奴隷売却パッチ20140405.zip

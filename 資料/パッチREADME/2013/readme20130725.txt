@@ -1,0 +1,10 @@
+動作環境：eramaou0.270＋eramaou_0270patch_20130705
+
+INFO.ERB		調教時、会話するを選択すると挿入中と表示される問題を修正
+			(847行目：SIF TFLAG:60 == 1 && PREVCOM != 56)
+SHOP.ERB		LOCAL@DRAW_MAINMENU:0の記述をFLAG:36を用いて行うように修正
+_DRAW_MAINMENU.ERB	LOCAL:0の記述をFLAG:36を用いて行うように修正
+SHOP_LABO.ERB		呼び出されない関数をコメントアウト
+EVENT_K.ERB		1014行目のENDIFのコメントアウトを解除
+EVENT_K_DUMMY.ERB	@KOJO_EVENT_COM_0を追加
+

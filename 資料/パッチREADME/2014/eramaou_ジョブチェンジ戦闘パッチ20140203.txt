@@ -1,0 +1,35 @@
+eramaou_ジョブチェンジ戦闘パッチ20140203
+
+※(eramaou　ver.0.280推奨)
+
+加筆・改変・再アップロードはご自由にどうぞ。
+
+■使い方
+　全てのERBファイルをERBフォルダに上書きコピーしてください。
+
+■仕様
+2014/2/3
+・転職時にパラメータを再設定（レベル１よりは強くなります）
+・戦闘時の台詞を戦闘ログOFF時に出力しないように。
+
+■修正箇所
+　■JOB_CHANGE.ERB
+　71行目以降に各種パラメータの再設定を追加。
+　
+　■DUNGEON_BATLLE.ERB
+　CALL ATTACK_KOUJOの間に
+
+　IF FLAG:5 & 32
+　	CALL ATTACK_KOUJO
+　ENDIF
+　を追加。
+
+　■DUNGEON_BATLLE2.ERB
+　CALL ATTACK_KOUJO**の間に
+
+　IF FLAG:5 & 32
+　	CALL ATTACK_KOUJO**
+　ENDIF
+　を追加。
+
+

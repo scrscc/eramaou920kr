@@ -1,0 +1,26 @@
+eramaou_v0.300_パッチまとめ20140517
+
+■パッチの当て方
+　eramaou Ver0.300に対して当ててください。
+　同名のフォルダを上書きしてください。
+　※パッチ適用後、EVENT_K_DUMMY.ERBを削除してください
+
+■以下のパッチを含んでいます
+	eramaou_ダンジョンパッチ_20140516.zip
+	eramaou_DUMMY削除.zip
+	[eramaou]戦闘ログでのSKIP中断.zip
+	eramaou_ご褒美口上パッチ_20140515.zip
+	patch_0300.zip
+
+■パッチを纏めるにあたって以下を修正しました。
+　■EVENT_K0.ERB
+　パッチに入れてしまったのが自分用の勝手版（慈愛口上獣姦加筆・別人版の一部を使用）だったので0.300のオリジナルから修正しました。
+　別人版の人ごめんなさい。
+	以下の関数を追加。
+	BENKI_KOUJO_K0
+	ENTERENEMY_KOUJO_K0
+	GOHOUBI_REQUEST_KOUJO_K0
+	GOHOUBI_AFTER_KOUJO_K0
+	OSIOKI_KOUJO_K0
+
+
