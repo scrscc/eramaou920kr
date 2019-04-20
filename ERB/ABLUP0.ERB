@@ -1,0 +1,199 @@
+﻿;Ｃ감각의 LvUP처리와 그 여부판정
+;eratohoA ver1,204의 스크립트를 바탕으로 처리를 간략화
+;eraIM@S에서 도입함(eramaou)
+;-------------------------------------------------
+;Ｃ감각의 LvUP
+;-------------------------------------------------
+@ABLUP0
+#DIM CALC
+;各部位感覚封鎖
+CALC = 0
+SIF TALENT:103 & 2
+	CALC ++
+SIF TALENT:105 & 2
+	CALC ++
+SIF TALENT:107 & 2
+	CALC ++
+
+;최대 Lv은 5、[자위광]이 붙어 있을 경우에 Lv10까지 해방
+DRAWLINE
+;IF TALENT:122
+;	PRINT 페니스
+;ELSEIF TALENT:121
+;	PRINT 페니스와 클리토리스
+;ELSE
+;	PRINT 클리토리스
+;ENDIF
+;PRINTL 의 감도를 UP합니다
+;PRINTL Ｃ감각이 높아지면、펠라치오나 커닐링구스、자위행위로부터 더 큰 쾌락을 얻을 수 있습니다
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+IF ABL:0 >= 5 && TALENT:74 == 0
+	PRINTW 이 이상 UP하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF TALENT:101 & 2
+	PRINTW Ｃ감각은 봉쇄되고 있습니다
+	RETURN 0
+ELSEIF ABL:0 >= CALC * 5 + 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;필요한 쾌Ｃ의 구슬
+A = 0
+
+;조건 별로 ＯＫ와 안 되는 것을 기록했다
+;쾌Ｃ의 구슬에 의한 선택유무（I=0:가능、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+
+CALL DECIDE_ABLUP0
+
+PRINTFORM [0] - %PALAMNAME:0%의 구슬×{JUEL:0}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족
+	SIF I & 2
+		PRINT 경험 부족 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:0 += 1
+
+IF RESULT == 0
+	JUEL:0 -= A
+ENDIF
+
+PRINTFORML %ABLNAME:0%의 레벨이 {ABL:0}(이)가 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;C 감각 LvUP 판정
+;-------------------------------------------------
+@DECIDE_ABLUP0
+#DIM CALC
+#DIM LCOUNT
+;各部位感覚封鎖
+CALC = 0
+SIF TALENT:103 & 2
+	CALC ++
+SIF TALENT:105 & 2
+	CALC ++
+SIF TALENT:107 & 2
+	CALC ++
+
+;C감각은 Lv5가 상한이나 、[자위광]이 붙어 있는 경우엔 Lv10까지 해방
+SIF ABL:0 >= 5 && TALENT:74 == 0
+	RETURN 0
+SIF ABL:0 >= CALC * 5 + 10
+	RETURN 0
+;感覚封鎖されている場合は不可
+SIF TALENT:101 & 2
+	RETURN 0
+
+;판정 변수를 空に
+A = 0
+I = 0
+
+IF ABL:0 == 0
+	A = 1
+ELSEIF ABL:0 == 1
+	A = 20
+ELSEIF ABL:0 == 2
+	A = 400
+ELSEIF ABL:0 == 3
+	A = 8000
+ELSEIF ABL:0 == 4
+	A = 20000
+ELSEIF ABL:0 == 5
+	A = 40000
+ELSEIF ABL:0 == 6
+	A = 60000
+ELSEIF ABL:0 == 7
+	A = 90000
+ELSEIF ABL:0 == 8
+	A = 120000
+ELSEIF ABL:0 == 9
+	A = 180000
+ELSEIF ABL:0 < 15
+	A = 180000
+	FOR LCOUNT, 0, (ABL:0 - 9)
+		A = A * 125 / 100
+	NEXT
+ELSEIF ABL:0 < 20
+	A = 362000
+	FOR LCOUNT, 0, (ABL:0 - 14)
+		A = A * 120 / 100
+	NEXT
+ELSEIF ABL:0 < 25
+	A = 583000
+	FOR LCOUNT, 0, (ABL:0 - 19)
+		A = A * 115 / 100
+	NEXT
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	SIF ABL:0 == 4
+		TIMES A , 2.00
+	SIF ABL:0 == 5
+		TIMES A , 2.50
+	SIF ABL:0 >= 6
+		TIMES A , 3.00
+ENDIF
+
+;Ｃ둔감
+SIF TALENT:101
+	TIMES A , 1.20
+
+;Ｃ민감
+SIF TALENT:102
+	TIMES A , 0.80
+
+;他部位の封鎖数
+IF ABL:0 > 5 && ABL:0 <= 10 && CALC > 0
+	A = A * (15 - CALC) / 15
+ELSEIF ABL:0 <= 15 && CALC > 1
+	A = A * (16 - CALC) / 15
+ELSEIF ABL:0 <= 20 && CALC > 2
+	A = A * (17 - CALC) / 15
+ENDIF
+
+;음란
+SIF TALENT:76
+	TIMES A , 0.80
+;자위광
+SIF TALENT:74
+	TIMES A , 0.80
+
+;최소한 1개는 필요
+SIF A < 1
+	A = 1
+
+;쾌Ｃ의 구슬로 올리다
+SIF JUEL:0 < A
+	I |= 1
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;
+;
+;

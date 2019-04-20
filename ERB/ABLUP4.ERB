@@ -1,0 +1,85 @@
+﻿
+@ABLUP4
+DRAWLINE
+IF ABL:4 >= 5
+	PRINTW 이미 MAX입니다。
+	RETURN 0
+ENDIF
+
+CALL DECIDE_ABLUP4
+
+PRINT [0] - 
+PRINTS PALAMNAME:15
+PRINT 의 구슬×
+PRINTV A
+PRINT ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:4 += 1
+
+IF RESULT == 0
+	JUEL:15 -= A
+ENDIF
+
+PRINTS ABLNAME:4
+PRINT 의 레벨이
+PRINTV ABL:4
+PRINTW 이 되었습니다。
+
+@DECIDE_ABLUP4
+
+;条件別にＯＫかダメかを記録する
+I = 0
+
+IF ABL:4 == 0
+	A = 1
+ELSEIF ABL:4 == 1
+	A = 50
+ELSEIF ABL:4 == 2
+	A = 600
+ELSEIF ABL:4 == 3
+	A = 7000
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 2.00
+	ENDIF
+ELSEIF ABL:4 == 4
+	A = 45000
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 3.00
+	ENDIF
+ENDIF
+
+;快Ｆの珠で上げる
+SIF JUEL:15 < A
+	I |= 1
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+

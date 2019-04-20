@@ -1,0 +1,345 @@
+﻿;自慰中毒のLvUP処理とその可否判定
+;eratohoA ver1,204のスクリプトをベースに処理を簡略化
+;eraIm@s_ver.0.17βdのスクリプトを参考に修正
+;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;自慰中毒のLvUP
+;-------------------------------------------------
+@ABLUP31
+DRAWLINE
+;PRINTL 노예の自慰への執着心を高めます
+;PRINTL 自慰中毒が高くなると、自慰行為への満足感が深まり、
+;PRINTL 常に自慰をしていないと心が落ち着かなくなります
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;自慰中毒はLv5が上限
+;[애정][음란][자위쉬움][쾌감에솔직][자위광][음유]が付いている場合はLv10まで解放
+IF ABL:31 >= 5 && (TALENT:85 == 0 && TALENT:76 == 0 && TALENT:60 == 0 && TALENT:70 == 0 && TALENT:74 == 0 && TALENT:78 == 0)
+	PRINTW 이 이상 UP 하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF ABL:31 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+;성교중독＋自慰中毒は11이상にならない
+ELSEIF ABL:30 + ABL:31 >= 10
+	PRINTFORMW 성교중독({ABL:30})＋자위중독({ABL:31})의 상한은 15입니다
+	RETURN 0
+ENDIF
+
+;必要な欲情의 구슬
+A = 0
+;必要な快Ｃ의 구슬
+B = 0
+;必要な恥情의 구슬
+C = 0
+;必要な自慰経験回数
+D = 0
+;必要な調教自慰経験回数
+E = 0
+;必要な異常経験回数
+F = 0
+
+;条件別にＯＫかダメかを記録する
+;自慰経験で上げる場合の可否（I=0:可、I&1:구슬 부족、I&2:경험 부족、I&4:능력 부족）
+I = 0
+;調教自慰経験で上げる場合の可否（I=0:可、I&1:구슬 부족、I&2:경험 부족、I&4:능력 부족）
+J = 0
+
+CALL DECIDE_ABLUP31
+
+;ＬＶ２から３、ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[해방][자위쉬움][중독되기쉬움][淫乱化]なら無視できる）
+SIF F > 0
+	PRINTFORML %EXPNAME:50%{F}이상(현재{EXP:50})동시에
+
+;露出癖が必要
+PRINTFORML %ABLNAME:17%{ABL:31 + 1}LV이상(현재{ABL:17}LV)동시에
+
+;Ｃ感覚が必要
+PRINTFORML %ABLNAME:0%{ABL:31 + 1}LV이상(현재{ABL:0}LV)동시에
+
+;自慰経験で上げる場合
+PRINTFORM [0] - %PALAMNAME:5%의 구슬×{JUEL:5}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+PRINTFORML 　　　%PALAMNAME:0%의 구슬×{JUEL:0}/{B}
+PRINTFORML 　　　%PALAMNAME:8%의 구슬×{JUEL:8}/{C}
+PRINTFORML 　　　%EXPNAME:10%　{EXP:10}/{D}
+
+;調教自慰経験で上げる場合
+PRINTFORM [1] - %PALAMNAME:5%의 구슬×{JUEL:5}/{A} ……
+IF J == 0
+	PRINT ＯＫ
+ELSE
+	SIF J & 1
+		PRINT 구슬 부족 
+	SIF J & 2
+		PRINT 경험 부족 
+	SIF J & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+PRINTFORML 　　　%PALAMNAME:0%의 구슬×{JUEL:0}/{B}
+PRINTFORML 　　　%PALAMNAME:8%의 구슬×{JUEL:8}/{C}
+PRINTFORML 　　　%EXPNAME:11%　{EXP:11}/{E}
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:31 += 1
+
+IF RESULT == 0 || RESULT == 1
+	JUEL:5 -= A
+	JUEL:0 -= B
+	JUEL:8 -= C
+ENDIF
+
+PRINTFORML %ABLNAME:31%의 레벨이 {ABL:31}으로 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;自慰中毒のLvUP可否判定
+;-------------------------------------------------
+@DECIDE_ABLUP31
+;自慰中毒はLv5が上限
+;[애정][음란][자위쉬움][쾌감에솔직][자위광][음유]が付いている場合はLv10まで解放
+SIF ABL:31 >= 10
+	RETURN 0
+SIF ABL:31 >= 5 && (TALENT:85 == 0 && TALENT:76 == 0 && TALENT:60 == 0 && TALENT:70 == 0 && TALENT:74 == 0 && TALENT:78 == 0)
+	RETURN 0
+;性交中毒LV＋自慰中毒LVは10が上限
+SIF ABL:30 + ABL:31 >= 10
+	RETURN 0
+
+;判定変数を空に
+I = 0
+J = 0
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+
+IF ABL:31 == 0
+	A = 3000
+	B = 10000
+	C = 1000
+	D = 100
+	E = 20
+ELSEIF ABL:31 == 1
+	A = 6000
+	B = 25000
+	C = 3000
+	D = 250
+	E = 40
+ELSEIF ABL:31 == 2
+	A = 12000
+	B = 50000
+	C = 6000
+	D = 500
+	E = 60
+ELSEIF ABL:31 == 3
+	A = 20000
+	B = 100000
+	C = 15000
+	D = 1000
+	E = 100
+ELSEIF ABL:31 == 4
+	A = 32000
+	B = 200000
+	C = 30000
+	D = 1500
+	E = 150
+ELSEIF ABL:31 == 5
+	A = 50000
+	B = 250000
+	C = 40000
+	D = 2000
+	E = 200
+ELSEIF ABL:31 == 6
+	A = 70000
+	B = 320000
+	C = 50000
+	D = 3000
+	E = 320
+ELSEIF ABL:31 == 7
+	A = 100000
+	B = 500000
+	C = 70000
+	D = 4000
+	E = 500
+ELSEIF ABL:31 == 8
+	A = 150000
+	B = 800000
+	C = 100000
+	D = 6000
+	E = 800
+ELSEIF ABL:31 == 9
+	A = 200000
+	B = 1000000
+	C = 150000
+	D = 8000
+	E = 1000
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	IF ABL:31 == 3
+		TIMES A , 1.50
+		TIMES B , 1.50
+		TIMES C , 1.50
+		TIMES D , 1.50
+		TIMES E , 1.50
+	ELSEIF ABL:31 == 4
+		TIMES A , 2.00
+		TIMES B , 2.00
+		TIMES C , 2.00
+		TIMES D , 2.00
+		TIMES E , 2.00
+	ELSEIF ABL:31 == 5
+		TIMES A , 2.50
+		TIMES B , 2.50
+		TIMES C , 2.50
+		TIMES D , 2.50
+		TIMES E , 2.50
+	ELSEIF ABL:31 >= 6
+		TIMES A , 3.00
+		TIMES B , 3.00
+		TIMES C , 3.00
+		TIMES D , 3.00
+		TIMES E , 3.00
+	ENDIF
+ENDIF
+
+;ＬＶ２から３、ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[해방][자위쉬움][음란][중독되기쉬움][광기]なら無視できる）
+IF ABL:31 == 2 && (TALENT:33 == 0 && TALENT:60 == 0 && TALENT:72 == 0 && TALENT:76 == 0 && TALENT:123 == 0)
+	F = ABL:31 - 1
+	IF EXP:50 < F
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;자위쉬움
+IF TALENT:60
+	TIMES A , 0.25
+	TIMES B , 0.25
+	TIMES C , 0.25
+	TIMES D , 0.25
+ENDIF
+
+;중독되기쉬움
+IF TALENT:72
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+	TIMES B , 0.75
+	TIMES C , 0.75
+	TIMES D , 0.75
+ENDIF
+
+;淫乱化
+IF TALENT:76
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+
+
+;異常経験が不足
+IF F > EXP:50
+	I |= 2
+	J |= 2
+ENDIF
+
+;露出癖が自慰中毒＋１レベルでないと능력 부족
+IF ABL:17 < ABL:31 + 1
+	I |= 4
+	J |= 4
+ENDIF
+
+;Ｃ感覚が自慰中毒＋１レベルでないと능력 부족
+IF ABL:0 < ABL:31 + 1
+	I |= 4
+	J |= 4
+ENDIF
+
+;最低でも1回・1個は必要
+SIF A < 1
+	A = 1
+SIF B < 1
+	B = 1
+SIF C < 1
+	C = 1
+SIF D < 1
+	D = 1
+SIF E < 1
+	E = 1
+
+;自慰経験で上げる場合
+;欲情의 구슬が不足
+SIF JUEL:5 < A
+	I |= 1
+;快Ｃ의 구슬が不足
+SIF JUEL:0 < B
+	I |= 1
+;恥情의 구슬が不足
+SIF JUEL:8 < C
+	I |= 1
+;自慰経験が不足
+SIF EXP:10 < D
+	I |= 2
+
+;調教自慰経験で上げる場合
+;欲情의 구슬で上げる
+SIF JUEL:5 < A
+	J |= 1
+;快Ｃ의 구슬で上げる
+SIF JUEL:0 < B
+	J |= 1
+;恥情의 구슬で上げる
+SIF JUEL:8 < C
+	J |= 1
+;調教自慰経験が必要
+SIF EXP:11 < E
+	J |= 2
+
+IF I == 0 || J == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+;
+;
+;

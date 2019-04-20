@@ -1,0 +1,225 @@
+﻿
+@ABLUP8
+DRAWLINE
+IF ABL:8 >= 5
+	PRINTW 이미 MAX입니다。
+	RETURN 0
+ENDIF
+
+;条件別にＯＫかダメかを記録する
+I = 0
+J = 0
+
+IF ABL:8 == 0
+	A = 100
+	B = 100
+	C = 0
+	D = 100
+	E = 100
+ELSEIF ABL:8 == 1
+	A = 500
+	B = 500
+	C = 0
+	D = 500
+	E = 300
+ELSEIF ABL:8 == 2
+	A = 1200
+	B = 1000
+	C = 0
+	D = 1500
+	E = 1000
+ELSEIF ABL:8 == 3
+	A = 0
+	B = 0
+	C = 10
+	D = 3000
+	E = 6000
+	;일선넘지않음
+	IF TALENT:27
+		TIMES C , 2.00
+		TIMES D , 2.00
+		TIMES E , 2.00
+	ENDIF
+ELSEIF ABL:8 == 4
+	A = 0
+	B = 0
+	C = 50
+	D = 5000
+	E = 12000
+	;일선넘지않음
+	IF TALENT:27
+		TIMES C , 3.00
+		TIMES D , 3.00
+		TIMES E , 3.00
+	ENDIF
+ENDIF
+
+;해방
+IF TALENT:33
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+	TIMES E , 0.50
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+	TIMES B , 0.75
+	TIMES C , 0.75
+	TIMES D , 0.75
+	TIMES E , 0.75
+ENDIF
+
+;欲望がマゾっ気＋１レベルでないといけない
+PRINTS ABLNAME:1
+PRINTV ABL:8+1
+PRINTL LV이상、동시에
+IF ABL:1 < ABL:8+1
+	;欲望が不足
+	I |= 4
+	J |= 4
+ENDIF
+
+;ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[해방]なら無視できる）
+IF ABL:8 == 3 && TALENT:33 == 0
+	PRINTS EXPNAME:50
+	PRINTL 있고、동시에
+	IF EXP:50 == 0
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ELSEIF ABL:8 == 4 && TALENT:33 == 0
+	PRINTS EXPNAME:50
+	PRINTL 2이상、동시에
+	IF EXP:50 < 2
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+IF B > 0
+	;苦痛의 구슬で上げる
+	SIF JUEL:9 < A
+		I |= 1
+	;欲情의 구슬で上げる
+	SIF JUEL:5 < B
+		I |= 1
+	;苦痛快楽経験が必要な場合
+	SIF EXP:30 < C
+		I |= 2
+
+	PRINT [0] - 
+	PRINTS PALAMNAME:9
+	PRINT 의 구슬×
+	PRINTV A
+	PRINT 、
+	PRINTS PALAMNAME:5
+	PRINT 의 구슬×
+	PRINTV B
+	IF C > 0
+		PRINT 、
+		PRINTS EXPNAME:30
+		PRINTV C
+		PRINT 이상
+	ENDIF
+	PRINT ……
+	
+	IF I == 0
+		PRINT ＯＫ
+	ELSE
+		SIF I & 1
+			PRINT 구슬 부족 
+		SIF I & 2
+			PRINT 경험 부족 
+		SIF I & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+ENDIF
+
+IF D > 0
+	;苦痛의 구슬で上げる
+	SIF JUEL:9 < D
+		J |= 1
+	;屈服의 구슬で上げる
+	SIF JUEL:6 < E
+		J |= 1
+	;この場合苦痛快楽経験が必要なこと있고
+	SIF EXP:30 < C
+		J |= 2
+	;この場合絶頂経験が１이상必要
+	SIF EXP:2 < 1
+		J |= 2
+
+	PRINT [1] - 
+	PRINTS PALAMNAME:9
+	PRINT 의 구슬×
+	PRINTV D
+	PRINT 、
+	PRINTS PALAMNAME:6
+	PRINT 의 구슬×
+	PRINTV E
+	IF C > 0
+		PRINT 、
+		PRINTS EXPNAME:30
+		PRINTV C
+		PRINT 이상
+	ENDIF
+	PRINT 、
+	PRINTS EXPNAME:2
+	PRINTV 1
+	PRINT 이상
+	PRINT ……
+	
+	IF J == 0
+		PRINT ＯＫ
+	ELSE
+		SIF J & 1
+			PRINT 구슬 부족 
+		SIF J & 2
+			PRINT 경험 부족 
+		SIF J & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF J == 256 && RESULT == 1
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:8 += 1
+
+IF RESULT == 0
+	JUEL:9 -= A
+	JUEL:5 -= B
+ELSEIF RESULT == 1
+	JUEL:9 -= D
+	JUEL:6 -= E
+ENDIF
+
+PRINTS ABLNAME:8
+PRINT 의 레벨이 
+PRINTV ABL:8
+PRINTW 으로 되었습니다。
+

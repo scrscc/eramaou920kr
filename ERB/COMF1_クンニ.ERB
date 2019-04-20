@@ -1,0 +1,89 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;커널링구스
+;愛撫系コマンド：調教者が調教対象のクリトリスを口で刺激
+;-------------------------------------------------
+@COM1
+
+;前回と今回の調教者が同じで
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0) && TEQUIP:89 == 0
+	;縄使用中でなく、前回の調教がフェラチオかクンニ강제かシックスナインだとシックスナインに
+	IF (PREVCOM == 31 || PREVCOM == 61 || PREVCOM == 69) && TEQUIP:44 == 0
+		CALL COM_ABLE69
+		SIF RESULT == 1
+			JUMP COM69
+	ENDIF
+ENDIF
+
+PRINTL 커널링구스
+;SAVESTR:22 = 커널링구스
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+SOURCE:10 = 100
+SOURCE:12 = 220
+SOURCE:14 = 50
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 40
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 160
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 700
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 1500
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 2400
+ELSE
+	SOURCE:0 = 3300
+ENDIF
+
+;調教者のTALENT:舌使いをみる
+IF TALENT:PLAYER:52 || TEQUIP:89
+	TIMES SOURCE:0 , 2.00
+	SOURCE:16 += SOURCE:0/20
+ENDIF
+
+;獣姦の場合はここで終了
+SIF TEQUIP:89
+	RETURN 1
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;노예のＶ⇔調教者の口の汚れが移動
+STAIN:3 |= STAIN:PLAYER:0
+STAIN:PLAYER:0 |= STAIN:3
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;레즈경험
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +3
+	EXP:40 += 3
+ENDIF
+
+;調教者のファーストキス記録
+IF CFLAG:PLAYER:16 == -1
+	CFLAG:PLAYER:16 = NO:TARGET + 301
+	CSTR:PLAYER:4 = %SAVESTR:TARGET%
+ENDIF
+
+;애정경험
+E = 1
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+RETURN 1

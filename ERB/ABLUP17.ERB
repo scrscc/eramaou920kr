@@ -1,0 +1,284 @@
+﻿;露出癖のLvUP処理とその可否判定
+;eratohoA ver1,204のスクリプトをベースに処理を簡略化
+
+;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;露出癖のLvUP
+;-------------------------------------------------
+@ABLUP17
+DRAWLINE
+;PRINTL 노예の露出癖を高めます
+;PRINTL 露出癖が高いと、恥辱的な行為や屈辱的な行為から快楽を得られるようになります
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;露出癖はLv5が上限
+;[솔직][해방][눈에띄고싶어함][노출광]が付いている場合はLv10まで解放
+IF ABL:17 >= 5 && (TALENT:13 == 0 && TALENT:33 == 0 && TALENT:28 == 0 && TALENT:89 == 0)
+	PRINTW 이 이상 UP 하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF ABL:17 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;必要な恥情의 구슬
+A = 0
+;必要な異常経験回数
+B = 0
+;必要な絶頂経験回数
+C = 0
+;必要な調教自慰経験回数
+D = 0
+
+;条件別にＯＫかダメかを記録する
+;恥情의 구슬による可否（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+
+CALL DECIDE_ABLUP17
+
+;欲望が露出癖＋１レベルでないといけない（[애정]がない場合）
+IF TALENT:85 == 0
+	PRINTFORM %ABLNAME:11%{ABL:17+1}LV이상(현재{ABL:11}LV)동시에
+	PRINTL 
+ELSEIF TALENT:85 == 1
+;従順が露出癖＋１レベルでないといけない（[애정]がある場合）
+	PRINTFORM %ABLNAME:10%{ABL:17+1}LV이상(현재{ABL:10}LV)동시에
+	PRINTL
+ENDIF
+
+;異常経験が必要か
+SIF B > 0
+	PRINTFORML %EXPNAME:50%{B}이상(현재{EXP:50})동시에
+
+PRINTFORM [0] - %PALAMNAME:8%의 구슬×{JUEL:8}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+;절정경험
+SIF C > 0
+	PRINTFORML 　　　%EXPNAME:2%　{EXP:2}/{C}
+;조교자위경험
+SIF D > 0
+	PRINTFORML 　　　%EXPNAME:11%　{EXP:11}/{D}
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:17 += 1
+
+IF RESULT == 0
+	JUEL:8 -= A
+ENDIF
+
+PRINTFORML %ABLNAME:17%의 레벨이 {ABL:17}으로 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;露出癖のLvUP可否判定
+;-------------------------------------------------
+@DECIDE_ABLUP17
+SIF ABL:17 >= 10
+	RETURN 0
+SIF ABL:17 >= 5 && (TALENT:13 == 0 && TALENT:33 == 0 && TALENT:28 == 0 && TALENT:89 == 0)
+	RETURN 0
+
+;判定変数を空に
+A = 0
+B = 0
+C = 0
+D = 0
+I = 0
+J = 0
+
+IF ABL:17 == 0
+	A = 100
+	C = 1
+ELSEIF ABL:17 == 1
+	A = 1000
+	D = 1
+ELSEIF ABL:17 == 2
+	A = 3000
+ELSEIF ABL:17 == 3
+	A = 6000
+ELSEIF ABL:17 == 4
+	A = 12000
+ELSEIF ABL:17 == 5
+	A = 25000
+ELSEIF ABL:17 == 6
+	A = 50000
+ELSEIF ABL:17 == 7
+	A = 80000
+ELSEIF ABL:17 == 8
+	A = 120000
+ELSEIF ABL:17 == 9
+	A = 150000
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	SIF ABL:17 == 3
+		TIMES A , 1.50
+	SIF ABL:17 == 4
+		TIMES A , 2.00
+	SIF ABL:17 == 5
+		TIMES A , 2.50
+	SIF ABL:17 >= 6
+		TIMES A , 3.00
+ENDIF
+
+;ＬＶ３이상に上げるときは異常経験必要（素質：[눈에띄고싶어함][해방][음란][도착적][마조][광기]なら無視できる）
+IF ABL:17 >= 3 && (TALENT:28 == 0 && TALENT:33 == 0 && TALENT:76 == 0 && TALENT:80 == 0 && TALENT:88 == 0 && TALENT:123 == 0)
+	B = ABL:17 - 2
+ENDIF
+
+;붕괴
+SIF TALENT:9
+	TIMES A , 0.80
+;겁쟁이
+SIF TALENT:10
+	TIMES A , 1.20
+;반항적
+SIF TALENT:11
+	TIMES A , 1.50
+;굳건함
+SIF TALENT:12
+	TIMES A , 1.10
+;시건방짐
+SIF TALENT:16
+	TIMES A , 1.10
+;자제심
+SIF TALENT:20
+	TIMES A , 1.10
+;무관심
+SIF TALENT:21
+	TIMES A , 1.10
+;감정부족
+SIF TALENT:22
+	TIMES A , 1.50
+;눈에띄고싶어함
+SIF TALENT:28
+	TIMES A , 0.50
+;정조관념
+SIF TALENT:30
+	TIMES A , 1.20
+;정조관부실
+SIF TALENT:31
+	TIMES A , 0.90
+
+;억압
+IF TALENT:32
+	TIMES A , 1.20
+;해방
+ELSEIF TALENT:33
+	TIMES A , 0.80
+ENDIF
+
+;저항
+SIF TALENT:34
+	TIMES A , 1.50
+
+;수줍음
+IF TALENT:35
+	TIMES A , 1.10
+;수치심없음
+ELSEIF TALENT:36
+	TIMES A , 0.90
+ENDIF
+
+;약점
+SIF TALENT:37
+	TIMES A , 0.80
+
+;자위쉬움
+SIF TALENT:60
+	TIMES A , 0.90
+
+;쾌감에솔직
+IF TALENT:70
+	TIMES A , 0.90
+;쾌감을부정
+ELSEIF TALENT:71
+	TIMES A , 1.20
+ENDIF
+
+;중독되기쉬움
+SIF TALENT:72
+	TIMES A , 0.90
+;즉각함락
+SIF TALENT:73
+	TIMES A , 0.50
+;음란
+SIF TALENT:76
+	TIMES A , 0.80
+;도착적
+SIF TALENT:80
+	TIMES A , 0.75
+;새드
+SIF TALENT:83
+	TIMES A , 1.20
+;마조
+SIF TALENT:88
+	TIMES A , 0.75
+;광기
+SIF TALENT:123
+	TIMES A , 0.50
+
+;欲望が露出癖＋１レベルでないといけない（[애정]がない場合）
+IF TALENT:85 == 0
+	IF ABL:11 < ABL:17+1
+		;欲望が不足
+		I |= 4
+	ENDIF
+ELSEIF TALENT:85 == 1
+;従順が露出癖＋１レベルでないといけない（[애정]がある場合）
+	IF ABL:10 < ABL:17+1
+		;従順が不足
+		I |= 4
+	ENDIF
+ENDIF
+
+;最低でも1個は必要
+SIF A < 1
+	A = 1
+
+;異常経験が不足
+SIF EXP:50 < B
+	I |= 2
+;絶頂経験が不足
+SIF EXP:2 < C
+	I |= 2
+;調教自慰経験が不足
+SIF EXP:11 < D
+	I |= 2
+
+;恥情의 구슬は足りている？
+SIF JUEL:8 < A
+	I |= 1
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;
+;
+;

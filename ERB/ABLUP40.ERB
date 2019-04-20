@@ -1,0 +1,146 @@
+﻿
+;-------------------------------------------------
+;フリー中毒のLvUP
+;-------------------------------------------------
+@ABLUP40
+IF ABL:40 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;必要な快Ｆの珠
+A = 0
+;必要な屈服の珠
+B = 0
+;必要な異常経験回数
+F = 0
+
+CALL DECIDE_ABLUP40
+
+;上げるときは異常経験必要（素質：[음란][중독되기쉬움]なら無視できる）
+SIF F > 0
+	PRINTFORML %EXPNAME:50%{F}이상(현재{EXP:50})필요
+
+;欲望が必要
+PRINTFORML %ABLNAME:11%{ABL:39 + 1}LV이상(현재{ABL:11}LV)필요
+
+PRINTFORM [0] - %PALAMNAME:15%의 구슬×{JUEL:15}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 충족하고 있지 않습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:40 += 1
+IF RESULT == 0
+	JUEL:15 -= A
+ENDIF
+
+PRINTFORML %ABLNAME:40%의 레벨이{ABL:40}가 되었습니다
+
+RETURN 0
+
+;--------------------------------------------------
+;レベルアップに必要な珠計算、レベルアップ予告処理
+;--------------------------------------------------
+@DECIDE_ABLUP40
+SIF ABL:40 >= 10
+	RETURN 0
+
+;条件別にＯＫかダメかを記録する
+I = 0
+
+IF ABL:40 == 0
+	A = 2000
+ELSEIF ABL:40 == 1
+	A = 5000
+ELSEIF ABL:40 == 2
+	A = 10000
+ELSEIF ABL:40 == 3
+	A = 20000
+ELSEIF ABL:40 == 4
+	A = 30000
+ELSEIF ABL:40 == 5
+	A = 45000
+ELSEIF ABL:40 == 6
+	A = 75000
+ELSEIF ABL:40 == 7
+	A = 100000
+ELSEIF ABL:40 == 8
+	A = 200000
+ELSEIF ABL:40 == 9
+	A = 300000
+ENDIF
+
+F = 0
+;２以上に上げるときは異常経験必要（素質：[중독되기쉬움][음란]なら無視できる）
+SIF ABL:40 >= 2 && (TALENT:72 == 0 && TALENT:76 == 0)
+		F = ABL:40 + 1
+
+;자제심
+IF TALENT:20
+	TIMES A , 2.50
+ENDIF
+;쾌감에솔직
+IF TALENT:70
+	TIMES A , 0.75
+;쾌감을부정
+ELSEIF TALENT:71
+	TIMES A , 1.75
+ENDIF
+;중독되기쉬움
+IF TALENT:72
+	TIMES A , 0.50
+ENDIF
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+ENDIF
+;광기
+IF TALENT:123
+	TIMES A , 0.50
+ENDIF
+
+
+
+;最低でも１回・１個は必要
+SIF A < 1
+	A = 1
+
+;欲望が必要
+SIF ABL:11 < ABL:40 + 1
+	I |= 4
+;快Ｆの珠は足りている？
+SIF JUEL:15 < A
+	I |= 1
+
+;異常経験は足りている？
+SIF EXP:50 < F
+	I |= 2
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;
+;
+;

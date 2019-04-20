@@ -1,0 +1,236 @@
+﻿;Ｖ감각의 LvUP처리와 그 여부 판정
+;eratohoA ver1,204의 스크립트를 바탕으로 처리를 간략화
+;eraIM@S에서 도입했습니다(eramaou)
+
+;-------------------------------------------------
+;Ｖ감각의 LvUP
+;-------------------------------------------------
+@ABLUP2
+#DIM CALC
+;各部位感覚封鎖
+CALC = 0
+SIF TALENT:101 & 2
+	CALC ++
+SIF TALENT:105 & 2
+	CALC ++
+SIF TALENT:107 & 2
+	CALC ++
+;남자는 제외
+SIF TALENT:122
+	RETURN 0
+
+DRAWLINE
+;PRINTL 질의 감도를 UP합니다
+;PRINTL Ｖ감각이 높아지면、통상의 섹스나 바이브로부터 더 큰 쾌락을 얻을 수 있습니다
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;최대 Lv은 5、[섹스광]이 붙어 있는 경우에 Lv10까지 해방
+IF ABL:2 >= 5 && TALENT:75 == 0
+	PRINTW 이 이상 UP 하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF TALENT:103 & 2
+	PRINTW Ｖ감각은 봉쇄되어 있습니다
+	RETURN 0
+ELSEIF ABL:2 >= CALC * 5 + 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;필요한 Ｖ감각의 구슬
+A = 0
+;필요한 Ｖ경험
+B = 0
+
+;조건 별로 ＯＫ인지 반대할지를 기록함
+;Ｖ감각의 구슬에 의해 기부（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+
+CALL DECIDE_ABLUP2
+
+PRINTFORM [0] - %PALAMNAME:1%의 구슬×{JUEL:1}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+ENDIF
+PRINTL 
+;Ｖ경험
+PRINTFORML       %EXPNAME:0%　　{EXP:0}/{B}
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:2 += 1
+
+IF RESULT == 0
+	JUEL:1 -= A
+ENDIF
+
+PRINTFORML %ABLNAME:2%의 레벨이 {ABL:2}으로 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;Ｖ감각의 LvUP 여부 판정
+;-------------------------------------------------
+@DECIDE_ABLUP2
+#DIM CALC
+#DIM LCOUNT
+;各部位感覚封鎖
+CALC = 0
+SIF TALENT:101 & 2
+	CALC ++
+SIF TALENT:105 & 2
+	CALC ++
+SIF TALENT:107 & 2
+	CALC ++
+;남자는 제외
+SIF TALENT:122
+	RETURN 0
+;Ｖ감각은 Lv5가 상한、[섹스광]이 붙어 있는 경우에 Lv10까지 해방
+SIF ABL:2 >= 5 && TALENT:75 == 0
+	RETURN 0
+SIF ABL:2 >= CALC * 5 + 10
+	RETURN 0
+;感覚封鎖されている場合は不可
+SIF TALENT:103 & 2
+	RETURN 0
+
+;판정 변수를 하늘에
+A = 0
+B = 0
+I = 0
+
+IF ABL:2 == 0
+	A = 1
+	B = 2
+ELSEIF ABL:2 == 1
+	A = 20
+	B = 10
+ELSEIF ABL:2 == 2
+	A = 400
+	B = 30
+ELSEIF ABL:2 == 3
+	A = 8000
+	B = 75
+ELSEIF ABL:2 == 4
+	A = 20000
+	B = 150
+ELSEIF ABL:2 == 5
+	A = 40000
+	B = 180
+ELSEIF ABL:2 == 6
+	A = 60000
+	B = 250
+ELSEIF ABL:2 == 7
+	A = 90000
+	B = 350
+ELSEIF ABL:2 == 8
+	A = 120000
+	B = 500
+ELSEIF ABL:2 == 9
+	A = 180000
+	B = 600
+ELSEIF ABL:2 < 15
+	A = 180000
+	B = 600
+	FOR LCOUNT, 0, (ABL:2 - 9)
+		A = A * 125 / 100
+		B = B * 115 / 100
+	NEXT
+ELSEIF ABL:2 < 20
+	A = 362000
+	B = 966
+	FOR LCOUNT, 0, (ABL:2 - 14)
+		A = A * 120 / 100
+		B = B * 120 / 100
+	NEXT
+ELSEIF ABL:2 < 25
+	A = 583000
+	B = 1942
+	FOR LCOUNT, 0, (ABL:2 - 19)
+		A = A * 115 / 100
+		B = B * 125 / 100
+	NEXT
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	IF ABL:2 == 4
+		TIMES A , 2.00
+		TIMES B , 2.00
+	ELSEIF ABL:2 == 5
+		TIMES A , 2.50
+		TIMES B , 2.50
+	ELSEIF ABL:2 >= 6
+		TIMES A , 3.00
+		TIMES B , 3.00
+	ENDIF
+ENDIF
+
+;Ｖ둔감
+IF TALENT:103
+	TIMES A , 1.20
+	TIMES B , 1.10
+ENDIF
+
+;他部位の封鎖数
+IF ABL:2 > 5 && ABL:2 <= 10 && CALC > 0
+	A = A * (15 - CALC) / 15
+	B = B * (20 - CALC) / 20
+ELSEIF ABL:2 <= 15 && CALC > 1
+	A = A * (16 - CALC) / 15
+	B = B * (21 - CALC) / 20
+ELSEIF ABL:2 <= 20 && CALC > 2
+	A = A * (17 - CALC) / 15
+	B = B * (22 - CALC) / 20
+ENDIF
+
+;음란
+IF TALENT:76
+	TIMES A , 0.80
+	TIMES B , 0.80
+ENDIF
+;섹스광
+IF TALENT:75
+	TIMES A , 0.80
+	TIMES B , 0.80
+ENDIF
+;Ｖ민감
+IF TALENT:104
+	TIMES A , 0.80
+	TIMES B , 0.80
+ENDIF
+
+;최소한 1개는 필요함
+SIF A < 1
+	A = 1
+SIF B < 1
+	B = 1
+
+;쾌Ｖ의 구슬은 충분한가？
+SIF JUEL:1 < A
+	I |= 1
+;성교 경험은 충분한가？
+SIF EXP:0 < B
+	I |= 2
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+;
+;
+;

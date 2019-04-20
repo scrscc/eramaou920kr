@@ -1,0 +1,252 @@
+﻿;봉사기술のLvUP処理とその可否判定
+;eraIm@s_ver.0.17βdのスクリプトをベースに処理を簡略化
+;eraIM@Sから導入しました(eramaou)
+
+
+;-------------------------------------------------
+;봉사기술のLvUP
+;-------------------------------------------------
+@ABLUP13
+DRAWLINE
+;PRINTL 노예の봉사기술をUPします
+;PRINTL 봉사기술が高いと、奉仕の際に相手をイかせやすくなります
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;奉仕精神がLv5이상ある場合はLv10まで解放
+IF (ABL:13 >= 5 && ABL:16 < 5) || ABL:13 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+;봉사기술＋성교 기술は11이상にならない
+ELSEIF ABL:13 + ABL:14 >= 10
+	PRINTFORMW 봉사기술({ABL:13})＋성교기술({ABL:14})의 상한은 10입니다
+	RETURN 0
+ENDIF
+
+;必要な習得의 구슬
+A = 0
+
+;条件別にＯＫかダメかを記録する
+;習得의 구슬による可否（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+
+CALL DECIDE_ABLUP13
+
+;Lv5までは技巧が봉사기술+1Lvでないといけない
+SIF ABL:13 < 5
+	PRINTFORML %ABLNAME:12%{ABL:13 + 1}LV이상(현재{ABL:12}LV)동시에
+;Lv5からは奉仕精神が봉사기술+1Lvでないといけない
+SIF ABL:13 >= 5
+	PRINTFORML %ABLNAME:16%{ABL:13 + 1}LV이상(현재{ABL:16}LV)동시에
+
+PRINTFORM [0] - %PALAMNAME:7%의 구슬×{JUEL:7}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:13 += 1
+SIF RESULT == 0
+	JUEL:7 -= A
+
+PRINTFORML %ABLNAME:13%의 레벨이 {ABL:13}으로 되었습니다
+
+RETURN 0
+
+;--------------------------------------------------
+;봉사기술のLvUP可否判定
+;--------------------------------------------------
+@DECIDE_ABLUP13
+;奉仕精神Lv5이상ある場合はLv10まで解放
+IF ABL:13 >= 5 && ABL:16 < 5
+	RETURN 0
+ELSEIF ABL:13 + ABL:14 >= 10
+	RETURN 0
+ENDIF
+
+;判定変数を空に
+A = 0
+I = 0
+
+IF ABL:13 == 0
+	A = 5
+ELSEIF ABL:13 == 1
+	A = 400
+ELSEIF ABL:13 == 2
+	A = 1000
+ELSEIF ABL:13 == 3
+	A = 3000
+ELSEIF ABL:13 == 4
+	A = 6000
+ELSEIF ABL:13 == 5
+	A = 9000
+ELSEIF ABL:13 == 6
+	A = 12000
+ELSEIF ABL:13 == 7
+	A = 16000
+ELSEIF ABL:13 == 8
+	A = 20000
+ELSEIF ABL:13 == 9
+	A = 25000
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	SIF ABL:13 == 3
+		TIMES A , 1.50
+	SIF ABL:13 == 4
+		TIMES A , 2.00
+	SIF ABL:13 == 5
+		TIMES A , 2.50
+	SIF ABL:13 >= 6
+		TIMES A , 3.00
+ENDIF
+
+;반항적
+IF TALENT:11
+	TIMES A , 1.20
+ENDIF
+;솔직
+IF TALENT:13
+	TIMES A , 0.95
+ENDIF
+;시건방짐
+IF TALENT:16
+	TIMES A , 1.20
+ENDIF
+
+;프라이드높음
+IF TALENT:15
+	TIMES A , 1.20
+;프라이드낮음
+ELSEIF TALENT:17
+	TIMES A , 0.95
+ENDIF
+
+;무관심
+IF TALENT:21
+	TIMES A , 1.05
+ENDIF
+;감정부족
+IF TALENT:22
+	TIMES A , 1.05
+ENDIF
+;호기심
+IF TALENT:23
+	TIMES A , 0.95
+ENDIF
+;보수적
+IF TALENT:24
+	TIMES A , 1.10
+ENDIF
+
+;억압
+IF TALENT:32
+	TIMES A , 1.10
+;해방
+ELSEIF TALENT:33
+	TIMES A , 0.90
+ENDIF
+
+;저항
+IF TALENT:34
+	TIMES A , 1.20
+ENDIF
+
+;수줍음
+IF TALENT:35
+	TIMES A , 1.05
+;수치심없음
+ELSEIF TALENT:36
+	TIMES A , 0.95
+ENDIF
+
+;약점
+IF TALENT:37
+	TIMES A , 0.90
+ENDIF
+
+;습득빠름
+IF TALENT:50
+	TIMES A , 0.80
+;습득느림
+ELSEIF TALENT:51
+	TIMES A , 1.50
+ENDIF
+
+;혀놀림
+IF TALENT:52
+	TIMES A , 0.90
+ENDIF
+;헌신적
+IF TALENT:63
+	TIMES A , 0.90
+ENDIF
+;불결무시
+IF TALENT:64
+	TIMES A , 0.90
+ENDIF
+;즉각함락
+IF TALENT:73
+	TIMES A , 0.90
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.95
+ENDIF
+;새드
+IF TALENT:83
+	TIMES A , 1.10
+ENDIF
+
+;봉사정신
+IF ABL:16 < 3
+	TIMES A , 1.00
+ELSEIF ABL:16 < 6
+	TIMES A , 0.95
+ELSEIF ABL:16 < 8
+	TIMES A , 0.90
+ELSEIF ABL:16 < 10
+	TIMES A , 0.85
+ELSE
+	TIMES A , 0.80
+ENDIF
+
+;最低でも1個は必要
+SIF A < 1
+	A = 1
+
+;習得의 구슬は足りている？
+SIF JUEL:7 < A
+	I |= 1
+
+;Lv5までは技巧が봉사기술+1Lvでないといけない
+SIF ABL:13 < 5 && ABL:12 < ABL:13 + 1
+	I |= 2
+;Lv5からは奉仕精神が봉사기술+1Lvでないといけない
+SIF ABL:13 >= 5 && ABL:16 < ABL:13 + 1
+	I |= 2
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+;
+;
+;

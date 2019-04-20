@@ -1,0 +1,155 @@
+﻿;eramaou追加コマンド
+
+;-------------------------------------------------
+;콜로세움
+;-------------------------------------------------
+;eraIM@Sから導入/改変しました(eramaou)
+
+@COM200
+
+PRINTL 콜로세움 결투
+CALL TRAIN_MESSAGE_B
+
+IF TEQUIP:55
+	TEQUIP:55 = 0
+	;チケットを減らす
+	ITEM:35 -= 1
+ELSE
+	TEQUIP:55 = 1
+	TFLAG:401 = 0
+	
+	A = 100
+	
+		;겁쟁이
+	SIF TALENT:10
+		TIMES A , 2.00
+	;감정부족
+	SIF TALENT:22
+		TIMES A , 0.60
+
+	LOSEBASE:0 += A
+	LOSEBASE:1 += A * 2
+
+	UP:10 += A * 20
+	SOURCE:14 += A * 5
+ENDIF
+T = 0
+RETURN 1
+
+
+@EQUIP_COM200
+;コロシアム調教中
+PRINTL ＜콜로세움 내부＞
+
+A = 100
+;겁쟁이
+SIF TALENT:10
+	TIMES A , 2.00
+
+;감정부족
+SIF TALENT:22
+	TIMES A , 0.60
+
+LOSEBASE:0 += A
+LOSEBASE:1 += A * 2
+
+UP:10 += A * 20
+SOURCE:8 += A * 10
+SOURCE:14 += A * 5
+
+SOURCE:10 += 2000
+
+TIMES SOURCE:0 , 2.00
+TIMES SOURCE:1 , 2.00
+TIMES SOURCE:2 , 2.00
+TIMES SOURCE:17 , 2.00
+TIMES SOURCE:13 , 1.80
+
+RETURN 0
+
+;-------------------------------------------------
+;함락チェック
+;-------------------------------------------------
+@COM_AFTER_ARENA
+IF BASE:TARGET:1 > 0
+	;勝利
+	PRINTL 경기 승리 경험+1
+	EXP:76 += 1
+	RETURN 0
+ENDIF
+
+
+PRINTL ＜노예함락＞
+
+TFLAG:401 = 1
+
+IF ASSI == PLAYER
+	IF BASE:ASSI:1 < (MAXBASE:ASSI:1 / 5)
+		PRINTL ＜조수퇴각＞
+		ASSIPLAY = 0
+		PLAYER = MASTER
+	ENDIF
+ENDIF
+
+RETURN 1
+
+;----------------------------------------------------
+;노예の戦闘能力値計算(結果はBに格納)
+;----------------------------------------------------
+@ARENA_SLAVE_POINT
+A = TARGET
+;戦闘値セット
+CALL WEAPON_RESTORE,TARGET
+B = 0
+
+;攻撃値
+B += CFLAG:A:11
+;防御値
+B += CFLAG:A:12
+;마술・呪術持ちはレベル*2をさらに加算
+SIF TALENT:A:241 == 1
+	B += (CFLAG:A:9 * 2)
+SIF TALENT:A:250 == 1
+	B += (CFLAG:A:9 * 2)
+
+;気力によって戦闘値が減少 
+B *= BASE:A:1
+B /= MAXBASE:A:1
+
+SIF B <= 0
+	B = 1
+
+RETURN B
+
+;----------------------------------------------------
+;조수の戦闘能力値計算(結果はBに格納)
+;----------------------------------------------------
+@ARENA_ASSI_POINT
+A = ASSI
+;戦闘値セット
+CALL WEAPON_RESTORE,ASSI
+B = 0
+
+;攻撃値
+B += CFLAG:A:11
+;防御値
+B += CFLAG:A:12
+;마술・呪術持ちはレベル*2をさらに加算
+SIF TALENT:A:241 == 1
+	B += (CFLAG:A:9 * 2)
+SIF TALENT:A:250 == 1
+	B += (CFLAG:A:9 * 2)
+
+;気力によって戦闘値が減少
+B *= (BASE:A:1 / 100)
+B /= (MAXBASE:A:1 / 100)
+
+SIF B <= 0
+	B = 1
+
+RETURN B
+
+
+;
+;
+;

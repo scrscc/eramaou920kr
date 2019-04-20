@@ -1,0 +1,154 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;오나홀
+;道具使用コマンド：調教対象のペニスをオナホールで刺激
+;-------------------------------------------------
+@COM17
+
+IF TEQUIP:90
+	PRINTL 촉수페니스괴롭히기
+	;SAVESTR:22 = 촉수페니스괴롭히기
+ELSE
+	PRINTL 오나홀
+	;SAVESTR:22 = 오나홀
+ENDIF
+CALL TRAIN_MESSAGE_B
+
+LOSEBASE:0 += 10
+LOSEBASE:1 += 80
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+SOURCE:12 = 120
+SOURCE:14 = 70
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 200
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 400
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 900
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 1600
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 2400
+ELSE
+	SOURCE:0 = 3000
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+;-------------------------------------------------
+;オナホールの着脱
+;-------------------------------------------------
+TEQUIP:17 = 1 - TEQUIP:17
+SIF TEQUIP:90
+	T = 0
+
+;-------------------------------------------------
+;汚れ（촉수）
+;-------------------------------------------------
+IF TEQUIP:90 && TEQUIP:17
+	STAIN:3 |= 2
+	STAIN:3 |= 4
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;オナホール装備中
+;-------------------------------------------------
+@EQUIP_COM17
+
+IF TEQUIP:90
+	PRINTL ＜촉수페니스공격중＞
+ELSE
+	PRINTL ＜오나홀장비중＞
+ENDIF
+
+LOSEBASE:0 += 5
+LOSEBASE:1 += 20
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	A = 40
+ELSEIF ABL:0 == 1
+	A = 120
+ELSEIF ABL:0 == 2
+	A = 250
+ELSEIF ABL:0 == 3
+	A = 450
+ELSEIF ABL:0 == 4
+	A = 600
+ELSE
+	A = 750
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES A , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES A , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES A , 0.80
+ELSEIF ABL:10 == 1
+	TIMES A , 0.90
+ELSEIF ABL:10 == 2
+	TIMES A , 1.00
+ELSEIF ABL:10 == 3
+	TIMES A , 1.10
+ELSEIF ABL:10 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+SOURCE:0 += A
+SOURCE:11 += 50
+SOURCE:12 += 50
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+SIF TEQUIP:90
+	T += 1
+
+RETURN 1
+;

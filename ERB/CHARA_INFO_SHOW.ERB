@@ -1,0 +1,1266 @@
+﻿;キャラの能力表示に使う関数群
+;eratohoAよりスクリプトを流用
+;eraIM@Sから導入しました(eramaou)
+;↑を更にeramaou開発者ではない者が編集
+
+;-----------------------------------------------
+@SHOW_CHARA_INFO(ARG)
+;-----------------------------------------------
+;ARG番のキャラの個別情報を表示
+#DIMS AGE_STR
+
+;召喚酔いの場合
+IF CFLAG:ARG:1 == 11
+	PRINTL 바친 육변기의 수
+	PRINTFORML 같은 종족　　……{CFLAG:ARG:800}（%GET_LOOK_INFO(ARG, "종족")%）
+	PRINTFORML 같은 성별　　……{CFLAG:ARG:801}（%GET_LOOK_INFO(ARG, "성별")%）
+	PRINTFORML 같은 이유　　……{CFLAG:ARG:802}（%GET_LOOK_INFO(ARG, "용자가된동기")%）
+	PRINTFORML 같은 생활		  ……{CFLAG:ARG:803}（%GET_LOOK_INFO(ARG, "용자가되기이전의생활")%）
+	PRINTFORML 같은 머리색　……{CFLAG:ARG:804}（%GET_LOOK_INFO(ARG, "머리색")%）
+	PRINTFORML 같은 눈색　　……{CFLAG:ARG:805}（%GET_LOOK_INFO(ARG, "눈동자색")%）
+	PRINTFORML 합계 　　　　……{CFLAG:ARG:800 + CFLAG:ARG:801 + CFLAG:ARG:802 + CFLAG:ARG:803 + CFLAG:ARG:804 + CFLAG:ARG:805} / 30
+	WAIT
+	RETURN 0
+ENDIF
+
+SIF TALENT:ARG:292
+	PRINTFORML %SAVESTR:ARG%의 남은 수명은{CFLAG:ARG:820}일 입니다
+
+;受注クエスト
+SIF CFLAG:ARG:534 == 1 && CFLAG:ARG:1 == 2
+	CALL QUEST_SELECT, ARG, "이름"
+
+
+AGE_STR = 
+IF GETBIT(FLAG:5,12) && ARG != 0
+	IF GETBIT(FLAG:5,13)
+		AGE_STR = {CFLAG:ARG:452} 세
+	ELSE
+		AGE_STR = {CFLAG:ARG:451} 세
+	ENDIF
+	SIF GETBIT(FLAG:5,13) && GETBIT(FLAG:5,14) && CFLAG:ARG:451 != CFLAG:ARG:452
+		AGE_STR = %AGE_STR% (인간환산{CFLAG:ARG:451, 3} 세)
+ENDIF
+;名前
+PRINTFORM \@ ARG == 0 ? %NAME:ARG, 16, LEFT% # %SAVESTR:ARG, 16, LEFT% \@%AGE_STR, 60%
+PRINTL
+
+SIF ARG != 0
+	PRINTFORM 일인칭：%SELF_CALL(ARG), 12, LEFT%[7] 일인칭 재설정
+
+IF GETBIT(FLAG:5,15) && ARG != 0
+	CALL CUP_SIZE, ARG
+	PRINTFORM 　　　　　　　 신장 {CFLAG:ARG:453 / 10, 3}.{CFLAG:ARG:453 % 10} cm　B {CFLAG:ARG:455 / 10, 3}.{CFLAG:ARG:455 % 10} cm(%RESULTS%)
+ENDIF
+PRINTL
+
+;TARGETを差し替えておく
+LOCAL = TARGET
+TARGET = ARG
+
+;体力気力のバー
+CALL LIFE_BAR, TARGET, 1
+SIF GETBIT(FLAG:5,15) && TARGET != 0
+	PRINTFORM \@ BASE:TARGET:0 < 10000 ? %UNICODE(0xA0)% #  \@\@ MAXBASE:TARGET:0 < 10000 ? %UNICODE(0xA0)%  #  \@체중 {CFLAG:TARGET:454 / 10, 3}.{CFLAG:TARGET:454 % 10} kg　W {CFLAG:TARGET:456 / 10, 3}.{CFLAG:TARGET:456 % 10} cm
+PRINTL
+	
+CALL VITAL_BAR, TARGET, 1
+SIF GETBIT(FLAG:5,15) && TARGET != 0
+	PRINTFORM 　　　　　　　\@ BASE:TARGET:1 < 10000 ? %UNICODE(0xA0)% #  \@\@ MAXBASE:TARGET:1 < 10000 ? %UNICODE(0xA0)% #  \@ H {CFLAG:TARGET:457 / 10, 3}.{CFLAG:TARGET:457 % 10} cm
+PRINTL
+
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;タレント
+CALL SHOW_TALENT
+
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;能力一覧
+CALL SHOW_INFO_ABL
+
+
+;刻印
+IF TARGET != 0
+	PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+	CALL SHOW_INFO_MARK
+ENDIF
+	PRINTW ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;経験、珠、指輪
+CALL SHOW_INFO_EXP
+CALL SHOW_JUEL
+CALL SHOW_RING
+PRINTW ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;外見関係
+CALL SHOW_DATA(ARG)
+CALL LOOK_INFO
+CALL SHOW_APPEARACE
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+
+;保存しておいたTARGETを戻す
+TARGET = LOCAL
+
+;-------------------------------------------------
+;素質の表示 PRINT_TALENTと交換
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;-------------------------------------------------
+@SHOW_TALENT (ARG:0 = -1)
+
+#DIM LCOUNT, 2
+
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+IF FLAG:5 & 256
+
+	PRINT 성별：
+	IF TALENT:TARGET:122
+		PRINT [남]
+	ELSEIF TALENT:TARGET:121
+		PRINT [후타나리]
+	ELSE
+		PRINT [여]
+	ENDIF
+	SIF TALENT:TARGET:0
+		PRINTFORM [%TALENTNAME:0%]
+	SIF TALENT:TARGET:1
+		PRINTFORM [%TALENTNAME:1%]
+	SIF TALENT:TARGET:273
+		PRINTFORM [%TALENTNAME:273%]
+	PRINTL 
+
+;性格
+	U = 0
+	TSTR = 성격：
+;口上用性格
+	FOR LCOUNT, 160, 180
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;性への関心,,
+;乙女心,,
+	FOR LCOUNT, 10, 40
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;潔癖度,,
+	FOR LCOUNT, 60, 70
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;127,역습,;くれぐれも背後に気を付けてください
+	SIF TALENT:TARGET:127
+		CALL SHOW_TALENT_GROUP(127)
+;132,유치,;子供っぽい
+	SIF TALENT:TARGET:132
+		CALL SHOW_TALENT_GROUP(132)
+;134,멘탈약함,;幼児退行しやすい
+	SIF TALENT:TARGET:134
+		CALL SHOW_TALENT_GROUP(134)
+
+	FOR LCOUNT, 150, 157
+		SIF LCOUNT == 153 || LCOUNT == 154
+			CONTINUE
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	SIF U != 0
+		PRINTFORML %TSTR%
+
+;体質
+	U = 0
+	TSTR = 체질：
+;体質
+	FOR LCOUNT, 40, 50
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;56,약독내성,;コマンド「しあわせ草」「이뇨제」が実行不可
+	SIF TALENT:TARGET:56
+		CALL SHOW_TALENT_GROUP(56)
+;57,오줌싸개,;放尿コマンドが常に使えるようになる. 絶頂時に放尿. 
+	SIF TALENT:TARGET:57
+		CALL SHOW_TALENT_GROUP(57)
+;身体特徴,,
+	FOR LCOUNT, 99, 140
+		SELECTCASE LCOUNT
+			CASE 101 TO 108, 113, 117, 118, 121, 122, 123, 126, 127, 132, 133, 134, 136
+				CONTINUE
+		ENDSELECT
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;133,조루,;「후타나리」か「남자」の時のみ表示
+	SIF TALENT:TARGET:133 && (TALENT:TARGET:121 || TALENT:TARGET:122)
+		CALL SHOW_TALENT_GROUP(133)
+;153,임신,;子供を身ごもってる
+	SIF TALENT:TARGET:153
+		CALL SHOW_TALENT_GROUP(153)
+;341,가슴임신,;乳房に子供を身ごもってる
+	SIF TALENT:TARGET:341
+		CALL SHOW_TALENT_GROUP(341)
+;342,정소임신,;精巣に子供を身ごもってる
+	SIF TALENT:TARGET:342
+		CALL SHOW_TALENT_GROUP(342)
+;158,동족임신불가,;モンスター・野良犬のみ妊娠
+	SIF TALENT:TARGET:158
+		CALL SHOW_TALENT_GROUP(158)
+;340,이상임신체질,;乳房や精巣で妊娠可
+	SIF TALENT:TARGET:340
+		CALL SHOW_TALENT_GROUP(340)
+;154,육아중,;子供を育てている最中
+	SIF TALENT:TARGET:154
+		CALL SHOW_TALENT_GROUP(154)
+
+	FOR LCOUNT, 244, 249
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;253,갈색피부,
+	SIF TALENT:TARGET:253
+		CALL SHOW_TALENT_GROUP(253)
+;255,하얀피부,;白い肌
+	SIF TALENT:TARGET:255
+		CALL SHOW_TALENT_GROUP(255)
+;256,허약,;HP回復量が低い
+	SIF TALENT:TARGET:256
+		CALL SHOW_TALENT_GROUP(256)
+;326,수상한뿌리,;조수化の際にふたなりになる
+	SIF TALENT:TARGET:326
+		CALL SHOW_TALENT_GROUP(326)
+
+	SIF U != 0
+		PRINTFORML %TSTR%
+
+;技術,,
+	U = 0
+	TSTR = 기술：
+;技術,,
+	FOR LCOUNT, 50, 60
+		SIF LCOUNT == 56 || LCOUNT == 57
+			CONTINUE
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;325,마계지식,;秘密ラボに出入り可能になる
+	SIF TALENT:TARGET:325
+		CALL SHOW_TALENT_GROUP(325)
+;327,음마지식,;えっちな罠解禁
+	SIF TALENT:TARGET:327
+		CALL SHOW_TALENT_GROUP(327)
+;328,마충지식,;蟲な罠強化
+	SIF TALENT:TARGET:328
+		CALL SHOW_TALENT_GROUP(328)
+;329,【조형왕】,;調度品タイムアタックの実績素質
+	SIF TALENT:TARGET:329
+		CALL SHOW_TALENT_GROUP(329)
+;魅了,,
+	FOR LCOUNT, 90, 99
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	SIF TALENT:TARGET:113
+		CALL SHOW_TALENT_GROUP(113)
+
+;117,치료,;조수として加わっていると全調教対象の回復量上昇. 効果は累積しない
+	SIF TALENT:TARGET:117
+		CALL SHOW_TALENT_GROUP(117)
+;118,고무,;조수の時にコマンドを実行しやすい. 조수の時に調教終了後の自慰回数増加
+	SIF TALENT:TARGET:118
+		CALL SHOW_TALENT_GROUP(118)
+;126,인기인,;売却額増加
+	SIF TALENT:TARGET:126
+		CALL SHOW_TALENT_GROUP(126)
+;売春関係の素質（eraIm@sより流用）,,
+	FOR LCOUNT, 180, 190
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	SIF U != 0
+		PRINTFORML %TSTR%
+
+;性癖
+	U = 0
+	TSTR = 버릇：
+;正直度,,
+;特殊性癖,,
+;性癖,,
+	FOR LCOUNT, 70, 90
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	FOR LCOUNT, 101, 109
+		SIF TALENT:TARGET:(LCOUNT) & 1
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+		IF TALENT:TARGET:(LCOUNT) & 2
+			SIF LCOUNT == 101
+				TSTR = %TSTR%[Ｃ감각봉쇄]
+			SIF LCOUNT == 103
+				TSTR = %TSTR%[Ｖ감각봉쇄]
+			SIF LCOUNT == 105
+				TSTR = %TSTR%[Ａ감각봉쇄]
+			SIF LCOUNT == 107
+				TSTR = %TSTR%[Ｂ감각봉쇄]
+			U += 1
+			IF U % 6 == 0
+				PRINTFORML %TSTR%
+				TSTR = 　　　
+				U = 0
+			ENDIF
+		ENDIF
+	NEXT
+	
+	;各種コンプレックス
+	FOR LCOUNT, 140, 144
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+	
+;136,암캐,;獣姦コマンドの効果増大
+	SIF TALENT:TARGET:136
+		CALL SHOW_TALENT_GROUP(136)
+;230- 強化素質,,
+	FOR LCOUNT, 230, 240
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;270- 特殊素質,,
+	FOR LCOUNT, 270, 273
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;274,혼박;悪堕ちしない. カルマが変動しない
+	SIF TALENT:TARGET:274
+		CALL SHOW_TALENT_GROUP(274)
+		
+;280,광왕의포로;ダンジョン戦及び侵攻戦で戦意喪失しやすくなる
+	SIF TALENT:TARGET:280
+		CALL SHOW_TALENT_GROUP(280)
+
+;281,상식변경：전투;ダンジョン戦がセックスバトルになる
+	SIF TALENT:TARGET:281
+		CALL SHOW_TALENT_GROUP(281)
+
+;283,상식변경：일상;日々の活動が肉便器になる
+	SIF TALENT:TARGET:283
+		CALL SHOW_TALENT_GROUP(283)
+
+;282,신성모독자;以前信じていた神を冒涜する
+	SIF TALENT:TARGET:282
+		CALL SHOW_TALENT_GROUP(282)
+
+	SIF U != 0
+		PRINTFORML %TSTR%
+
+;後天
+	U = 0
+	TSTR = 후천적：
+
+;9,붕괴,;売却額がかなり低下. 営業で客の満足度激減
+	SIF TALENT:TARGET:9
+		CALL SHOW_TALENT_GROUP(9)
+;123,광기,;売却額がかなり低下. いるだけで全調教対象の回復量減少. 効果は累積する
+	SIF TALENT:TARGET:123
+		CALL SHOW_TALENT_GROUP(123)
+;157,유부녀,;結婚した証. 欲望が上がりやすい
+	SIF TALENT:TARGET:157
+		CALL SHOW_TALENT_GROUP(157)
+;254,악마의각인,;함락しなくても迎撃できる
+	SIF TALENT:TARGET:254
+		CALL SHOW_TALENT_GROUP(254)
+;体調不良系,,
+	FOR LCOUNT, 190, 200
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+;境遇や肩書,,
+	FOR LCOUNT, 290, 300
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	;キャンペーン用
+	FOR LCOUNT, 360, 369
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	SIF U != 0
+		PRINTFORML %TSTR%
+
+
+;전투
+	U = 0
+	TSTR = 전투기술：
+
+	FOR LCOUNT, 200, 220
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	FOR LCOUNT, 240, 280
+		SIF (LCOUNT >= 244 && LCOUNT < 249) || (LCOUNT >= 253 && LCOUNT < 257) || (LCOUNT >= 270 && LCOUNT < 275)
+			CONTINUE
+		SIF TALENT:TARGET:(LCOUNT)
+			CALL SHOW_TALENT_GROUP(LCOUNT)
+	NEXT
+
+	SIF U != 0
+		PRINTFORML %TSTR%
+
+	;一応初期化
+	TSTR = 
+ELSE
+	U = 0
+	REPEAT 400
+		;SIF COUNT == 114 && TALENT:114 && (TALENT:251 || TALENT:252 || TALENT:253)
+		;	CONTINUE
+		SIF COUNT >= 300 && COUNT < 325
+			CONTINUE
+		IF TALENT:TARGET:COUNT
+			;133,조루,;「후타나리」か「남자」の時のみ表示
+			SIF COUNT == 133 && TALENT:TARGET:121 == 0 && TALENT:TARGET:122 == 0
+				CONTINUE
+			PRINTFORM  [%TALENTNAME:COUNT%]
+			U += 1
+			IF U % 6 == 0
+				PRINTL 
+			ENDIF
+		ENDIF
+	REND
+	;300-399は秘密能力なので、主人か조수経験者か【애정】以外は非表示
+	;IF TARGET == MASTER || ISASSI:TARGET || TALENT:TARGET:85
+	;	REPEAT 100
+	;		C = COUNT + 300
+	;		IF TALENT:TARGET:C
+	;			PRINTFORM  [%TALENTNAME:C%]
+	;			U += 1
+	;			IF U % 6 == 0
+	;				PRINTL 
+	;			ENDIF
+	;		ENDIF
+	;	REND
+	;ENDIF
+	SIF U % 6 != 0
+		PRINTL 
+ENDIF
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+
+@SHOW_TALENT_GROUP(ARG)
+;ARG,TALENT番号
+TSTR = %TSTR%[%TALENTNAME:(ARG)%]
+U += 1
+IF U % 6 == 0
+	PRINTFORML %TSTR%
+	TSTR = 　　　
+	U = 0
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;능력 확인 PRINT_ABLと交換
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;-------------------------------------------------
+@SHOW_INFO_ABL (ARG:0 = -1)
+#DIM NUMBER_OF_ABL
+#DIM ELEMENT_COUNT
+#DIM TEMP_CHARA_ID
+NUMBER_OF_ABL = 0
+ELEMENT_COUNT = 0
+TEMP_CHARA_ID = -1
+
+;TARGET差し替え
+IF INRANGE(ARG:0, 0, CHARANUM - 1)
+	TEMP_CHARA_ID = TARGET
+	TARGET = ARG:0
+ENDIF
+
+FOR NUMBER_OF_ABL, 0, 41
+	;5-9, 18-19, 24-29, 34-36, 38は飛ばす
+	IF INRANGE(NUMBER_OF_ABL, 5, 9) || INRANGE(NUMBER_OF_ABL, 18, 19) || INRANGE(NUMBER_OF_ABL, 24, 29) || INRANGE(NUMBER_OF_ABL, 34, 36) || (NUMBER_OF_ABL == 38)
+		CONTINUE
+	ENDIF
+	
+	;性別による分岐
+	IF TALENT:122 && ( NUMBER_OF_ABL == 2 || NUMBER_OF_ABL == 22 || NUMBER_OF_ABL == 33 )
+		;男ならＶ感覚とレズっ気とレズ中毒は表示しない
+		CONTINUE
+	ELSEIF TALENT:122 == 0 && ( NUMBER_OF_ABL == 23 || NUMBER_OF_ABL == 34 )
+		;女ならホモっ気とホモ中毒は表示しない
+		CONTINUE
+	ENDIF
+	
+	;値ゼロの能力は表示しない
+	IF ABL:NUMBER_OF_ABL == 0
+		CONTINUE
+	ENDIF
+	
+	;能力名とレベルの表示
+	PRINTFORM   %ABLNAME:NUMBER_OF_ABL, 8, LEFT% - {ABL:NUMBER_OF_ABL}LV 
+	
+	;レベルアップ可能か
+	X = NUMBER_OF_ABL
+	CALL DECIDE_ABLUP
+
+	;改行チェック
+	ELEMENT_COUNT += 1
+	IF (ELEMENT_COUNT % 4) == 0
+		PRINTL 
+	ENDIF
+NEXT
+
+;改行チェック
+IF (ELEMENT_COUNT % 4) != 0
+	PRINTL 
+ENDIF
+
+;TARGETを戻す
+IF TEMP_CHARA_ID != -1
+	TARGET = TEMP_CHARA_ID
+ENDIF
+
+;-------------------------------------------------
+;刻印の表示 PRINT_MARKと交換
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;-------------------------------------------------
+@SHOW_INFO_MARK (ARG:0 = -1)
+
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+
+PRINTFORM  고통:LV{MARK:0} 
+BAR MARK:0, 3, 3
+PRINTFORM    쾌락:LV{MARK:1} 
+BAR MARK:1, 3, 3
+PRINTFORM    굴복:LV{MARK:2} 
+BAR MARK:2, 3, 3
+PRINTFORM    반발:LV{MARK:3} 
+BAR MARK:3, 3, 3
+CALL DECIDE_ABLUP99
+SIF RESULT == 1
+	PRINT  *
+PRINTL 
+
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+;-------------------------------------------------
+;経験の表示 PRINT_EXPと交換
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;-------------------------------------------------
+@SHOW_INFO_EXP (ARG:0 = -1)
+
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+U = 0
+REPEAT 82
+	SIF EXP:COUNT == 0
+		CONTINUE
+	PRINTFORM  %EXPNAME:COUNT%:{EXP:COUNT} 
+	IF COUNT == 80
+		IF TARGET == 0
+			X = CFLAG:TARGET:9 * 100 + 10
+			X:1 = CFLAG:TARGET:9 * CFLAG:TARGET:9 * 50 - CFLAG:TARGET:9 * 40 - 10 + EXP:80
+		ELSE
+			X = CFLAG:TARGET:9 * 10 + 10
+			X:1 = CFLAG:TARGET:9 * CFLAG:TARGET:9 * 5 + CFLAG:TARGET:9 * 5 - 10 + EXP:80
+		ENDIF
+		PRINTL
+		PRINTFORM  다음 레벨업에 필요한 경험치:{X, 6}　　　　　　　　획득한 총 경험치:{X:1, 10}
+	ENDIF
+	U += 1
+		IF U % 4 == 0
+			PRINTL 
+		ENDIF
+REND
+
+SIF U % 4 != 0
+PRINTL 
+
+IF CFLAG:16 > -1
+	LOCAL = CFLAG:16 - 1
+	IF LOCAL == -1
+		PRINT [첫 키스 상대：불명]
+	ELSEIF CFLAG:16 == 993
+		PRINT [첫 키스 상대：광왕]
+	ELSEIF CFLAG:16 == 994
+		PRINT [첫 키스 상대：몬스터]
+	ELSEIF CFLAG:16 == 995
+		PRINT [첫 키스 상대：몬스터의 귀두]
+	ELSEIF CFLAG:16 == 996
+		PRINT [첫 키스 상대：들개의 똥구멍]
+	ELSEIF CFLAG:16 == 997
+		PRINT [첫 키스 상대：들개의 귀두]
+	ELSEIF CFLAG:16 == 998
+		PRINT [첫 키스 상대：들개의 주둥이]
+	ELSEIF CFLAG:16 == 999
+		PRINT [첫 키스 상대：촉수]
+	ELSE
+		PRINTFORM [첫 키스 상대：%CSTR:4%의
+		IF CFLAG:16 < 100
+			PRINT 입술]
+		ELSEIF CFLAG:16 < 300
+			PRINT 페니스]
+		ELSEIF CFLAG:16 < 400
+			PRINT 질]
+		ELSEIF CFLAG:16 < 500
+			PRINT 애널]
+		ENDIF
+	ENDIF
+ENDIF
+
+IF CFLAG:15 > 0
+	LOCAL = CFLAG:15 - 1
+	;初体験がバイブの場合
+	IF CFLAG:15 == 101
+		PRINT [첫 경험 상대：꿀단지웜의 대가리]
+	;初体験が촉수生物の場合
+	ELSEIF CFLAG:15 == 102
+		PRINT [첫 경험 상대：촉수생물의 촉수]
+	;初体験が犬の場合
+	ELSEIF CFLAG:15 == 103
+		PRINT [첫 경험 상대：똥개의 자지]
+	;初体験がモンスターの場合
+	ELSEIF CFLAG:15 == 104
+		PRINT [첫 경험 상대：몬스터의 자지]
+	ELSEIF CFLAG:15 == 105
+		PRINT [첫 경험 상대：광왕의 자지]
+	ELSEIF LOCAL == 0
+		PRINTFORM [첫 경험 상대：%SAVESTR:LOCAL%]
+	ELSE
+		PRINTFORM [첫 경험 상대：%CSTR:3%]
+	ENDIF
+ENDIF
+
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+SIF CFLAG:16 > -1 || CFLAG:15 > 0
+PRINTL
+
+;-------------------------------------------------
+;現在のターゲットの体力バーを表示
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;引数 ARG:1 0以外の場合、末尾改行無し
+;-------------------------------------------------
+@LIFE_BAR (ARG:0 = -1, ARG:1 = 0)
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+IF MAXBASE:0 <= 0
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+	RETURN 0
+ENDIF
+
+PRINT 체력
+IF BASE:0 < 0
+	BAR 0,MAXBASE:0,32
+	PRINTFORM (   0/{MAXBASE:0})
+ELSE
+	BAR BASE:0,MAXBASE:0,32
+	PRINTFORM ({BASE:0, 4}/{MAXBASE:0})
+ENDIF
+IF BASE:0 < 0
+	PRINT ★사망★
+ELSEIF BASE:0 < 500
+	PRINT ★빈사★
+ENDIF
+SIF ARG:1 == 0
+	PRINTL 
+
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+;-------------------------------------------------
+;現在のターゲットの気力バーを表示
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;引数 ARG:1 0以外の場合、末尾改行無し
+;-------------------------------------------------
+@VITAL_BAR (ARG:0 = -1, ARG:1 = 0)
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+IF MAXBASE:1 <= 0
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+	RETURN 0
+ENDIF
+
+PRINT 기력
+IF BASE:1 < 0
+	BAR 0,MAXBASE:1,32
+	PRINTFORM (　 0/{MAXBASE:1})
+ELSE
+	BAR BASE:1,MAXBASE:1,32
+	PRINTFORM ({BASE:1, 4}/{MAXBASE:1})
+ENDIF
+
+SIF BASE:1 <= 0
+	PRINT ★기력０★
+SIF ARG:1 == 0
+	PRINTL 
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+;-------------------------------------------------
+;現在のターゲットの外見情報を表示
+;引数 ARG:0 -1以外の場合、その数字のキャラ番号のキャラ能力を表示します
+;-------------------------------------------------
+@SHOW_APPEARACE (ARG:0 = -1)
+
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+;顔の刺青
+SIF CSTR:10 != ""
+	PRINTFORML %SAVESTR:TARGET%의 뺨에는『%CSTR:10%』의 문신이 새겨져있습니다. 
+
+;現在の格好
+IF FLAG:37
+	PRINTFORM  지금 %SAVESTR:TARGET%의 모양은
+	CALL PRINT_CLOTHTYPE
+	PRINTL 입니다.
+ENDIF
+
+;ズーコの着ぐるみを着ていたらここで終了
+IF CFLAG:42 == 11 && (CFLAG:40 & 64)
+	SIF CFLAG:40 == 64
+		PRINTL  아무래도、안쪽은 벌거벗은 것 같습니다. 
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+	RETURN 1
+ENDIF
+
+;上半身裸なら、胸と背中と下腹部の刺青
+IF !(CFLAG:40 & 6)
+	;胸の刺青
+	SIF CSTR:11 != ""
+		PRINTFORML  가슴에는『%CSTR:11%』라는 문신이 새겨져 있습니다. 
+	;背中の刺青
+	SIF CSTR:12 != ""
+		PRINTFORML  등에는『%CSTR:12%』라는 문신이 새겨져 있습니다. 
+	;下腹部の刺青
+	SIF CSTR:13 != ""
+		PRINTFORML  하복부에는『%CSTR:13%』라는 문신이 새겨져 있습니다. 
+	
+ENDIF
+
+SIF (CFLAG:40 & 8) && (CFLAG:40 & 1) == 0
+	PRINTL  아무래도、하의는 입지 않은 것 같습니다. 
+
+;性器周辺が確認できない状況ならここで終了
+IF CFLAG:40 & 17
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+	RETURN 0
+ENDIF
+;オムツ着用中でも終了
+IF (CFLAG:40 & 64) && CFLAG:42 == 69
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+	RETURN 0
+ENDIF
+;スカートタイプ着用で従順＋露出度が３未満でもここで終了
+IF (CFLAG:40 & 8) && ABL:10 + ABL:17 < 3
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+	RETURN 0
+ENDIF
+
+PRINT  
+IF CFLAG:40 & 8
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINT 의 치맛자락을 들어 올리면、
+ENDIF
+
+;음모의상태
+SIF NO:TARGET != 0
+	PRINTFORM %SAVESTR:TARGET%의
+IF TALENT:125 == 1
+	PRINTL 영구적으로 탈모시킨 음부가 보입니다. 
+ELSEIF TALENT:310 == 1
+	PRINTL 성기는 완전히 백보지입니다. 
+ELSEIF TALENT:310 > 1 && TALENT:310 <= 20
+	PRINTL 음부를 희미하게 나마 털이 덮고 있습니다. 
+ELSEIF TALENT:310 > 20 && TALENT:310 <= 50
+	PRINTL 음부가 은은하게 털로 덮여 있습니다. 
+ELSEIF TALENT:310 > 50 && TALENT:310 <= 100
+	PRINTL 치구는 음모가 깨끗하게 나고 있습니다. 
+ELSEIF TALENT:310 > 100 && TALENT:310 <= 200
+	PRINTL 사타구니에 털이 우거지고 있습니다. 
+ELSEIF TALENT:310 > 200
+	PRINTL 치구에서 항문까지 빽빽한 털로 덮여 있습니다. 
+ENDIF
+;피어싱
+S = 0
+IF (CFLAG:7 & 8)
+	IF TALENT:122 || TALENT:121
+		PRINT  페니스
+	ELSE
+		PRINT  클리토리스
+	ENDIF
+	S = 1
+ENDIF
+IF (CFLAG:7 & 64)
+	IF S
+		PRINT 와
+	ELSE
+		PRINT  
+	ENDIF
+	PRINT 코
+	S = 1
+ENDIF
+IF (CFLAG:7 & 32)
+	IF S
+		PRINT 와
+	ELSE
+		PRINT  
+	ENDIF
+	PRINT 입술
+	S = 1
+ENDIF
+IF (CFLAG:7 & 4)
+	IF S
+		PRINT 와
+	ELSE
+		PRINT  
+	ENDIF
+	PRINT 음순
+	S = 1
+ENDIF
+IF (CFLAG:40 & 6) == 0
+	IF (CFLAG:7 & 1)
+		IF S
+			PRINT 와
+		ELSE
+			PRINT  
+		ENDIF
+		PRINT 유두
+		S = 1
+	ENDIF
+ENDIF
+IF (CFLAG:7 & 2)
+	IF S
+		PRINT 와
+	ELSE
+		PRINT  
+	ENDIF
+	PRINT 배꼽
+	S = 1
+ENDIF
+IF (CFLAG:7 & 16)
+	IF S
+		PRINT 와
+	ELSE
+		PRINT  
+	ENDIF
+	PRINT 혀
+	S = 1
+ENDIF
+SIF S
+	PRINTL 피어싱 되어있습니다. 
+
+S = 0
+
+;尻の刺青
+SIF CSTR:14 != ""
+	PRINTFORML  엉덩이에는『%CSTR:14%』라는 문신이 새겨져 있습니다. 
+;性器の刺青
+SIF CSTR:15 != ""
+	PRINTFORML  성기에는『%CSTR:15%』라는 문신이 새겨져 있습니다. 
+;肛門の刺青
+SIF CSTR:16 != ""
+	PRINTFORML  항문에는『%CSTR:16%』라는 문신이 새겨져 있습니다. 
+;太股の刺青
+SIF CSTR:17 != ""
+	PRINTFORML  허벅지에는『%CSTR:17%』라는 문신이 새겨져 있습니다. 
+
+
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+;-------------------------------------------------
+;魔法装備
+;-------------------------------------------------
+@SHOW_RING (ARG:0 = -1)
+;キャラ差し替え処理
+LOCAL:1 = -1
+IF ARG:0 >= 0 && ARG:0 < CHARANUM
+	LOCAL:1 = TARGET
+	TARGET = ARG:0
+ENDIF
+
+W:0 = CFLAG:TARGET:550
+PRINTFORM  【무기】　:
+IF W:0 <= -1
+	PRINT 맨손
+ELSE
+	CALL PRINT_EQUIPTYPE_WEAPON
+ENDIF
+
+PRINT 　
+
+W:0 = CFLAG:TARGET:551
+PRINTFORM  【장식A】　:
+IF W:0 <= -1
+	PRINT 없음
+ELSE
+	CALL PRINT_EQUIPTYPE_RING
+ENDIF
+
+PRINT 　
+
+W:0 = CFLAG:TARGET:552
+PRINTFORM  【장식B】　:
+IF W:0 <= -1
+	PRINTL 없음
+ELSE
+	CALL PRINT_EQUIPTYPE_RING
+	PRINTL  
+ENDIF
+	SIF LOCAL:1 != -1
+		TARGET = LOCAL:1;終わるときにはTARGETを戻す
+
+;-------------------------------------------------
+;汚れ状況を表示
+;-------------------------------------------------
+@STAIN_INFO
+
+REPEAT 6
+	SIF COUNT == 2 && TALENT:MASTER:121 == 0 && TALENT:MASTER:122 == 0
+		CONTINUE
+	SIF COUNT == 3 && TALENT:MASTER:122
+		CONTINUE
+	SIF COUNT == 5 && TALENT:MASTER:122
+		CONTINUE
+	PRINTS NAME:MASTER
+	IF COUNT == 0
+		PRINT 의 입：
+	ELSEIF COUNT == 1
+		PRINT 의 손：
+	ELSEIF COUNT == 2
+		PRINT 의 페니스：
+	ELSEIF COUNT == 3
+		PRINT 의 질：
+	ELSEIF COUNT == 4
+		PRINT 의 항문：
+	ELSEIF COUNT == 5
+		PRINT 의 가슴：
+	ENDIF
+	SIF STAIN:MASTER:COUNT & 1
+		PRINT <애액>
+	SIF STAIN:MASTER:COUNT & 2
+		PRINT <쿠퍼액>
+	SIF STAIN:MASTER:COUNT & 4
+		PRINT <정액>
+	SIF STAIN:MASTER:COUNT & 8
+		PRINT <장액>
+	SIF STAIN:MASTER:COUNT & 16
+		PRINT <모유>
+	SIF STAIN:MASTER:COUNT & 32
+		PRINT <오줌>
+	PRINTL 
+REND
+
+REPEAT 6
+	SIF COUNT == 2 && TALENT:121 == 0 && TALENT:122 == 0
+		CONTINUE
+	SIF COUNT == 3 && TALENT:122
+		CONTINUE
+	SIF COUNT == 5 && TALENT:122
+		CONTINUE
+	PRINTS SAVESTR:TARGET
+	IF COUNT == 0
+		PRINT 의 입：
+	ELSEIF COUNT == 1
+		PRINT 의 손：
+	ELSEIF COUNT == 2
+		PRINT 의 페니스：
+	ELSEIF COUNT == 3
+		PRINT 의 질：
+	ELSEIF COUNT == 4
+		PRINT 의 항문：
+	ELSEIF COUNT == 5
+		PRINT 의 가슴：
+	ENDIF
+	
+	SIF STAIN:COUNT & 1
+		PRINT <애액>
+	SIF STAIN:COUNT & 2
+		PRINT <쿠퍼액>
+	SIF STAIN:COUNT & 4
+		PRINT <정액>
+	SIF STAIN:COUNT & 8
+		PRINT <장액>
+	SIF STAIN:COUNT & 16
+		PRINT <모유>
+	SIF STAIN:COUNT & 32
+		PRINT <오줌>
+	PRINTL 
+REND
+
+REPEAT 6
+	SIF ASSI < 0
+		BREAK
+	SIF COUNT == 2 && TALENT:ASSI:121 == 0 && TALENT:ASSI:122 == 0
+		CONTINUE
+	SIF COUNT == 3 && TALENT:ASSI:122
+		CONTINUE
+	SIF COUNT == 5 && TALENT:ASSI:122
+		CONTINUE
+	PRINTS SAVESTR:ASSI
+	IF COUNT == 0
+		PRINT 의 입：
+	ELSEIF COUNT == 1
+		PRINT 의 손：
+	ELSEIF COUNT == 2
+		PRINT 의 페니스：
+	ELSEIF COUNT == 3
+		PRINT 의 질：
+	ELSEIF COUNT == 4
+		PRINT 의 항문：
+	ELSEIF COUNT == 5
+		PRINT 의 가슴：
+	ENDIF
+	
+	SIF STAIN:ASSI:COUNT & 1
+		PRINT <애액>
+	SIF STAIN:ASSI:COUNT & 2
+		PRINT <쿠퍼액>
+	SIF STAIN:ASSI:COUNT & 4
+		PRINT <정액>
+	SIF STAIN:ASSI:COUNT & 8
+		PRINT <장액>
+	SIF STAIN:ASSI:COUNT & 16
+		PRINT <모유>
+	SIF STAIN:ASSI:COUNT & 32
+		PRINT <오줌>
+	PRINTL 
+REND
+
+WAIT
+
+RETURN 1
+
+;-------------------------------------------------
+;状況の表示
+;-------------------------------------------------
+;調教対象には使わない、特殊な着脱式の道具を追加した場合はここに追加をしてください
+;（場所変更、マスターや조수が使用する道具等）
+;-------------------------------------------------
+@SHOW_EQUIP_2
+SETCOLOR 0xff1493
+IF TEQUIP:53
+	LOCAL = 10 + 4 * CFLAG:499 - CFLAG:491 + 1
+	PRINTFORM [촬영중(남은 횟수{LOCAL}회)]
+ENDIF
+SIF TEQUIP:54
+	PRINT  [야외플레이중]
+SIF TEQUIP:57
+	PRINT  [수치(큰거울）플레이중]
+SIF TEQUIP:58
+	PRINT  [욕실플레이중]
+SIF TEQUIP:59
+	PRINT  [새댁플레이중]
+SIF TEQUIP:89
+	PRINT  [수간플레이중]
+SIF TEQUIP:90
+	PRINT  [촉수소환중] 
+SIF TEQUIP:55
+	PRINT  [콜로세움결투중] 
+PRINTL  
+RESETCOLOR
+
+;-------------------------------------------------
+;使用中の道具を表示する
+;-------------------------------------------------
+;一度使用したら解除するまで止まらない道具や調教を
+;追加した場合はここに追加をしてください
+;-------------------------------------------------
+@SHOW_EQUIP_1
+
+IF TEQUIP:11 || TEQUIP:13 || TEQUIP:14 || TEQUIP:15 || TEQUIP:16 || TEQUIP:17 || TEQUIP:18 || TEQUIP:19 || TEQUIP:21 || TEQUIP:22 || TEQUIP:43 || TEQUIP:44 || TEQUIP:45 || TEQUIP:46 || TEQUIP:47 || TEQUIP:48 || TEQUIP:49 || TEQUIP:98 || TFLAG:60 || TFLAG:899 >= 1
+	PRINTFORM 사용중(%SAVESTR:TARGET%) 
+
+SETCOLOR 0xff1493
+SIF TEQUIP:21
+	PRINT [최음약효과발휘중]
+SIF TEQUIP:22
+	PRINT [이뇨제효과발휘중]
+IF TEQUIP:11 && TEQUIP:90
+	PRINT [촉수삽입]
+ELSEIF TEQUIP:11
+	PRINT [꿀단지웜]
+ENDIF
+
+IF TEQUIP:13 && TEQUIP:90
+	PRINT [촉수항문삽입]
+ELSEIF TEQUIP:13
+	PRINT [애널웜]
+ENDIF
+
+IF TEQUIP:14 && TEQUIP:90
+	PRINT [촉수클리괴롭히기]
+ELSEIF TEQUIP:14
+	PRINT [클리캡]
+ENDIF
+
+IF TEQUIP:15 && TEQUIP:90
+	PRINT [촉수유두괴롭히기]
+ELSEIF TEQUIP:15
+	PRINT [유두캡]
+ENDIF
+
+IF TEQUIP:16 && TEQUIP:90
+	PRINT [촉수착유]
+ELSEIF TEQUIP:16
+	PRINT [착유기]
+ENDIF
+
+IF TEQUIP:17 && TEQUIP:90
+	PRINT [촉수페니스괴롭히기]
+ELSEIF TEQUIP:17
+	PRINT [오나홀]
+ENDIF
+
+IF TEQUIP:44 && TEQUIP:90
+	PRINT [촉수긴박]
+ELSEIF TEQUIP:44
+	PRINT [밧줄로 긴박]
+ENDIF
+
+IF TEQUIP:46 && TEQUIP:90
+	PRINT [촉수관장]
+ELSEIF TEQUIP:46
+	PRINT [관장+애널플러그]
+ENDIF
+SIF TEQUIP:98
+	PRINT [촉수구욕]
+
+SIF TEQUIP:43
+	PRINT [아이마스크]
+SIF TEQUIP:45
+	PRINT [볼개그]
+SIF TEQUIP:18
+	PRINT [샤워]
+SIF TEQUIP:19
+	PRINT [애널비즈]
+SIF TEQUIP:49
+	PRINT [애널전극]
+SIF TFLAG:60 == 1 && PREVCOM != 56
+	PRINT [삽입중]
+SIF TFLAG:899 >= 1
+	PRINT [실신중]
+RESETCOLOR
+
+;ココより↑にTEQUIPに登録したものを書き込む
+PRINTL  
+ENDIF
+
+;===========================================================
+;その他のデータ
+;===========================================================
+@SHOW_DATA(ARG)
+
+IF CFLAG:ARG:130 > 0 && CFLAG:131 > 5
+	PRINT [능욕 예속:
+ELSEIF CFLAG:ARG:130 > 0
+	PRINT [능욕 공포:
+ENDIF
+
+IF CFLAG:ARG:130 > 0
+	LOCAL = CFLAG:ARG:130
+	CALL MONSTER_NAME,LOCAL,0
+	PRINT ]　
+ENDIF
+
+PRINT [결혼 상대:
+IF CFLAG:ARG:601 == 900
+	PRINT 똥개
+ELSEIF CFLAG:ARG:601 == 901
+	PRINT 당신
+ELSEIF CFLAG:ARG:601 == 902
+	IF CFLAG:ARG:606 == 200
+		CALL SEARCH_FAMILY,ARG,"LOVE"
+		IF RESULT > 0
+			PRINTFORM %SAVESTR:RESULT%
+		ELSE
+			PRINT 연인
+		ENDIF
+	ELSE
+		CALL NAME_LOVER, CFLAG:ARG:606, 1
+	ENDIF
+ELSEIF CFLAG:ARG:601 == 0
+	PRINTFORM %GET_LOOK_INFO(ARG, "결혼")%
+ELSE
+	LOCAL = CFLAG:ARG:601
+	LOCAL %= 10
+	IF LOCAL == 9
+		CALL SEARCH_FAMILY,ARG,"MARRIAGE"
+		IF RESULT > 0
+			PRINTFORM %SAVESTR:RESULT%
+		ELSE
+			PRINT 없음
+		ENDIF
+	ELSE
+		PRINTFORM %ITEMNAME:(CFLAG:ARG:601)%
+	ENDIF
+ENDIF
+
+PRINT ]　
+
+PRINT [카르마:
+PRINTV CFLAG:ARG:151
+
+IF CFLAG:ARG:151 > 150
+	PRINT :청정
+ELSEIF CFLAG:ARG:151 > 100
+	PRINT :정의
+ELSEIF CFLAG:ARG:151 > 50
+	PRINT :질서
+ELSEIF CFLAG:ARG:151 > -50
+	PRINT :중립
+ELSEIF CFLAG:ARG:151 > -100
+	PRINT :혼돈
+ELSEIF CFLAG:ARG:151 > -150
+	PRINT :타락
+ELSE
+	PRINT :패덕
+ENDIF
+
+PRINTL ]　
+
+;
+

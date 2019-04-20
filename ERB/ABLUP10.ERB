@@ -1,0 +1,357 @@
+﻿;순종의 LvUP처리와 그 여부 판정
+;eratohoA ver1,204のスクリプトをベースに処理を簡略化
+;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;従順のLvUP
+;-------------------------------------------------
+@ABLUP10
+DRAWLINE
+;PRINTL 노예の従順さを高めます
+;PRINTL 従順さが高くなると命令に従いやすくなります
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;순종이 Lv5 상한
+;[애정][망신]が付いている場合は10まで上昇可能
+IF ABL:10 >= 5 && (TALENT:85 == 0 && TALENT:86 == 0)
+	PRINTW 이 이상 UP 하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF ABL:10 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;필요한 공포의 구슬
+A = 0
+;필요한 공순의 구슬
+B = 0
+;필요한 욕정의 구슬
+C = 0
+;필요한 굴복의 구슬
+D = 0
+;필요한 이상 경험 횟수
+E = 0
+
+;条件別にＯＫかダメかを記録する
+;恐怖의 구슬による可否（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+;恭順의 구슬による可否（J=0:可、J&1:구슬 부족、J&2:경험 부족）
+J = 0
+;欲情의 구슬による可否（K=0:可、K&1:구슬 부족、K&2:경험 부족、K=256:そのレベルでは自動不可）
+K = 0
+;屈服의 구슬による可否（L=0:可、L&1:구슬 부족、L&2:경험 부족、L=256:そのレベルでは自動不可）
+L = 0
+
+CALL DECIDE_ABLUP10
+
+;異常経験が必要か
+SIF E > 0
+	PRINTFORML %EXPNAME:50%{E}이상(현재{EXP:50})동시에
+
+IF A > 0
+	;恐怖의 구슬で上げる
+	PRINTFORM [0] - %PALAMNAME:10%의 구슬×{JUEL:10}/{A} ……
+	IF I == 0
+		PRINT ＯＫ
+	ELSE
+		SIF I & 1
+			PRINT 구슬 부족 
+		SIF I & 2
+			PRINT 경험 부족 
+	ENDIF
+	PRINTL 
+ENDIF
+
+;恭順의 구슬で上げる
+PRINTFORM [1] - %PALAMNAME:4%의 구슬×{JUEL:4}/{B} ……
+IF J == 0
+	PRINT ＯＫ
+ELSE
+	SIF J & 1
+		PRINT 구슬 부족 
+	SIF J & 2
+		PRINT 경험 부족 
+ENDIF
+PRINTL 
+
+IF C > 0
+	;欲情의 구슬で上げる
+	PRINTFORM [2] - %PALAMNAME:5%의 구슬×{JUEL:5}/{C} ……
+	IF K == 0
+		PRINT ＯＫ
+	ELSE
+		SIF K & 1
+			PRINT 구슬 부족 
+		SIF K & 2
+			PRINT 경험 부족 
+	ENDIF
+	PRINTL 
+ENDIF
+
+IF D > 0
+	;屈服의 구슬で上げる
+	PRINTFORM [3] - %PALAMNAME:6%의 구슬×{JUEL:6}/{D} ……
+	IF L == 0
+		PRINT ＯＫ
+	ELSE
+		SIF L & 1
+			PRINT 구슬 부족 
+		SIF L & 2
+			PRINT 경험 부족 
+	ENDIF
+	PRINTL 
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF (RESULT < 0 || RESULT > 3) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF K == 256 && RESULT == 2
+	RESTART
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF L == 256 && RESULT == 3
+	RESTART
+ELSEIF L != 0 && RESULT == 3
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:10 += 1
+
+IF RESULT == 0
+	JUEL:10 -= A
+ELSEIF RESULT == 1
+	JUEL:4 -= B
+ELSEIF RESULT == 2
+	JUEL:5 -= C
+ELSEIF RESULT == 3
+	JUEL:6 -= D
+ENDIF
+
+PRINTFORML %ABLNAME:10%의 레벨이 {ABL:10}으로 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;従順のLvUP可否判定
+;-------------------------------------------------
+@DECIDE_ABLUP10
+;従順はLv5が上限、[애정][망신]が付いている場合はLv10まで解放
+SIF ABL:10 >= 5 && (TALENT:85 == 0 && TALENT:86 == 0)
+	RETURN 0
+SIF ABL:10 >= 10
+	RETURN 0
+
+;判定変数を空に
+I = 0
+J = 0
+K = 0
+L = 0
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+
+IF ABL:10 == 0
+	A = 10
+	B = 10
+	C = 300
+	D = 200
+ELSEIF ABL:10 == 1
+	A = 150
+	B = 100
+	C = 1000
+	D = 1200
+ELSEIF ABL:10 == 2
+	A = 1000
+	B = 800
+	C = 2000
+	D = 3000
+ELSEIF ABL:10 == 3
+	A = 3000
+	B = 3000
+	C = 0
+	D = 12000
+ELSEIF ABL:10 == 4
+	A = 8000
+	B = 5000
+	C = 0
+	D = 0
+ELSEIF ABL:10 == 5
+	A = 12000
+	B = 10000
+	C = 0
+	D = 0
+ELSEIF ABL:10 == 6
+	A = 25000
+	B = 20000
+	C = 0
+	D = 0
+ELSEIF ABL:10 == 7
+	A = 0
+	B = 40000
+	C = 0
+	D = 0
+ELSEIF ABL:10 == 8
+	A = 0
+	B = 80000
+	C = 0
+	D = 0
+ELSEIF ABL:10 == 9
+	A = 0
+	B = 150000
+	C = 0
+	D = 0
+ENDIF
+
+;ＬＶ４から５に上げるときは異常経験必要
+;（素質：[겁쟁이][솔직][즉각함락][음란][애정][망신]なら無視できる）
+IF ABL:10 == 4 && (TALENT:10 == 0 && TALENT:13 == 0 && TALENT:76 == 0 && TALENT:73 == 0 && TALENT:85 == 0 && TALENT:86 == 0)
+	E = 1
+;ＬＶ７から８に上げるときは異常経験が２이상必要
+;（素質：[겁쟁이][솔직][즉각함락][음란][애정][망신]なら無視できる）
+ELSEIF ABL:10 == 7 && (TALENT:10 == 0 && TALENT:13 == 0 && TALENT:76 == 0 && TALENT:73 == 0 && TALENT:85 == 0 && TALENT:86 == 0)
+	E = 2
+ENDIF
+
+;겁쟁이
+IF TALENT:10
+	TIMES A , 0.50
+	TIMES B , 0.90
+	TIMES D , 0.90
+ENDIF
+;반항적
+IF TALENT:11
+	TIMES A , 2.00
+	TIMES B , 1.50
+	TIMES C , 1.20
+	TIMES D , 1.50
+ENDIF
+;굳건함
+IF TALENT:12
+	TIMES A , 3.00
+	TIMES B , 1.50
+	TIMES C , 1.20
+	TIMES D , 1.50
+ENDIF
+;솔직
+IF TALENT:13
+	TIMES B , 0.80
+	TIMES D , 0.90
+ENDIF
+;시건방짐
+IF TALENT:16
+	TIMES A , 1.20
+	TIMES B , 1.50
+	TIMES D , 1.20
+ENDIF
+;프라이드높음
+IF TALENT:15
+	TIMES A , 1.20
+	TIMES B , 1.50
+	TIMES D , 2.00
+;프라이드낮음
+ELSEIF TALENT:17
+	TIMES B , 0.80
+	TIMES D , 0.80
+ENDIF
+
+;억압
+IF TALENT:32
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES C , 2.00
+	TIMES D , 1.20
+;해방
+ELSEIF TALENT:33
+	TIMES C , 0.50
+ENDIF
+;저항
+IF TALENT:34
+	TIMES A , 1.50
+	TIMES B , 1.50
+	TIMES C , 2.00
+	TIMES D , 2.00
+ENDIF
+
+;음란
+SIF TALENT:76
+	TIMES C , 0.50
+;애정
+SIF TALENT:85
+	TIMES B , 0.75
+;망신
+SIF TALENT:86
+	TIMES B , 0.20
+
+;질투
+IF TALENT:84
+	TIMES B , 5.00
+	TIMES C , 0.80
+	TIMES D , 2.00
+ENDIF
+
+;最低でも1個は必要
+SIF B < 1
+	B = 1
+
+;恐怖의 구슬は必要か？
+IF A > 0
+	;恐怖의 구슬は足りている？
+	SIF JUEL:10 < A
+	I |= 1
+ELSE
+	I = 256
+ENDIF
+
+;恭順의 구슬は足りている？
+SIF JUEL:4 < B
+	J |= 1
+
+;欲情의 구슬は必要か？
+IF C > 0
+	;欲情의 구슬は足りている？
+	SIF JUEL:5 < C
+		K |= 1
+ELSE
+	K = 256
+ENDIF
+
+;屈服의 구슬は足りている？
+IF D > 0
+	;屈服의 구슬で上げる
+	SIF JUEL:6 < D
+		L |= 1
+ELSE
+	L = 256
+ENDIF
+
+;異常経験は足りている？
+IF E > EXP:50
+	I |= 2
+	J |= 2
+	K |= 2
+	L |= 2
+ENDIF
+
+IF I == 0 || J == 0 || K == 0 || L ==0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;
+;
+;

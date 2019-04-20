@@ -1,0 +1,4469 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+@V_ABLE(ARG)
+;ARGのV行為が可能かどうかを判定する関数です
+;オトコだとダメ
+SIF TALENT:(ARG):122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:(ARG):135
+	RETURN 0
+;処女だとダメ
+SIF TALENT:(ARG):0
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:(ARG):273
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;0-9 애무계 명령
+;-------------------------------------------------
+;--------------------------------------------------
+;애무
+;--------------------------------------------------
+@COM_ABLE0
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+;-------------------------------------------------
+;커널링구스 실행 판정
+;-------------------------------------------------
+@COM_ABLE1
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;대상이 남자일 경우 불가
+SIF TALENT:122
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;性器が精液、애널、尿で汚れており、汚臭敏感で従順3以下のASSIの場合クンニはできない（調教者が汚れ無視ならＯＫ）
+IF (STAIN:2 & 4 || STAIN:2 & 8 || STAIN:2 & 32) && ASSIPLAY
+	SIF ABL:ASSI:0 <= 3 && TALENT:ASSI:62 && TALENT:ASSI:64 == 0
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;애널愛撫実行判定
+;-------------------------------------------------
+@COM_ABLE2
+resetcolor
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;主人プレイなら自動成功
+IF ASSIPLAY == 0
+	RETURN 1
+;조수プレイの場合
+ELSE
+	;潤滑不足の場合はダメ
+	IF  PALAM:3 < PALAMLV:2
+		;조수がサドならOK
+		IF TALENT:ASSI:83
+			RETURN 1
+		;조수が従順4以上かつレズっ気4以上の場合はOK
+		ELSEIF ABL:ASSI:10 <= 3 && ABL:ASSI:22 <= 3
+			RETURN 1
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;自慰実行判定
+;-------------------------------------------------
+@COM_ABLE3
+resetcolor
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;従順3以下・レズっ気3以下のASSIの場合自慰はできない（小悪魔ならＯＫ）
+IF ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:87 == 0
+		RETURN 0
+ENDIF
+;自慰しないがあるとダメ
+SIF TALENT:150
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;フェラする実行判定
+;-------------------------------------------------
+@COM_ABLE4
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;性器が愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下のASSIの場合フェラはできない（調教者が汚れ無視ならＯＫ）
+IF (STAIN:2 & 1 || STAIN:2 & 4 || STAIN:2 & 8 || STAIN:0 & 32) && ASSIPLAY
+	SIF ABL:ASSI:10 <= 3 && TALENT:ASSI:62 && TALENT:ASSI:64 == 0
+		RETURN 0
+ENDIF
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;対象がオトコかふたなりじゃないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 1) || (CFLAG:40 & 16) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;胸愛撫実行判定
+;-------------------------------------------------
+@COM_ABLE5
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;ブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;キスする実行判定
+;-------------------------------------------------
+@COM_ABLE6
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;口が愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下のASSIの場合キスはできない（調教者が汚れ無視ならＯＫ）
+IF (STAIN:0 & 1 || STAIN:0 & 4 || STAIN:0 & 8 || STAIN:0 & 32) && ASSIPLAY
+	SIF ABL:ASSI:10 <= 3 && TALENT:ASSI:62 && TALENT:ASSI:64 == 0
+		RETURN 0
+ENDIF
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;秘貝開帳実行判定
+;-------------------------------------------------
+@COM_ABLE7
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;従順が2未満だとダメ
+SIF ABL:10 < 2
+	RETURN 0
+;処女の場合、従順3以上または露出癖3以上ないとダメ
+SIF TALENT:0 && ABL:10 < 3 && ABL:17 < 3
+	RETURN 0
+;バイブ使用中は不可
+SIF TEQUIP:11
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;指挿入れ実行判定
+;-------------------------------------------------
+@COM_ABLE8
+resetcolor
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合指挿入れはできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;애널舐め実行判定
+;-------------------------------------------------
+@COM_ABLE9
+resetcolor
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;汚臭敏感で従順3以下のASSIの場合애널舐めはできない（調教者が汚れ無視ならＯＫ）
+IF ASSIPLAY
+	SIF ABL:ASSI:10 <= 3 && TALENT:ASSI:62 && TALENT:ASSI:64 == 0
+		RETURN 0
+ENDIF
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;애널バイブ使用中は不可
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;10-19 道具使用コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;ローター実行判定
+;-------------------------------------------------
+@COM_ABLE10
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:0 == 0 && NOITEM == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;バイブ実行判定
+;-------------------------------------------------
+@COM_ABLE11
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:11
+	RETURN 1
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:1 == 0 && NOITEM == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合バイブはできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合バイブはできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;Ｅマッサージャ実行判定
+;-------------------------------------------------
+@COM_ABLE12
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:2 == 0 && NOITEM == 0
+	RETURN 0
+;ASSIの場合、技巧3以上かサドじゃないと使えない。
+IF ASSIPLAY
+	SIF ABL:ASSI:12 < 3 && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;애널バイブ実行判定
+;-------------------------------------------------
+@COM_ABLE13
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:13
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:3 == 0 && NOITEM == 0
+	RETURN 0
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合애널バイブはできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;관장＋애널プラグ使用中はダメ
+SIF TEQUIP:46
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;電動クリキャップ実行判定
+;-------------------------------------------------
+@COM_ABLE14
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:14
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:7 == 0 && NOITEM == 0
+	RETURN 0
+;オトコやふたなりはダメ
+SIF TALENT:121 == 1 || TALENT:122 == 1
+	RETURN 0
+;ASSIの場合、技巧3以上じゃないと使えない。
+IF ASSIPLAY
+	SIF ABL:ASSI:12 < 3
+		RETURN 0
+ENDIF
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;クリップローター実行判定
+;-------------------------------------------------
+@COM_ABLE15
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:15
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:8 == 0 && NOITEM == 0
+	RETURN 0
+;搾乳器使用中は不可
+SIF TEQUIP:16
+	RETURN 0
+;ASSIの場合、技巧3以上じゃないと使えない。
+IF ASSIPLAY
+	SIF ABL:ASSI:12 < 3
+		RETURN 0
+ENDIF
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;搾乳器実行判定
+;-------------------------------------------------
+@COM_ABLE16
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:16
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:17 == 0 && NOITEM == 0
+	RETURN 0
+;母乳体質でないと使えない
+SIF TALENT:130 == 0
+	RETURN 0
+;クリップローター使用中は不可
+SIF TEQUIP:15
+	RETURN 0
+;Ｂ感度2以下はダメ
+SIF ABL:TARGET:1 <= 2 
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;ASSIの場合、技巧3以上じゃないと使えない。
+IF ASSIPLAY
+	SIF ABL:ASSI:12 < 3
+		RETURN 0
+ENDIF
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;オナホール実行判定
+;-------------------------------------------------
+@COM_ABLE17
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:17
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:12 == 0 && NOITEM == 0
+	RETURN 0
+;オトコやふたなりじゃないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0
+	RETURN 0
+;ASSIの場合、技巧3以上じゃないと使えない。
+IF ASSIPLAY
+	SIF ABL:ASSI:12 < 3
+		RETURN 0
+ENDIF
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;シャワー実行判定
+;-------------------------------------------------
+@COM_ABLE18
+resetcolor
+;解除はいつでも可能
+SIF TEQUIP:18
+	RETURN 1
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂中じゃないとダメ
+SIF TEQUIP:58 == 0
+	RETURN 0
+;クリキャップ使用中は不可
+SIF TEQUIP:14
+	RETURN 0
+;クリップローター使用中は不可
+SIF TEQUIP:15
+	RETURN 0
+;搾乳器使用中は不可
+SIF TEQUIP:16
+	RETURN 0
+;ASSIの場合動物耳には従順４がないと使用不可（サドならＯＫ）
+IF TALENT:124 && ABL:10 <= 4 && ASSIPLAY
+	SIF TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;全裸じゃないとダメ
+IF CFLAG:40 && FLAG:37
+	;ただし一部の特殊装備品のみなら可
+	SIF CFLAG:40 != 64 || CFLAG:42 <= 70
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;애널ビーズ実行判定
+;-------------------------------------------------
+@COM_ABLE19
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:19
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:20 == 0 && NOITEM == 0
+	RETURN 0
+;애널バイブ使用中は不可
+SIF TEQUIP:13
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;20-29 セックス系コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;正常位実行判定
+;-------------------------------------------------
+@COM_ABLE20
+resetcolor
+setcolor 255,165,0
+;Ｖ系フィルタが入ってるとダメ
+SIF FLAG:25 & 4
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合正常位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;後背位実行判定
+;-------------------------------------------------
+@COM_ABLE21
+resetcolor
+setcolor 255,165,0
+;Ｖ系フィルタが入ってるとダメ
+SIF FLAG:25 & 4
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ(獣姦を除く)
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0 && TEQUIP:89 == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合後背位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合後背位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;対面座位実行判定
+;-------------------------------------------------
+@COM_ABLE22
+resetcolor
+setcolor 255,165,0
+;Ｖ系フィルタが入ってるとダメ
+SIF FLAG:25 & 4
+	RETURN 0
+;処女はダメ
+SIF EXP:0 == 0
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合対面座位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合対面座位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;背面座位実行判定
+;-------------------------------------------------
+@COM_ABLE23
+resetcolor
+setcolor 255,165,0
+;Ｖ系フィルタが入ってるとダメ
+SIF FLAG:25 & 4
+	RETURN 0
+;処女はダメ
+SIF EXP:0 == 0
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合背面座位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合背面座位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;逆レイプ実行判定
+;-------------------------------------------------
+@COM_ABLE24
+resetcolor
+setcolor 255,165,0
+;Ｖ系フィルタが入ってるとダメ
+SIF FLAG:25 & 4
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教対象がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;調教者がオトコだとダメ
+SIF TALENT:PLAYER:122
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;逆애널レイプ実行判定
+;-------------------------------------------------
+@COM_ABLE25
+resetcolor
+setcolor 219,112,147
+;Ａ系フィルタが入ってるとダメ
+SIF FLAG:25 & 8
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教対象がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;正常位애널実行判定
+;-------------------------------------------------
+@COM_ABLE26
+resetcolor
+setcolor 219,112,147
+;Ａ系フィルタが入ってるとダメ
+SIF FLAG:25 & 8
+	RETURN 0
+;애널バイブ挿入中はダメ
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;一定のＡ経験が必要
+SIF EXP:1 < 10
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位애널はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;後背位애널実行判定
+;-------------------------------------------------
+@COM_ABLE27
+resetcolor
+setcolor 219,112,147
+;Ａ系フィルタが入ってるとダメ
+SIF FLAG:25 & 8
+	RETURN 0
+;애널バイブ挿入中はダメ
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;관장＋애널プラグ使用中はダメ
+SIF TEQUIP:46
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ(獣姦を除く)
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0 && TEQUIP:89 == 0
+	RETURN 0
+;潤滑不足で、従順4以下・レズっ気4以下のASSIの場合애널セックスはできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;一定のＡ経験が必要
+SIF EXP:1 < 10
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;対面座位애널実行判定
+;-------------------------------------------------
+@COM_ABLE28
+resetcolor
+setcolor 219,112,147
+;Ａ系フィルタが入ってるとダメ
+SIF FLAG:25 & 8
+	RETURN 0
+;애널バイブ挿入中はダメ
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;一定のＡ経験が必要
+SIF EXP:1 < 10
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合対面座位애널はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;背面座位애널実行判定
+;-------------------------------------------------
+@COM_ABLE29
+resetcolor
+setcolor 219,112,147
+;Ａ系フィルタが入ってるとダメ
+SIF FLAG:25 & 8
+	RETURN 0
+;애널バイブ挿入中はダメ
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;一定のＡ経験が必要
+SIF EXP:1 < 10
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合背面座位애널はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;30-39 奉仕系コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;手淫実行判定
+;-------------------------------------------------
+@COM_ABLE30
+resetcolor
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && TEQUIP:89 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中なら獣姦中毒Lv1必要
+SIF TEQUIP:89 && ABL:39 < 1
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;フェラチオ実行判定
+;-------------------------------------------------
+@COM_ABLE31
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && TEQUIP:89 == 0 && TEQUIP:89 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中なら獣姦中毒Lv1必要
+SIF TEQUIP:89 && ABL:39 < 1
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;パイズリ実行判定
+;-------------------------------------------------
+@COM_ABLE32
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;[절벽]だとダメ
+SIF TALENT:116
+	RETURN 0
+;[폭유]か[거유]か[超乳]でなければ技巧3以上、
+SIF TALENT:114 == 0 && TALENT:110 == 0 && TALENT:119 == 0 && ABL:12 < 3 
+	RETURN 0
+;[빈유]だと技巧4以上必要
+SIF TALENT:109 && ABL:12 < 4
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6)
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;素股実行判定
+;-------------------------------------------------
+@COM_ABLE33
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;潤滑が高くないとダメ
+SIF PALAM:3 < 2000
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;騎乗位実行判定
+;-------------------------------------------------
+@COM_ABLE34
+resetcolor
+setcolor 255,165,0
+;Ｖ系フィルタが入ってるとダメ
+SIF FLAG:25 & 4
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;未熟だとダメ
+SIF TALENT:135
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && TEQUIP:89 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中なら獣姦中毒Lv2必要
+SIF TEQUIP:89 && ABL:39 < 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;泡踊り実行判定
+;-------------------------------------------------
+@COM_ABLE35
+resetcolor
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;お風呂場プレイ中でプレイマットが無いとダメ
+SIF TEQUIP:58 == 0
+	RETURN 0
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;애널バイブ挿入中はダメ
+SIF TEQUIP:13
+	RETURN 0
+;クリキャップ使用中は不可 
+SIF TEQUIP:14
+	RETURN 0
+;クリップローター使用中は不可
+SIF TEQUIP:15
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:43
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;アイマスク使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;全裸じゃないとダメ
+IF CFLAG:40 && FLAG:37
+	;ただし一部の特殊装備品のみなら可
+	SIF CFLAG:42 <= 70
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;騎乗位애널実行判定
+;-------------------------------------------------
+@COM_ABLE36
+resetcolor
+setcolor 219,112,147
+;Ａ系フィルタが入ってるとダメ
+SIF FLAG:25 & 8
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;애널バイブ挿入中はダメ
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;一定のＡ経験が必要
+SIF EXP:1 < 10
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;애널奉仕実行判定
+;-------------------------------------------------
+@COM_ABLE37
+resetcolor
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中なら獣姦中毒Lv1必要
+SIF TEQUIP:89 && ABL:39 < 1
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;足コキ実行判定
+;-------------------------------------------------
+@COM_ABLE38
+resetcolor
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;40-49 SM系コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;スパンキング実行判定
+;-------------------------------------------------
+@COM_ABLE40
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;従順4以下・レズっ気4以下のASSIの場合スパンキングはできない（サドならＯＫ）
+IF ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && (TALENT:ASSI:83 == 0 && ABL:ASSI:20 < 2)
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;鞭実行判定
+;-------------------------------------------------
+@COM_ABLE41
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:10 == 0 && NOITEM == 0
+	RETURN 0
+;従順4以下・レズっ気4以下のASSIの場合鞭はできない（サドならＯＫ）
+IF ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && (TALENT:ASSI:83 == 0 && ABL:ASSI:20 < 3)
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;針実行判定
+;-------------------------------------------------
+@COM_ABLE42
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:11 == 0 && NOITEM == 0
+	RETURN 0
+;従順4以下・レズっ気4以下のASSIの場合針はできない（サドならＯＫ）
+IF ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && (TALENT:ASSI:83 == 0 && ABL:ASSI:20 < 3)
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;アイマスク実行判定
+;-------------------------------------------------
+@COM_ABLE43
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:43
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:5 == 0 && NOITEM == 0
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;縄実行判定
+;-------------------------------------------------
+@COM_ABLE44
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:44
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定で無いとダメ
+SIF ITEM:14 == 0 && NOITEM == 0
+	RETURN 0
+;調教者の技巧が3無いとできない
+SIF ABL:PLAYER:12 <= 2
+	RETURN 0
+;조수は技巧5でないとダメ
+IF ASSIPLAY
+	SIF ABL:ASSI:12 <= 4
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;ボールギャグ実行判定
+;-------------------------------------------------
+@COM_ABLE45
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;촉수口辱中だとダメ
+SIF TEQUIP:98
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64)
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:45
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:9 == 0 && NOITEM == 0
+	RETURN 0
+;ASSIの場合、技巧3以上じゃないと使えない。
+IF ASSIPLAY
+	SIF ABL:ASSI:12 < 3
+		RETURN 0
+ENDIF
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;관장実行判定
+;-------------------------------------------------
+@COM_ABLE46
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:46
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:15 == 0 && NOITEM == 0
+	RETURN 0
+;애널バイブ使用中は不可
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;Ａ経験が25未満じゃできない
+SIF EXP:1 <= 25
+	RETURN 0
+;순종、욕망、露出癖の合計が10ないとできない
+SIF ABL:10 + ABL:11 + ABL:17 < 10
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;ボンデージ装着実行判定
+;-------------------------------------------------
+@COM_ABLE47
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:47
+	RETURN 1
+;アイテム｢ボンデージスーツ｣を持っているか、アイテムなし設定でないとダメ
+SIF ITEM:23 == 0 && NOITEM == 0
+	RETURN 0
+;조수じゃなきゃダメ
+SIF ASSIPLAY == 0 || ASSI < 1
+	RETURN 0
+;조수のサドっ気が2以上ないとダメ
+SIF ABL:ASSI:20 < 2
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;足コキする実行判定
+;-------------------------------------------------
+@COM_ABLE48
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;対象がオトコかふたなりじゃないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0
+	RETURN 0
+;従順4以下・レズっ気4以下のASSIの場合足コキはできない（サドならＯＫ）
+IF ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && (TALENT:ASSI:83 == 0 && ABL:ASSI:20 < 2)
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;애널전극実行判定
+;-------------------------------------------------
+@COM_ABLE49
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;解除はいつでも可能
+SIF TEQUIP:49
+	RETURN 1
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:21 == 0 && NOITEM == 0
+	RETURN 0
+;애널バイブ使用中は不可
+SIF TEQUIP:13
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;普通の관장使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;50-59 特殊コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;ローション実行判定
+;-------------------------------------------------
+@COM_ABLE50
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:25 == 0 && NOITEM == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;媚薬実行判定
+;-------------------------------------------------
+@COM_ABLE51
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定か촉수조교중でないとダメ
+SIF ITEM:26 == 0 && NOITEM == 0 && TEQUIP:90 == 0
+	RETURN 0
+;薬毒耐性だとダメ
+SIF TALENT:56
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;利尿剤実行判定
+;-------------------------------------------------
+@COM_ABLE52
+resetcolor
+setcolor 100,149,237
+;器具系フィルタが入ってるとダメ
+SIF FLAG:25 & 2
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定か촉수조교중でないとダメ
+SIF ITEM:27 == 0 && NOITEM == 0 && TEQUIP:90 == 0
+	RETURN 0
+;薬毒耐性だとダメ
+SIF TALENT:56 && TEQUIP:90 == 0
+	RETURN 0
+;連続投与はダメ
+SIF TEQUIP:22
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;ビデオ撮影実行判定
+;-------------------------------------------------
+@COM_ABLE53
+resetcolor
+;解除はいつでも可能
+SIF TEQUIP:53
+	RETURN 1
+;カメラとテープのアイテムを持っているか、アイテムなし設定でないとダメ
+SIF ( ITEM:6 == 0 || ITEM:28 == 0 ) && NOITEM == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;野外プレイ実行判定
+;-------------------------------------------------
+@COM_ABLE54
+;解除はいつでも可能
+SIF TEQUIP:54
+	RETURN 1
+;アイテム｢개목걸이｣を持っているか、アイテムなし設定でないとダメ
+SIF ITEM:18 == 0 && NOITEM == 0
+	RETURN 0
+;従順かマゾっ気が3以上ないとダメ
+SIF ABL:10 <= 2 && ABL:21 <= 2
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;会話する実行判定
+;-------------------------------------------------
+@COM_ABLE56
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;羞恥プレイ実行判定
+;-------------------------------------------------
+@COM_ABLE57
+;解除はいつでも可能
+SIF TEQUIP:57
+	RETURN 1
+;アイテム｢큰거울｣を持っているか、アイテムなし設定でないとダメ
+SIF ITEM:16 == 0 && NOITEM == 0
+	RETURN 0
+;従順が1以上ないとダメ
+SIF ABL:10 <= 1
+	RETURN 0
+;野外プレイ中はダメ
+SIF TEQUIP:54
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;お風呂場プレイ実行判定
+;-------------------------------------------------
+@COM_ABLE58
+;解除はいつでも可能
+SIF TEQUIP:58
+	RETURN 1
+;従順が1以上ないとダメ
+SIF ABL:10 <= 1
+	RETURN 0
+;対象か조수が動物耳なら、従順が3以下だとダメ
+SIF TALENT:124 && ABL:10 <= 2
+	RETURN 0
+IF ASSI > 0
+	SIF TALENT:ASSI:124 && ABL:ASSI:10 <= 2
+		RETURN 0
+ENDIF
+;野外プレイ中はダメ
+SIF TEQUIP:54
+	RETURN 0
+;羞恥プレイ中はダメ
+SIF TEQUIP:57
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;全裸じゃないとダメ
+IF CFLAG:40 && FLAG:37
+	;ただし一部の特殊装備品のみなら可
+	SIF CFLAG:40 != 64 || CFLAG:42 <= 70
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;新妻プレイ実行判定
+;-------------------------------------------------
+@COM_ABLE59
+;解除はいつでも可能
+SIF TEQUIP:59
+	RETURN 1
+;アイテム｢에이프런｣を持っているか、アイテムなし設定でないとダメ
+SIF ITEM:19 == 0 && NOITEM == 0
+	RETURN 0
+;조수じゃダメ
+SIF ASSIPLAY
+	RETURN 0
+;従順が3以上ないとダメ
+SIF ABL:0 <= 2
+	RETURN 0
+;野外プレイ中はダメ
+SIF TEQUIP:54
+	RETURN 0
+;羞恥プレイ中はダメ
+SIF TEQUIP:57
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;全裸じゃないとダメ
+SIF CFLAG:40 && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;60-69 조수によるコマンド、及びレズプレイ
+;-------------------------------------------------
+;-------------------------------------------------
+;조수にキス実行判定
+;-------------------------------------------------
+@COM_ABLE60
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수じゃないとダメ
+SIF PLAYER != ASSI
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;クンニ강제実行判定
+;-------------------------------------------------
+@COM_ABLE61
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;調教者がオトコだとダメ
+SIF TALENT:PLAYER:122
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;조수を犯す実行判定
+;-------------------------------------------------
+@COM_ABLE62
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수がいないとダメ
+SIF ASSI < 1
+	RETURN 0
+;主人じゃないとダメ
+SIF ASSIPLAY
+	RETURN 0
+;조수がオトコだとダメ
+SIF TALENT:ASSI:122
+	RETURN 0
+;조수が未熟だとダメ（主人がサドならＯＫ）
+SIF TALENT:ASSI:135 && TALENT:MASTER:83 ==0
+	RETURN 0
+;主人がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:MASTER:121 == 0 && TALENT:MASTER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;縄使用中か従順が3以上ないとダメ
+SIF TEQUIP:44 == 0 && ABL:10 < 3
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;조수が貞操帯を付けているとダメ
+SIF CFLAG:ASSI:42 == 79 && (CFLAG:ASSI:40 & 64) && FLAG:37
+	RETURN 0
+;조수が貞操封印だとダメ
+SIF TALENT:ASSI:273
+	RETURN 0
+;対象から조수への相性が良くないとダメ
+R = NO:ASSI
+SIF RELATION:R <= 100
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;貝あわせ実行判定
+;-------------------------------------------------
+@COM_ABLE63
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;オトコかふたなりだとダメ
+SIF TALENT:121 || TALENT:122
+	RETURN 0
+;調教者がオトコかふたなりだとダメ
+SIF TALENT:PLAYER:121 || TALENT:PLAYER:122
+	RETURN 0
+;欲望3以下の場合貝あわせはできない（소악마、相性良好ならＯＫ）
+R = NO:PLAYER
+IF ASSIPLAY
+	SIF ABL:ASSI:11 <= 3 && TALENT:ASSI:87 == 0 && RELATION:R < 150
+		RETURN 0
+ENDIF
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;3P実行判定
+;-------------------------------------------------
+@COM_ABLE64
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수がいないとダメ
+SIF ASSI < 1
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ
+SIF TALENT:135
+	RETURN 0
+;バイブ장착중はダメ
+SIF TEQUIP:11
+	RETURN 0
+;애널バイブ장착중はダメ
+SIF TEQUIP:13
+	RETURN 0
+A = 0
+;MASTERがオトコかふたなり
+SIF TALENT:MASTER:121 || TALENT:MASTER:122
+	A += 1
+;ASSIがオトコかふたなり
+SIF TALENT:ASSI:121 || TALENT:ASSI:122
+	A += 1
+;ペニスバンドとあわせて二本ないとだめ
+SIF A + ITEM:PBAND < 2
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合二本刺しはできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合二本刺しはできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;一定のＡ経験が必要
+SIF EXP:1 < 10
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;조수を犯させる実行判定
+;-------------------------------------------------
+@COM_ABLE65
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수じゃないとダメ
+SIF PLAYER != ASSI
+	RETURN 0
+;조수がオトコだとダメ
+SIF TALENT:PLAYER:122
+	RETURN 0
+;조수が未熟だとダメ
+SIF TALENT:PLAYER:135
+	RETURN 0
+;남자、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;조수が貞操帯を付けているとダメ
+SIF CFLAG:PLAYER:42 == 79 && (CFLAG:PLAYER:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;조수が貞操封印だとダメ
+SIF TALENT:PLAYER:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;二本フェラ実行判定
+;-------------------------------------------------
+@COM_ABLE66
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수じゃないとダメ
+SIF PLAYER != ASSI
+	RETURN 0
+;主人がオトコかふたなりじゃないとダメ
+SIF TALENT:MASTER:121 == 0 && TALENT:MASTER:122 == 0
+	RETURN 0
+;조수がオトコかふたなりじゃないとダメ
+SIF TALENT:ASSI:121 == 0 && TALENT:ASSI:122 == 0
+	RETURN 0
+;主人が【매혹】か【수수께끼의매력】じゃないとダメ（조수と対象が共に愛or淫乱なら可）
+IF TALENT:MASTER:91 == 0 && TALENT:MASTER:92 == 0
+	SIF (TALENT:85 == 0 && TALENT:76 == 0) || (TALENT:ASSI:85 == 0 && TALENT:ASSI:76 == 0)
+		RETURN 0
+ENDIF
+;조수と対象のどちらかに奉仕しないがあるとダメ
+SIF TALENT:151 || TALENT:ASSI:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;Ｗフェラ実行判定
+;-------------------------------------------------
+@COM_ABLE68
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수じゃないとダメ
+SIF PLAYER != ASSI
+	RETURN 0
+;主人がオトコかふたなりじゃないとダメ
+SIF TALENT:MASTER:121 == 0 && TALENT:MASTER:122 == 0
+	RETURN 0
+;主人が【매혹】か【수수께끼의매력】じゃないとダメ（조수と対象が共に愛or淫乱なら可）
+IF TALENT:MASTER:91 == 0 && TALENT:MASTER:92 == 0
+	SIF (TALENT:85 == 0 && TALENT:76 == 0) || (TALENT:ASSI:85 == 0 && TALENT:ASSI:76 == 0)
+		RETURN 0
+ENDIF
+;조수と対象のどちらかに奉仕しないがあるとダメ
+SIF TALENT:151 || TALENT:ASSI:151 
+	RETURN 0
+;조수が奉仕精神ＬＶ３以上、技巧ＬＶ３以上じゃないとダメ
+SIF ABL:ASSI:12 < 3 || ABL:ASSI:16 < 3
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;シックスナイン実行判定
+;-------------------------------------------------
+@COM_ABLE69
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;欲望3以下・レズっ気3以下のASSIの場合シックスナインはできない（소악마、相性良好ならＯＫ）
+R = NO:PLAYER
+IF ASSI > 0 && ASSIPLAY
+	SIF (ABL:ASSI:11 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:87 == 0 && RELATION:R < 150
+		RETURN 0
+ELSE
+;調教者が조수でないなら従順3以上、奉仕精神3以上必要
+	SIF ABL:10 < 3 || ABL:16 < 3
+		RETURN 0
+ENDIF
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;ダブル素股実行判定
+;-------------------------------------------------
+@COM_ABLE70
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;主人じゃないとダメ
+SIF ASSIPLAY
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;主人が【매혹】か【수수께끼의매력】じゃないとダメ（조수と対象が共に愛or淫乱なら可）
+IF TALENT:MASTER:91 == 0 && TALENT:MASTER:92 == 0
+	SIF (TALENT:85 == 0 && TALENT:76 == 0) || (TALENT:ASSI:85 == 0 && TALENT:ASSI:76 == 0)
+		RETURN 0
+ENDIF
+;対象か조수のどちらかに奉仕しないがあるとダメ
+SIF TALENT:151 || TALENT:ASSI:151
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;調教対象がパンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;ダブルパイズリ実行判定
+;-------------------------------------------------
+@COM_ABLE71
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;조수じゃないとダメ
+SIF PLAYER != ASSI
+	RETURN 0
+;調教対象と조수のどちらかがオトコだとダメ
+SIF TALENT:122 || TALENT:ASSI:122
+	RETURN 0
+;調教対象と조수のどちらかが[절벽]だとダメ
+SIF TALENT:116 || TALENT:ASSI:116
+	RETURN 0
+;主人がオトコかふたなりじゃないとダメ
+SIF TALENT:MASTER:121 == 0 && TALENT:MASTER:122 == 0
+	RETURN 0
+;主人が【매혹】か【수수께끼의매력】じゃないとダメ（조수と対象が共に愛or淫乱なら可）
+IF TALENT:MASTER:91 == 0 && TALENT:MASTER:92 == 0
+	SIF (TALENT:85 == 0 && TALENT:76 == 0) || (TALENT:ASSI:85 == 0 && TALENT:ASSI:76 == 0)
+		RETURN 0
+ENDIF
+;조수が技巧4以上、奉仕精神3以上じゃないとダメ
+SIF ABL:ASSI:12 < 4 || ABL:ASSI:16 < 3
+	RETURN 0
+;調教対象と助手のどちらかが[폭유]か[거유]か[超乳]でなければ技巧3以上、
+SIF TALENT:114 == 0 && TALENT:110 == 0 && TALENT:119 == 0 && TALENT:ASSI:114 == 0 && TALENT:ASSI:110 == 0 && TALENT:ASSI:119 == 0 && ABL:12 < 3 
+	RETURN 0
+;調教対象と조수が両方とも[빈유]だと技巧4以上必要
+SIF TALENT:109 && TALENT:ASSI:109 && ABL:12 < 4
+	RETURN 0
+;対象か조수のどちらかに奉仕しないがあるとダメ
+SIF TALENT:151 || TALENT:ASSI:151
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教対象がブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;eraWIZから流用
+;-------------------------------------------------
+;陰毛を剃る実行判定
+;-------------------------------------------------
+@COM_ABLE72
+;陰毛が無いとダメ
+SIF TALENT:310 <= 20
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;従順が2未満だとダメ
+SIF ABL:10 < 2
+	RETURN 0
+;処女の場合、従順3以上または露出癖3以上ないとダメ
+SIF TALENT:0 && ABL:10 < 3 && ABL:17 < 3
+	RETURN 0
+;バイブ使用中は不可
+SIF TEQUIP:11
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+;-------------------------------------------------
+;髪型を弄る実行判定
+;-------------------------------------------------
+@COM_ABLE73
+
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;従順が2未満だとダメ
+SIF ABL:10 < 2
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;80-89 ハードな調教コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;イラマチオ実行判定
+;-------------------------------------------------
+@COM_ABLE80
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;순종、欲望の合計が6以上ないとダメ
+SIF ABL:10 + ABL:11 < 6
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;피스트퍽
+;-------------------------------------------------
+@COM_ABLE81
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;一定のＶ経験が必要
+SIF EXP:0 < 75
+	RETURN 0
+;バイブ使用中は不可
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;ASSIの場合、従順4以上かサドじゃないとできない。
+IF ASSIPLAY
+	SIF ABL:ASSI:10 < 4 && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;小柄体型なら従順が4以上かつマゾっ気が4以上じゃないと実行できない
+SIF TALENT:100 && (ABL:10 <= 3 || ABL:21 <= 3)
+		RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;애널피스트
+;-------------------------------------------------
+@COM_ABLE82
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;애널バイブ使用中は不可
+SIF TEQUIP:13
+	RETURN 0
+;一定のＡ経験が必要
+SIF EXP:1 < 75
+	RETURN 0
+;관장＋애널プラグ使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;ASSIの場合、従順3以上かサドじゃないとできない。
+IF ASSIPLAY
+	SIF ABL:ASSI:10 < 4 && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;小柄体型なら従順が4以上かつマゾっ気が4以上じゃないと実行できない
+SIF TALENT:100 && (ABL:10 <= 3 || ABL:21 <= 3)
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;애널ビーズ使用中は不可
+SIF TEQUIP:19
+	RETURN 0
+;전극使用中は不可
+SIF TEQUIP:49
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;양구멍피스트
+;-------------------------------------------------
+@COM_ABLE83
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;バイブ使用中は不可
+SIF TEQUIP:11
+	RETURN 0
+;애널バイブ使用中は不可
+SIF TEQUIP:13
+	RETURN 0
+;관장＋애널プラグ使用中は不可
+SIF TEQUIP:46
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0	
+;一定のＶ・Ａ経験が必要
+SIF EXP:0 < 150 || EXP:1 < 150
+	RETURN 0
+;ASSIの場合、従順4以上かサドじゃないとできない。
+IF ASSIPLAY
+	SIF ABL:ASSI:10 < 4 && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;小柄体型なら従順が4以上かつマゾっ気が4以上かつ拡張経験5以上じゃないと実行できない
+SIF TALENT:100 && (ABL:10 <= 3 || ABL:21 <= 3 || EXP:53 < 5)
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;放尿実行判定
+;-------------------------------------------------
+@COM_ABLE85
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;利尿剤使用中かおもらし癖でないとダメ
+SIF TEQUIP:22 == 0 && TALENT:57 == 0
+	RETURN 0
+;従順３以上でないとダメ（お風呂場ならＯＫ）
+SIF TEQUIP:58 == 0 && ABL:10 <= 2
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;飲尿実行判定
+;-------------------------------------------------
+@COM_ABLE86
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+RETURN 0
+;調教者がおもらし癖でないとダメ
+SIF TALENT:PLAYER:57 == 0
+	RETURN 0
+;従順４以上でないとダメ
+SIF ABL:10 <= 3
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;ピアシング実行判定
+;-------------------------------------------------
+@COM_ABLE87
+resetcolor
+setcolor 255,99,71
+;SM系フィルタが入ってるとダメ
+SIF FLAG:25 & 16
+	RETURN 0
+;対象がピアシングされているかアイテムにピアスがないとダメ
+SIF  ITEM:34 == 0 && ((CFLAG:7 & 1) == 0 && (CFLAG:7 & 2) == 0 && (CFLAG:7 & 4) == 0 && (CFLAG:7 & 8) == 0 && (CFLAG:7 & 16) == 0 && (CFLAG:7 & 32) == 0 && (CFLAG:7 & 64) == 0)
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;従順が3未満だとダメ
+SIF ABL:10 < 3
+	RETURN 0
+;バイブ使用中は不可
+SIF TEQUIP:11
+	RETURN 0
+;クリキャップ使用中は不可
+SIF TEQUIP:14
+	RETURN 0
+;ニプルキャップ使用中は不可
+SIF TEQUIP:15
+	RETURN 0
+;搾乳器使用中は不可
+SIF TEQUIP:16
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;獣姦プレイ実行判定
+;-------------------------------------------------
+@COM_ABLE89
+resetcolor
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:22 == 0 && NOITEM == 0
+	RETURN 0
+;道具使用中はダメ（野外プレイのみ可）
+SIF TEQUIP:89 == 0 && (TEQUIP:11 || TEQUIP:13 || TEQUIP:14 || TEQUIP:15 || TEQUIP:16 || TEQUIP:17 || TEQUIP:19 || TEQUIP:44 || TEQUIP:46|| TEQUIP:49 || TEQUIP:90)
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;ニプルファック実行判定
+;-------------------------------------------------
+@COM_ABLE90
+;애무계 필터가 켜져 있으면 불가
+SIF FLAG:25 & 1
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;ブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;超乳でないとダメ
+SIF TALENT:119 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;100-109 촉수系コマンド
+;-------------------------------------------------
+;-------------------------------------------------
+;촉수生物使用判定
+;-------------------------------------------------
+@COM_ABLE100
+;調教者が秘密知識を持ってないとダメ
+SIF TALENT:PLAYER:325 == 0
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:90 == 0 && NOITEM == 0
+	RETURN 0
+;道具使用中はダメ
+SIF TEQUIP:90 == 0 && (TEQUIP:11 || TEQUIP:13 || TEQUIP:14 || TEQUIP:15 || TEQUIP:16 || TEQUIP:17 || TEQUIP:19 || TEQUIP:44 || TEQUIP:46|| TEQUIP:49 || TEQUIP:54 || TEQUIP:89)
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+RETURN 1
+
+@COM_ABLE101
+;촉수삽입
+SIF TEQUIP:90 == 0
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+RETURN 1
+
+@COM_ABLE102
+;애널촉수
+SIF TEQUIP:90 == 0
+	RETURN 0
+;촉수관장中は不可
+SIF TEQUIP:46
+	RETURN 0
+RETURN 1
+
+@COM_ABLE103
+;촉수클리괴롭히기
+SIF TEQUIP:90 == 0
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+RETURN 1
+
+@COM_ABLE104
+;촉수유두괴롭히기
+SIF TEQUIP:90 == 0
+	RETURN 0
+;촉수搾乳中は不可
+SIF TEQUIP:16
+	RETURN 0
+RETURN 1
+
+@COM_ABLE105
+;촉수착유
+SIF TEQUIP:90 == 0
+	RETURN 0
+;촉수乳首責め中は不可
+SIF TEQUIP:15
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+RETURN 1
+
+@COM_ABLE106
+;촉수긴박
+SIF TEQUIP:90 == 0
+	RETURN 0
+RETURN 1
+
+@COM_ABLE107
+;촉수관장
+SIF TEQUIP:90 == 0
+	RETURN 0
+;애널촉수中は不可
+SIF TEQUIP:13
+	RETURN 0
+RETURN 1
+
+@COM_ABLE108
+;촉수구욕
+SIF TEQUIP:90 == 0
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+RETURN 1
+
+@COM_ABLE109
+;촉수페니스괴롭히기
+SIF TEQUIP:90 == 0
+	RETURN 0
+;オトコかふたなりじゃないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;服の着脱実行判定
+;-------------------------------------------------
+@COM_ABLE110
+;着衣設定を使ってない場合はダメ
+SIF FLAG:37 == 0
+	RETURN 0
+;着衣フラグが存在しないとダメ
+SIF CFLAG:41 == 0 && CFLAG:42 == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;服を破る実行判定
+;-------------------------------------------------
+@COM_ABLE111
+;着衣設定を使ってない場合はダメ
+SIF FLAG:37 == 0
+	RETURN 0
+;着衣フラグが存在しないとダメ
+SIF CFLAG:41 == 0 && CFLAG:42 == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;全裸だとダメ
+SIF CFLAG:40 == 0
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;120-追加コマンド実行判定
+;-------------------------------------------------
+;-------------------------------------------------
+;挿入Ｇスポ責め実行判定
+;-------------------------------------------------
+@COM_ABLE120
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合正常位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;挿入子宮口責め実行判定
+;-------------------------------------------------
+@COM_ABLE121
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合正常位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;兜あわせ実行判定
+;-------------------------------------------------
+@COM_ABLE122
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;対象がオトコかふたなりじゃないとダメ
+SIF TALENT:121 == 0 && TALENT:122 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;パイズリフェラ実行判定
+;-------------------------------------------------
+@COM_ABLE123
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;従順と奉仕技術と技巧が3以上必要
+SIF ABL:10 < 3 && ABL:12 < 3 && ABL:13 < 3
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;[절벽]だとダメ
+SIF TALENT:116
+	RETURN 0
+;[폭유]か[거유]か[超乳]でなければ技巧3以上、
+SIF TALENT:114 == 0 && TALENT:110 == 0 && TALENT:119 == 0 && ABL:12 < 3 
+	RETURN 0
+;[빈유]だと技巧4以上必要
+SIF TALENT:109 && ABL:12 < 4
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ブラジャーか上着上を着てるとダメ
+SIF (CFLAG:40 & 6) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+	
+RETURN 1
+
+;-------------------------------------------------
+;ディープスロート実行判定
+;-------------------------------------------------
+@COM_ABLE124
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;従順と技巧と奉仕精神が3以上必要
+SIF ABL:10 < 3 && ABL:12 < 3 && ABL:16 < 3
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;-------------------------------------------------
+;フェラ自慰実行判定
+;-------------------------------------------------
+@COM_ABLE125
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;従順と奉仕技術と技巧が3以上必要
+SIF ABL:10 < 3 &&  ABL:12 < 3 &&  ABL:13 < 3
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;従順3以下・レズっ気3以下のASSIの場合自慰はできない（小悪魔ならＯＫ）
+IF ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:87 == 0
+		RETURN 0
+ENDIF
+;自慰しないがあるとダメ
+SIF TALENT:150
+	RETURN 0
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;テコキフェラ実行判定
+;-------------------------------------------------
+@COM_ABLE126
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;従順と技巧と奉仕精神が3以上必要
+SIF ABL:10 < 3 && ABL:12 < 3 && ABL:16 < 3
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+
+;-------------------------------------------------
+;バキュームフェラ実行判定
+;-------------------------------------------------
+@COM_ABLE127
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;失神中はダメ
+SIF TFLAG:899 > 0
+	RETURN 0
+;従順と技巧と奉仕精神が3以上必要
+SIF ABL:10 < 3 && ABL:12 < 3 && ABL:16 < 3
+	RETURN 0
+;調教者がオトコかふたなりじゃないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0
+	RETURN 0
+;奉仕しないがあるとダメ
+SIF TALENT:151
+	RETURN 0
+;調教者のペニスが愛液、精液、애널、尿で汚れており、汚臭敏感で従順3以下の場合フェラはできない（汚れ無視ならＯＫ）
+IF STAIN:PLAYER:2 & 1 || STAIN:PLAYER:2 & 4 || STAIN:PLAYER:2 & 8 || STAIN:PLAYER:2 & 32
+	SIF ABL:10 <= 3 && TALENT:62 && TALENT:64 == 0
+		RETURN 0
+ENDIF
+;ボールギャグ使用中は不可
+SIF TEQUIP:45
+	RETURN 0
+;縄使用中は不可
+SIF TEQUIP:44
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+RETURN 1
+;-------------------------------------------------
+;정상위・キス実行判定
+;-------------------------------------------------
+@COM_ABLE128
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が3以上、対象の性交技術が2以上必要
+SIF ABL:PLAYER:12 < 3 && ABL:14 < 2
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合正常位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;정상위・胸愛撫実行判定
+;-------------------------------------------------
+@COM_ABLE129
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が3以上、対象の性交技術が2以上必要
+SIF ABL:PLAYER:12 < 3 && ABL:14 < 2
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合正常位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;正常位ＳＰ実行判定
+;-------------------------------------------------
+@COM_ABLE130
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が5以上、対象の性交技術が3以上必要
+SIF ABL:PLAYER:12 < 5 && ABL:14 < 3
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合正常位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合正常位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;후배위・胸愛撫実行判定
+;-------------------------------------------------
+@COM_ABLE131
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が3以上、対象の性交技術が2以上必要
+SIF ABL:PLAYER:12 < 3 && ABL:14 < 2
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合後背位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合後背位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;후배위・スパンキング実行判定
+;-------------------------------------------------
+@COM_ABLE132
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が3以上、対象の性交技術が2以上必要
+SIF ABL:PLAYER:12 < 3 && ABL:14 < 2
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合後背位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合後背位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;立ちバック実行判定
+;-------------------------------------------------
+@COM_ABLE133
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が4以上、対象の性交技術が3以上必要
+SIF ABL:PLAYER:12 < 4 && ABL:14 < 3
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合後背位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合後背位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+;-------------------------------------------------
+;後背位ＳＰ実行判定
+;-------------------------------------------------
+@COM_ABLE134
+;追加コマンドを許可していなければダメ
+SIF FLAG:71 == 1
+	RETURN 0
+;調教者の技巧が5以上、対象の性交技術が3以上必要
+SIF ABL:PLAYER:12 < 5 && ABL:14 < 3
+	RETURN 0
+;バイブ挿入中はダメ
+SIF TEQUIP:11
+	RETURN 0
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;未熟だとダメ（調教者がサドなら可）
+SIF TALENT:135 && TALENT:PLAYER:83 == 0
+	RETURN 0
+;調教者がオトコ、후타나리、もしくはペニスバンドがないとダメ
+SIF TALENT:PLAYER:121 == 0 && TALENT:PLAYER:122 == 0 && ITEM:PBAND == 0
+	RETURN 0
+;処女で、従順4以下・レズっ気4以下のASSIの場合後背位はできない（サドならＯＫ）
+IF EXP:0 == 0 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 4 || ABL:ASSI:22 <= 4) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;潤滑不足で、従順3以下・レズっ気3以下のASSIの場合後背位はできない（サドならＯＫ）
+IF PALAM:3 < PALAMLV:2 && ASSIPLAY
+	SIF (ABL:ASSI:10 <= 3 || ABL:ASSI:22 <= 3) && TALENT:ASSI:83 == 0
+		RETURN 0
+ENDIF
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;お風呂場プレイ中はプレイマットが無いとダメ
+SIF TEQUIP:58 && ITEM:13 == 0 && NOITEM == 0
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操帯を付けているとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;貞操封印だとダメ
+SIF TALENT:273
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+
+RETURN 1
+
+;------------------------------------------
+;セルフクンニ実行判定
+;------------------------------------------
+@COM_ABLE135
+;デュラハンじゃないとだめ
+SIF TALENT:314 != 4
+	RETURN 0
+;대상이 남자일 경우 불가
+SIF TALENT:122
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;パンツか上着下・ズボンタイプを着てるとダメ
+SIF (CFLAG:40 & 17) && FLAG:37
+	RETURN 0
+;オムツをはいているとダメ
+SIF CFLAG:42 == 69 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;性器が精液、애널、尿で汚れており、汚臭敏感で従順3以下のASSIの場合クンニはできない（調教者が汚れ無視ならＯＫ）
+IF (STAIN:2 & 4 || STAIN:2 & 8 || STAIN:2 & 32) && ASSIPLAY
+	SIF ABL:ASSI:0 <= 3 && TALENT:ASSI:62 && TALENT:ASSI:64 == 0
+		RETURN 0
+ENDIF
+RETURN 1
+
+;-------------------------------------------------
+;フリー調教実行判定
+;-------------------------------------------------
+@COM_ABLE150
+;순종、欲望の合計が6以上ないとダメ
+SIF ABL:10 + ABL:11 < 6
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;결투중에도 불가
+SIF TEQUIP:55
+	RETURN 0
+;ズーコの着ぐるみを着てるとダメ
+SIF CFLAG:42 == 11 && (CFLAG:40 & 64) && FLAG:37
+	RETURN 0
+;調教内容がセットされていないとダメ
+SIF CSTR:7 == ""
+	RETURN 0
+RETURN 1
+
+;------------------------------------------
+;コロシアム実行判定
+;------------------------------------------
+@COM_ABLE200
+;道具使用中はダメ
+SIF TEQUIP:55 == 0 && (TEQUIP:11 || TEQUIP:13 || TEQUIP:14 || TEQUIP:15 || TEQUIP:16 || TEQUIP:17 || TEQUIP:19 || TEQUIP:43 || TEQUIP:44 || TEQUIP:45 || TEQUIP:46|| TEQUIP:49 || TEQUIP:54 || TEQUIP:89)
+	RETURN 0
+;野外プレイ中はダメ
+SIF TEQUIP:54
+	RETURN 0
+;獣姦プレイ中はダメ
+SIF TEQUIP:89
+	RETURN 0
+;촉수 조교 중엔 불가
+SIF TEQUIP:90
+	RETURN 0
+;シャワー中はダメ
+SIF TEQUIP:18
+	RETURN 0
+;新妻プレイ中はダメ
+SIF TEQUIP:59
+	RETURN 0
+;お風呂場プレイ中はダメ
+SIF TEQUIP:58
+	RETURN 0
+;羞恥プレイ中はダメ
+SIF TEQUIP:57
+	RETURN 0
+;観戦チケットが無いとダメ
+SIF ITEM:35 == 0
+	RETURN 0
+RETURN 1
+
+;조수
+@COM_ABLE201
+SIF TEQUIP:55 == 0
+	RETURN 0
+;조수じゃないとダメ
+SIF PLAYER != ASSI
+	RETURN 0
+RETURN 1
+
+;최하층민
+@COM_ABLE202
+SIF TEQUIP:55 == 0
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+
+;곰팡내나는개
+@COM_ABLE203
+SIF TEQUIP:55 == 0
+	RETURN 0
+SIF CFLAG:PLAYER:9 < 20
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+
+;오크
+@COM_ABLE204
+SIF TEQUIP:55 == 0
+	RETURN 0
+SIF CFLAG:PLAYER:9 < 40
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+
+;냄새나는돼지
+@COM_ABLE205
+SIF TEQUIP:55 == 0
+	RETURN 0
+SIF CFLAG:PLAYER:9 < 60
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+
+;트롤
+@COM_ABLE206
+SIF TEQUIP:55 == 0
+	RETURN 0
+SIF CFLAG:PLAYER:9 < 80
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+
+;미약슬라임
+@COM_ABLE207
+SIF TEQUIP:55 == 0
+	RETURN 0
+SIF CFLAG:PLAYER:9 < 100
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+
+;촉수
+@COM_ABLE208
+SIF TEQUIP:55 == 0
+	RETURN 0
+;調教者が秘密知識を持ってないとダメ
+SIF TALENT:PLAYER:325 == 0
+	RETURN 0
+;アイテムを持っているか、アイテムなし設定でないとダメ
+SIF ITEM:90 == 0 && NOITEM == 0
+	RETURN 0
+;조수じゃ駄目
+SIF ASSIPLAY
+	RETURN 0
+RETURN 1
+

@@ -1,0 +1,748 @@
+﻿
+;キャラの中から血縁者を探す関数
+;判定は勇者になる前・性格・名前・家族構成の一致によって判定する
+;CFLAG:604 = 血縁関係の名前 （CFLAG:6そのまま）
+;CFLAG:605 = 血縁者の情報
+;       1の位…0,없음 1,兄 2,姉 3,弟 4,妹 5,父 6,母 7,息子 8,娘（1,3,5,7は未実装）
+;      10の位…勇者になる前
+;    1000の位…性格（TALENTから160引いたもの）
+;  100000の位…가족구성
+
+;--------------------------------------
+@SEARCH_FAMILY, ARG:0, WHO_SEARCH = "FAMILY"
+#DIM SERCH_TYPE
+#DIM CHAR_NAME
+#DIM TARGET_NAME
+#DIM TARGET_FAMILY
+#DIM TARGET_ID
+#DIM EX_DATA
+#DIM EX_NAME_DATA
+#DIM CHARA
+#DIM FAMILY,2
+#DIMS WHO_SEARCH
+;--------------------------------------
+;家族がいるかどうか探す
+;용자・奴隷一覧からARGの家族を探してRETURNで返す
+
+
+TARGET_FAMILY = -1
+
+IF TALENT:ARG:마을처녀Ａ && WHO_SEARCH == "FAMILY"
+	;マオの場合リリィのみを探す
+	FOR CHARA, 0, CHARANUM
+		SIF TALENT:CHARA:마을처녀Ｂ
+			TARGET_FAMILY = CHARA
+	NEXT
+	RETURN TARGET_FAMILY
+ELSEIF TALENT:ARG:마을처녀Ｂ && WHO_SEARCH == "FAMILY"
+	;リリィの場合マオのみを探す
+	FOR CHARA, 0, CHARANUM
+		SIF TALENT:CHARA:마을처녀Ａ
+			TARGET_FAMILY = CHARA
+	NEXT
+	RETURN TARGET_FAMILY
+ENDIF
+
+CHAR_NAME = CFLAG:ARG:6
+IF WHO_SEARCH == "MARRIAGE"
+	;結婚相手のデータ
+	EX_DATA = CFLAG:ARG:601
+	;結婚相手の名前
+	EX_NAME_DATA = CFLAG:ARG:609
+ELSEIF WHO_SEARCH == "LOVE"
+	;恋人のデータ
+	EX_DATA = CFLAG:ARG:610
+	;恋人の名前
+	EX_NAME_DATA = CFLAG:ARG:608
+ELSE
+	;家族のデータ
+	EX_DATA = CFLAG:ARG:605
+	;家族の名前
+	EX_NAME_DATA = CFLAG:ARG:604
+ENDIF
+FAMILY:0 = TALENT:ARG:320
+
+;お探しは誰ですか？
+SERCH_TYPE = EX_DATA % 10
+SIF SERCH_TYPE == 0 && WHO_SEARCH == "FAMILY"
+	RETURN TARGET_FAMILY
+
+FOR CHARA, 0, CHARANUM
+	
+	IF WHO_SEARCH == "MARRIAGE"
+		TARGET_NAME = CFLAG:CHARA:609
+	ELSEIF WHO_SEARCH == "LOVE"
+		TARGET_NAME = CFLAG:CHARA:608
+	ELSE
+		TARGET_NAME = CFLAG:CHARA:604
+	ENDIF
+	
+	IF WHO_SEARCH == "MARRIAGE"
+		TARGET_ID = CFLAG:CHARA:601
+	ELSEIF WHO_SEARCH == "LOVE"
+		TARGET_ID = CFLAG:CHARA:610
+	ELSE
+		TARGET_ID = CFLAG:CHARA:605
+	ENDIF
+	
+	;名前は0の場合もあるので判定から除外
+	
+	SIF TARGET_ID == 0
+		CONTINUE
+	
+	;自分は除外
+	SIF ARG == CHARA
+		CONTINUE
+	
+	;魔王をサーチ中の場合、指定する名前番号は0番以外ない
+	SIF CHARA == 0 && EX_NAME_DATA != 0
+		CONTINUE
+	
+	;魔王の結婚相手を探す場合、「魔王と結婚」の番号である901が指定されているか
+	IF ARG == 0 && WHO_SEARCH == "MARRIAGE"
+		IF TARGET_ID == 901
+			;おめでとう! あなたが結婚相手か
+			TARGET_FAMILY = CHARA
+			BREAK
+		ELSE
+			CONTINUE
+		ENDIF
+	ENDIF
+	
+	;名前一致
+	SIF TARGET_NAME != CHAR_NAME
+		CONTINUE
+	
+	;勇者になる前一致
+	LOCAL = EX_DATA % 1000
+	LOCAL /= 10
+	
+	SIF TALENT:CHARA:용자가되기이전의생활 != LOCAL
+		CONTINUE
+	
+	;性格一致
+	LOCAL = EX_DATA % 100000
+	LOCAL /= 1000
+	LOCAL += 160
+	;魔王は性格を持たないので除外
+	SIF TALENT:CHARA:LOCAL == 0 && CHARA != 0
+		CONTINUE
+	
+	;家族構成一致
+	LOCAL = EX_DATA / 100000
+	FAMILY:1 = TALENT:CHARA:320
+	
+	IF LOCAL == FAMILY:1 && WHO_SEARCH == "MARRIAGE"
+		;おめでとう! あなたが結婚相手か
+		TARGET_FAMILY = CHARA
+		BREAK
+	ELSEIF WHO_SEARCH == "MARRIAGE"
+		CONTINUE
+	ELSEIF LOCAL == FAMILY:1 && WHO_SEARCH == "LOVE"
+		;おめでとう! あなたが恋人か
+		TARGET_FAMILY = CHARA
+		BREAK
+	ELSEIF WHO_SEARCH == "LOVE"
+		CONTINUE
+	ENDIF
+	
+	;家族構成が設定されている？
+	;家族設定の有無
+	LOCAL:1 = FAMILY:1 % 10
+	SIF LOCAL:1 == 0
+		CONTINUE
+	
+	IF SERCH_TYPE == 1 || SERCH_TYPE == 2
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			;自分が弟のため、対象に弟がいなくてはダメ
+			LOCAL:1 = FAMILY:1 % 1000000000
+			LOCAL:1 /= 100000000
+		ELSE
+			;自分が妹のため、対象に妹がいなくてはダメ
+			LOCAL:1 = FAMILY:1 % 100000000
+			LOCAL:1 /= 10000000
+		ENDIF
+		SIF LOCAL:1 == 0
+			CONTINUE
+	ELSEIF SERCH_TYPE == 3 || SERCH_TYPE == 4
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			;自分が兄のため、対象に兄がいなくてはダメ
+			LOCAL:1 = FAMILY:1 % 10000000
+			LOCAL:1 /= 1000000
+		ELSE
+			;自分が姉のため、対象に姉がいなくてはダメ
+			LOCAL:1 = FAMILY:1 % 1000000
+			LOCAL:1 /= 100000
+		ENDIF
+		SIF LOCAL:1 == 0
+			CONTINUE
+	ELSEIF SERCH_TYPE == 5 || SERCH_TYPE == 6
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			;自分が息子のため、対象に息子がいなくてはダメ
+			LOCAL:1 = FAMILY:1 % 10000
+			LOCAL:1 /= 1000
+		ELSE
+			;自分が娘のため、対象に娘がいなくてはダメ
+			LOCAL:1 = FAMILY:1 % 1000
+			LOCAL:1 /= 100
+		ENDIF
+		SIF LOCAL:1 == 0
+			CONTINUE
+	ENDIF
+	
+	IF SERCH_TYPE > 0 && SERCH_TYPE < 5
+		;兄弟間の一致
+		
+		;同じ数だけ兄が必要
+		LOCAL:1 = FAMILY:1 % 10000000
+		LOCAL:1 /= 1000000
+		LOCAL:2 = FAMILY:0 % 10000000
+		LOCAL:2 /= 1000000
+			;兄を探す場合、自分の兄は一人少なくなる
+			SIF SERCH_TYPE == 1
+				LOCAL:2 -= 1
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			;(元)남자
+			;弟妹を探す場合、対象の兄は一人少なくなる
+			SIF SERCH_TYPE == 3 || SERCH_TYPE == 4
+				LOCAL:1 -= 1
+		ENDIF
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+		;同じ数だけ弟が必要
+		LOCAL:1 = FAMILY:1 % 1000000000
+		LOCAL:1 /= 100000000
+		LOCAL:2 = FAMILY:0 % 1000000000
+		LOCAL:2 /= 100000000
+			;弟を探す場合、自分の弟は一人少なくなる
+			SIF SERCH_TYPE == 3
+				LOCAL:2 -= 1
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			;(元)남자
+			;兄姉を探す場合、対象の弟は一人少なくなる
+			SIF SERCH_TYPE == 1 || SERCH_TYPE == 2
+				LOCAL:1 -= 1
+		ENDIF
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+		;同じ数の姉が必要
+		LOCAL:1 = FAMILY:1 % 1000000
+		LOCAL:1 /= 100000
+		LOCAL:2 = FAMILY:0 % 1000000
+		LOCAL:2 /= 100000
+			;姉を探す場合、自分の姉は一人少なくなる
+			SIF SERCH_TYPE == 2
+				LOCAL:2 -= 1
+		IF (TALENT:ARG:122 == 0 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 && CFLAG:ARG:70)
+			;(元)女
+			;弟妹を探す場合、対象の姉は一人少なくなる
+			SIF SERCH_TYPE == 3 || SERCH_TYPE == 4
+				LOCAL:1 -= 1
+		ENDIF
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+		;同じ数の妹が必要
+		LOCAL:1 = FAMILY:1 % 100000000
+		LOCAL:1 /= 10000000
+		LOCAL:2 = FAMILY:0 % 100000000
+		LOCAL:2 /= 10000000
+			;妹を探す場合、自分の妹は一人少なくなる
+			SIF SERCH_TYPE == 4
+				LOCAL:2 -= 1
+		IF (TALENT:ARG:122 == 0 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 && CFLAG:ARG:70)
+			;(元)女
+			;兄姉を探す場合、対象の妹は一人少なくなる
+			SIF SERCH_TYPE == 1 || SERCH_TYPE == 2
+				LOCAL:1 -= 1
+		ENDIF
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+		;便宜上姉妹の順列は連続しているものと扱う
+		
+	ELSEIF SERCH_TYPE == 5 || SERCH_TYPE == 6
+		;親子間の一致（自分が子）
+		
+		;息子と同じ数だけ兄弟が必要
+		;自分の兄
+		LOCAL:2 = FAMILY:0 % 10000000
+		LOCAL:2 /= 1000000
+		;自分の弟
+		LOCAL:3 = FAMILY:0 % 1000000000
+		LOCAL:3 /= 100000000
+		LOCAL:2 += LOCAL:3
+		;自分が息子の場合
+		SIF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			LOCAL:2 += 1
+		;対象の息子
+		LOCAL:1 = FAMILY:1 % 10000
+		LOCAL:1 /= 1000
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+		;娘と同じ数だけ姉妹が必要
+		;自分の姉
+		LOCAL:2 = FAMILY:0 % 1000000
+		LOCAL:2 /= 100000
+		;自分の妹
+		LOCAL:3 = FAMILY:0 % 100000000
+		LOCAL:3 /= 10000000
+		LOCAL:2 += LOCAL:3
+		;自分が娘の場合
+		SIF (TALENT:ARG:122 == 0 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 && CFLAG:ARG:70)
+			LOCAL:2 += 1
+		;対象の娘
+		LOCAL:1 = FAMILY:1 % 1000
+		LOCAL:1 /= 100
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+	ELSEIF SERCH_TYPE == 7 || SERCH_TYPE == 8
+		
+		;親子間の一致（自分が親）
+		
+		;息子と同じ数だけ兄弟が必要
+		;対象の兄
+		LOCAL:2 = FAMILY:1 % 10000000
+		LOCAL:2 /= 1000000
+		;対象の弟
+		LOCAL:3 = FAMILY:1 % 1000000000
+		LOCAL:3 /= 100000000
+		LOCAL:2 += LOCAL:3
+		;対象を加える
+		SIF SERCH_TYPE == 7
+			LOCAL:2 += 1
+		;自分の息子
+		LOCAL:1 = FAMILY:0 % 10000
+		LOCAL:1 /= 1000
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+		;娘と同じ数だけ姉妹が必要
+		;対象の姉
+		LOCAL:2 = FAMILY:1 % 1000000
+		LOCAL:2 /= 100000
+		;対象の妹
+		LOCAL:3 = FAMILY:1 % 100000000
+		LOCAL:3 /= 10000000
+		LOCAL:2 += LOCAL:3
+		;対象を加える
+		SIF SERCH_TYPE == 8
+			LOCAL:2 += 1
+		;自分の娘
+		LOCAL:1 = FAMILY:0 % 1000
+		LOCAL:1 /= 100
+		SIF LOCAL:1 != LOCAL:2
+			CONTINUE
+		
+	ELSE
+		RETURN TARGET_FAMILY
+	ENDIF
+	
+	;おめでとう! あなたが家族か
+	TARGET_FAMILY = CHARA
+	BREAK
+NEXT
+
+
+RETURN TARGET_FAMILY
+
+;--------------------------------------
+@SET_FAMILY_LINK, ARG:0,ARG:1
+#DIM CHARA
+#DIM FAMILY,2
+#DIM TYPE
+#DIM MARRY
+;--------------------------------------
+;新規勇者ARG:0にリンクするキャラを選び、
+;設定のすり合わせをする関数
+
+LOCAL = 0
+
+FOR CHARA, 0, CHARANUM
+	
+	;ターゲットありの場合
+	;その奴隷だけを狙う
+	SIF ARG:1 > 0 && CHARA != ARG:1
+		CONTINUE
+	
+	;家族構成確認
+	FAMILY:1 = TALENT:CHARA:320
+	
+	;家族構成が設定されている？
+	;家族設定の有無
+	LOCAL:1 = FAMILY:1 % 10
+	SIF LOCAL:1 == 0
+		CONTINUE
+	
+	;すでに予約が入っている？
+	SIF CFLAG:CHARA:604 != 0
+		CONTINUE
+	SIF CFLAG:CHARA:605 != 0
+		CONTINUE
+	
+	;おめでとう! あなたが家族か
+	LOCAL = CHARA
+	BREAK
+	
+NEXT
+
+SIF LOCAL == 0
+	RETURN 0
+
+CHARA = LOCAL
+FAMILY:0 = TALENT:ARG:320
+
+;名前共有
+CFLAG:CHARA:604 = CFLAG:ARG:6
+CFLAG:ARG:604 = CFLAG:CHARA:6
+
+$SETTYPE
+
+;自分に対する対象の関係決定
+IF RAND:4 == 0
+	;兄姉
+	IF (TALENT:CHARA:122 && CFLAG:CHARA:70 == 0) || (TALENT:CHARA:122 ==0 && CFLAG:CHARA:70)
+		TYPE = 1
+	ELSE
+		TYPE = 2
+	ENDIF
+ELSEIF RAND:3 == 0
+	;妹弟
+	IF (TALENT:CHARA:122 && CFLAG:CHARA:70 == 0) || (TALENT:CHARA:122 ==0 && CFLAG:CHARA:70)
+		TYPE = 3
+	ELSE
+		TYPE = 4
+	ENDIF
+ELSEIF RAND:2 == 0
+	;父母
+	IF (TALENT:CHARA:122 && CFLAG:CHARA:70 == 0) || (TALENT:CHARA:122 ==0 && CFLAG:CHARA:70)
+		TYPE = 5
+	ELSE
+		TYPE = 6
+	ENDIF
+ELSE
+	;娘息子
+	IF (TALENT:CHARA:122 && CFLAG:CHARA:70 == 0) || (TALENT:CHARA:122 ==0 && CFLAG:CHARA:70)
+		TYPE = 7
+	ELSE
+		TYPE = 8
+	ENDIF
+ENDIF
+
+IF TYPE == 2 || TYPE == 1
+	;対象が兄姉の場合、対象に妹か弟がいなくてはいけない
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		;自分が弟
+		LOCAL:1 = FAMILY:1 % 1000000000
+		LOCAL:1 /= 100000000
+	ELSE
+		;自分が妹
+		LOCAL:1 = FAMILY:1 % 100000000
+		LOCAL:1 /= 10000000
+	ENDIF
+	SIF LOCAL:1 == 0
+		GOTO  SETTYPE
+ELSEIF TYPE == 4 || TYPE == 3
+	;対象が妹弟の場合、対象に姉か兄がいなくてはいけない
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		;自分が兄
+		LOCAL:1 = FAMILY:1 % 10000000
+		LOCAL:1 /= 1000000
+	ELSE
+		;自分が姉
+		LOCAL:1 = FAMILY:1 % 1000000
+		LOCAL:1 /= 100000
+	ENDIF
+	SIF LOCAL:1 == 0
+		GOTO  SETTYPE
+ELSEIF TYPE == 6 || TYPE == 5
+	;対象が父母の場合、対象に娘か息子がいなくてはいけない
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		;自分が息子
+		LOCAL:1 = FAMILY:1 % 10000
+		LOCAL:1 /= 1000
+	ELSE
+		;自分が娘
+		LOCAL:1 = FAMILY:1 % 1000
+		LOCAL:1 /= 100
+	ENDIF
+	SIF LOCAL:1 == 0
+		GOTO  SETTYPE
+ENDIF
+
+;自分の領域に相手の情報を格納
+CFLAG:ARG:605 = TYPE
+CALL CHARA_ID_OUTPUT,CHARA
+CFLAG:ARG:605 += RESULT
+
+;自分の情報を相手に合わせる
+
+;용자가되기이전의생활
+LOCAL = TALENT:CHARA:용자가되기이전의생활
+
+;家族で一緒な感じ
+;農家、漁師、物乞い、貴族、貧民、商人、パン屋、奴隷
+SIF LOCAL == 3 || LOCAL == 4 || LOCAL == 7 || LOCAL == 8 || LOCAL == 9 || LOCAL == 15 || LOCAL == 18 || LOCAL == 20
+	TALENT:ARG:용자가되기이전의생활 = LOCAL
+
+IF TYPE >= 1 && TYPE <= 4
+	;兄弟姉妹の場合、まず兄弟姉妹を同じく
+	LOCAL = FAMILY:1 % 1000000000
+	LOCAL /= 100000
+	
+	LOCAL:1 = FAMILY:0 % 100000
+	LOCAL:1 += LOCAL * 100000
+	LOCAL:2 = FAMILY:0 / 1000000000
+	LOCAL:1 += LOCAL:2 * 1000000000
+	
+	IF TYPE == 2
+		;対象が姉の場合、自分に姉を一人追加
+		LOCAL:1 += 100000
+		;妹弟の一人は自分なので削る
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			LOCAL:1 -= 100000000
+		ELSE
+			LOCAL:1 -= 10000000
+		ENDIF
+	ELSEIF TYPE == 4
+		;対象が妹の場合、自分に妹を一人追加
+		LOCAL:1 += 10000000
+		;兄姉の一人は自分なので削る
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			LOCAL:1 -= 1000000
+		ELSE
+			LOCAL:1 -= 100000
+		ENDIF
+	ELSEIF TYPE == 1
+		;対象が兄の場合、自分に兄を一人追加
+		LOCAL:1 += 1000000
+		;妹弟の一人は自分なので削る
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			LOCAL:1 -= 100000000
+		ELSE
+			LOCAL:1 -= 10000000
+		ENDIF
+	ELSEIF TYPE == 3
+		;対象が弟の場合、自分に弟を一人追加
+		LOCAL:1 += 100000000
+		;兄姉の一人は自分なので削る
+		IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+			LOCAL:1 -= 1000000
+		ELSE
+			LOCAL:1 -= 100000
+		ENDIF
+	ENDIF
+	
+	FAMILY:0 = LOCAL:1
+	
+ELSEIF TYPE == 6 || TYPE == 5
+	
+	;対象が父母の場合、
+	;対象の娘息子を自分の兄弟姉妹と合わせる
+	
+	LOCAL:0 = 0
+	
+	;娘の有無
+	LOCAL:1 = FAMILY:1 % 1000
+	LOCAL:1 /= 100
+	;娘である自分を除外
+	SIF (TALENT:ARG:122 == 0 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 && CFLAG:ARG:70)
+		LOCAL:1 -= 1
+	IF LOCAL:1 > 0
+		FOR LOCAL:2,0,LOCAL:1
+			;ランダムで姉か妹に振り分け
+			IF RAND:2 == 0
+				LOCAL:0 += LOCAL:1 * 100000
+			ELSE
+				LOCAL:0 += LOCAL:1 * 10000000
+			ENDIF
+		NEXT
+	ENDIF
+	
+	;息子の有無
+	LOCAL:1 = FAMILY:1 % 10000
+	LOCAL:1 /= 1000
+	;息子である自分を除外
+	SIF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		LOCAL:1 -= 1
+	IF LOCAL:1 > 0
+		FOR LOCAL:2,0,LOCAL:1
+			;ランダムで兄か弟に振り分け
+			IF RAND:2 == 0
+				LOCAL:0 += LOCAL:1 * 1000000
+			ELSE
+				LOCAL:0 += LOCAL:1 * 100000000
+			ENDIF
+		NEXT
+	ENDIF
+	
+	;その他の設定を割り込ませる
+	LOCAL:2 = FAMILY:0 % 100000
+	LOCAL:0 += LOCAL:2
+	LOCAL:2 = FAMILY:0 / 1000000000
+	LOCAL:0 += LOCAL:2 * 1000000000
+	
+	FAMILY:0 = LOCAL:0
+	
+ELSEIF TYPE == 8 || TYPE == 7
+	
+	;対象が娘息子の場合、
+	;対象の兄弟姉妹を自分の娘息子と合わせる
+	
+	;まず自分をカウント
+	IF (TALENT:CHARA:122 && CFLAG:CHARA:70 == 0) || (TALENT:CHARA:122 ==0 && CFLAG:CHARA:70)
+		LOCAL:0 = 1001
+	ELSE
+		LOCAL:0 = 101
+	ENDIF
+	
+	;姉の有無
+	LOCAL:1 = FAMILY:1 % 1000000
+	LOCAL:1 /= 100000
+	LOCAL:0 += LOCAL:1 * 100
+	
+	;兄の有無
+	LOCAL:1 = FAMILY:1 % 10000000
+	LOCAL:1 /= 1000000
+	LOCAL:0 += LOCAL:1 * 1000
+	
+	;妹の有無
+	LOCAL:1 = FAMILY:1 % 100000000
+	LOCAL:1 /= 10000000
+	LOCAL:0 += LOCAL:1 * 100
+	
+	;弟の有無
+	LOCAL:1 = FAMILY:1 % 1000000000
+	LOCAL:1 /= 100000000
+	LOCAL:0 += LOCAL:1 * 1000
+	
+	;兄弟の設定を割り込ませる
+	LOCAL:2 = FAMILY:0 % 1000000000
+	LOCAL:2 /= 100000
+	LOCAL:0 += LOCAL:2 * 100000
+	
+	;結婚状態を再定義する
+	IF TALENT:ARG:157 == 1
+		;現在の状況…결혼
+		LOCAL:0 += 10010
+		MARRY = 1
+	ELSEIF RAND:20 == 0
+		
+		;現在の状況
+		IF RAND:2 == 0
+			;離婚
+			LOCAL:0 += 20010
+		ELSE
+			;死別（未亡人）
+			LOCAL:0 += 50010
+		ENDIF
+		MARRY = 1
+	ENDIF
+	
+	;性別の設定（人妻の場合）
+	IF ( (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70) ) && MARRY == 1
+		;(元)남자
+		IF RAND:20 == 0
+			;男男カップル
+			LOCAL:0 += 8000000000
+			;BLっ気補正
+			ABL:ARG:ＢＬ끼 = 3
+		ELSEIF RAND:8 == 0
+			;男ふたカップル
+			LOCAL:0 += 7000000000
+		ELSE
+			;男女カップル
+			LOCAL:0 += 6000000000
+		ENDIF
+	ELSEIF TALENT:ARG:121 == 1 && MARRY == 1
+		;후타나리
+		IF RAND:10 == 0
+			;希少なふたなりのカップル
+			LOCAL:0 += 5000000000
+			;レズっ気補正
+			ABL:ARG:레즈끼 = 3
+		ELSEIF RAND:2 == 0
+			;ふた男カップル
+			LOCAL:0 += 4000000000
+		ELSE
+			;ふた女カップル
+			LOCAL:0 += 3000000000
+			;レズっ気補正
+			ABL:ARG:레즈끼 = 3
+		ENDIF
+	ELSEIF MARRY == 1
+		;女
+		IF RAND:20 == 0
+			;女女カップル
+			LOCAL:0 += 2000000000
+			;レズっ気補正
+			ABL:ARG:레즈끼 = 3
+		ELSEIF RAND:8 == 0
+			;女ふたカップル
+			LOCAL:0 += 1000000000
+			;レズっ気補正
+			ABL:ARG:레즈끼 = 3
+		ENDIF
+	ENDIF
+	
+	FAMILY:0 = LOCAL:0
+	
+ENDIF
+
+;家族設定更新
+TALENT:ARG:320 = FAMILY:0
+
+;関係決定
+IF TYPE == 2 || TYPE == 1
+	;相手が兄姉の場合、自分が妹か弟
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		LOCAL = 3
+	ELSE
+		LOCAL = 4
+	ENDIF
+ELSEIF TYPE == 4 || TYPE == 3
+	;相手が妹弟の場合、自分が姉か兄
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		LOCAL = 1
+	ELSE
+		LOCAL = 2
+	ENDIF
+ELSEIF TYPE == 6 || TYPE == 5
+	;相手が父母の場合、自分が娘か息子
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		LOCAL = 7
+	ELSE
+		LOCAL = 8
+	ENDIF
+ELSE
+	;相手が娘の場合、自分が父か母
+	IF (TALENT:ARG:122 && CFLAG:ARG:70 == 0) || (TALENT:ARG:122 ==0 && CFLAG:ARG:70)
+		LOCAL = 5
+	ELSE
+		LOCAL = 6
+	ENDIF
+ENDIF
+
+
+;相手の領域に自分の情報を格納
+CFLAG:CHARA:605 = LOCAL
+CALL CHARA_ID_OUTPUT,ARG
+CFLAG:CHARA:605 += RESULT
+
+;判定には使用しないが、種族を合わせておく
+
+LOCAL = TALENT:CHARA:314
+
+SIF (LOCAL >= 0 && LOCAL <= 6) || LOCAL == 10 || LOCAL == 11
+	TALENT:ARG:314 = LOCAL
+;동물귀
+SIF LOCAL == 2
+	TALENT:ARG:124 = 1
+
+
+RETURN 1
+

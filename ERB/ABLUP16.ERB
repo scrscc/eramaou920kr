@@ -1,0 +1,547 @@
+﻿;奉仕精神のLvUP処理とその可否判定
+;eratohoA ver1,204のスクリプトをベースに処理を簡略化
+
+;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;奉仕精神のLvUP
+;-------------------------------------------------
+@ABLUP16
+DRAWLINE
+;PRINTL 노예の奉仕精神を高めます
+;PRINTL 奉仕精神が高いと、性的な奉仕に歓びを感じるようになります
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;奉仕精神はLv5が上限
+;[애정][망신][헌신적]が付いている場合はLv10まで解放
+IF ABL:16 >= 5 && (TALENT:63 == 0 && TALENT:85 == 0 && TALENT:86 == 0)
+	PRINTW 이 이상 UP 하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF ABL:16 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;必要な屈服의 구슬
+A = 0
+;必要な恭順의 구슬
+B = 0
+;必要な習得의 구슬
+C = 0
+;必要な奉仕快楽経験回数
+D = 0
+;必要な絶頂経験＆精液経験回数
+E = 0
+;必要な異常経験回数
+F = 0
+
+;条件別にＯＫかダメかを記録する
+;屈服의 구슬による可否（I=0:可、I&1:구슬 부족、I&2:경험 부족、I&4:능력 부족）
+I = 0
+;恭順의 구슬による可否（J=0:可、J&1:구슬 부족、J&2:경험 부족、J&4:능력 부족、J=256:そのレベルでは自動不可）
+J = 0
+;習得의 구슬による可否（K=0:可、K&1:구슬 부족、K&2:경험 부족、K&4:능력 부족、K=256:そのレベルでは自動不可）
+K = 0
+
+CALL DECIDE_ABLUP16
+
+;従順が奉仕精神＋１レベルでないといけない
+PRINTFORML %ABLNAME:10%{ABL:16+1}LV이상(현재{ABL:10}LV)동시에
+
+;ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[망신]なら無視できる）
+SIF F > 0
+	PRINTFORML %EXPNAME:50%{F}이상(현재{EXP:50})동시에
+
+;屈服의 구슬で上げる
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{JUEL:6}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+IF E > 0
+	PRINTFORML 　　　%EXPNAME:2%　{EXP:2}/{E}
+	PRINTFORML 　　　%EXPNAME:20%　{EXP:20}/{E}
+ENDIF
+
+IF B > 0
+	;恭順의 구슬で上げる
+	PRINTFORM [1] - %PALAMNAME:4%의 구슬×{JUEL:4}/{B} ……
+	IF J == 0
+		PRINT ＯＫ
+	ELSE
+		SIF J & 1
+			PRINT 구슬 부족 
+		SIF J & 2
+			PRINT 경험 부족 
+		SIF J & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+	SIF D > 0
+		PRINTFORML 　　　%EXPNAME:21%　{EXP:21}/{D}
+ENDIF
+
+IF C > 0
+	;習得의 구슬で上げる
+	PRINTFORM [2] - %PALAMNAME:7%의 구슬×{JUEL:7}/{C} ……
+	IF K == 0
+		PRINT ＯＫ
+	ELSE
+		SIF K & 1
+			PRINT 구슬 부족 
+		SIF K & 2
+			PRINT 경험 부족 
+		SIF K & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+	PRINTFORML 　　　%EXPNAME:2%　{EXP:2}/1
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF (RESULT < 0 || RESULT > 2) && RESULT != 100
+	GOTO INPUT_LOOP
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	GOTO INPUT_LOOP
+ELSEIF J == 256 && RESULT == 1
+	GOTO INPUT_LOOP
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다
+	GOTO INPUT_LOOP
+ELSEIF K == 256 && RESULT == 2
+	GOTO INPUT_LOOP
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 만족하지 못했습니다
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:16 += 1
+
+IF RESULT == 0
+	JUEL:6 -= A
+ELSEIF RESULT == 1
+	JUEL:4 -= B
+ELSEIF RESULT == 2
+	JUEL:7 -= C
+ENDIF
+
+PRINTFORML %ABLNAME:16%의 레벨이 {ABL:16}으로 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;奉仕精神のLvUP可否判定
+;-------------------------------------------------
+@DECIDE_ABLUP16
+SIF ABL:16 >= 10
+	RETURN 0
+SIF ABL:16 >= 5 && (TALENT:63 == 0 && TALENT:85 == 0 && TALENT:86 == 0)
+	RETURN 0
+
+;判定変数を空に
+I = 0
+J = 0
+K = 0
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+F = 0
+
+
+
+IF ABL:16 == 0
+	A = 100
+	B = 20
+	C = 100
+	D = 1
+	E = 1
+ELSEIF ABL:16 == 1
+	A = 1200
+	B = 400
+	C = 2000
+	D = 1
+	E = 3
+ELSEIF ABL:16 == 2
+	A = 5000
+	B = 2000
+	C = 10000
+	D = 20
+	E = 6
+ELSEIF ABL:16 == 3
+	A = 10000
+	B = 3000
+	C = 0
+	D = 20
+	E = 10
+ELSEIF ABL:16 == 4
+	A = 30000
+	B = 10000
+	C = 0
+	D = 100
+	E = 20
+ELSEIF ABL:16 == 5
+	A = 50000
+	B = 20000
+	C = 0
+	D = 200
+	E = 80
+ELSEIF ABL:16 == 6
+	A = 70000
+	B = 30000
+	C = 0
+	D = 350
+	E = 150
+ELSEIF ABL:16 == 7
+	A = 100000
+	B = 50000
+	C = 0
+	D = 500
+	E = 200
+ELSEIF ABL:16 == 8
+	A = 150000
+	B = 80000
+	C = 0
+	D = 700
+	E = 400
+ELSEIF ABL:16 == 9
+	A = 200000
+	B = 150000
+	C = 0
+	D = 1000
+	E = 800
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	IF ABL:16 == 3
+		TIMES A , 1.50
+		TIMES B , 1.50
+		TIMES D , 1.50
+		TIMES E , 1.50
+	ELSEIF ABL:16 == 4
+		TIMES A , 2.00
+		TIMES B , 2.00
+		TIMES D , 2.00
+		TIMES E , 2.00
+	ELSEIF ABL:16 == 5
+		TIMES A , 2.50
+		TIMES B , 2.50
+		TIMES D , 2.50
+		TIMES E , 2.50
+	ELSEIF ABL:16 >= 6
+		TIMES A , 3.00
+		TIMES B , 3.00
+		TIMES D , 3.00
+		TIMES E , 3.00
+	ENDIF
+ENDIF
+
+;ＬＶ３이상に上げるときは異常経験必要（素質：[헌신적][애정][망신]なら無視できる）
+IF ABL:16 >= 3 && (TALENT:63 == 0 && TALENT:85 == 0 && TALENT:86 == 0)
+	F = ABL:16 - 2
+ENDIF
+
+;반항적
+IF TALENT:11
+	TIMES A , 1.20
+	TIMES B , 1.40
+	TIMES D , 1.20
+	TIMES E , 1.20
+ENDIF
+
+;굳건함
+IF TALENT:12
+	TIMES A , 1.20
+	TIMES D , 1.20
+ENDIF
+
+;솔직
+IF TALENT:13
+	TIMES A , 0.90
+	TIMES B , 0.80
+	TIMES C , 0.80
+	TIMES D , 0.70
+ENDIF
+
+;시건방짐
+IF TALENT:16
+	TIMES A , 1.10
+	TIMES B , 1.10
+ENDIF
+
+;프라이드높음
+IF TALENT:15
+	TIMES A , 1.40
+	TIMES B , 1.30
+	TIMES D , 1.20
+	TIMES E , 1.20
+;프라이드낮음
+ELSEIF TALENT:17
+	TIMES A , 0.90
+	TIMES B , 0.80
+	TIMES D , 0.80
+	TIMES E , 0.80
+ENDIF
+
+;자제심
+IF TALENT:20
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES D , 1.20
+	TIMES E , 1.20
+ENDIF
+
+;무관심
+IF TALENT:21
+	TIMES A , 1.10
+	TIMES B , 1.10
+	TIMES D , 1.20
+	TIMES E , 1.10
+ENDIF
+
+;감정부족
+IF TALENT:22
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES D , 1.40
+	TIMES E , 1.20
+ENDIF
+
+;보수적
+IF TALENT:24
+	TIMES A , 1.30
+	TIMES B , 1.30
+	TIMES C , 1.30
+	TIMES D , 1.20
+	TIMES E , 1.20
+ENDIF
+
+;낙관적
+IF TALENT:25
+	TIMES A , 0.90
+	TIMES B , 0.80
+	TIMES D , 0.70
+	TIMES E , 0.75
+;비관적
+ELSEIF TALENT:26
+	TIMES A , 0.80
+	TIMES B , 0.80
+	TIMES D , 0.80
+	TIMES E , 0.80
+ENDIF
+
+;눈에띄고싶어함
+IF TALENT:28
+	TIMES A , 0.90
+	TIMES B , 0.90
+	TIMES C , 0.90
+	TIMES D , 0.90
+ENDIF
+
+;억압
+IF TALENT:32
+	TIMES A , 1.10
+	TIMES B , 1.10
+	TIMES D , 2.50
+	TIMES E , 3.00
+;해방
+ELSEIF TALENT:33
+	TIMES A , 0.90
+	TIMES B , 0.90
+	TIMES D , 0.70
+	TIMES E , 0.60
+ENDIF
+
+;저항
+IF TALENT:34
+	TIMES A , 1.50
+	TIMES B , 1.50
+	TIMES C , 1.50
+	TIMES D , 2.00
+	TIMES E , 2.00
+ENDIF
+
+;약점
+IF TALENT:37
+	TIMES A , 0.80
+	TIMES B , 0.80
+	TIMES C , 0.80
+	TIMES D , 0.50
+	TIMES E , 0.50
+ENDIF
+
+;습득빠름
+SIF TALENT:50
+	TIMES C , 0.80
+
+;습득느림
+SIF TALENT:51
+	TIMES C , 1.60
+
+;혀놀림
+SIF TALENT:52
+	TIMES C , 0.80
+
+;헌신적
+IF TALENT:63
+	TIMES A , 0.80
+	TIMES B , 0.70
+	TIMES D , 0.60
+	TIMES E , 0.80
+ENDIF
+
+;쾌감에솔직
+IF TALENT:70
+	TIMES E , 0.70
+;쾌감을부정
+ELSEIF TALENT:71
+	TIMES E , 3.00
+ENDIF
+
+;즉각함락
+IF TALENT:73
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES D , 0.50
+	TIMES E , 0.50
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+	TIMES B , 0.75
+	TIMES C , 0.75
+	TIMES D , 0.75
+	TIMES E , 0.75
+ENDIF
+
+;새드
+IF TALENT:83
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES D , 1.50
+ENDIF
+
+;애정
+IF TALENT:85
+	TIMES A , 0.75
+	TIMES B , 0.75
+	TIMES C , 0.75
+	TIMES D , 0.75
+ENDIF
+
+;망신
+IF TALENT:86
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+	TIMES E , 0.50
+ENDIF
+
+;소악마
+IF TALENT:87
+	TIMES A , 1.10
+	TIMES B , 1.10
+	TIMES D , 1.20
+	TIMES E , 0.80
+ENDIF
+
+;광기
+IF TALENT:123
+	TIMES A , 2.50
+	TIMES B , 3.00
+	TIMES C , 1.50
+	TIMES D , 0.80
+	TIMES E , 0.50
+ENDIF
+
+;붕괴
+IF TALENT:9
+	TIMES A , 2.50
+	TIMES B , 2.50
+	TIMES C , 2.50
+	TIMES D , 0.50
+	TIMES E , 0.50
+ENDIF
+
+;最低でも1回・1個は必要
+SIF A < 1
+	A = 1
+SIF B < 1
+	B = 1
+SIF D < 1
+	D = 1
+SIF E < 1
+	E = 1
+
+;屈服의 구슬は足りている？
+SIF JUEL:6 < A
+	I |= 1
+
+;恭順의 구슬は足りている？
+IF B > 0
+	SIF JUEL:4 < B
+		J |= 1
+	;この場合奉仕快楽経験が必要なこと있고
+	SIF EXP:21 < D
+		J |= 2
+ELSE
+	J = 256
+ENDIF
+
+;習得의 구슬は足りている？
+IF C > 0
+	SIF JUEL:7 < C
+		K |= 1
+	;この場合絶頂経験が１이상必要
+	SIF EXP:2 < 1
+		K |= 2
+ELSE
+	K = 256
+ENDIF
+
+;絶頂経験が必要な場合
+SIF EXP:2 < E
+	I |= 2
+;精液経験が必要な場合
+SIF EXP:20 < E
+	I |= 2
+
+;従順が奉仕精神＋１レベルでないと능력 부족
+IF ABL:10 < ABL:16 + 1
+	I |= 4
+	J |= 4
+	K |= 4
+ENDIF
+
+;異常経験が不足
+IF F > EXP:50
+	I |= 2
+	J |= 2
+	K |= 2
+ENDIF
+
+IF I == 0 || J == 0 || K == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+;
+;
+;

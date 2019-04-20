@@ -1,0 +1,263 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;옷을찢는다
+;着衣・脱衣関連コマンド：調教対象の服を破る
+;-------------------------------------------------
+@COM111
+
+$INPUT_LOOP
+
+PRINTL 옷을찢는다
+
+A = CFLAG:40
+CALL WEARING_CLOTH_ALL
+B = CFLAG:40
+CFLAG:40 = A
+
+;-------------------------------------------------
+;破り取る部位の確認
+;-------------------------------------------------
+PRINTFORM 현재%SAVESTR:TARGET%의 모습은、
+CALL PRINT_CLOTHTYPE
+PRINTFORML 입니다……
+
+;引き裂き判定変数をLに保存
+CALL COM111_ABLE0L
+L:0 = RESULT
+CALL COM111_ABLE1L
+L:1 = RESULT
+CALL COM111_ABLE2L
+L:2 = RESULT
+CALL COM111_ABLE3L
+L:3 = RESULT
+CALL COM111_ABLE4L
+L:4 = RESULT
+CALL COM111_ABLE5L
+L:5 = RESULT
+CALL COM111_ABLE6L
+L:6 = RESULT
+
+;特別コス
+IF L:0
+	PRINT  [10] - 
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	PRINTL 를 뜯어낸다
+ENDIF
+;ワンピース上半身
+IF L:1
+	PRINT  [11] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 의 상반신을 찢는다
+ENDIF
+;ワンピース下半身
+IF L:2
+	PRINT  [12] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 의 아래를 찢는다
+ENDIF
+;ツーピース上
+IF L:3
+	PRINT  [11] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 위를 찢는다
+ENDIF
+;ツーピース下
+IF L:4
+	PRINT  [12] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	IF CFLAG:41 >= 1 && CFLAG:41 <= 100
+		PRINTL 의 스커트를 찢는다
+	ELSE
+		PRINTL 아래를 찢는다
+	ENDIF
+ENDIF
+;ブラジャー
+SIF L:5
+	PRINTL  [13] - 브래지어를 잡아 찢는다
+;パンツ
+SIF L:6
+	PRINTL  [14] - 팬티를 잡아 찢는다
+;옷을착탈
+PRINTL  [19] - [옷을착탈]으로 돌아간다
+PRINTL  [100]- 그만둔다
+
+INPUT
+
+;-------------------------------------------------
+;引き裂き処理
+;-------------------------------------------------
+;剥ぎ取れない特別コス
+IF RESULT == 10 && (CFLAG:40 & 64) && (CFLAG:42 == 11 || CFLAG:42 == 79)
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	PRINTL 는 맨손으로는 찢어질 것 같지 않다
+	WAIT
+	RETURN 0
+;特別コス引き裂き
+ELSEIF RESULT == 10 && L:0
+	PRINTFORM %SAVESTR:TARGET%로부터 
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	PRINTL (을)를 강제로 벗겨냈다
+	CFLAG:40 -= 64
+	CFLAG:47 = -3
+;ワンピース上半身引き裂き
+ELSEIF RESULT == 11 && L:1
+	PRINTFORM %조사선택(SAVESTR:TARGET, "가")% 입고있던 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 의 상반신을 찢어냈다
+	CFLAG:40 -= 4
+	CFLAG:45 = -3
+;ワンピース下半身引き裂き
+ELSEIF RESULT == 12 && L:2
+	PRINTFORM %조사선택(SAVESTR:TARGET, "가")% 입고 있던 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 의 하반신을 찢어 냈다
+	SIF CFLAG:40 & 8
+		CFLAG:40 -= 8
+	SIF CFLAG:40 & 16
+		CFLAG:40 -= 16
+	CFLAG:46 = -3
+;ツーピース上引き裂き
+ELSEIF RESULT == 11 && L:3
+	PRINTFORM %조사선택(SAVESTR:TARGET, "가")% 입고 있던 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 위를 찢었다 
+	CFLAG:40 -= 4
+	CFLAG:45 = -3
+;ツーピース下引き裂き
+ELSEIF RESULT == 12 && L:4
+	PRINTFORM %조사선택(SAVESTR:TARGET, "가")% 입고 있던 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	IF CFLAG:41 >= 1 && CFLAG:41 <= 100
+		PRINTL 의 스커트를 찢었다
+	ELSE
+		PRINTL 아래를 찢었다
+	ENDIF
+	SIF CFLAG:40 & 8
+		CFLAG:40 -= 8
+	SIF CFLAG:40 & 16
+		CFLAG:40 -= 16
+	CFLAG:46 = -3
+;ブラジャー引き裂き
+ELSEIF RESULT == 13 && L:5
+	PRINTFORML %SAVESTR:TARGET%의 브래지어를 잡아 찢었다
+	CFLAG:40 -= 2
+	CFLAG:44 = -3
+;パンツ引き裂き
+ELSEIF RESULT == 14 && L:6
+	PRINTFORML %SAVESTR:TARGET%의 팬티를 확 뜯어버렸다
+	CFLAG:40 -= 1
+	CFLAG:43 = -3
+ELSEIF RESULT == 19
+	RETURN 0
+ELSEIF RESULT == 100
+	RETURN 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+IF CFLAG:40 == 0
+	PRINTL （알몸이 되었으므로 옷의 탈착으로 돌아갑니다）
+	PRINTL 
+	WAIT
+	RETURN 0
+ENDIF
+
+PRINTL 
+
+GOTO INPUT_LOOP
+
+;=================================================
+;判定用関数群
+;=================================================
+;特別コス引き裂き判定
+@COM111_ABLE0L
+;特別コスが設定されていないとダメ
+SIF CFLAG:42 == 0
+	RETURN 0
+;特別コスを付けていないとダメ
+SIF (CFLAG:40 & 64) == 0
+	RETURN 0
+RETURN 1
+
+;ワンピース上引き裂き判定
+@COM111_ABLE1L
+;設定衣装がワンピースでないとダメ
+SIF CFLAG:41 <= 200
+	RETURN 0
+;上着上が残ってないとダメ
+SIF (CFLAG:40 & 4) == 0
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ワンピース下引き裂き判定
+@COM111_ABLE2L
+;設定衣装がワンピースでないとダメ
+SIF CFLAG:41 <= 200
+	RETURN 0
+;上着下が残ってないとダメ
+SIF (CFLAG:40 & 24) == 0
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+RETURN 1
+
+;ツーピース上引き裂き判定
+@COM111_ABLE3L
+;設定衣装がツーピースでないとダメ
+SIF CFLAG:41 >= 201
+	RETURN 0
+;上着上を付けてないとダメ
+SIF (CFLAG:40 & 4) == 0
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ツーピース下引き裂き判定
+@COM111_ABLE4L
+;設定衣装がツーピースでないとダメ
+SIF CFLAG:41 >= 201
+	RETURN 0
+;上着下を付けてないとダメ
+SIF (CFLAG:40 & 24) == 0
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+RETURN 1
+
+;ブラジャー引き裂き判定
+@COM111_ABLE5L
+;ブラジャーを付けてないとダメ
+SIF (CFLAG:40 & 2) == 0
+	RETURN 0
+;上着上を着ているとダメ
+SIF (CFLAG:40 & 4)
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;パンツ引き裂き判定
+@COM111_ABLE6L
+;パンツを穿いてないとダメ
+SIF (CFLAG:40 & 1) == 0
+	RETURN 0
+;上着下・ズボンタイプを穿いてるとダメ
+SIF (CFLAG:40 & 16) 
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+;和服の場合は上着下・スカートタイプを着ているとダメ
+SIF CFLAG:41 == 202 && (CFLAG:40 & 8)
+	RETURN 0
+RETURN 1
+

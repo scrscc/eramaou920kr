@@ -1,0 +1,189 @@
+﻿
+@ABLUP9
+DRAWLINE
+IF ABL:9 >= 5
+	PRINTW 이미 MAX입니다。
+	RETURN 0
+ENDIF
+
+;条件別にＯＫかダメかを記録する
+I = 0
+J = 0
+
+IF ABL:9 == 0
+	A = 200
+	B = 50
+	C = 0
+	D = 1000
+ELSEIF ABL:9 == 1
+	A = 1000
+	B = 200
+	C = 0
+	D = 5000
+ELSEIF ABL:9 == 2
+	A = 3000
+	B = 500
+	C = 1000
+	D = 0
+ELSEIF ABL:9 == 3
+	A = 8000
+	B = 1000
+	C = 2000
+	D = 0
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 2.00
+		TIMES B , 2.00
+		TIMES C , 2.00
+	ENDIF
+ELSEIF ABL:9 == 4
+	A = 20000
+	B = 2000
+	C = 5000
+	D = 0
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 3.00
+		TIMES B , 3.00
+		TIMES C , 3.00
+	ENDIF
+ENDIF
+
+;レズ素質
+IF TALENT:81
+	TIMES A , 0.25
+	TIMES B , 0.25
+	TIMES C , 0.25
+	TIMES D , 0.25
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+	TIMES B , 0.75
+	TIMES C , 0.75
+	TIMES D , 0.75
+ENDIF
+
+;ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[レズ素質]なら無視できる）
+IF ABL:9 == 3 && TALENT:81 == 0
+	PRINTS EXPNAME:50
+	PRINTL 있고、동시에
+	IF EXP:50 == 0
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ELSEIF ABL:9 == 4 && TALENT:81 == 0
+	PRINTS EXPNAME:50
+	PRINTL 2이상、동시에
+	IF EXP:50 < 2
+		;異常経験が不足
+		I |= 2
+		J |= 2
+	ENDIF
+ENDIF
+
+;欲情의 구슬で上げる
+SIF JUEL:5 < A
+	I |= 1
+;充実의 구슬で上げる
+SIF JUEL:6 < C
+	I |= 1
+;レズ経験が必要
+SIF EXP:40 < B
+	I |= 2
+
+PRINT [0] - 
+PRINTS PALAMNAME:5
+PRINT 의 구슬×
+PRINTV A
+IF C > 0
+	PRINT 、
+	PRINTS PALAMNAME:6
+	PRINT 의 구슬×
+	PRINTV C
+ENDIF
+PRINT 、
+PRINTS EXPNAME:40
+PRINTV B
+PRINT 이상
+PRINT ……
+
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+
+IF D > 0
+	;快Ｃ의 구슬で上げる
+	SIF JUEL:0 < D
+		J |= 1
+	;レズ経験が必要
+	SIF EXP:40 < B
+		J |= 2
+
+	PRINT [1] - 
+	PRINTS PALAMNAME:0
+	PRINT 의 구슬×
+	PRINTV D
+	PRINT 、
+	PRINTS EXPNAME:40
+	PRINTV B
+	PRINT 이상
+	PRINT ……
+	
+	IF J == 0
+		PRINT ＯＫ
+	ELSE
+		SIF J & 1
+			PRINT 구슬 부족 
+		SIF J & 2
+			PRINT 경험 부족 
+		SIF J & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF J == 256 && RESULT == 1
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:9 += 1
+
+IF RESULT == 0
+	JUEL:5 -= A
+	JUEL:6 -= C
+ELSEIF RESULT == 1
+	JUEL:0 -= D
+ENDIF
+
+PRINTS ABLNAME:9
+PRINT 의 레벨이 
+PRINTV ABL:9
+PRINTW 으로 되었습니다。
+

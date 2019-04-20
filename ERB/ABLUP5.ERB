@@ -1,0 +1,96 @@
+﻿
+@ABLUP5
+DRAWLINE
+IF ABL:5 >= 5
+	PRINTW 이미 MAX입니다。
+	RETURN 0
+ENDIF
+
+;条件別にＯＫかダメかを記録する
+I = 0
+
+IF ABL:5 == 0
+	A = 1
+	B = 2
+ELSEIF ABL:5 == 1
+	A = 50
+	B = 10
+	SIF EXP:1 >= EXPLV:3
+		A = 20
+ELSEIF ABL:5 == 2
+	A = 600
+	B = 30
+	SIF EXP:1 >= EXPLV:4
+		A = 100
+ELSEIF ABL:5 == 3
+	A = 7000
+	B = 150
+	SIF EXP:1 >= EXPLV:5
+		A = 500
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 2.00
+		TIMES B , 2.00
+	ENDIF
+ELSEIF ABL:5 == 4
+	A = 45000
+	B = 300
+	SIF EXP:1 >= EXPLV:5
+		A = 8000
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 3.00
+		TIMES B , 3.00
+	ENDIF
+ENDIF
+
+;快Ａ의 구슬で上げる
+SIF JUEL:2 < A
+	I |= 1
+
+SIF EXP:1 < B
+	I |= 2
+
+PRINT [0] - 
+PRINTS PALAMNAME:2
+PRINT 의 구슬×
+PRINTV A
+PRINT 、
+PRINTS EXPNAME:1
+PRINTV B
+PRINT 이상
+PRINT ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:5 += 1
+
+IF RESULT == 0
+	JUEL:2 -= A
+ENDIF
+
+PRINTS ABLNAME:5
+PRINT 의 레벨이
+PRINTV ABL:5
+PRINTW 이 되었습니다。
+

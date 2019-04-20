@@ -1,0 +1,1343 @@
+﻿;----------------------------------------
+@BENKI, ARG:0
+#DIM PLAY
+#DIM BENKI_MENU,10
+#DIM TARGET_POOL
+;----------------------------------------
+;肉便器に転職するとできるプレイ
+;ARG:0がキャラ
+;PLAY       = 参加者
+;BENKI_MENU = プレイ内容
+
+;BENKI_MENU:0  = 奉仕のソース
+;BENKI_MENU:1  = Vのソース
+;BENKI_MENU:2  = Aのソース
+;BENKI_MENU:3  = 同性愛のソース
+;BENKI_MENU:4  = 獣姦のソース
+;BENKI_MENU:5  = 露出のソース
+;BENKI_MENU:6  = ビデオのソース
+
+;初期化
+BENKI_MENU:0 = 0,0,0,0,0,0,0,0,0,0
+TARGET_POOL = TARGET
+
+IF ARG:0 == 0
+	;魔王様は除外
+	RETURN 0
+ELSEIF TALENT:(ARG:0):육변기 == 0
+	;肉便器以外は除外
+	RETURN 0
+ENDIF
+
+;気力・体力による制限
+SIF BASE:(ARG:0):0 < 300
+	RETURN 0
+SIF BASE:(ARG:0):1 < 100
+	RETURN 0
+
+;조교중以外除去
+SIF CFLAG:(ARG:0):1 != 0
+	RETURN 0
+
+;オトコは除外
+SIF TALENT:(ARG:0):남자
+	RETURN 0
+
+;育児中は除外
+SIF TALENT:(ARG:0):육아중
+	RETURN 0
+
+PRINTL  
+DRAWLINE
+
+;FLAG:62 = 肉便器行動内容
+
+;FLAG:62 =  0 最下層モンスター奉仕
+;FLAG:62 =  1 レズ便器
+;FLAG:62 =  2 獣姦便器
+;FLAG:62 =  3 両穴便器
+;FLAG:62 =  4 膣便器
+;FLAG:62 =  5 アナル便器
+;FLAG:62 =  6 フェラ便器
+
+;FLAG:62 =  7 獣姦配信
+;FLAG:62 =  8 娼婦購入配信
+;FLAG:62 =  9 野外露出配信
+;FLAG:62 = 10 公衆便所配信
+;FLAG:62 = 11 애널拡張配信
+;FLAG:62 = 12 自慰配信
+
+FLAG:62 = -1
+
+;常識改変フラグ
+FLAG:63 = 0
+;상식변경【일상】
+SIF TALENT:ARG:283 > 0
+	FLAG:63 = 1
+
+;肉便器奉仕相手
+;FLAG:64 =  0 不浄な眷属
+;FLAG:64 =  1 창부
+;FLAG:64 =  2 大型犬
+;FLAG:64 =  3 魔族の男
+;FLAG:64 =  4 ダークエルフの少年
+;FLAG:64 =  5 脂ぎったオーク
+;FLAG:64 =  6 オークの中年
+;FLAG:64 =  7 幼い奴隷少女
+;FLAG:64 =  8 物乞い
+;FLAG:64 =  9 淫魔
+
+;初期人数1人
+PLAY = 1
+
+;素質
+
+;처녀（V減少）
+SIF TALENT:(ARG:0):처녀
+	BENKI_MENU:1 -= 20
+;헌신적（奉仕）
+SIF TALENT:(ARG:0):헌신적
+	BENKI_MENU:0 += 1
+;섹스광（V）
+SIF TALENT:(ARG:0):섹스광
+	BENKI_MENU:1 += 3
+;항문광（A）
+SIF TALENT:(ARG:0):항문광
+	BENKI_MENU:2 += 3
+;바이・남성혐오（同性愛）
+SIF TALENT:(ARG:0):바이 || TALENT:(ARG:0):남성혐오
+	BENKI_MENU:3 += 1
+;노출광（露出）
+SIF TALENT:(ARG:0):노출광
+	BENKI_MENU:5 += 3
+;동물귀（獣姦）
+SIF TALENT:(ARG:0):동물귀
+	BENKI_MENU:4 += 1
+;암캐（獣姦）
+SIF TALENT:(ARG:0):암캐
+	BENKI_MENU:4 += 3
+;봉사안함（奉仕減少）
+SIF TALENT:(ARG:0):봉사안함
+	BENKI_MENU:0 -= 20
+;음호（V）
+SIF TALENT:(ARG:0):음호
+	BENKI_MENU:1 += 3
+;음항（A）
+SIF TALENT:(ARG:0):음항
+	BENKI_MENU:2 += 3
+;처녀봉인（V減少）
+SIF TALENT:(ARG:0):처녀봉인
+	BENKI_MENU:1 -= 20
+
+;能力値
+
+;V감각（V）
+	BENKI_MENU:1 += ABL:(ARG:0):Ｖ감각
+;A감각（A）
+	BENKI_MENU:2 += ABL:(ARG:0):Ａ감각
+;화술（ビデオ）
+	BENKI_MENU:6 += ABL:(ARG:0):화술
+;봉사정신（奉仕）
+	BENKI_MENU:0 += ABL:(ARG:0):봉사정신
+;노출벽（露出）
+	BENKI_MENU:5 += ABL:(ARG:0):노출벽
+;레즈중독（同性愛）
+	BENKI_MENU:3 += ABL:(ARG:0):레즈중독
+;수간중독（獣姦）
+	BENKI_MENU:4 += ABL:(ARG:0):수간중독
+
+;特殊な경험の有無
+
+;봉사쾌락경험（奉仕）
+SIF EXP:(ARG:0):봉사쾌락경험
+	BENKI_MENU:0 += 1
+;V拡張경험（V）
+SIF EXP:(ARG:0):Ｖ확장경험
+	BENKI_MENU:1 += 1
+;A拡張경험（A）
+SIF EXP:(ARG:0):Ａ확장경험
+	BENKI_MENU:2 += 1
+;수간경험（獣姦）
+SIF EXP:(ARG:0):수간경험
+	BENKI_MENU:4 += 1
+;50回を超える獣姦경험（獣姦）
+SIF EXP:(ARG:0):수간경험 > 50
+	BENKI_MENU:4 += 3
+;피사경험（ビデオ）
+SIF EXP:(ARG:0):피사경험
+	BENKI_MENU:6 += 1
+;50回を超える被写경험（ビデオ）	
+SIF EXP:(ARG:0):피사경험 > 50
+	BENKI_MENU:6 += 3
+
+;服装による趣向
+
+;貞操帯（V減少）
+SIF CFLAG:(ARG:0):42 == 79 && (CFLAG:(ARG:0):40 & 64) && FLAG:37
+	BENKI_MENU:1 -= 20
+
+;常識改変効果
+;物乞い奉仕（奉仕）
+SIF TALENT:(ARG:0):283 == 1
+	BENKI_MENU:0 += 3
+;野外露出（露出）
+SIF TALENT:(ARG:0):283 == 2
+	BENKI_MENU:5 += 3
+;痴態公開（ビデオ）
+SIF TALENT:(ARG:0):283 == 3
+	BENKI_MENU:6 += 3
+;公衆便女（人数）
+SIF TALENT:(ARG:0):283 == 4
+	PLAY += 3
+;獣姦マニア（獣姦）
+SIF TALENT:(ARG:0):283 == 5
+	BENKI_MENU:4 += 3
+
+;共通のPLAY補正
+
+;素質
+
+;정조관부실
+SIF TALENT:(ARG:0):정조관부실
+	PLAY += 1
+;쾌감에솔직
+SIF TALENT:(ARG:0):쾌감에솔직
+	PLAY += 1
+;음란
+SIF TALENT:(ARG:0):음란
+	PLAY += 1
+;마조
+SIF TALENT:(ARG:0):마조
+	PLAY += 1
+
+;能力
+
+;순종
+	PLAY += ABL:(ARG:0):순종
+;욕망
+	PLAY += ABL:(ARG:0):욕망
+;기교
+	PLAY += ABL:(ARG:0):기교
+;마조끼
+	PLAY += ABL:(ARG:0):마조끼
+
+;ランダムボーナス
+	PLAY += RAND:4
+
+;プレイ内容の判定
+FOR	LOCAL:1,0,10
+	SIF BENKI_MENU:(LOCAL:1) > 9
+		BENKI_MENU:(LOCAL:1) = 9
+	SIF BENKI_MENU:(LOCAL:1) < 0
+		BENKI_MENU:(LOCAL:1) = 0
+	;ついでにボーナス
+	PLAY += BENKI_MENU:(LOCAL:1)
+NEXT
+
+;未確定の相手
+FLAG:64 = -1
+
+;配信分岐
+IF BENKI_MENU:6 >= 3
+	;ビデオソース3以上でビデオ配信分岐
+	;例）被写경험50回超
+	
+	IF BENKI_MENU:4 >= 3
+		;獣姦ソース3以上で獣姦配信
+		;例）수간중독3以上
+		
+		;肉便器行動内容
+		FLAG:62 = 7
+		;相手：大型犬
+		FLAG:64 = 2
+	ELSEIF BENKI_MENU:3 >= 3
+		;同性愛ソース3以上で娼婦購入配信
+		;例）レズ中毒3以上
+		
+		;肉便器行動内容
+		FLAG:62 = 8
+		;相手：창부
+		FLAG:64 = 1
+		
+	ELSEIF BENKI_MENU:5 >= 3
+		;露出ソース3以上で野外露出配信
+		;例）露出癖3以上
+		
+		;肉便器行動内容
+		FLAG:62 = 9
+		
+	ELSEIF BENKI_MENU:1 >= 3 && BENKI_MENU:2 >= 3
+		;A&Vソース3以上で公衆便所配信
+		;例）Ｖ감각3以上かつＡ감각3以上
+		
+		;肉便器行動内容
+		FLAG:62 = 10
+		
+	ELSEIF BENKI_MENU:2 >= 3
+		;Aソース3以上でA拡張配信
+		;例）Ａ감각3以上
+		
+		;肉便器行動内容
+		FLAG:62 = 11
+		;相手無し
+		FLAG:64 = -2
+	ELSE
+		;その他・自慰配信
+		
+		;肉便器行動内容
+		FLAG:62 = 12
+		;相手無し
+		FLAG:64 = -2
+	ENDIF
+ELSEIF BENKI_MENU:4 >= 3
+	;獣姦ソース3以上で獣姦分岐
+	;例）수간중독3以上
+	
+	;肉便器行動内容
+	FLAG:62 = 2
+	;相手：大型犬
+	FLAG:64 = 2
+ELSEIF BENKI_MENU:3 >= 3
+	;同性愛ソース3以上でレズ便器分岐
+	;例）レズ中毒3以上
+	
+	;肉便器行動内容
+	FLAG:62 = 1
+	IF TALENT:ARG:로리콘
+		;幼い奴隷少女
+		FLAG:64 = 7
+	ELSE
+		;淫魔
+		FLAG:64 = 9
+	ENDIF
+ELSEIF BENKI_MENU:0 >= 3
+	;奉仕ソース3以上で最下層民分岐
+	;例）봉사정신3以上
+	
+	;肉便器行動内容
+	FLAG:62 = 0
+	;相手：최하층민
+	FLAG:64 = 0
+;さらにAとVで分岐
+ELSEIF BENKI_MENU:1 >= 3 && BENKI_MENU:2 >= 3
+	;A&Vソース3以上で両穴プレイ
+	;例）Ｖ감각3以上かつＡ감각3以上
+	
+	;肉便器行動内容
+	FLAG:62 = 3
+ELSEIF BENKI_MENU:1 >= 3
+	;Vソース3以上でVプレイ
+	;例）Ｖ감각3以上
+	
+	;肉便器行動内容
+	FLAG:62 = 4
+ELSEIF BENKI_MENU:2 >= 3
+	;Aソース3以上でAプレイ
+	;例）Ａ감각3以上
+	
+	;肉便器行動内容
+	FLAG:62 = 5
+ELSE
+	;その他. フェラ便器
+	
+	;肉便器行動内容
+	FLAG:62 = 6
+ENDIF
+
+;未定の相手を確定
+IF FLAG:64 == -1
+	IF TALENT:ARG:283 == 1
+		;物乞い常識改変
+		FLAG:64 = 8
+	ELSEIF TALENT:ARG:쇼타콘
+		;ダークエルフの少年
+		FLAG:64 = 4
+	ELSEIF TALENT:ARG:파더콘
+		;オークの中年
+		FLAG:64 = 6
+	ELSEIF TALENT:ARG:악취민감
+		;脂ぎったオーク
+		FLAG:64 = 5
+	ELSE
+		;魔族の男
+		FLAG:64 = 3
+	ENDIF
+ENDIF
+
+;実行
+
+;DUNGEON_BITCH_LOG.ERB参照
+PRINTFORM %FS_BITCH("LOOKS", ARG)%는
+
+;상식변경
+SIF FLAG:63 == 1
+	PRINT 아무런 의문도 가지지 않고
+
+IF TALENT:(ARG:0):고귀함 && BENKI_MENU:0 >= 3
+	;고귀함＆奉仕ボーナス
+	PRINTFORM 고귀한 자의 의무로서 
+	PLAY += 1
+ELSEIF TALENT:(ARG:0):자애로움 && BENKI_MENU:0 >= 3
+	;자애로움＆奉仕ボーナス
+	PRINTFORM 자애의 마음으로 
+	PLAY += 1
+ENDIF
+
+IF TALENT:(ARG:0):헌신적 && BENKI_MENU:0 >= 3
+	;헌신적＆奉仕ボーナス
+	PRINTFORM 스스로 나서서 
+	PLAY += 1
+ENDIF
+
+;説明（～をした）
+IF FLAG:62 == 0
+	;最下層モンスター奉仕
+	PRINTFORM 봉사변기로서
+	CALL BENKI_PLAYER_NAME
+	PRINTFORML 에게 봉사 해 주는
+ELSEIF FLAG:62 == 1
+	;レズ便器
+	PRINTFORML 성욕이 왕성한 음마들의 성욕처리로 사용된
+ELSEIF FLAG:62 == 2
+	;獣姦便器
+	PRINTFORML 가축의 성처리를 한
+ELSEIF FLAG:62 == 3
+	;両穴便器
+	PRINTFORML 구멍이란 모든 구멍으로 봉사 하는
+ELSEIF FLAG:62 == 4
+	;膣便器
+	PRINTFORML 질로 봉사하는
+ELSEIF FLAG:62 == 5
+	;アナル便器
+	PRINTFORML 애널로 봉사하는
+ELSEIF FLAG:62 == 6
+	;フェラ便器
+	PRINTFORML 펠라로 봉사해주는
+ELSEIF FLAG:62 == 7
+	;獣姦配信
+	PRINTFORML 개와 교미하는 모습을 수정구에 담아
+ELSEIF FLAG:62 == 8
+	;娼婦購入配信
+	PRINTFORML 창녀를 사서 섹스하는 모습을 수정구에 담아
+ELSEIF FLAG:62 == 9
+	;露出配信
+	PRINTFORML 야외노출하는 모습을 수정구에 담아
+ELSEIF FLAG:62 == 10
+	;便所配信
+	PRINTFORML 공중화장실에서 가랑이를 여는 모습을 수정구에 담아
+ELSEIF FLAG:62 == 11
+	;拡張配信
+	PRINTFORML 항문 확장을 하는 모습을 수정구에 담아
+ELSEIF FLAG:62 == 12
+	;自慰配信
+	PRINTFORML 자위하는 모습을 수정구에 담아
+ELSE
+	;자위
+	PRINTFORML 자위했다
+ENDIF
+
+WAIT
+
+SIF BENKI_MENU:6 >= 3
+	PRINTFORM 수정구의 영상을 재생하면、
+
+PRINTFORM %SAVESTR:(ARG:0)%
+
+IF BENKI_MENU:6 >= 3
+	PRINT 가
+ELSE
+	PRINT 는
+ENDIF
+
+;いつ？
+IF BENKI_MENU:5 >= 3
+	;露出ソースによる露出行為
+	PRINTFORM 대낮에、
+ELSE
+	PRINTFORM 야밤에、
+ENDIF
+
+;（誰がいる）どこで？
+IF FLAG:62 == 8
+	;娼婦購入配信
+	PRINTFORM 신음소리가 들리는 사창가
+ELSEIF FLAG:62 == 10
+	;便所配信
+	PRINTFORM 더러운 공중변소
+ELSEIF BENKI_MENU:5 >= 3 && BENKI_MENU:4 >= 3
+	;露出＆獣姦
+	PRINTFORM 연구원들이 지켜 보고있는 중인 이종 강간 연구소
+ELSEIF BENKI_MENU:5 >= 5
+	;露出ソースによる露出行為
+	PRINTFORM 거리의 소음이 들리는 골목
+ELSEIF BENKI_MENU:5 >= 3
+	;露出ソースによる露出行為
+	IF FLAG:64 == 4
+		;相手がダークエルフの少年
+		PRINT 소년이 놀고있는
+	ELSE
+		PRINT 아무도 지나가지 않는
+	ENDIF
+	PRINTFORM 공원 수풀
+ELSE
+	;その他
+	PRINTFORM 자기 방
+ENDIF
+
+IF BENKI_MENU:6 >= 3
+	PRINT 에서 수정구 녹화를 셋팅하고、
+ELSE
+	PRINT 에서、
+ENDIF
+
+IF TALENT:(ARG:0):거유
+	PRINTFORM 거유를 흔들며 
+ELSEIF TALENT:(ARG:0):폭유
+	PRINTFORM 폭유를 흔들며 
+ELSEIF TALENT:(ARG:0):초유
+	PRINTFORM 초유를 흔들며
+ENDIF
+
+;수줍음
+SIF TALENT:(ARG:0):수줍음
+	PRINTFORM 부끄러운 듯이 
+
+;誰と？
+CALL BENKI_PLAYER_NAME
+
+;どうする？
+IF FLAG:62 == 11
+	;拡張配信
+	PRINTFORM 거대한 애널 플러그를 항문에 삽입하는
+ELSEIF FLAG:62 == 6
+	;フェラ
+	PRINTFORM 의 페니스를 펠라하는
+ELSEIF FLAG:64 == -2
+	;相手無し自慰
+	PRINTFORM 자위하는
+ELSEIF BENKI_MENU:4 >= 3
+	;獣姦ソース
+	PRINTFORM 와 교미하는
+ELSEIF BENKI_MENU:3 >= 3
+	;同性ソース
+	PRINTFORM 와 알몸으로 부둥켜 안는
+ELSEIF BENKI_MENU:0 >= 3
+	;奉仕
+	PRINTFORM 에게 봉사하는
+ELSEIF BENKI_MENU:1 >= 3 && BENKI_MENU:2 >= 3
+	;A&Vソース3以上
+	PRINTFORM 와 애널과 바기나로 발정 교미를 계속하는
+ELSEIF BENKI_MENU:1 >= 3
+	;Vソース3以上
+	PRINTFORM 와 실전 콘돔착용 섹스에 흥미를 느끼는
+ELSE
+	PRINTFORM 와 항문섹스에 흥미를 느끼는
+ENDIF
+
+IF BENKI_MENU:6 >= 3
+	PRINTW 모습이 담겨져 있었다…
+ELSE
+	PRINTW 모습이 있었다…
+ENDIF
+
+;最低一匹
+SIF PLAY < 1
+	PLAY = 1
+
+A = ARG:0
+TARGET = ARG:0
+CALL BENKI_KOUJO
+
+IF BENKI_MENU:6 >= 3
+	
+	;清算
+	PRINTFORM %조사선택(SAVESTR:(ARG:0), "는")% {PLAY}
+	IF FLAG:62 == 7
+		;獣姦配信
+		PRINTFORML 마리의 대형견의 성처리를 한 모양이다. 
+	ELSEIF FLAG:62 == 8
+		;娼婦購入配信
+		PRINTFORML 명의 창녀를 사서 안은 모양이다. 
+	ELSEIF FLAG:62 == 11 || FLAG:62 == 12
+		;拡張配信・自慰配信
+		PRINTFORML 회 자위한 모양이다. 
+	ELSE
+		PRINTFORM 몇 명의
+		CALL BENKI_PLAYER_NAME
+		PRINTFORML 와 섹스한 모양이다. 
+	ENDIF
+	
+	
+	;処理数に応じて噂が広がる
+	
+	PRINTFORM %SAVESTR:(ARG:0)%의 치태가 담긴 수정구는 
+	
+	IF PLAY > 25
+		PRINTFORM 공공연하게 
+	ELSE
+		PRINTFORM 뒤에서 
+	ENDIF
+	
+	IF PLAY > 15
+		PRINTFORM 대량으로 
+	ELSE
+		PRINTFORM 소량이 
+	ENDIF
+	
+	IF PLAY > 10
+		PRINTFORM 복제되어 
+	ELSE
+		PRINTFORM 거래되어 
+	ENDIF
+	
+	PRINTFORM 유통되어、%SAVESTR:(ARG:0)%의 소문은 
+	
+	IF PLAY > 30
+		PRINTFORM 고향
+	ELSEIF PLAY > 25
+		PRINTFORM 던젼 밖
+	ELSEIF PLAY > 20
+		PRINTFORM 던젼의 주민
+	ELSEIF PLAY > 15
+		PRINTFORM 당신의 직속병
+	ELSEIF PLAY > 10
+		PRINTFORM 당신의 측근
+	ELSE
+		PRINTFORM 당신의 귀에 소문이 들릴 때
+	ENDIF
+	
+	PRINTFORML 까지 퍼졌다. 
+	
+	PRINTFORML 쾌C의 구슬+{PLAY*10}
+	PRINTFORML 욕정의 구슬+{PLAY*10}
+	PRINTFORML 치정의 구슬+{PLAY*5}
+	JUEL:(ARG:0):0 += PLAY*10
+	JUEL:(ARG:0):5 += PLAY*10
+	JUEL:(ARG:0):8 += PLAY*5
+	
+	IF FLAG:62 == 7
+		;獣姦配信
+		PRINTFORML 수간경험+{PLAY}
+		EXP:(ARG:0):수간경험 += PLAY
+	ENDIF
+	
+	IF FLAG:62 == 8
+		;娼婦購入配信
+		PRINTFORML 레즈경험+{PLAY}
+		EXP:(ARG:0):레즈경험 += PLAY
+	ELSEIF FLAG:62 == 11 || FLAG:62 == 12
+		;애널拡張・自慰配信
+		PRINTFORML 자위경험+{PLAY}
+		EXP:(ARG:0):자위경험 += PLAY
+	ELSE
+		PRINTFORML 성교경험+{PLAY}
+		PRINTFORML 정액경험+{PLAY}
+		EXP:(ARG:0):성교경험 += PLAY
+		EXP:(ARG:0):정액경험 += PLAY
+	ENDIF
+	
+	IF FLAG:62 == 11
+		;拡張配信
+		PRINTFORML Ａ확장경험+{PLAY}
+		EXP:(ARG:0):Ａ확장경험 += PLAY
+	ENDIF
+	
+	IF BENKI_MENU:1 >= 3
+		;Vソース3以上
+		PRINTFORML 쾌V의 구슬+{PLAY*10}
+		PRINTFORML V경험+{PLAY}
+		JUEL:(ARG:0):1 += PLAY*10
+		EXP:(ARG:0):Ｖ경험 += PLAY
+	ENDIF
+	IF BENKI_MENU:2 >= 3
+		;Aソース3以上
+		PRINTFORML 쾌A의 구슬+{PLAY*10}
+		PRINTFORML A경험+{PLAY}
+		JUEL:(ARG:0):2 += PLAY*10
+		EXP:(ARG:0):Ａ경험 += PLAY
+	ENDIF
+	
+	PRINTFORML 피사경험+{PLAY}
+	EXP:(ARG:0):피사경험 += PLAY
+	
+	PRINTFORML 경험치+{PLAY}
+	EXP:(ARG:0):전투경험 += PLAY
+	
+ELSEIF BENKI_MENU:4 >= 3
+	;獣姦ソース3以上で獣姦分岐
+	;例）수간중독3以上
+	
+	;清算
+	PRINTFORML %SAVESTR:(ARG:0)%는{PLAY}마리의 짐승의 성처리를 실시하였다. 
+	
+	;処理数に応じて噂が広がる
+	IF PLAY > 30
+		PRINTFORML %SAVESTR:(ARG:0)%의 소문은 고향까지 퍼져、귀여운 얼굴로 그런 변태욕망이 있었는가라며 경멸당해、짐승과 섹스하는 동족보다 짐승의 자지를 좋아하는 변태녀로 알려졌다. 
+	ELSEIF PLAY > 25
+		PRINTFORML %SAVESTR:(ARG:0)%의 치태는 던젼 밖까지 소문이 퍼져, 동족보다 짐승을 좋아하는 짐승 이하의 변태녀라고 알려졌다. 
+	ELSEIF PLAY > 20
+		PRINTFORML %SAVESTR:(ARG:0)%는 던전의 거주자들 사이까지 소문이 돌아、짐승과 섹스하는 변태라고 알려졌다. 
+	ELSEIF PLAY > 15
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 직속병의 사이에서 짐승 이하로 떨어진 변태녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 10
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 측근들 사이에서 변태녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 5
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 특수 취향 사이에서 수간변소가 있다는 소문이 되었다. 
+	ELSE
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 누구에게도 관심받지 못했다. 
+	ENDIF
+	
+	;各種珠や경험
+	
+	PRINTFORML 쾌C의 구슬+{PLAY*10}
+	PRINTFORML 욕정의 구슬+{PLAY*10}
+	PRINTFORML 치정의 구슬+{PLAY*5}
+	JUEL:(ARG:0):0 += PLAY*10
+	JUEL:(ARG:0):5 += PLAY*10
+	JUEL:(ARG:0):8 += PLAY*5
+	
+	IF BENKI_MENU:1 >= 3
+		;Vソース3以上
+		PRINTFORML 쾌V의 구슬+{PLAY*10}
+		PRINTFORML V경험+{PLAY}
+		JUEL:(ARG:0):1 += PLAY*10
+		EXP:(ARG:0):0 += PLAY
+	ENDIF
+	IF BENKI_MENU:2 >= 3
+		;Aソース3以上
+		PRINTFORML 쾌A의 구슬+{PLAY*10}
+		PRINTFORML A경험+{PLAY}
+		JUEL:(ARG:0):2 += PLAY*10
+		EXP:(ARG:0):1 += PLAY
+	ENDIF
+	
+	PRINTFORML 수간경험+{PLAY}
+	PRINTFORML 경험치+{PLAY}
+	EXP:(ARG:0):56 += PLAY
+	EXP:(ARG:0):80 += PLAY
+	
+ELSEIF BENKI_MENU:0 >= 3
+	;奉仕ソース3以上で最下層民分岐
+	;例）봉사정신3以上
+	
+	PRINTFORM %조사선택(SAVESTR:(ARG:0), "는")% 
+	
+	IF BENKI_MENU:1 >= 3 && BENKI_MENU:2 >= 3
+		;A&Vソース3以上で両穴プレイ
+		PRINTFORM 쓸 수 있는 구멍은 전부 써서 
+	ELSEIF BENKI_MENU:1 >= 3
+		;Vソース3以上でVプレイ
+		PRINTFORM 질과 입으로 
+	ELSEIF BENKI_MENU:2 >= 3
+		;Aソース3以上でAプレイ
+		PRINTFORM 아날과 입으로 
+	ELSE
+		;そのほか
+		PRINTFORM 입과 손으로 
+	ENDIF
+	
+	CALL BENKI_PLAYER_NAME
+	PRINTFORM 의
+	
+	IF TALENT:(ARG:0):악취민감
+		;汚臭敏感ボーナス
+		PRINTFORM 불결하고 치구 투성이인 
+		PLAY += 1
+	ENDIF
+	
+	PRINTFORM 페니스를 부드럽게 감싸며，
+	
+	;노예の様子
+	
+	IF FLAG:63 == 1
+		;상식변경
+		PRINTFORML 평소대로의 얼굴에 미소를 띄우며 성처리를 계속하고 있었다……
+	ELSEIF TALENT:(ARG:0):붕괴
+		;붕괴
+		PRINTFORML 부서진 것 같은 웃음을 짓고 있었다……
+	ELSEIF EXP:(ARG:0):봉사쾌락경험 > 100
+		;奉仕쾌楽경험100超
+		CALL BENKI_PLAYER_NAME
+		PRINTFORM 의 발기를 격려하면서 부드럽게 미소 짓고 있었다……
+	ELSEIF EXP:(ARG:0):봉사쾌락경험 > 50
+		;奉仕쾌楽경험50超
+		CALL BENKI_PLAYER_NAME
+		PRINTFORM 에게 부드럽게 미소 짓고 있었다……
+	ELSE
+		PRINTFORML 기분이 나쁜듯했다……
+	ENDIF
+	
+	;清算
+	PRINTFORM %SAVESTR:(ARG:0)%는{PLAY}명의
+	CALL BENKI_PLAYER_NAME
+	PRINTFORM 의 성처리를 실시했다. 
+	
+	;処理数に応じて噂が広がる
+	IF PLAY > 30
+		PRINTFORML %SAVESTR:(ARG:0)%의 소문은 고향에까지 퍼져, 나라도 안아줄 것 같다는 더러운 욕망의 눈으로 보여져, 어떤 더러운 것이라도 차별 없이 받아들여 성적인 봉사 해 주는 청아한 성녀라고 알려지게 되었다. 
+	ELSEIF PLAY > 25
+		PRINTFORML %SAVESTR:(ARG:0)%의 치태는 던젼 밖까지 아려져, 어떤 더러운 것이라도 차별 없이 성을 베푸는 성녀라고 알려졌다. 
+	ELSEIF PLAY > 20
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 던전의 주민들 사이에서 소문이 나, 어떤 더러운 것이라도 차별 없이 안아주는 성녀라고 알려졌다. 
+	ELSEIF PLAY > 15
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 직속병 사이에서 어떤 더러운 것이라도 안아주는 성녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 10
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 측근 사이에서 청아한 성녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 5
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 괴짜들 사이에서 봉사변소가 있다는 소문이 되었다. 
+	ELSE
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 누구에게도 관심받지 못했다. 
+	ENDIF
+	
+	PRINTFORML 쾌C의 구슬+{PLAY*10}
+	PRINTFORML 욕정의 구슬+{PLAY*10}
+	PRINTFORML 치정의 구슬+{PLAY*5}
+	JUEL:(ARG:0):0 += PLAY*10
+	JUEL:(ARG:0):5 += PLAY*10
+	JUEL:(ARG:0):8 += PLAY*5
+	
+	IF BENKI_MENU:1 >= 3
+		;Vソース3以上
+		PRINTFORML 쾌V의 구슬+{PLAY*10}
+		PRINTFORML V경험+{PLAY}
+		JUEL:(ARG:0):1 += PLAY*10
+		EXP:(ARG:0):0 += PLAY
+	ENDIF
+	IF BENKI_MENU:2 >= 3
+		;Aソース3以上
+		PRINTFORML 쾌A의 구슬+{PLAY*10}
+		PRINTFORML A경험+{PLAY}
+		JUEL:(ARG:0):2 += PLAY*10
+		EXP:(ARG:0):1 += PLAY
+	ENDIF
+	
+	PRINTFORML 성교경험+{PLAY}
+	PRINTFORML 정액경험+{PLAY}
+	PRINTFORML 경험치+{PLAY}
+	EXP:(ARG:0):5 += PLAY
+	EXP:(ARG:0):20 += PLAY
+	EXP:(ARG:0):80 += PLAY
+	
+ELSEIF BENKI_MENU:3 >= 3
+	;同性愛ソース3以上でレズ便器分岐
+	;例）レズ中毒3以上
+	
+	;후타나리
+	SIF TALENT:(ARG:0):후타나리
+		PRINTFORM 후타나리인
+	
+	PRINTFORM %조사선택(SAVESTR:(ARG:0), "는")% 
+	
+	IF TALENT:(ARG:0):후타나리 && TALENT:(ARG:0):로리콘
+		;ふたなりロリコンボーナス
+		PRINTFORM 고환이 텅 빌때까지 어린
+		CALL BENKI_PLAYER_NAME
+		PRINTFORM 에게 허리를 부딪히며、
+		PLAY += 6
+	ELSEIF TALENT:(ARG:0):후타나리
+		;ふたなりボーナス
+		PRINTFORM 고환이 텅 빌 때까지 정액을 쥐어 짜내、
+		PLAY += 3
+	ELSEIF TALENT:(ARG:0):로리콘
+		;ロリコンボーナス
+		PRINTFORM 어린
+		CALL BENKI_PLAYER_NAME
+		PRINTFORM 에게 유혹되어、
+		PLAY += 3
+	ELSE
+		;そのほか
+		CALL BENKI_PLAYER_NAME
+		PRINTFORM 들에게 유혹되어、
+	ENDIF
+	
+	;노예の様子
+	IF FLAG:63 == 1
+		;상식변경
+		PRINTFORML 평소대로의 얼굴에 미소를 띄우며 성처리를 계속하고 있었다……
+	ELSEIF TALENT:(ARG:0):붕괴
+		;붕괴
+		PRINTFORML 부서진 것 같은 웃음을 짓고 있었다……
+	ELSEIF EXP:(ARG:0):레즈경험 > 1000
+		;レズ경험1000超
+		PRINTFORML 기절 할 정도로 잔뜩 갈 정도로 하고 있었다……
+	ELSEIF EXP:(ARG:0):레즈경험 > 500
+		;レズ경험500超
+		PRINTFORML 즐거운듯 음마들과 몸을 얽히고 있었다……
+	ELSE
+		PRINTFORML 기분이 나쁜 듯 있었다……
+	ENDIF
+	
+	;清算
+	PRINTFORM %SAVESTR:(ARG:0)%는{PLAY}명의
+	CALL BENKI_PLAYER_NAME
+	PRINTFORM 의 성처리를 실시했다. 
+	
+	;処理数に応じて噂が広がる
+	IF PLAY > 30
+		PRINTFORML %SAVESTR:(ARG:0)%의 소문은 고향까지 퍼져, 친구인 여자애들에게 그런 눈으로 보여졌던 건가 하며 경멸당해, 여용사를 강간하고 싶어 참을 수 없는 변태 레즈녀라고 알려졌다. 
+	ELSEIF PLAY > 25
+		PRINTFORML %SAVESTR:(ARG:0)%의 치태는 던전 밖까지 알려져, 여용사를 기다리고 있는 변태 레즈녀라고 알려졌다. 
+	ELSEIF PLAY > 20
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 던전의 주민 사이에서 소문이 나, 여자를 강간하고 싶어 참을 수 없는 변태 레즈녀라고 알려졌다. 
+	ELSEIF PLAY > 15
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 용사의 직속병 사이에서 여자라면 누구라도 안는 변태 레즈녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 10
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 측근 사이에서 변태 레즈녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 5
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 괴짜들 사이에서 레즈변소가 있다는 소문이 되었다.. 
+	ELSE
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 누구에게도 관심받지 못했다. 
+	ENDIF
+	
+	PRINTFORML 쾌C의 구슬+{PLAY*10}
+	PRINTFORML 욕정의 구슬+{PLAY*10}
+	PRINTFORML 치정의 구슬+{PLAY*5}
+	JUEL:(ARG:0):0 += PLAY*10
+	JUEL:(ARG:0):5 += PLAY*10
+	JUEL:(ARG:0):8 += PLAY*5
+	
+	IF TALENT:(ARG:0):후타나리
+		;ふたなりボーナス
+		PRINTFORML 사정경험+{PLAY}
+		EXP:(ARG:0):3 += PLAY
+	ENDIF
+	
+	PRINTFORML 레즈경험+{PLAY}
+	PRINTFORML 경험치+{PLAY}
+	EXP:(ARG:0):40 += PLAY
+	EXP:(ARG:0):80 += PLAY
+	
+	
+ELSE
+	;さらにAとVで分岐
+	
+	PRINTFORM %조사선택(SAVESTR:(ARG:0), "는")% 
+	
+	;겁쟁이・비관적
+	SIF TALENT:(ARG:0):비관적 || TALENT:(ARG:0):겁쟁이
+		PRINTFORM 처음에는 떨고 있었지만, 이윽고 
+	
+	;정조관부실
+	SIF TALENT:(ARG:0):정조관부실
+		PRINTFORM 금방 가랑이를 열고 
+	
+	
+	;노예の様子
+	IF FLAG:63 == 1
+		;상식변경
+		PRINTFORML 평소대로의 얼굴로 잡담도 섞으면서 성처리를 계속하고 있었다……
+	ELSEIF TALENT:(ARG:0):붕괴
+		;붕괴
+		PRINTFORML 부서진 것 같은 웃음을 짓고 있었다……
+	ELSEIF TALENT:(ARG:0):음란
+		;음란
+		PRINTFORML 녹아내린 얼굴로 짐승과도 같은 교성을 질렀다……
+	ELSEIF TALENT:(ARG:0):애정
+		;애정
+		PRINTFORML 젖은 눈으로 당신의 이름을 반복했다……
+	;精液経験で分岐
+	ELSEIF EXP:(ARG:0):20 > 1000
+		PRINTFORML 비굴한 미소로 정액을 조르고 있었다……
+	ELSEIF EXP:(ARG:0):20 > 500
+		PRINTFORML 비굴한 얼굴로 음어를 중얼 거리고 있었다……
+	ELSEIF EXP:(ARG:0):20 > 250
+		PRINTFORML 어색한 미소로 V사인을 하면서， 용서를 구걸하고 있었다……
+	ELSEIF EXP:(ARG:0):20 > 100
+		PRINTFORML 어색한 미소로 피스싸인을 강요 당하고 있었다……
+	ELSEIF EXP:(ARG:0):20 > 50
+		PRINTFORML 사죄의 말을 반복 하고 있었다……
+	ELSE
+		PRINTFORML 죽은 눈으로 어딘가 먼 곳을 보고 있었다……
+	ENDIF
+	
+	;清算
+	PRINTFORM %SAVESTR:(ARG:0)%는{PLAY}명의
+	CALL BENKI_PLAYER_NAME
+	PRINTFORM 의 성처리를 실시했다. 
+	
+	;処理数に応じて噂が広がる
+	IF PLAY > 30
+		PRINTFORML %SAVESTR:(ARG:0)%의 소문은 고향에 까지 퍼져、그 %조사선택(SAVESTR:(ARG:0), "가")% 마족에게 알랑거리는 진정한 변태가 됐다고 경멸당해, 더러운 치구를 사랑하는 변태공중변소녀라고 알려졌다. 
+	ELSEIF PLAY > 25
+		PRINTFORML %SAVESTR:(ARG:0)%의 치태는 던젼 밖까지 알려져, 더러운 치구를 사랑하는 변태 변기녀라고 알려졌다. 
+	ELSEIF PLAY > 20
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 던젼의 주민들 사이에서 소문이 되어, 매일 밤 무료로 가랑이를 여는 공중 변기녀라고 알려졌다. 
+	ELSEIF PLAY > 15
+		PRINTFORML %SAVESTR:(ARG:0)%는 마왕의 직속 병사들 사이에서 변태공중변소녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 10
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 측근 사이에서 누구에게나 가랑이를 여는 변기녀가 있다는 소문이 되었다. 
+	ELSEIF PLAY > 5
+		PRINTFORML %SAVESTR:(ARG:0)%는 호사가 사이에서 변녀라고 소문이 났다
+	ELSE
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 누구에게도 관심받지 못했다. 
+	ENDIF
+	
+	PRINTFORML 쾌C의 구슬+{PLAY*10}
+	PRINTFORML 욕정의 구슬+{PLAY*10}
+	PRINTFORML 치정의 구슬+{PLAY*5}
+	JUEL:(ARG:0):0 += PLAY*10
+	JUEL:(ARG:0):5 += PLAY*10
+	JUEL:(ARG:0):8 += PLAY*5
+	
+	IF BENKI_MENU:1 >= 3
+		;Vソース3以上
+		PRINTFORML 쾌V의 구슬+{PLAY*10}
+		PRINTFORML V경험+{PLAY}
+		JUEL:(ARG:0):1 += PLAY*10
+		EXP:(ARG:0):0 += PLAY
+	ENDIF
+	IF BENKI_MENU:2 >= 3
+		;Aソース3以上
+		PRINTFORML 쾌A의 구슬+{PLAY*10}
+		PRINTFORML A경험+{PLAY}
+		JUEL:(ARG:0):2 += PLAY*10
+		EXP:(ARG:0):1 += PLAY
+	ENDIF
+	
+	IF BENKI_MENU:1 >= 3 || BENKI_MENU:2 >= 3
+		;AかVどちらかを満たせば性交경험
+		PRINTFORML 성교경험+{PLAY}
+		EXP:(ARG:0):5 += PLAY
+	ENDIF
+	
+	PRINTFORML 정액경험+{PLAY}
+	PRINTFORML 경험치+{PLAY}
+	
+	EXP:(ARG:0):20 += PLAY
+	EXP:(ARG:0):80 += PLAY
+	
+ENDIF
+
+DRAWLINE
+PRINTW  
+
+TARGET = TARGET_POOL
+
+RETURN 0
+
+;----------------------------------------------
+@SELECT_BENKI_MENU(ARG, ARGS)
+#DIM ANSWER
+#DIM DICE
+;----------------------------------------------
+;ARG  参照キャラ
+;ARGS 参照内容
+;肉便器のアクションを振り分ける
+;ANSWER = 調教コマンドと同じ
+
+;デフォは愛撫
+ANSWER = 0
+DICE = 2
+
+IF ARGS == "전투"
+	;上書きする可能性のある後ろの判定ほど低確率に
+	
+	;技巧2以上で手淫分岐
+	IF ABL:(ARG):12 >= 2 && RAND:DICE == 0
+		ANSWER = 30
+		DICE += 1
+	ENDIF
+	
+	;奉仕技術2以上でフェラ分岐
+	IF ABL:(ARG):13 >= 2 && RAND:DICE == 0
+		ANSWER = 31
+		DICE += 1
+	ENDIF
+	
+	;露出癖2以上で自慰分岐
+	IF ABL:(ARG):17 >= 2 && RAND:DICE == 0
+		ANSWER = 3
+		DICE += 1
+	ENDIF
+	
+	;奉仕精神2以上でアナル奉仕分岐
+	IF ABL:(ARG):16 >= 2 && RAND:DICE == 0
+		ANSWER = 37
+		DICE += 1
+	ENDIF
+	
+	;V感覚2以上で正常位分岐
+	CALL V_ABLE,ARG
+	IF ABL:(ARG):2 >= 2 && RESULT == 1 && RAND:DICE == 0
+		ANSWER = 20
+		DICE += 1
+	ENDIF
+	
+	;V感覚2以上で後背位分岐
+	CALL V_ABLE,ARG
+	IF ABL:(ARG):2 >= 2 && RESULT == 1 && RAND:DICE == 0
+		ANSWER = 21
+		DICE += 1
+	ENDIF
+	
+	;A感覚2以上で正常位アナル分岐
+	IF ABL:(ARG):3 >= 2 && RAND:DICE == 0
+		ANSWER = 26
+		DICE += 1
+	ENDIF
+	
+	;A感覚2以上で後背位アナル分岐
+	IF ABL:(ARG):3 >= 2 && RAND:DICE == 0
+		ANSWER = 27
+		DICE += 1
+	ENDIF
+	
+ENDIF
+
+RETURN ANSWER
+
+;----------------------------------------------
+@NAME_BENKI_MENU(ARG)
+;----------------------------------------------
+;ARG  参照コマンド
+;基本的に調教コマンドと同じ
+
+SELECTCASE ARG
+CASE 0
+	PRINT 애무
+CASE 1
+	PRINT 커널링구스
+CASE 2
+	PRINT 애널애무
+CASE 3
+	PRINT 자위
+CASE 4
+	PRINT 펠라한다
+CASE 5
+	PRINT 가슴애무
+CASE 6
+	PRINT 키스
+CASE 7
+	PRINT 조개벌리기
+CASE 8
+	PRINT 손가락넣기
+CASE 9
+	PRINT 애널핥기
+CASE 10
+	PRINT 진동하는보석
+CASE 11
+	PRINT 꿀단지웜
+CASE 20
+	PRINT 정상위
+CASE 21
+	PRINT 후배위
+CASE 22
+	PRINT 대면좌위
+CASE 23
+	PRINT 배면좌위
+CASE 26
+	PRINT 정상위애널
+CASE 27
+	PRINT 후배위애널
+CASE 28
+	PRINT 대면좌위애널
+CASE 29
+	PRINT 배면좌위애널
+CASE 30
+	PRINT 수음
+CASE 31
+	PRINT 펠라치오
+CASE 32
+	PRINT 파이즈리
+CASE 33
+	PRINT 가랑이비비기
+CASE 34
+	PRINT 기승위
+CASE 36
+	PRINT 기승위애널
+CASE 37
+	PRINT 애널봉사
+CASE 38
+	PRINT 풋잡
+ENDSELECT
+
+RETURN 0
+
+;----------------------------------------------
+@GET_EXP_BENKI_MENU(ARG, ARG:1)
+#DIM PLAY
+#DIM GET_PALAM,15
+;----------------------------------------------
+;ARG:0  対象キャラ
+;ARG:1  参照コマンド
+;基本的に調教コマンドと同じ
+
+SIF TALENT:(ARG:0):육변기 == 0
+	RETURN 0
+
+SIF TALENT:(ARG:0):281 == 0
+	RETURN 0
+
+GET_PALAM:0 = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+PLAY = 10
+
+SELECTCASE ARG:1
+CASE 0
+	;애무
+	GET_PALAM:7 += PLAY / 10
+CASE 1
+	;커널링구스
+	GET_PALAM:0 += PLAY
+CASE 2
+	;애널애무
+	GET_PALAM:2 += PLAY / 2
+CASE 3
+	;자위
+	GET_PALAM:7 += PLAY / 5
+	GET_PALAM:0 += PLAY
+	PRINTFORMW 자위경험+{PLAY/10}
+	EXP:(ARG):10 += PLAY / 10
+CASE 4
+	;펠라한다
+CASE 5
+	;가슴애무
+CASE 6
+	;키스
+CASE 7
+	;조개벌리기
+	GET_PALAM:7 += PLAY / 8
+	GET_PALAM:0 += PLAY
+	PRINTFORMW 자위경험+{PLAY/10}
+	EXP:(ARG):10 += PLAY / 10
+CASE 8
+	;손가락넣기
+	GET_PALAM:1 += PLAY / 2
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 9
+	;애널핥기
+CASE 10
+	;진동하는보석
+	GET_PALAM:0 += PLAY
+CASE 11
+	;꿀단지웜
+	GET_PALAM:1 += PLAY
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 20
+	;정상위
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:1 += PLAY
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 21
+	;후배위
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:1 += PLAY
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 22
+	;대면좌위
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:1 += PLAY
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 23
+	;배면좌위
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:1 += PLAY
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 26
+	;정상위애널
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:2 += PLAY
+	PRINTFORMW Ａ경험+{PLAY/10}
+	EXP:(ARG):1 += PLAY / 10
+CASE 27
+	;후배위애널
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:2 += PLAY
+	PRINTFORMW Ａ경험+{PLAY/10}
+	EXP:(ARG):1 += PLAY / 10
+CASE 28
+	;대면좌위애널
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:2 += PLAY
+	PRINTFORMW Ａ경험+{PLAY/10}
+	EXP:(ARG):1 += PLAY / 10
+CASE 29
+	;배면좌위애널
+	GET_PALAM:7 += PLAY / 3
+	GET_PALAM:2 += PLAY
+	PRINTFORMW Ａ경험+{PLAY/10}
+	EXP:(ARG):1 += PLAY / 10
+CASE 30
+	;수음
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:6 += PLAY / 3
+CASE 31
+	;フェラ
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:6 += PLAY / 3
+	PRINTFORMW 펠라경험+{PLAY/10}
+	EXP:(ARG):22 += PLAY / 10
+CASE 32
+	;파이즈리
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:6 += PLAY / 3
+CASE 33
+	;가랑이비비기
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:0 += PLAY
+	GET_PALAM:6 += PLAY / 3
+CASE 34
+	;기승위
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:1 += PLAY
+	GET_PALAM:6 += PLAY / 3
+	PRINTFORMW Ｖ경험+{PLAY/10}
+	EXP:(ARG):0 += PLAY / 10
+CASE 36
+	;기승위애널
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:2 += PLAY
+	GET_PALAM:6 += PLAY / 3
+	PRINTFORMW Ａ경험+{PLAY/10}
+	EXP:(ARG):1 += PLAY / 10
+CASE 37
+	;애널봉사
+	GET_PALAM:7 += PLAY / 2
+	GET_PALAM:6 += PLAY * 2
+CASE 38
+	;풋잡
+	GET_PALAM:7 += PLAY / 2
+ENDSELECT
+
+FOR LOCAL,0,15
+	SIF GET_PALAM:LOCAL
+		PRINTFORML %PALAMNAME:LOCAL%+{GET_PALAM:LOCAL}
+	JUEL:(ARG):LOCAL += GET_PALAM:LOCAL
+NEXT
+
+RETURN 0
+
+@BENKI_PLAYER_NAME
+
+;誰と？
+IF FLAG:64 == 0
+	PRINT 던전의 웅덩이에 살아가는 악취나는 부정한 권속
+ELSEIF FLAG:64 == 1
+	PRINT 창부
+ELSEIF FLAG:64 == 2
+	PRINT 대형견
+ELSEIF FLAG:64 == 3
+	PRINT 마족 남자
+ELSEIF FLAG:64 == 4
+	PRINT 다크엘프 소년
+ELSEIF FLAG:64 == 5
+	PRINT 기름기 도는 오크
+ELSEIF FLAG:64 == 6
+	PRINT 중년 오크
+ELSEIF FLAG:64 == 7
+	PRINT 노예 소녀
+ELSEIF FLAG:64 == 8
+	PRINT 거지
+ELSEIF FLAG:64 == 9
+	PRINT 여자 음마
+ENDIF
+
+RETURN 0
+
+

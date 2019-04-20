@@ -1,0 +1,254 @@
+﻿;--------------------------------------------------
+@ARCANA_BATTLE
+#DIM TURN
+#DIM ATKER
+#DIM DEFER
+;--------------------------------------------------
+;아르카나 나이트와 원 용자의 전투
+;A・ATKERが元勇者
+;B・DEFERがアルカナナイト
+
+IF FLAG:5 & 32
+	PRINTW *1:1 전투다! *
+	DRAWLINE
+ENDIF
+
+;対戦者代入
+ATKER = A
+DEFER = B
+
+;탄 보충
+CFLAG:ATKER:571 = 15
+CFLAG:DEFER:571 = 15
+
+;선제
+IF TALENT:ATKER:252 == 1
+	CALL DUEL_ATTACK, ATKER, 2, DEFER, 3
+ENDIF
+
+;先制アルカナ
+IF TALENT:DEFER:252 == 1
+	CALL DUEL_ATTACK, DEFER, 2, ATKER, 2
+ENDIF
+
+FOR TURN, 0, 20
+	IF TURN > 15
+		SIF FLAG:5 & 32
+			PRINTFORML %SAVESTR:ATKER%는 도망갔다………
+		BASE:ATKER:1 -= RAND:30
+		BREAK
+	ENDIF
+	
+	IF FLAG:5 & 32
+		PRINTFORML %SAVESTR:ATKER%
+		PRINT HP
+		BARL BASE:ATKER:0,MAXBASE:ATKER:0,50
+		PRINT 기력
+		BARL BASE:ATKER:1,MAXBASE:ATKER:1,50
+		PRINTFORML 공격{CFLAG:ATKER:11} 방어{CFLAG:ATKER:12}
+		
+		PRINTW VS
+		
+		PRINTFORML %SAVESTR:B%
+		PRINT HP
+		BARL BASE:DEFER:0,MAXBASE:DEFER:0,50
+		PRINT 기력
+		BARL BASE:DEFER:1,MAXBASE:DEFER:1,50
+		PRINTFORML 공격{CFLAG:DEFER:11} 방어{CFLAG:DEFER:12}
+		WAIT
+	ENDIF
+	
+	;선제（旧処理の場所）
+	
+	SIF FLAG:5 & 32
+		DRAWLINE
+	
+	;선공 후공 결정
+	A = ATKER
+	B = DEFER
+	X = RAND:6
+	Y = RAND:6
+	CALL SPEED_PLUS3
+	
+	IF X >= Y
+		;노예先攻
+		CALL DUEL_ATTACK, ATKER, 0, DEFER, 3
+		;アルカナ後攻
+		SIF RESULT == 0
+			CALL DUEL_ATTACK, DEFER, 1, ATKER, 2
+		IF RESULT == 999
+			IF FLAG:5 & 32
+				PRINTL 전투가 중단되었다.
+				BREAK
+			ENDIF
+		ENDIF
+	ELSE
+		;アルカナ先攻
+		CALL DUEL_ATTACK, DEFER, 0, ATKER, 2
+		;노예後攻
+		SIF RESULT == 0
+			CALL DUEL_ATTACK, ATKER, 1, DEFER, 3
+		IF RESULT == 999
+			IF FLAG:5 & 32
+				PRINTL 전투가 중단되었다.
+				BREAK
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	A = ATKER
+	B = DEFER
+	
+	CALL DEATH_CHECK4
+	IF RESULT == 2
+		BREAK
+	ELSEIF RESULT == 1
+		BREAK
+	ENDIF	
+	BASE:ATKER:1 -= RAND:20
+	BASE:DEFER:1 -= RAND:20
+NEXT
+
+SIF CFLAG:DEFER:1 == 2
+	PRINTFORML %SAVESTR:ATKER%는 아르카나 나이트에게 패배했다………
+
+;장비의 회복
+CALL WEAPON_RESTORE,ATKER
+CALL WEAPON_RESTORE,DEFER
+
+SIF CFLAG:DEFER:1 == 0
+	RETURN 2
+RETURN 0
+
+;------------------------------
+@SPEED_PLUS3
+;------------------------------
+;속도 수정
+
+;기습
+SIF TALENT:A:243 == 1
+	X += 1
+SIF TALENT:B:243 == 1
+	Y += 1
+;악마날개
+SIF TALENT:A:245 == 1
+	X += 1
+SIF TALENT:B:245 == 1
+	Y += 1
+;걸음빠름
+SIF TALENT:A:258 == 1
+	X += 1
+SIF TALENT:B:258 == 1
+	Y += 1
+;ホビットの加速ボーナス
+SIF TALENT:A:314 == 10
+	X += 1
+SIF TALENT:B:314 == 10
+	Y += 1
+;ドワーフの減速
+SIF TALENT:A:314 == 11
+	X -= 1
+SIF TALENT:B:314 == 11
+	Y -= 1
+
+
+;장비 효과
+W:8 = 3
+CALL EQUIP_CHECK
+X += RESULT
+
+;장비 효과
+W:8 = 12
+CALL EQUIP_CHECK
+X -= RESULT
+
+T:1 = A
+A = B
+;장비 효과
+W:8 = 3
+CALL EQUIP_CHECK
+Y += RESULT
+W:8 = 12
+CALL EQUIP_CHECK
+Y -= RESULT
+B = A
+A = T:1
+
+RETURN 0
+
+;--------------------------------------
+@DEATH_CHECK4
+;--------------------------------------
+
+;아르카나 나이트 사망판정
+IF BASE:B:0 <= 0
+	PRINTFORML %조사선택(SAVESTR:B, "는")% 분전에도 불구하고 쓰러졌다.
+	CFLAG:B:1 = 0
+	RETURN 2
+ELSEIF BASE:B:0 <= 300
+	PRINTFORML %조사선택(SAVESTR:B, "는")% 생명의 위기를 느끼고 항복하여 목숨을 구걸했다.
+	CFLAG:B:1 = 0
+	RETURN 2
+ELSEIF BASE:B:1 <= 0
+	PRINTFORML %조사선택(SAVESTR:B, "는")% 전의를 잃은 채 무기를 땅에 떨어뜨리곤 항복하였다.
+	CFLAG:B:1 = 0
+	RETURN 2
+ENDIF
+
+;마왕측의 생존 판정
+
+IF BASE:A:0 <= 0 && (FLAG:5 & 128)
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 아르카나 나이트 앞에 무릎을 꿇고 말았다.
+	PRINTFORMW %조사선택(SAVESTR:B, "는")% 그녀를 들어 올려 광왕의 성으로 연행했다.
+	CFLAG:A:1 = 9
+	RETURN 1
+ELSEIF BASE:A:0 <= 300 && (FLAG:5 & 128)
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 생명의 위기를 느끼곤 항복하여 목숨을 구걸했다.
+	PRINTFORMW %조사선택(SAVESTR:B, "는")% 그녀를 체포하여 광왕의 성으로 연행했다.
+	CFLAG:A:1 = 9
+	RETURN 1
+ELSEIF BASE:A:1 <= 0 && (FLAG:5 & 128)
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 전의를 잃어 무기를 버리고 항복했다.
+	PRINTFORMW %조사선택(SAVESTR:B, "는")% 그녀를 체포하여 광왕의 성으로 연행했다.
+	CFLAG:A:1 = 9
+	RETURN 1
+ENDIF
+
+IF BASE:A:0 <= 0
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 아르카나 나이트 앞에서 쓰러지고 말았다.
+	CFLAG:A:1 = 0
+	RETURN 1
+ELSEIF BASE:A:0 <= 300
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 생명의 위기를 느끼곤 항복하여 목숨을 구걸했다.
+	PRINTFORMW %조사선택(SAVESTR:B, "는")% 타락해 버린 그녀를 불쌍히 여겨 성 밖으로 되돌려 보냈다.
+	CFLAG:A:1 = 0
+	RETURN 1
+ELSEIF BASE:A:1 <= 0
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 전의를 잃어 무기를 버리고 항복했다.
+	PRINTFORMW %조사선택(SAVESTR:B, "는")% 타락해 버린 그녀를 불쌍히 여겨 성 밖으로 되돌려 보냈다.
+	CFLAG:A:1 = 0
+	RETURN 1
+ENDIF
+
+RETURN 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,312 @@
+﻿;eramaou追加コマンド
+
+;-------------------------------------------------
+;트롤
+;生きたオナホ要員 レベル80以上
+;-------------------------------------------------
+@COM206
+
+PRINTL 트롤
+
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;戦闘値の計算
+;-------------------------------------------------
+LOSEBASE:0 += CFLAG:0:9 * 3
+SIF BASE:0 <= 0
+	LOSEBASE:0 /= 4
+LOSEBASE:1 += CFLAG:0:9 * 20
+
+CALL ARENA_SLAVE_POINT
+
+;戦闘ポイントが低ければ追加ダメージ
+IF RESULT < (5 * CFLAG:0:9)
+	;気力が0なら追加ダメージ無し
+	IF BASE:1 <= 0
+		PRINTFORMW 트롤은 넘어진 채로 %SAVESTR:TARGET%의 가랑이에 곤봉을 문지르며 천하게 웃고 있다
+	ELSE
+		;追加ダメージ
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 트롤의 강렬한 일격을 받고 날아가 버렸다
+		LOSEBASE:0 += CFLAG:0:9 * 2
+		LOSEBASE:1 += CFLAG:0:9 * 2
+		IF BASE:1 < LOSEBASE:1
+			PRINTFORMW 그리고 %조사선택(SAVESTR:TARGET, "는")% 축 늘어진 채 일어날 기색이 없었다
+			PRINTW ＜노예함락＞
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 트롤의 일격을 막아내는게 고작이다
+ENDIF
+
+;コロシアム収入
+;TFLAG:402 += (LOSEBASE:0 * 5) + RAND:RESULT
+
+TFLAG:400 = 206
+;戦闘後の処理
+CALL COM_AFTER_ARENA
+SIF RESULT == 0
+	RETURN 1
+
+;-------------------------------------------------
+;各種コマンドへ
+;-------------------------------------------------
+$INPUT_LOOP_0
+PRINTL 어디를 능욕합니까？
+PRINTL [0] - 입
+PRINTL [1] - 가슴
+SIF TALENT:122 == 0
+	PRINTL [2] - 질
+PRINTL [3] - 애널
+PRINTL [999] 능욕하지 않는다
+
+INPUT
+
+IF RESULT == 0
+	PRINTL ＜트롤・펠라치오＞
+	SELECTCOM = 31
+	CALL COM31
+	;フェラチオ実行不可時
+	SIF RESULT == 0
+		RETURN 0
+	;コロシアム収入
+	TFLAG:402 += (LOSEBASE:0 * 5) + RAND:RESULT
+ELSEIF RESULT == 1
+	PRINTL ＜트롤・가슴애무＞
+	SELECTCOM = 5
+	CALL COM5
+	;コロシアム収入
+	TFLAG:402 += (LOSEBASE:0 * 5) + RAND:RESULT
+ELSEIF RESULT == 2
+	;対象がオトコなら戻る
+	SIF TALENT:122
+		RETURN 0
+	PRINTL ＜트롤・후배위＞
+	SELECTCOM = 21
+	CALL COM21
+	;処女を奪わせなかった場合
+	SIF RESULT == 0
+		RETURN 0
+	;コロシアム収入
+	TFLAG:402 += (LOSEBASE:0 * 5) + RAND:RESULT
+ELSEIF RESULT == 3
+	PRINTL ＜트롤・후배위애널＞
+	SELECTCOM = 27
+	CALL COM27
+	;コロシアム収入
+	TFLAG:402 += (LOSEBASE:0 * 5) + RAND:RESULT
+ELSEIF RESULT == 999
+	PRINTFORMW %NAME:MASTER%은 트롤을 물러가게 했다……
+ELSE
+	GOTO INPUT_LOOP_0
+ENDIF
+
+;-------------------------------------------------
+;사정チェック
+;獣姦コマンドの改編です。
+;-------------------------------------------------
+;拡張経験
+IF EXP:52 == 0 && SELECTCOM == 21
+	EXP:50 += 1
+	PRINTL 이상경험＋１
+ENDIF
+IF SELECTCOM == 21
+	EXP:52 += 1
+	PRINTL Ｖ확장경험＋1
+ENDIF
+IF EXP:53 == 0 && SELECTCOM == 27
+	EXP:50 += 1
+	PRINTL 이상경험＋１
+ENDIF
+IF SELECTCOM == 27
+	EXP:53 += 1
+	PRINTL Ａ확장경험＋1
+ENDIF
+
+
+SIF MAXBASE:MASTER:4 == 0
+	GOTO END_EJAC
+
+B = 0
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	B = 450
+ELSEIF ABL:12 == 1
+	B = 1000
+ELSEIF ABL:12 == 2
+	B = 1600
+ELSEIF ABL:12 == 3
+	B = 2200
+ELSEIF ABL:12 == 4
+	B = 2700
+ELSE
+	B = 3200
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES B , 0.30
+ELSEIF ABL:10 == 1
+	TIMES B , 0.50
+ELSEIF ABL:10 == 2
+	TIMES B , 0.70
+ELSEIF ABL:10 == 3
+	TIMES B , 1.00
+ELSEIF ABL:10 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES B , 1.00
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES B , 1.10
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES B , 1.20
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES B , 1.30
+ELSEIF PALAM:5 < PALAMLV:5
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;키스
+IF SELECTCOM == 6
+	B = 0
+;후배위
+ELSEIF SELECTCOM == 21
+	TIMES B , 1.00
+;후배위애널
+ELSEIF SELECTCOM == 27
+	TIMES B , 1.50
+;수음
+ELSEIF SELECTCOM == 30
+	TIMES B , 0.80
+;펠라치오
+ELSEIF SELECTCOM == 31
+	TIMES B , 1.20
+;기승위
+ELSEIF SELECTCOM == 34
+	TIMES B , 1.50
+ELSE
+	B = 0
+ENDIF
+
+BASE:MASTER:4 += B
+
+S = BASE:MASTER:4
+EJAC = MAXBASE:MASTER:4
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+IF E
+;사정している
+	TIMES SOURCE:4 , 3.00
+
+	;ABL:精液中毒をみる
+	IF ABL:32 == 0
+		SOURCE:7 = 0
+		TIMES SOURCE:5 , 2.00
+		TIMES SOURCE:13, 2.00
+	ELSEIF ABL:32 == 1
+		SOURCE:7 = 200
+		TIMES SOURCE:5 , 2.50
+		TIMES SOURCE:13, 1.60
+	ELSEIF ABL:32 == 2
+		SOURCE:7 = 500
+		TIMES SOURCE:5 , 3.00
+		TIMES SOURCE:13, 1.00
+	ELSEIF ABL:32 == 3
+		SOURCE:7 = 1200
+		TIMES SOURCE:5 , 4.50
+		TIMES SOURCE:13, 0.70
+	ELSEIF ABL:32 == 4
+		SOURCE:7 = 2500
+		TIMES SOURCE:5 , 6.00
+		TIMES SOURCE:13, 0.40
+	ELSE
+		SOURCE:7 = 5000
+		TIMES SOURCE:5 , 8.00
+		TIMES SOURCE:13, 0.10
+	ENDIF
+ENDIF
+
+;대량사정
+IF E == 2
+	EXP:20 += 3
+	PRINTL 몬스터 대량사정
+	PRINTL 정액경험＋３
+
+	BASE:MASTER:4 -= EJAC*2
+	SIF BASE:MASTER:4 >= EJAC
+		BASE:MASTER:4 = EJAC-1
+	;膣内사정フラグ（モンスター）
+	SIF SELECTCOM == 21 || SELECTCOM == 34
+		TFLAG:38 = 2
+	;フェラチオで사정フラグ
+	SIF SELECTCOM == 31
+		TFLAG:0 = 2
+	;セックスで사정フラグ
+	SIF SELECTCOM == 21 || SELECTCOM == 27
+		TFLAG:2 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:20 += 1
+	PRINTL 몬스터 사정
+	PRINTL 정액경험＋１
+
+	BASE:MASTER:4 -= EJAC
+	SIF BASE:MASTER:4 >= EJAC
+		BASE:MASTER:4 = EJAC-1
+	;膣内사정フラグ（モンスター）
+	SIF SELECTCOM == 21 || SELECTCOM == 34
+		TFLAG:38 = 1
+	;フェラチオで사정フラグ
+	SIF SELECTCOM == 31
+		TFLAG:0 = 1
+	;セックスで사정フラグ
+	SIF SELECTCOM == 21 || SELECTCOM == 27
+		TFLAG:2 = 1
+ENDIF
+
+$END_EJAC
+
+;-------------------------------------------------
+;汚れ
+;-------------------------------------------------
+SIF SELECTCOM == 21
+	STAIN:3 |= 2
+SIF SELECTCOM == 27
+	STAIN:4 |= 2
+SIF SELECTCOM == 30
+	STAIN:1 |= 2
+SIF SELECTCOM == 31
+	STAIN:0 |= 2
+SIF SELECTCOM == 37
+	STAIN:0 |= 8
+SIF SELECTCOM == 21 && E > 0
+	STAIN:3 |= 4
+SIF SELECTCOM == 27 && E > 0
+	STAIN:4 |= 4
+SIF SELECTCOM == 30 && E > 0
+	STAIN:1 |= 4
+SIF SELECTCOM == 31 && E > 0
+	STAIN:0 |= 4
+
+;コロシアムモンスターが사정フラグ
+TFLAG:15 = E
+
+RETURN 1
+;
+;
+;

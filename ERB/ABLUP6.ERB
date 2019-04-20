@@ -1,0 +1,242 @@
+﻿
+
+@ABLUP6
+DRAWLINE
+IF ABL:6 >= 5
+	PRINTW 이미 MAX입니다。
+	RETURN 0
+ENDIF
+
+;条件別にＯＫかダメかを記録する
+I = 0
+J = 0
+K = 0
+
+IF ABL:6 == 0
+	A = 100
+	B = 20
+	C = 100
+	D = 1
+	E = 1
+ELSEIF ABL:6 == 1
+	A = 1200
+	B = 100
+	C = 0
+	D = 1
+	E = 3
+ELSEIF ABL:6 == 2
+	A = 5000
+	B = 600
+	C = 0
+	D = 20
+	E = 6
+ELSEIF ABL:6 == 3
+	A = 10000
+	B = 2000
+	C = 0
+	D = 20
+	E = 10
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 2.00
+		TIMES B , 2.00
+		TIMES D , 2.00
+	ENDIF
+ELSEIF ABL:6 == 4
+	A = 30000
+	B = 8000
+	C = 0
+	D = 100
+	E = 20
+	;일선넘지않음
+	IF TALENT:27
+		TIMES A , 3.00
+		TIMES B , 3.00
+		TIMES D , 3.00
+	ENDIF
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+	TIMES B , 0.75
+	TIMES C , 0.75
+	TIMES D , 0.75
+ENDIF
+
+;従順が奉仕精神＋１レベルでないといけない
+PRINTS ABLNAME:0
+PRINTV ABL:6+1
+PRINTL LV이상、동시에
+IF ABL:0 < ABL:6+1
+	;従順が不足
+	I |= 4
+	J |= 4
+	K |= 4
+ENDIF
+
+;ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[망신]なら無視できる）
+IF ABL:6 == 3 && TALENT:86 == 0
+	PRINTS EXPNAME:50
+	PRINT 있고、동시에
+	IF EXP:50 == 0
+		;異常経験が不足
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+ELSEIF ABL:6 == 4 && TALENT:86 == 0
+	PRINTS EXPNAME:50
+	PRINT 2이상、동시에
+	IF EXP:50 < 2
+		;異常経験が不足
+		I |= 2
+		J |= 2
+		K |= 2
+	ENDIF
+ENDIF
+
+;屈服의 구슬で上げる
+SIF JUEL:6 < A
+	I |= 1
+;絶頂経験が必要な場合
+SIF EXP:2 < E
+	I |= 2
+;精液経験が必要な場合
+SIF EXP:20 < E
+	I |= 2
+
+PRINT [0] - 
+PRINTS PALAMNAME:6
+PRINT 의 구슬×
+PRINTV A
+IF E > 0
+	PRINT 、
+	PRINTS EXPNAME:2
+	PRINTV E
+	PRINT 이상
+	PRINT 、
+	PRINTS EXPNAME:20
+	PRINTV E
+	PRINT 이상
+ENDIF
+PRINT ……
+
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+
+IF B > 0
+	;恭順의 구슬で上げる
+	SIF JUEL:4 < B
+		J |= 1
+	;この場合奉仕快楽経験が必要なこと있고
+	SIF EXP:21 < D
+		J |= 2
+
+	PRINT [1] - 
+	PRINTS PALAMNAME:4
+	PRINT 의 구슬×
+	PRINTV B
+	IF D > 0
+		PRINT 、
+		PRINTS EXPNAME:21
+		PRINTV D
+		PRINT 이상
+	ENDIF
+	PRINT ……
+	
+	IF J == 0
+		PRINT ＯＫ
+	ELSE
+		SIF J & 1
+			PRINT 구슬 부족 
+		SIF J & 2
+			PRINT 경험 부족 
+		SIF J & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+ELSE
+	J = 256
+ENDIF
+
+IF C > 0
+	;習得의 구슬で上げる
+	SIF JUEL:7 < A
+		K |= 1
+	;この場合絶頂経験が１이상必要
+	SIF EXP:2 < 1
+		K |= 2
+
+	PRINT [2] - 
+	PRINTS PALAMNAME:7
+	PRINT 의 구슬×
+	PRINTV C
+	PRINT 、
+	PRINTS EXPNAME:2
+	PRINTV 1
+	PRINT 이상
+	PRINT ……
+
+	IF K == 0
+		PRINT ＯＫ
+	ELSE
+		SIF K & 1
+			PRINT 구슬 부족 
+		SIF K & 2
+			PRINT 경험 부족 
+		SIF K & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+ELSE
+	K = 256
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF (RESULT < 0 || RESULT > 2) && RESULT != 100
+	GOTO INPUT_LOOP
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。다시 입력하십시오。
+	GOTO INPUT_LOOP
+ELSEIF J == 256 && RESULT == 1
+	GOTO INPUT_LOOP
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다。다시 입력하십시오。
+	GOTO INPUT_LOOP
+ELSEIF K == 256 && RESULT == 2
+	GOTO INPUT_LOOP
+ELSEIF K != 0 && RESULT == 2
+	PRINTL 조건을 만족하지 못했습니다。다시 입력하십시오。
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:6 += 1
+
+IF RESULT == 0
+	JUEL:6 -= A
+ELSEIF RESULT == 1
+	JUEL:4 -= B
+ELSEIF RESULT == 2
+	JUEL:7 -= C
+ENDIF
+
+PRINTS ABLNAME:6
+PRINT 의 레벨이 
+PRINTV ABL:6
+PRINTW 으로 되었습니다。
+

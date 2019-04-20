@@ -1,0 +1,113 @@
+﻿;名前変更
+
+;-----------------------------------------------
+@SHOW_BUTTON_NAME_EDIT(NUM, ARG, RESET = 0)
+#DIM NUM
+#DIM RESET
+;-----------------------------------------------
+;キャラの能力表示において[名前を変更][名前を戻す]ボタンを表示する
+;引数NUMはボタンの数値、ARGは対象キャラの番号
+;引数RESETが0以外なら[戻す]時の処理になる
+
+LOCAL = CHECK_ABLE_TO_NAME_EDIT(ARG)
+IF LOCAL == 2
+	; 侵攻中の勇者ならボタン自体を表示しない
+	RETURN 0
+ELSEIF LOCAL != 0
+	; 노예で実行不可なら灰色にする
+	SETCOLOR 0x646464
+ENDIF
+
+IF RESET
+	PRINTFORM [{NUM}] 이름을 되돌린다　
+ELSE
+	PRINTFORM [{NUM}] 이름을 변경한다　
+ENDIF
+RESETCOLOR
+
+;-----------------------------------------------
+@CHECK_ABLE_TO_NAME_EDIT(ARG)
+#FUNCTION
+;-----------------------------------------------
+;ARG番のキャラに対して、名前を変更できるかの判断を行い、結果に対応する値を返す式中関数
+
+IF ARG == 0
+	; あなたの名前は変えられない
+	RETURNF 1
+ELSEIF CFLAG:ARG:1 == 2
+	; 侵攻中の勇者だ
+	RETURNF 2
+ELSEIF CFLAG:ARG:1 ==7
+	; 苗床だ
+	RETURNF 3
+ELSEIF CFLAG:ARG:1 != 0 && CFLAG:ARG:1 != 3
+	; 조교중でも迎撃中でもない
+	RETURNF 4
+ENDIF
+RETURNF 0
+
+;-----------------------------------------------
+@CHARA_INFO_NAME_EDIT(ARG,RESET = 0)
+#DIM RESET
+;-----------------------------------------------
+;キャラの能力表示において[名前を変える][戻す]のボタンが押されるとここに来る
+;引数RESETが0以外なら[戻す]時の処理になる
+
+;先に[名前を変更]出来るかチェックして、ダメなら値に対応する処理をしてリターン0
+LOCAL = CHECK_ABLE_TO_NAME_EDIT(ARG)
+IF LOCAL != 0
+	IF LOCAL == 1
+		PRINTW 당신의 이름은 바꿀 수 없다
+	ELSEIF LOCAL == 2
+		;侵攻中の勇者ではボタンが表示されないが、それでも入力すればここに来る. 
+		RETURN 2
+	ELSEIF LOCAL == 3
+		PRINTW 묘상의 이름은 바꿀 수 없다
+	ELSEIF LOCAL == 4
+		PRINTW 그 캐릭터는 이름을 바꿀 수 없는 상황이다
+	ENDIF
+	RETURN 0
+ENDIF
+
+;可能なら処理に移る
+
+IF RESET
+	;[戻す]
+	CFLAG:ARG:420 = 0
+	CALL NAME_RESET
+	PRINTW 이름을 되돌렸습니다
+
+	;一人称設定
+	IF CFLAG:ARG:450 >= 99
+		CALL SELF_CALLNAME, SAVESTR:ARG
+		CFLAG:ARG:450 = RESULT
+	ENDIF
+	RETURN 0
+ENDIF
+
+;[変える]
+$INPUT_LOOP
+PRINTL 새로운 이름을 입력하십시오
+INPUTS
+LOCALS = %RESULTS%
+SELECTCASE STRLENS(LOCALS)
+	CASE IS > 16
+	PRINTFORMW 이름이 너무 깁니다. 전각에서 8문자까지 가능합니다. 
+	GOTO INPUT_LOOP
+CASE IS > 0
+	SAVESTR:ARG = %LOCALS%
+	PRINTFORMW 이름을 %LOCALS%로 바꿨습니다
+	CSTR:ARG:1 = %LOCALS%
+	CFLAG:ARG:420 = 1
+CASEELSE
+	PRINTW 변경하지 않았습니다
+ENDSELECT
+
+;一人称設定
+IF CFLAG:ARG:450 >= 99
+	CALL SELF_CALLNAME, SAVESTR:ARG
+	CFLAG:ARG:450 = RESULT
+ENDIF
+
+RETURN 0
+

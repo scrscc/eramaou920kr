@@ -1,0 +1,120 @@
+﻿;eramaou追加コマンド
+
+;-------------------------------------------------
+;조수
+;조수も戦えるんです
+;SELECTCOMを入れないと
+;-------------------------------------------------
+@COM201
+
+SIF ASSI != PLAYER
+	RETURN 0
+
+PRINTL 조수
+
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;戦闘値の計算
+;-------------------------------------------------
+CALL ARENA_ASSI_POINT
+
+LOSEBASE:0 += RESULT
+LOSEBASE:1 += RESULT * 10
+
+C = RESULT
+
+CALL ARENA_SLAVE_POINT
+
+;戦闘ポイントが低ければ追加ダメージ
+IF RESULT < C
+	;気力が0なら追加ダメージ無し
+	IF BASE:1 <= 0
+		PRINTFORMW %조사선택(SAVESTR:ASSI, "는")% %조사선택(SAVESTR:TARGET, "를")% 희롱하듯 짓밟아 누르고 있다
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% %SAVESTR:ASSI%의 공격을 처리 할 수 없다！
+		;追加ダメージ
+		LOSEBASE:0 += C
+		LOSEBASE:1 += C * 5
+		IF BASE:1 < LOSEBASE:1
+			PRINTFORMW 그리고 %SAVESTR:ASSI%의 통한의 일격으로 %조사선택(SAVESTR:TARGET, "는")% 무기를 덜어뜨려 버렸다
+			PRINTW ＜노예함락＞
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% %SAVESTR:ASSI%에게 반격을 가했다
+	BASE:ASSI:0 -= RESULT
+	BASE:ASSI:1 -= RESULT * 10
+ENDIF
+;コロシアム収入
+;TFLAG:402 += LOSEBASE:0 * 5 + RAND:RESULT
+
+TFLAG:400 = 201
+;戦闘後の処理
+CALL COM_AFTER_ARENA
+SIF RESULT == 0
+	RETURN 1
+;戦闘で조수退却していた場合、陵辱しない
+SIF ASSI != PLAYER
+	RETURN 1
+
+;-------------------------------------------------
+;各種コマンドへ
+;-------------------------------------------------
+$INPUT_LOOP_0
+PRINTL 어디를 능욕합니까？
+SIF TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1 || ITEM:PBAND == 1
+	PRINTL [0] - 입
+PRINTL [1] - 가슴
+SIF (TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1 || ITEM:PBAND == 1) && TALENT:122 == 0
+	PRINTL [2] - 질
+SIF TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1 || ITEM:PBAND == 1
+	PRINTL [3] - 애널
+PRINTL [999] 능욕하지 않는다
+
+INPUT
+
+IF RESULT == 0 && (TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1 || ITEM:PBAND == 1)
+	PRINTL ＜조수・펠라치오＞
+	SELECTCOM = 31
+	CALL COM31
+	;フェラチオ実行不可時
+	SIF RESULT == 0
+		RETURN 0
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:0 * 5 + RAND:RESULT
+ELSEIF RESULT == 1
+	PRINTL ＜조수・가슴애무＞
+	SELECTCOM = 5
+	CALL COM5
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:0 * 5 + RAND:RESULT
+ELSEIF RESULT == 2 && (TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1 || ITEM:PBAND == 1) && TALENT:122 == 0
+	;対象がオトコなら戻る
+	SIF TALENT:122
+		RETURN 0
+	PRINTL ＜조수・후배위＞
+	SELECTCOM = 21
+	CALL COM21
+	;処女を奪わせなかった場合
+	SIF RESULT == 0
+		RETURN 0
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:0 * 5 + RAND:RESULT
+ELSEIF RESULT == 3 && (TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1 || ITEM:PBAND == 1)
+	PRINTL ＜조수・후배위애널＞
+	SELECTCOM = 27
+	CALL COM27
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:0 * 5 + RAND:RESULT
+ELSEIF RESULT == 999
+	PRINTFORMW %NAME:MASTER%은 %조사선택(SAVESTR:ASSI, "를")% 물러가게 했다……
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_0
+ENDIF
+
+RETURN 1
+;
+;
+;

@@ -1,0 +1,243 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;애무
+;調教者が手と口で調教対象の乳房とクリトリス（ペニス）を刺激
+;-------------------------------------------------
+@COM0
+
+PRINTL 애무
+;SAVESTR:22 = 애무
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+;快ｃのソース
+SOURCE:0 = 0
+;快ｂのソース
+SOURCE:17 = 0
+;情愛のソース
+SOURCE:3 = 0
+;性行動のソース
+SOURCE:4 = 60
+;不潔のソース
+SOURCE:8 = 30
+;露出のソース
+SOURCE:12 = 100
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 20
+	SOURCE:3 = 25
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 100
+	SOURCE:3 = 50
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 500
+	SOURCE:3 = 80
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 1200
+	SOURCE:3 = 100
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 2000
+	SOURCE:3 = 115
+ELSE
+	SOURCE:0 = 2800
+	SOURCE:3 = 125
+ENDIF
+
+;ABL:Ｂ感覚をみる
+IF ABL:1 == 0
+	SOURCE:17 = 15
+	SOURCE:3 += 25
+ELSEIF ABL:1 == 1
+	SOURCE:17 = 50
+	SOURCE:3 += 50
+ELSEIF ABL:1 == 2
+	SOURCE:17 = 300
+	SOURCE:3 += 80
+ELSEIF ABL:1 == 3
+	SOURCE:17 = 700
+	SOURCE:3 += 100
+ELSEIF ABL:1 == 4
+	SOURCE:17 = 1100
+	SOURCE:3 += 115
+ELSE
+	SOURCE:17 = 1600
+	SOURCE:3 += 125
+ENDIF
+
+;노예の口が愛液、精液、애널、尿で汚れており、
+;汚臭敏感で従順3以下のASSIの場合キスはしない（汚れ無視なら問題なし）
+IF  (STAIN:0 & 1 || STAIN:0 & 4 || STAIN:0 & 8 || STAIN:0 & 32) && ASSIPLAY
+	IF ABL:ASSI:10 <= 3 && TALENT:ASSI:62 && TALENT:ASSI:64 == 0
+		SOURCE:8 = 0
+		SOURCE:0 /= 2
+		SOURCE:3 /= 4
+		SOURCE:10 /= 2
+	ENDIF
+;ボールギャグ使用中もキスはなし
+ELSEIF TEQUIP:45
+	SOURCE:8 = 0
+	SOURCE:0 /= 2
+	SOURCE:3 /= 4
+	SOURCE:10 /= 2
+;ファーストキス未体験だとキスを避けるので効果減
+ELSEIF CFLAG:16 == -1
+	SOURCE:8 = 0
+	SOURCE:0 /= 2
+	SOURCE:3 /= 4
+	SOURCE:10 /= 2
+ELSE
+	;악취둔감
+	SIF TALENT:61
+		SOURCE:8 /= 4
+	;악취민감
+	SIF TALENT:62
+		SOURCE:8 *= 3
+	;自尊心
+	SIF TALENT:15
+		SOURCE:8 *= 2
+	;애정
+	IF TALENT:85 && ASSIPLAY == 0
+		SOURCE:3 *= 2
+		SOURCE:8 /= 10
+	ENDIF
+	IF STAIN:PLAYER:0
+	;主人の口の汚れがあると不潔150%
+		SOURCE:8 *= 3
+		SOURCE:8 /= 2
+	ENDIF
+
+	;노예の口⇔調教者の口の汚れが移動
+	STAIN:0 |= STAIN:PLAYER:0
+	STAIN:PLAYER:0 |= STAIN:0
+ENDIF
+
+;獣姦の場合はここで終了
+SIF TEQUIP:89
+	RETURN 1
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+IF TEQUIP:90
+	;노예に촉수の汚れがつく
+	STAIN:1 |= 2
+	STAIN:1 |= 4
+	STAIN:5 |= 2
+	STAIN:5 |= 4
+ELSE
+	;노예のＶ⇔調教者の指の汚れが移動
+	STAIN:3 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:3
+
+	;노예のＢ⇔調教者の指の汚れが移動
+	STAIN:5 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:5
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;레즈경험・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +5
+	EXP:40 += 5
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +5
+	EXP:41 += 5
+ENDIF
+
+;애정경험
+;基本値
+E = 2
+
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+RETURN 1
+
+;-------------------------------------------------
+;自動愛撫
+;何者かが調教対象の乳房とクリトリス（ペニス）を刺激
+;-------------------------------------------------
+@COM0_AUTO
+
+PRINT ≪기어 다니는 감촉≫
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 1
+LOSEBASE:1 += 5
+
+;快ｃのソース
+SOURCE:0 = 0
+;快ｂのソース
+SOURCE:17 = 0
+;情愛のソース
+SOURCE:3 = 0
+;性行動のソース
+SOURCE:4 = 60
+;不潔のソース
+SOURCE:8 = 30
+;露出のソース
+SOURCE:12 = 100
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 20
+	SOURCE:3 = 25
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 100
+	SOURCE:3 = 50
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 500
+	SOURCE:3 = 80
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 1200
+	SOURCE:3 = 100
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 2000
+	SOURCE:3 = 115
+ELSE
+	SOURCE:0 = 2800
+	SOURCE:3 = 125
+ENDIF
+
+;ABL:Ｂ感覚をみる
+IF ABL:1 == 0
+	SOURCE:17 = 15
+	SOURCE:3 += 25
+ELSEIF ABL:1 == 1
+	SOURCE:17 = 50
+	SOURCE:3 += 50
+ELSEIF ABL:1 == 2
+	SOURCE:17 = 300
+	SOURCE:3 += 80
+ELSEIF ABL:1 == 3
+	SOURCE:17 = 700
+	SOURCE:3 += 100
+ELSEIF ABL:1 == 4
+	SOURCE:17 = 1100
+	SOURCE:3 += 115
+ELSE
+	SOURCE:17 = 1600
+	SOURCE:3 += 125
+ENDIF
+
+;自動回数
+CFLAG:666 += 1
+
+RETURN 1
+

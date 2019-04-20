@@ -1,0 +1,85 @@
+﻿;eramaou追加コマンド
+
+;-------------------------------------------------
+;미약슬라임
+;うまく気力だけを減らす要員 レベル100以上
+;-------------------------------------------------
+@COM207
+
+PRINTL 미약슬라임
+
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;戦闘値の計算
+;-------------------------------------------------
+LOSEBASE:1 += CFLAG:0:9 * 10
+
+CALL ARENA_SLAVE_POINT
+
+;戦闘ポイントが低ければ追加ダメージ
+IF RESULT < (5 * CFLAG:0:9)
+	;気力が0なら追加ダメージ無し
+	IF BASE:1 <= 0
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 미약슬라임에 감싸져 이제 저항하는 것도 할 수 없다
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 미약슬라임에 감싸져 움직일수 없게 되어버렸다
+		LOSEBASE:1 += CFLAG:0:9 * 10
+			IF BASE:1 < LOSEBASE:1
+				PRINTFORMW 그리고 %조사선택(SAVESTR:TARGET, "는")% 미약슬라임 안에서 빠져버렸다
+				PRINTW ＜노예함락＞
+			ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 미약슬라임에 휘감겨져 필사적으로 도망치려 하고 있다
+ENDIF
+
+;コロシアム収入
+;TFLAG:402 += LOSEBASE:0 * 10 + RAND:RESULT
+
+TFLAG:400 = 207
+;戦闘後の処理
+CALL COM_AFTER_ARENA
+SIF RESULT == 0
+	RETURN 1
+
+$INPUT_LOOP_0
+PRINTL 어디에 점액을 흘려 넣습니까？
+PRINTL [0] - 입
+SIF TALENT:122 == 0
+	PRINTL [1] - 질
+PRINTL [2] - 애널
+PRINTL [999] 능욕하지 않는다
+
+INPUT
+
+IF RESULT == 0
+	PRINTFORMW 넘어진 %SAVESTR:TARGET%의 입을 노려 대량의 점액이 투입되었다
+	SELECTCOM = 51
+	JUMP COM51
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:1 * 2 + RAND:RESULT
+ELSEIF RESULT == 1
+	;対象がオトコなら戻る
+	SIF TALENT:122
+		RETURN 0
+	PRINTFORMW 넘어진 %SAVESTR:TARGET%의 질을 노리고 대량의 점액이 투입되어、자궁까지 점액으로 채워져 버렸다
+	SELECTCOM = 51
+	JUMP COM51
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:1 * 2 + RAND:RESULT
+ELSEIF RESULT == 2
+	PRINTFORMW 넘어진 %SAVESTR:TARGET%의 항문에 대량의 점액이 투입되었다
+	SELECTCOM = 51
+	JUMP COM51
+	;コロシアム収入
+	TFLAG:402 += LOSEBASE:1 * 2 + RAND:RESULT
+ELSEIF RESULT == 999
+ELSE
+	GOTO INPUT_LOOP_0
+ENDIF
+
+RETURN 1
+;
+;
+;

@@ -1,0 +1,144 @@
+﻿;반발각인의 소거 처리와 그 여부 판정
+;eratohoA ver1,204의 스크립트를 참고로 처리를 간략화
+
+;>굴복 각인을 지워보며 테스트
+;>사용하는 경우엔↓을 ABL.ERB의「PRINTL [100] 능력치 향상 종료」의 앞에 삽입함
+;>PRINTFORML [99]%MARKNAME:3%-{MARK:3}LV
+;>
+;>SYSTEM_SOURCE_SUB.ERB 내의 @MARK_GOT_CHECK도 弄ると再度反発刻印が付いたりしないので吉
+;>●수정 전
+;>IF A >= 500 && A < 1200 && MARK:3 <= 0
+;>	MARK:3 = 1
+;>●수정 후
+;>IF A >= 500 && A < 1200 && MARK:4 <= 0
+;>	MARK:3 = 1
+;>	MARK:4 = 1
+;>●이상의 내용을 3LV의 3군데로 하는 것
+;>上記の解らないor解ってもやらない場合に再度屈服刻印付いた場合の弊害は保証しかねます
+
+;-------------------------------------------------
+;반발각인의 소거 처리
+;-------------------------------------------------
+@ABLUP99
+DRAWLINE
+;PRINTL 노예에게 달린 반발 각인을 소거합니다
+;PRINTL 반발 각인이 달려 있는 노예는、주인의 명령에 따르기 어려워집니다
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;반발 각反発刻印が存在しない場合
+IF MARK:3 <= 0
+	PRINTL 반발 각은은 없습니다
+	WAIT
+	RETURN 0
+ENDIF
+
+;필요한 굴복의 구슬
+A = 0
+;必要な従順LV
+B = 0
+
+;条件別にＯＫかダメかを記録する
+I = 0
+
+CALL DECIDE_ABLUP99
+
+;反発刻印Lvと同じLvの屈服刻印が必要
+PRINTFORML %MARKNAME:2%{MARK:3}이상 (현재{MARK:2}) 동시에
+
+;反発刻印Lv+2Lvの従順が必要
+PRINTFORML %ABLNAME:10%{B}LV以上(현재{ABL:10}LV)LV필요
+
+PRINTFORM [0] - %PALAMNAME:6%의 구슬×{JUEL:6}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 각인 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+INPUT
+IF RESULT != 0 && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+MARK:3 -= 1
+
+JUEL:6 -= A
+
+PRINTFORML %MARKNAME:3%이 {MARK:3}으로 내려갔습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;反発刻印の消去可否判定
+;-------------------------------------------------
+@DECIDE_ABLUP99
+;反発刻印が存在しない場合
+SIF MARK:3 <= 0
+	RETURN 0
+
+;判定変数を空に
+I = 0
+
+B = 0
+
+IF MARK:3 == 1
+	A = 5000
+ELSEIF MARK:3 == 2
+	A = 10000
+ELSEIF MARK:3 == 3
+	A = 50000
+ENDIF
+
+;굳건함
+IF TALENT:12
+	TIMES A , 3.00
+ENDIF
+
+;시건방짐
+IF TALENT:16
+	TIMES A , 1.50
+ENDIF
+
+;솔직
+IF TALENT:13
+	TIMES A , 0.50
+ENDIF
+
+;애정
+IF TALENT:85
+	TIMES A , 0.50
+ENDIF
+
+;反発刻印Lvと同じLvの屈服刻印が必要
+SIF MARK:3 > MARK:2
+	I |= 2
+
+;反発刻印Lv+2Lvの従順が必要
+B = MARK:3 + 2
+SIF B > ABL:10
+	I |= 4
+
+;屈服の宝珠が不足
+SIF JUEL:6 < A
+	I |= 1
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+;
+;
+;

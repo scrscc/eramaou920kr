@@ -1,0 +1,331 @@
+﻿
+
+;-----------------------------------------------
+@SHOW_BUTTON_TEMPTATION(NUM, ARG)
+#DIM NUM
+;-----------------------------------------------
+;캐릭터의 능력 표시에서[악마의 유혹]버튼을 표시하는
+;인수 NUM은 버튼의 수치, ARG는 대상 캐릭터의 번호
+
+LOCAL = CHECK_ABLE_TO_TEMPTATION(ARG)
+IF LOCAL != 2
+
+ENDIF
+IF LOCAL != 0
+	IF LOCAL == 1
+	; 侵攻中の勇者でないならボタン自体を表示しない
+	ENDIF
+	RETURN 0
+ENDIF
+PRINTFORM [{NUM}] 악마의 유혹　
+
+;-----------------------------------------------
+@CHECK_ABLE_TO_TEMPTATION(ARG)
+#FUNCTION
+;-----------------------------------------------
+;ARG番のキャラに対して、[魔の誘惑]できるかの判断を行い、結果に対応する値を返す式中関数
+;可なら0を返す
+
+IF CFLAG:ARG:1 != 2
+	; 侵攻中の勇者でないとダメ
+	RETURNF 1
+ENDIF
+RETURNF 0
+
+;-----------------------------------------------
+@TEMPTATION(ARG)
+;-----------------------------------------------
+;ARG番のキャラの誘惑処理を行う
+;キャラの能力表示において[魔の誘惑]のボタンが押されるとここに来る
+
+;先に[유혹]出来るかチェックして、ダメなら値に対応する処理をしてリターン0
+LOCAL = CHECK_ABLE_TO_TEMPTATION(ARG)
+IF LOCAL != 0
+	IF LOCAL == 1
+		;侵攻中の勇者以外ではボタンが表示されないが、それでも入力すればここに来る. 
+		RETURN 2
+	ENDIF
+	RETURN 0
+ENDIF
+;可能なら処理に移る
+
+;魔王の誘惑
+;勇者は長生きするが함락に近づく
+;CFLAG:2が1000になると함락
+
+;기력감쇠
+IF BASE:0:0 < 2000
+	PRINTW *당신의 마력은 한계다*
+	RETURN 0
+ENDIF
+BASE:0:0 -= 2000
+
+;誘惑処理
+CALL TEMPTATION_TRY(ARG)
+WAIT
+
+;結果表示
+PRINTFORML 호감도：{CFLAG:ARG:2}/1000
+BARL (CFLAG:ARG:2),1000,50
+PRINTFORML 당신의 마력：{BASE:0:0}/{MAXBASE:0:0}
+BARL BASE:0:0,MAXBASE:0:0,50
+WAIT
+
+IF (CFLAG:ARG:2) >= 1000
+	PRINTFORMW *용사는 당신의 유혹을 버티지 못하고 투항했다! *
+	CFLAG:ARG:1 = 0
+	CFLAG:ARG:506 = 1
+	CFLAG:ARG:507 = 0
+	CALL PARTY_DEL(ARG)
+ENDIF
+
+;リターン１でターンエンド
+RETURN 1
+
+;-----------------------------------------------
+;魔王さまが誘惑を試みる処理
+@TEMPTATION_TRY(ARG)
+#DIM NUM = 0
+#DIM SEIKOU
+#DIM SIPPAI
+;-----------------------------------------------
+CALL PREPARE_TEMPTATION(ARG, SEIKOU, SIPPAI)
+FOR NUM, 0, 6
+	;誘惑判定成功
+	IF FI_TEMPTATION(ARG, SEIKOU, SIPPAI)
+		SELECTCASE RAND:9
+		;序盤は3,4番が固定値で有利
+		;育ってくると0～2が強力になる（予定）
+		;魔王レベル20以降かつエロトラップを解禁してからが勝負
+		;アイテム取得系はハズレだけど稀に部位感度が上がったりするのでよし
+		CASE 0
+			PRINTFORML *몽마의 쾌락이 %SAVESTR:ARG%를 덮쳤다! *
+			PRINTFORML 욕정의구슬+{CFLAG:0:9 * 10}
+			JUEL:ARG:5 += CFLAG:0:9 * 10
+			CFLAG:ARG:2 += 10 * (1 + ABL:ARG:0 +ABL:ARG:1 + ABL:ARG:2 + ABL:ARG:3)
+		CASE 1
+			PRINTFORML *자신의 은밀한 열정이 %SAVESTR:ARG%를 덮쳤다! *
+			PRINTFORML 욕정의구슬+{CFLAG:0:9 * 5}
+			PRINTFORML 굴복의구슬+{CFLAG:0:9 * 2}
+			JUEL:ARG:5 += CFLAG:0:9 * 5
+			JUEL:ARG:6 += CFLAG:0:9 * 2
+			CFLAG:ARG:2 += 15 * (1 + ABL:ARG:10 + ABL:ARG:11)
+		CASE 2
+			PRINTFORML *자기 마음의 어두운 면이 %SAVESTR:ARG%를 덮쳤다! *
+			PRINTFORML 굴복의구슬+{CFLAG:0:9 * 4}
+			JUEL:ARG:6 += CFLAG:0:9 * 4
+			CFLAG:ARG:2 += 10 * (1 + MARK:ARG:0 + MARK:ARG:1 + MARK:ARG:2) / (1 + MARK:ARG:3)
+		CASE 3
+			PRINTFORML *마왕의 달콤한 유혹이 %SAVESTR:ARG%를 덮쳤다! *
+			PRINTFORML 굴복의구슬+{CFLAG:0:9}
+			JUEL:ARG:6 += CFLAG:0:9
+			CFLAG:ARG:2 += 40
+		CASE 4
+			PRINTFORML *세상의 반을 너에게 줄수도 있다……*
+			PRINTFORML 굴복의구슬+{CFLAG:0:9 * 2}
+			JUEL:ARG:6 += CFLAG:0:9 * 2
+			CFLAG:ARG:2 += 50
+		CASE 5
+			SELECTCASE (BASE:ARG:0 * 100) / MAXBASE:ARG:0
+			CASE IS >= 75
+				CFLAG:ARG:2 += 5
+			CASE IS >= 50
+				CFLAG:ARG:2 += 25
+			CASE IS >= 25
+				CFLAG:ARG:2 += 50
+			CASE IS >= 10
+				CFLAG:ARG:2 += 75
+			CASEELSE
+				CFLAG:ARG:2 += 200
+			ENDSELECT
+			PRINTFORML *마계의 파동이 %SAVESTR:ARG%를 치유했다…*
+			PRINTFORML HP+{CFLAG:0:9 * 50}
+			BASE:ARG:0 += CFLAG:0:9 * 50
+			SIF BASE:ARG:0 > MAXBASE:ARG:0
+				BASE:ARG:0 = MAXBASE:ARG:0
+		CASE 6
+			SELECTCASE (BASE:ARG:1 * 100) / MAXBASE:ARG:1
+			CASE IS >= 75
+				CFLAG:ARG:2 += 5
+			CASE IS >= 50
+				CFLAG:ARG:2 += 25
+			CASE IS >= 25
+				CFLAG:ARG:2 += 50
+			CASE IS >= 10
+				CFLAG:ARG:2 += 75
+			CASEELSE
+				CFLAG:ARG:2 += 200
+			ENDSELECT
+			PRINTFORML *마계의 파동이 %SAVESTR:ARG%의 마음을 달랬다…*
+			PRINTFORML 기력+{CFLAG:0:9 * 50}
+			BASE:ARG:1 += CFLAG:0:9 * 50
+			SIF BASE:ARG:1 > MAXBASE:ARG:1
+				BASE:ARG:1 = MAXBASE:ARG:1
+		CASE 7, 8
+			PRINTFORML *당신은 %SAVESTR:ARG%에게 아이템을 주었다…*
+			A = ARG
+			CALL ADD_EX_ITEM, -1, ARG, 0
+			IF RESULT > 0
+				CFLAG:ARG:2 += 5
+			ELSE
+				GOTO FAIL
+			ENDIF
+		ENDSELECT
+		
+		;籠絡され堕落していく
+		CALL KARMA, ARG, - RAND(1, 4)
+	;誘惑失敗
+	ELSE
+		$FAIL
+		PRINTL 유혹을 이겨낸 듯하다
+		;成功でカルマ上昇（堕落よりやや効果は低い）
+		CALL KARMA, ARG, RAND(1, 3)
+	ENDIF
+NEXT
+
+;保証人チャンス! 
+
+;援助額
+LOCAL = 10000
+
+IF RAND:20 == 0 && TALENT:ARG:보증인 == 0 && MONEY >= LOCAL
+	;保証人でなく、あなたがLOCAL以上のお金を持ち、1/20の確率
+	PRINTFORML *당신은 %SAVESTR:ARG%에게 {LOCAL}의 자금원조를 할 수 있다……*
+	PRINTFORML 돈을 주는 대신 %SAVESTR:ARG%는 채무의 보증인이 됩니다
+	
+	CALL SELECT_YES_NO
+	
+	IF RESULT == 0
+		PRINTFORML *%SAVESTR:ARG%는 큰 돈에 대한 대가로 채무의 보증인이 되었습니다*
+		PRINTFORML 굴복의구슬+{CFLAG:0:9 * 2}
+		JUEL:ARG:6 += CFLAG:0:9 * 2
+		CFLAG:ARG:2 += 50
+		TALENT:ARG:보증인 = 1
+		MONEY -= LOCAL
+		CFLAG:ARG:580 += LOCAL
+	ENDIF
+
+;肉芽の呪いチャンス! 
+
+ELSEIF RAND:20 == 0 && TALENT:ARG:121 == 0 && TALENT:ARG:122 == 0 && MONEY >= LOCAL
+	;オトコでもふたなりでもなく、あなたがLOCAL以上のお金を持ち、1/20の確率
+	PRINTFORML *당신은 %SAVESTR:ARG%에게 {LOCAL}의 자금원조를 할 수 있다……*
+	PRINTFORML 돈을 주는 대신%SAVESTR:ARG%에게 육아의 저주를 내렸다
+	
+	CALL SELECT_YES_NO
+	
+	IF RESULT == 0
+		PRINTFORML *%SAVESTR:ARG%는 큰돈과 교환하여 저주를 받아들였습니다*
+		PRINTFORML 굴복의구슬+{CFLAG:0:9 * 2}
+		JUEL:ARG:6 += CFLAG:0:9 * 2
+		CFLAG:ARG:2 += 50
+		TALENT:ARG:326 = 1
+		MONEY -= LOCAL
+		CFLAG:ARG:580 += LOCAL
+	ENDIF
+	
+ELSEIF RAND:10 == 0 && CFLAG:ARG:582 < (LOCAL * -1) && MONEY >= LOCAL
+;借金がLOCAL以上あり、あなたがLOCAL以上のお金を持ち、1/10の確率
+	PRINTFORML *당신은%SAVESTR:ARG%의 부채를{LOCAL}정도 상환해 줄 수 있다……*
+	
+	CALL SELECT_YES_NO
+	
+	IF RESULT == 0
+		PRINTFORML *%SAVESTR:ARG%는 큰 돈에 대한 대가로 말할 수 없는 굴복을 느꼈습니다*
+		PRINTFORML 굴복의구슬+{CFLAG:0:9 * 5}
+		JUEL:ARG:6 += CFLAG:0:9 * 5
+		CFLAG:ARG:2 += 80
+		MONEY -= LOCAL
+		CFLAG:ARG:582 += LOCAL
+	ENDIF
+
+ENDIF
+
+
+
+RETURN 0
+
+
+
+;-----------------------------------------------
+;誘惑の正否判定関数
+;-----------------------------------------------
+;内容は要するにくじ引き
+;ここの判定が通ってもアイテム入手になった場合は失敗する可能性がある
+@FI_TEMPTATION(ARG, SEIKOU, SIPPAI)
+#FUNCTION
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM SEIKOU
+#DIM SIPPAI
+#DIM RING, 3
+RING:1 = CFLAG:ARG:551 % 1000
+RING:2 = CFLAG:ARG:552 % 1000
+;[즉각함락][음란][애정][육변기]なら無条件で成功
+SIF TALENT:ARG:73 || TALENT:ARG:76 || TALENT:ARG:85 || TALENT:ARG:204
+	RETURNF 1
+;一部の指輪は一定確率で正否処理を先行
+;不幸の指輪は25％で強制成功
+SIF RAND:20 < 5 && (RING:1 == 20 || RING:2 == 20)
+	RETURNF 1
+;結界の指輪は50％で強制失敗
+SIF RAND:10 < 5 && (RING:1 == 18 || RING:2 == 18)
+	RETURNF 0
+
+IF RAND:(SEIKOU + SIPPAI) < SEIKOU
+	RETURNF 1
+ELSE
+	RETURNF 0
+ENDIF
+
+
+;-----------------------------------------------
+;誘惑成功確率設定関数
+;-----------------------------------------------
+;つまりはアタリとハズレのくじを作成する
+@PREPARE_TEMPTATION(ARG, SEIKOU, SIPPAI)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM REF SEIKOU
+#DIM REF SIPPAI
+;成功の基本値
+;魔王さま側のレベルや経験等
+SEIKOU = 99 + CFLAG:0:9
+SEIKOU += FLAG:30 + FLAG:31 + FLAG:32
+;勇者側のえろす経験や技能
+SEIKOU += (EXP:ARG:2 + EXP:ARG:5 + EXP:ARG:20 + EXP:ARG:55 + EXP:ARG:56 + EXP:ARG:57 + EXP:ARG:74) / 3
+SEIKOU += 5 * (ABL:ARG:0 +ABL:ARG:1 + ABL:ARG:2 + ABL:ARG:3)
+SEIKOU += 10 * (ABL:ARG:10 + ABL:ARG:11)
+;誘惑開始時の残り体力・気力に大きく影響される
+;最大倍率は脅威の36倍
+SELECTCASE (BASE:ARG:0 * 100) / MAXBASE:ARG:0
+	CASE IS >= 75
+	CASE IS >= 50
+		TIMES SEIKOU , 1.5
+	CASE IS >= 25
+		TIMES SEIKOU , 3.0
+	CASE IS >= 10
+		TIMES SEIKOU , 4.5
+	CASEELSE
+		TIMES SEIKOU , 6.0
+ENDSELECT
+SELECTCASE (BASE:ARG:1 * 100) / MAXBASE:ARG:1
+	CASE IS >= 75
+	CASE IS >= 50
+		TIMES SEIKOU , 1.5
+	CASE IS >= 25
+		TIMES SEIKOU , 3.0
+	CASE IS >= 10
+		TIMES SEIKOU , 4.5
+	CASEELSE
+		TIMES SEIKOU , 6.0
+ENDSELECT
+
+;失敗の基本値は勇者レベルとカルマ
+SIPPAI = 50 + CFLAG:ARG:9 + CFLAG:ARG:151
+SIPPAI = MAX(0, SIPPAI)
+;刻印の効果が大
+SIPPAI *= (1 + MARK:ARG:3)
+SIPPAI /= POWER(1 + MARK:ARG:0 + MARK:ARG:1 + MARK:ARG:2, 2)
+
+

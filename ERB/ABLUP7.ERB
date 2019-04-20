@@ -1,0 +1,134 @@
+﻿
+@ABLUP7
+DRAWLINE
+IF ABL:7 >= 5
+	PRINTW 이미 MAX입니다。
+	RETURN 0
+ENDIF
+
+;条件別にＯＫかダメかを記録する
+I = 0
+J = 0
+K = 0
+
+IF ABL:7 == 0
+	A = 100
+ELSEIF ABL:7 == 1
+	A = 1000
+ELSEIF ABL:7 == 2
+	A = 5000
+ELSEIF ABL:7 == 3
+	A = 15000
+	;일선넘지않음
+	SIF TALENT:27
+		TIMES A , 2.00
+ELSEIF ABL:7 == 4
+	A = 35000
+	;일선넘지않음
+	SIF TALENT:27
+		TIMES A , 3.00
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.75
+ENDIF
+
+;눈에띄고싶어함
+IF TALENT:80
+	TIMES A , 0.50
+ENDIF
+
+;欲望が露出癖＋１レベルでないといけない
+PRINTS ABLNAME:1
+PRINTV ABL:7+1
+PRINTL LV이상、동시에
+IF ABL:1 < ABL:7+1
+	;欲望が不足
+	I |= 4
+ENDIF
+
+;ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[눈에띄고싶어함]なら無視できる）
+IF ABL:7 == 3 && TALENT:28 == 0
+	PRINTS EXPNAME:50
+	PRINTL 있고、동시에
+	IF EXP:50 == 0
+		;異常経験が不足
+		I |= 2
+	ENDIF
+ELSEIF ABL:7 == 4 && TALENT:28 == 0
+	PRINTS EXPNAME:50
+	PRINTL 2동시에、동시에
+	IF EXP:50 < 2
+		;異常経験が不足
+		I |= 2
+	ENDIF
+ENDIF
+
+;恥情의 구슬で上げる
+SIF JUEL:8 < A
+	I |= 1
+IF ABL:7 < 2
+	;絶頂経験が必要
+	SIF EXP:2 == 0
+		I |= 2
+ELSE
+	;調教自慰経験が必要
+	SIF EXP:11 == 0
+		I |= 2
+ENDIF
+
+PRINT [0] - 
+PRINTS PALAMNAME:8
+PRINT 의 구슬×
+PRINTV A
+IF ABL:7 < 2
+	PRINT 、
+	PRINTS EXPNAME:2
+	PRINTV 1
+	PRINT 이상
+ELSE
+	PRINT 、
+	PRINTS EXPNAME:11
+	PRINTV 1
+	PRINT 이상
+ENDIF
+PRINT ……
+
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다。
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:7 += 1
+
+IF RESULT == 0
+	JUEL:8 -= A
+ENDIF
+
+PRINTS ABLNAME:7
+PRINT 의 레벨이
+PRINTV ABL:7
+PRINTW 으로 되었습니다。
+

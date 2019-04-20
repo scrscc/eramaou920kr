@@ -1,0 +1,372 @@
+﻿;レズっ気のLvUP処理とその可否判定
+;eratohoA ver1,204のスクリプトをベースに処理を簡略化
+;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;レズっ気のLvUP
+;-------------------------------------------------
+@ABLUP22
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+DRAWLINE
+;PRINTL 노예のレズっ気を高めます
+;PRINTL レズっ気が高いと、女同士の性行為や奉仕からより大きな快楽を得られるようになります
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;レズっ気はLv5が上限
+;[해방][도착적][바이][남성혐오][광기]が付いている場合はLv10まで解放
+IF ABL:22 >= 5 && (TALENT:33 == 0 && TALENT:80 == 0 && TALENT:81 == 0 && TALENT:82 == 0 && TALENT:123 == 0)
+	PRINTW 이 이상 UP 하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF ABL:22 >= 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;必要な欲情의 구슬
+A = 0
+;必要なレズ経験
+B = 0
+;必要な屈服의 구슬
+C = 0
+;必要な快Ｃ의 구슬
+D = 0
+;必要な異常経験回数
+E = 0
+
+;条件別にＯＫかダメかを記録する
+;욕정＋屈服의 구슬による可否（I=0:可、I&1:구슬 부족、I&2:경험 부족、I&4:능력 부족）
+I = 0
+;快Ｃ의 구슬による可否（I=0:可、I&1:구슬 부족、I&2:경험 부족、I&4:능력 부족）
+J = 0
+
+CALL DECIDE_ABLUP22
+
+;ＬＶ３から４、４から５に上げるときは異常経験必要（素質：[レズ]なら無視できる）
+SIF E > 0
+	PRINTFORML %EXPNAME:50%{E}이상(현재{EXP:50})동시에
+
+;欲望が必要
+PRINTFORML %ABLNAME:11%{ABL:22 + 1}LV이상(현재{ABL:11}LV)동시에
+
+;욕정＋屈服의 구슬で上げる場合
+PRINTFORM [0] - %PALAMNAME:5%의 구슬×{JUEL:5}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+	SIF I & 4
+		PRINT 능력 부족 
+ENDIF
+PRINTL 
+SIF C > 0
+	PRINTFORML 　　　%PALAMNAME:6%의 구슬×{JUEL:6}/{C}
+PRINTFORML 　　　%EXPNAME:40%　{EXP:40}/{B}
+
+;快Ｃ의 구슬で上げる場合
+IF D > 0
+	PRINTFORM [1] - %PALAMNAME:0%의 구슬×{JUEL:0}/{D} ……
+	IF J == 0
+		PRINT ＯＫ
+	ELSE
+		SIF J & 1
+			PRINT 구슬 부족 
+		SIF J & 2
+			PRINT 경험 부족 
+		SIF J & 4
+			PRINT 능력 부족 
+	ENDIF
+	PRINTL 
+	PRINTFORML 　　　%EXPNAME:40%　{EXP:40}/{B}
+ENDIF
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 1) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF J == 256 && RESULT == 1
+	RESTART
+ELSEIF J != 0 && RESULT == 1
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:22 += 1
+
+IF RESULT == 0
+	JUEL:5 -= A
+	JUEL:6 -= C
+ELSEIF RESULT == 1
+	JUEL:0 -= D
+ENDIF
+
+PRINTFORML %ABLNAME:22%의 레벨이 {ABL:22}으로 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;レズっ気のLvUP可否判定
+;-------------------------------------------------
+@DECIDE_ABLUP22
+;オトコだとダメ
+SIF TALENT:122
+	RETURN 0
+;レズっ気はLv10が上限
+;[해방][도착적][바이][남성혐오][광기]が付いている場合はLv10まで解放
+IF ABL:22 >= 5 && (TALENT:33 == 0 && TALENT:80 == 0 && TALENT:81 == 0 && TALENT:82 == 0 && TALENT:123 == 0)
+	RETURN 0
+ELSEIF ABL:22 >= 10
+	RETURN 0
+ENDIF
+
+;判定変数を空に
+I = 0
+J = 0
+
+A = 0
+B = 0
+C = 0
+D = 0
+E = 0
+
+
+
+IF ABL:22 == 0
+	A = 200
+	B = 50
+	C = 0
+	D = 1000
+ELSEIF ABL:22 == 1
+	A = 1000
+	B = 150
+	C = 0
+	D = 5000
+ELSEIF ABL:22 == 2
+	A = 3000
+	B = 300
+	C = 1000
+	D = 0
+ELSEIF ABL:22 == 3
+	A = 8000
+	B = 500
+	C = 2000
+	D = 0
+ELSEIF ABL:22 == 4
+	A = 20000
+	B = 800
+	C = 5000
+	D = 0
+ELSEIF ABL:22 == 5
+	A = 40000
+	B = 1200
+	C = 10000
+	D = 0
+ELSEIF ABL:22 == 6
+	A = 80000
+	B = 1800
+	C = 13000
+	D = 0
+ELSEIF ABL:22 == 7
+	A = 150000
+	B = 2600
+	C = 18000
+	D = 0
+ELSEIF ABL:22 == 8
+	A = 200000
+	B = 3600
+	C = 30000
+	D = 0
+ELSEIF ABL:22 == 9
+	A = 300000
+	B = 5000
+	C = 50000
+	D = 0
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	IF ABL:22 == 3
+		TIMES A , 1.50
+		TIMES B , 1.50
+		TIMES C , 1.50
+	ELSEIF ABL:22 == 4
+		TIMES A , 2.00
+		TIMES B , 2.00
+		TIMES C , 2.00
+	ELSEIF ABL:22 == 5
+		TIMES A , 2.50
+		TIMES B , 2.50
+		TIMES C , 2.50
+	ELSEIF ABL:22 >= 6
+		TIMES A , 3.00
+		TIMES B , 3.00
+		TIMES C , 3.00
+	ENDIF
+ENDIF
+
+;ＬＶ３이상に上げるときは異常経験必要（素質：[해방][도착적][바이][광기]なら無視できる）
+SIF ABL:22 >= 3 && (TALENT:33 == 0 && TALENT:80 == 0 && TALENT:81 == 0 && TALENT:123 == 0)
+	E = ABL:22 - 2
+
+;솔직
+IF TALENT:13
+	TIMES A , 0.95
+	TIMES B , 0.95
+	TIMES C , 0.95
+	TIMES D , 0.95
+ENDIF
+;무관심
+IF TALENT:21
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES C , 1.20
+	TIMES D , 1.20
+ENDIF
+;호기심
+IF TALENT:23
+	TIMES A , 0.95
+	TIMES B , 0.95
+	TIMES C , 0.95
+	TIMES D , 0.95
+ENDIF
+;보수적
+IF TALENT:24
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES C , 1.20
+	TIMES D , 1.20
+ENDIF
+
+;정조관념
+IF TALENT:30
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES C , 1.20
+	TIMES D , 1.20
+;정조관부실
+ELSEIF TALENT:31
+	TIMES A , 0.95
+	TIMES B , 0.95
+	TIMES C , 0.95
+	TIMES D , 0.95
+ENDIF
+
+;헌신적
+IF TALENT:63
+	TIMES A , 0.95
+	TIMES B , 0.95
+	TIMES C , 0.95
+	TIMES D , 0.95
+ENDIF
+
+;쾌감에솔직
+IF TALENT:70
+	TIMES A , 0.95
+	TIMES B , 0.95
+	TIMES C , 0.95
+	TIMES D , 0.95
+;쾌감을부정
+ELSEIF TALENT:71
+	TIMES A , 1.20
+	TIMES B , 1.20
+	TIMES C , 1.20
+	TIMES D , 1.20
+ENDIF
+
+;도착적
+IF TALENT:80
+	TIMES A , 0.80
+	TIMES B , 0.80
+	TIMES C , 0.80
+	TIMES D , 0.80
+ENDIF
+
+;선머슴
+IF TALENT:79
+	TIMES A , 2.00
+	TIMES B , 2.00
+	TIMES C , 2.00
+	TIMES D , 2.00
+ENDIF
+
+;바이
+IF TALENT:81
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+;남성혐오
+IF TALENT:82
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+;광기
+IF TALENT:123
+	TIMES A , 0.50
+	TIMES B , 0.50
+	TIMES C , 0.50
+	TIMES D , 0.50
+ENDIF
+
+;最低でも1回・1個は必要
+SIF A < 1
+	A = 1
+SIF B < 1
+	B = 1
+
+;異常経験が不足
+IF EXP:50 < E
+	I |= 2
+	J |= 2
+ENDIF
+
+;欲情의 구슬が不足
+SIF JUEL:5 < A
+	I |= 1
+;屈服의 구슬が不足
+SIF JUEL:6 < C
+	I |= 1
+;レズ経験が不足
+SIF EXP:40 < B
+	I |= 2
+
+;欲望がレズっ気+1Lvでないといけない
+IF ABL:11 < ABL:22 + 1
+	;欲望が不足
+	I |= 4
+	J |= 4
+ENDIF
+
+;Ｃ感覚で上げる場合
+IF D > 0
+	;快Ｃ의 구슬が不足
+	SIF JUEL:0 < D
+		J |= 1
+	;レズ経験が不足
+	SIF EXP:40 < B
+		J |= 2
+ELSE
+	J = 256
+ENDIF
+
+IF I == 0 || J == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+;
+;
+;

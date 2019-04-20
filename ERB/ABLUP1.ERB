@@ -1,0 +1,210 @@
+﻿;Ｂ감각의 LvUP처리와 그 여부 판정
+;eratohoA ver1,204의 스크립트를 바탕으로 처리를 간략화
+;eraIM@S에서 도입했습니다(eramaou)
+;-------------------------------------------------
+;Ｂ감각의 LvUP
+;-------------------------------------------------
+@ABLUP1
+#DIM CALC
+;各部位感覚封鎖
+CALC = 0
+SIF TALENT:101 & 2
+	CALC ++
+SIF TALENT:103 & 2
+	CALC ++
+SIF TALENT:105 & 2
+	CALC ++
+
+DRAWLINE
+;SIF TALENT:122 == 0 && TALENT:116 == 0
+;	PRINT 유방이나
+;PRINTL 젖꼭지의 감도를 UP합니다
+;PRINTL Ｂ감각이 높아지면、가슴에 대한 애무와 착유를 통해 더 큰 쾌락을 얻을 수 있습니다
+;PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;최대 Lv은 5、[음유]를 가지고 있는 경우엔 Lv10까지 해방
+IF ABL:1 >= 5 && TALENT:78 == 0
+	PRINTW 이 이상 UP하려면 소질이 필요합니다
+	RETURN 0
+ELSEIF TALENT:107 & 2
+	PRINTW Ｂ감각은 봉쇄되어 있습니다
+	RETURN 0
+ELSEIF ABL:1 >= CALC * 5 + 10
+	PRINTW 이미 MAX입니다
+	RETURN 0
+ENDIF
+
+;필요한 Ｂ감각의 구슬
+A = 0
+
+;조건 별로 ＯＫ인지 되지 않을 지 기록했다
+;Ｂ감각의 구슬에 의한 여부（I=0:可、I&1:구슬 부족）
+I = 0
+
+CALL DECIDE_ABLUP1
+
+PRINTFORM [0] - %PALAMNAME:14%의 구슬×{JUEL:14}/{A} ……
+IF I == 0
+	PRINT ＯＫ
+ELSE
+	SIF I & 1
+		PRINT 구슬 부족 
+	SIF I & 2
+		PRINT 경험 부족 
+ENDIF
+PRINTL 
+
+PRINTL [100] - 그만둔다
+
+
+INPUT
+IF (RESULT < 0 || RESULT > 0) && RESULT != 100
+	RESTART
+ELSEIF I != 0 && RESULT == 0
+	PRINTL 조건을 만족하지 못했습니다
+	RESTART
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+ABL:1 += 1
+
+IF RESULT == 0
+	JUEL:14 -= A
+ENDIF
+
+PRINTFORML %ABLNAME:1%의 레벨이 {ABL:1}(이)가 되었습니다
+
+RETURN 0
+
+;-------------------------------------------------
+;Ｂ감각의 LvUP 여부 판정
+;-------------------------------------------------
+@DECIDE_ABLUP1
+#DIM CALC
+#DIM LCOUNT
+;各部位感覚封鎖
+CALC = 0
+SIF TALENT:101 & 2
+	CALC ++
+SIF TALENT:103 & 2
+	CALC ++
+SIF TALENT:105 & 2
+	CALC ++
+
+;Ｂ감각은 Lv5가 상한、[음유]를 가지고 있는 경우 Lv10까지 해방
+SIF ABL:1 >= 5 && TALENT:78 == 0
+	RETURN 0
+SIF ABL:1 >= CALC * 5 + 10
+	RETURN 0
+;感覚封鎖されている場合は不可
+SIF TALENT:107 & 2
+	RETURN 0
+
+;판정 변수를 하늘로
+A = 0
+I = 0
+
+IF ABL:1 == 0
+	A = 1
+ELSEIF ABL:1 == 1
+	A = 20
+ELSEIF ABL:1 == 2
+	A = 400
+ELSEIF ABL:1 == 3
+	A = 8000
+ELSEIF ABL:1 == 4
+	A = 20000
+ELSEIF ABL:1 == 5
+	A = 40000
+ELSEIF ABL:1 == 6
+	A = 60000
+ELSEIF ABL:1 == 7
+	A = 90000
+ELSEIF ABL:1 == 8
+	A = 120000
+ELSEIF ABL:1 == 9
+	A = 180000
+ELSEIF ABL:1 < 15
+	A = 180000
+	FOR LCOUNT, 0, (ABL:1 - 9)
+		A = A * 125 / 100
+	NEXT
+ELSEIF ABL:1 < 20
+	A = 362000
+	FOR LCOUNT, 0, (ABL:1 - 14)
+		A = A * 120 / 100
+	NEXT
+ELSEIF ABL:1 < 25
+	A = 583000
+	FOR LCOUNT, 0, (ABL:1 - 19)
+		A = A * 115 / 100
+	NEXT
+ENDIF
+
+;일선넘지않음
+IF TALENT:27
+	SIF ABL:1 == 4
+		TIMES A , 2.00
+	SIF ABL:1 == 5
+		TIMES A , 2.50
+	SIF ABL:1 >= 6
+		TIMES A , 3.00
+ENDIF
+
+;B둔감
+SIF TALENT:107
+	TIMES A , 1.20
+;거유
+SIF TALENT:110
+	TIMES A , 1.10
+;폭유
+SIF TALENT:114
+	TIMES A , 1.20
+
+;超乳
+SIF TALENT:119
+	TIMES A , 1.30
+
+;B민감
+SIF TALENT:108
+	TIMES A , 0.80
+
+;他部位の封鎖数
+IF ABL:1 > 5 && ABL:1 <= 10 && CALC > 0
+	A = A * (15 - CALC) / 15
+ELSEIF ABL:1 <= 15 && CALC > 1
+	A = A * (16 - CALC) / 15
+ELSEIF ABL:1 <= 20 && CALC > 2
+	A = A * (17 - CALC) / 15
+ENDIF
+
+;음란
+SIF TALENT:76
+	TIMES A , 0.80
+;음유
+SIF TALENT:78
+	TIMES A , 0.80
+;빈유
+SIF TALENT:109
+	TIMES A , 0.80
+;절벽
+SIF TALENT:116
+	TIMES A , 0.65
+
+;최소한 1개는 필요함
+SIF A < 1
+	A = 1
+
+;쾌Ｂ의 구슬로 올립니까？
+SIF JUEL:14 < A
+	I |= 1
+
+IF I == 0
+	RETURN 1
+ELSE
+	RETURN 0
+ENDIF
+
+;
+;
+;

@@ -1,0 +1,334 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;バイブ
+;道具使用コマンド：調教対象のヴァギナをバイブで刺激
+;-------------------------------------------------
+@COM11
+;処女を奪うかどうかの確認
+CALL CONFIRM_LOST_VIRGIN
+SIF RESULT == 0
+	RETURN 0
+
+IF TEQUIP:90
+	PRINTL 촉수삽입
+	;SAVESTR:22 = 촉수삽입
+ELSE
+	PRINTL 바이브
+	;SAVESTR:22 = バイブ
+ENDIF
+
+IF DAY:2 == 15 && TALENT:190 == 0
+	PRINTL *만월은 웜의 산란기입니다。실행하시겠습니까？*
+	PRINTL [0] 네 [1] 아니오
+	INPUT
+	SIF RESULT != 0
+		RETURN 0
+ENDIF
+
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 30
+LOSEBASE:1 += 100
+
+;ABL:Ｖ感覚をみる
+IF ABL:2 == 0
+	SOURCE:1 = 80
+ELSEIF ABL:2 == 1
+	SOURCE:1 = 250
+ELSEIF ABL:2 == 2
+	SOURCE:1 = 600
+ELSEIF ABL:2 == 3
+	SOURCE:1 = 1000
+ELSEIF ABL:2 == 4
+	SOURCE:1 = 1300
+ELSE
+	SOURCE:1 = 1700
+ENDIF
+
+;EXP:Ｖ経験をみる
+IF EXP:0 < EXPLV:1
+	TIMES SOURCE:1 , 0.20
+	SOURCE:6 = 5500
+ELSEIF EXP:0 < EXPLV:2
+	TIMES SOURCE:1 , 0.60
+	SOURCE:6 = 300
+ELSEIF EXP:0 < EXPLV:3
+	TIMES SOURCE:1 , 1.00
+	SOURCE:6 = 50
+ELSEIF EXP:0 < EXPLV:4
+	TIMES SOURCE:1 , 1.20
+	SOURCE:6 = 10
+ELSEIF EXP:0 < EXPLV:5
+	TIMES SOURCE:1 , 1.40
+	SOURCE:6 = 0
+ELSE
+	TIMES SOURCE:1 , 1.60
+	SOURCE:6 = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES SOURCE:1 , 0.10
+	SOURCE:6 += 1000
+	TIMES SOURCE:6 , 3.00
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES SOURCE:1 , 0.40
+	SOURCE:6 += 400
+	TIMES SOURCE:6 , 1.00
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:6 , 0.50
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES SOURCE:1 , 1.40
+	TIMES SOURCE:6 , 0.20
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES SOURCE:1 , 1.80
+	TIMES SOURCE:6 , 0.10
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES SOURCE:1 , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES SOURCE:1 , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES SOURCE:1 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES SOURCE:1 , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES SOURCE:1 , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES SOURCE:1 , 0.80
+ELSEIF ABL:10 == 1
+	TIMES SOURCE:1 , 0.90
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:1 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:1 , 1.10
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:1 , 1.20
+ELSE
+	TIMES SOURCE:1 , 1.30
+ENDIF
+
+;장신
+SIF TALENT:99
+	TIMES SOURCE:6 , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES SOURCE:6 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 4.00
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+S = 0
+;Ｖ感覚が高いほどＶ経験が入る
+IF ABL:2 <= 1
+	S = 1
+ELSEIF ABL:2 <= 4
+	S = 2
+ELSEIF ABL:2 <= 7
+	S = 3
+ELSE
+	S = 4
+ENDIF
+EXP:0 += S
+PRINTFORML Ｖ경험+{S}
+S = 0
+
+;레즈경험
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +3
+	EXP:40 += 3
+ENDIF
+
+;-------------------------------------------------
+;バイブの着脱
+;-------------------------------------------------
+TEQUIP:11 = 1 - TEQUIP:11
+SIF TEQUIP:90
+	T = 0
+
+;-------------------------------------------------
+;汚れ（촉수）
+;-------------------------------------------------
+IF TEQUIP:90 && TEQUIP:11
+	STAIN:3 |= 2
+	STAIN:3 |= 4
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;バイブ挿入中
+;-------------------------------------------------
+@EQUIP_COM11
+
+;V経験を伴うコマンドのフラグ(処女膜再生対応)
+TFLAG:19 = 1
+
+IF TEQUIP:90
+	PRINTL ＜촉수삽입중＞
+ELSE
+	PRINTL ＜바이브삽입중＞
+ENDIF
+
+;満月時はたまに産卵する
+IF DAY:2 == 15 && RAND:3 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 생식기 안에 웜의 알이 대량으로 산란되었다……
+	SIF TALENT:190 == 0
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:190%이 되었다
+	TALENT:190 = 1
+ENDIF
+
+LOSEBASE:0 += 10
+LOSEBASE:1 += 50
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;ABL:Ｖ感覚をみる
+IF ABL:2 == 0
+	A = 40
+ELSEIF ABL:2 == 1
+	A = 120
+ELSEIF ABL:2 == 2
+	A = 300
+ELSEIF ABL:2 == 3
+	A = 500
+ELSEIF ABL:2 == 4
+	A = 650
+ELSE
+	A = 850
+ENDIF
+
+;EXP:Ｖ経験をみる
+;処女はありえない
+IF EXP:0 < EXPLV:2
+	TIMES A , 0.60
+	B = 150
+ELSEIF EXP:0 < EXPLV:3
+	TIMES A , 1.00
+	B = 20
+ELSEIF EXP:0 < EXPLV:4
+	TIMES A , 1.20
+	B = 0
+ELSEIF EXP:0 < EXPLV:5
+	TIMES A , 1.40
+	B = 0
+ELSE
+	TIMES A , 1.60
+	B = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES A , 0.10
+	B += 400
+	TIMES B , 3.00
+	C += 1000
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES A , 0.40
+	B += 150
+	TIMES B , 1.00
+	C += 200
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES A , 1.00
+	TIMES B , 0.50
+	C += 80
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES A , 1.40
+	TIMES B , 0.20
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES A , 1.80
+	TIMES B , 0.10
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES A , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES A , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES A , 0.80
+ELSEIF ABL:10 == 1
+	TIMES A , 0.90
+ELSEIF ABL:10 == 2
+	TIMES A , 1.00
+ELSEIF ABL:10 == 3
+	TIMES A , 1.10
+ELSEIF ABL:10 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+
+;장신
+SIF TALENT:99
+	TIMES B , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES B , 2.00
+;미숙
+SIF TALENT:135
+	TIMES B , 4.00
+
+;정조관념
+IF TALENT:30
+	;処女はありえない
+	TIMES B, 3.00
+ENDIF
+
+SOURCE:1 += A
+SOURCE:6 += B
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+S = 0
+;自慰実行時は経験＋１
+SIF SELECTCOM == 3
+	S = 1
+;Ｖ感覚が高いほどＶ経験が入る
+IF ABL:2 <= 1
+	S += 1
+ELSEIF ABL:2 <= 4
+	S += 2
+ELSEIF ABL:2 <= 7
+	S += 3
+ELSE
+	S += 4
+ENDIF
+EXP:0 += S
+PRINTFORML Ｖ경험+{S}
+S = 0
+
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+SIF TEQUIP:90
+	T += 1
+
+RETURN 1

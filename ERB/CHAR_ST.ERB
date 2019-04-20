@@ -1,0 +1,152 @@
+﻿;------------------------------------------
+;주로 용자의 스테이터스를 조작처리하는 것 들입니다
+;------------------------------------------
+
+
+;----------------------
+@WEAPON_RESTORE,ARG:0
+;----------------------
+
+A = ARG:0
+
+;장비 효과
+W:8 = 2
+CALL EQUIP_CHECK
+
+CFLAG:(ARG:0):11 = CFLAG:(ARG:0):13 * (RESULT + 10)
+CFLAG:(ARG:0):11 /= 10
+CFLAG:(ARG:0):12 = CFLAG:(ARG:0):14 * (RESULT + 10)
+CFLAG:(ARG:0):12 /= 10
+
+;철벽
+IF BASE:(ARG:0):1 * 100 / MAXBASE:(ARG:0):1 < 40 && TALENT:(ARG:0):249
+	CFLAG:(ARG:0):11 += CFLAG:(ARG:0):9
+	CFLAG:(ARG:0):12 += CFLAG:(ARG:0):9
+	BASE:(ARG:0):0 += CFLAG:(ARG:0):9 * 10
+	SIF BASE:(ARG:0):0 > MAXBASE:(ARG:0):0
+		BASE:(ARG:0):0 = MAXBASE:(ARG:0):0
+ENDIF
+
+;장비 효과
+W:8 = 11
+CALL EQUIP_CHECK
+RESULT += 1
+CFLAG:(ARG:0):11 /= RESULT
+CFLAG:(ARG:0):12 /= RESULT
+
+;装備効果(攻撃増加)
+W:8 = 7
+CALL EQUIP_CHECK
+SIF RESULT > 0
+	CFLAG:(ARG:0):11 += RESULT * 10
+
+;装備効果(防御増加)
+W:8 = 8
+CALL EQUIP_CHECK
+SIF RESULT > 0
+	CFLAG:(ARG:0):12 += RESULT * 10
+
+;勲章によって強化される上位職
+IF TALENT:(ARG:0):210
+	;마계장군
+	;攻撃偏重のボーナス
+	CFLAG:(ARG:0):11 += EXP:(ARG:0):81 * 2
+	CFLAG:(ARG:0):12 += EXP:(ARG:0):81
+ELSEIF TALENT:A:211
+	;마도신관
+	;防御偏重のボーナス
+	CFLAG:(ARG:0):11 += EXP:(ARG:0):81
+	CFLAG:(ARG:0):12 += EXP:(ARG:0):81 * 2
+ENDIF
+
+IF TALENT:(ARG:0):314 == 2 && DAY:2 >= 14 && DAY:2 <= 16
+	;늑대인간의 만월효과
+	CFLAG:(ARG:0):11 *= 10
+	CFLAG:(ARG:0):12 *= 10
+ENDIF
+
+RETURN 0
+
+;-----------------------
+@KARMA, ARG:0, ARG:1
+;-----------------------
+;카르마 변동
+;キャラはARG:0 量はARG:1
+
+SIF TALENT:ARG:혼박
+	RETURN 0
+
+CFLAG:(ARG:0):151 += ARG:1
+
+SIF CFLAG:(ARG:0):151 > 200
+	CFLAG:(ARG:0):151 = 200
+
+SIF CFLAG:(ARG:0):151 < -200
+	CFLAG:(ARG:0):151 = -200
+
+RETURN 0
+
+;-----------------------
+@FAITH, ARG:0, ARG:1
+;-----------------------
+;信仰変動
+;キャラはARG:0 量はARG:1
+
+SIF TALENT:ARG:혼박
+	RETURN 0
+
+CFLAG:(ARG:0):152 += ARG:1
+
+SIF CFLAG:(ARG:0):152 > 100
+	CFLAG:(ARG:0):152 = 100
+
+SIF CFLAG:(ARG:0):152 < 0
+	CFLAG:(ARG:0):152 = 0
+
+RETURN 0
+
+;-----------------------
+@CHARA_LV_CHECK,CHARA
+#DIM CHARA
+;-----------------------
+;レベルダウン
+
+IF EXP:CHARA:80 < 0
+		CFLAG:CHARA:9 -= 1
+	EXP:CHARA:80 = CFLAG:CHARA:9 * 10
+	;ステータスも減少
+	CFLAG:CHARA:11 -= 1
+	CFLAG:CHARA:12 -= 1
+	CFLAG:CHARA:13 -= 1
+	CFLAG:CHARA:14 -= 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %SAVESTR:CHARA%의 레벨이 1 내려갔다
+ENDIF
+
+RETURN 0
+
+;-----------------------
+@CHARA_ID_OUTPUT,CHARA
+#DIM CHARA
+;-----------------------
+;キャラの識別番号出力
+
+LOCAL = 0
+
+LOCAL += TALENT:CHARA:용자가되기이전의생활 * 10
+
+;性格
+FOR LOCAL:1, 160, 179
+	SIF TALENT:CHARA:(LOCAL:1)
+		BREAK
+NEXT
+LOCAL:1 -= 1
+LOCAL += (LOCAL:1 - 160) * 1000
+
+;가족구성
+LOCAL:1 = TALENT:CHARA:320
+LOCAL += LOCAL:1 * 100000
+
+RETURN LOCAL
+
+

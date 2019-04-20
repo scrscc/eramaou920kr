@@ -1,0 +1,239 @@
+﻿;転職関係
+
+;-----------------------------------------------
+@SHOW_BUTTON_JOB_CHANGE(NUM, ARG)
+#DIM NUM
+;-----------------------------------------------
+;キャラの能力表示において[転職]ボタンを表示する
+;引数NUMはボタンの数値、ARGは対象キャラの番号
+
+LOCAL = CHECK_ABLE_TO_JOB_CHANGE(ARG)
+IF LOCAL == 2
+	; 侵攻中の勇者ならボタン自体を表示しない
+	RETURN 0
+ELSEIF LOCAL != 0
+	; 노예で実行不可なら灰色にする
+	SETCOLOR 0x646464
+ENDIF
+PRINTFORM [{NUM}] 전직　
+RESETCOLOR
+RETURN 0
+
+;-----------------------------------------------
+@CHECK_ABLE_TO_JOB_CHANGE(ARG)
+#FUNCTION
+;-----------------------------------------------
+;ARG番のキャラに対して、[転職]できるかの判断を行い、結果に対応する値を返す式中関数
+;可なら0を返す
+
+IF ARG == 0
+	; あなたの職は変えられない
+	RETURNF 1
+ELSEIF CFLAG:ARG:1 == 2
+	; 侵攻中の勇者だ
+	RETURNF 2
+ELSEIF CFLAG:ARG:9 < 50
+	; もっと経験を積まないといけない! 
+	RETURNF 3
+ELSEIF CFLAG:ARG:1 != 0 && CFLAG:ARG:1 != 7
+	; そのキャラは転職できる状態に無い
+	RETURNF 4
+ENDIF
+RETURNF 0
+
+;-----------------------------------------------
+@CHARA_INFO_JOB_CHANGE(ARG)
+;-----------------------------------------------
+;ARG番のキャラの転職処理を行う
+;キャラの能力表示において[転職]のボタンが押されるとここに来る
+
+;先に[転職]出来るかチェックして、ダメなら値に対応する処理をしてリターン0
+LOCAL = CHECK_ABLE_TO_JOB_CHANGE(ARG)
+IF LOCAL != 0
+	IF LOCAL == 1
+		PRINTW 당신의 직업은 바꿀 수 없다
+	ELSEIF LOCAL == 2
+		;侵攻中の勇者ではボタンが表示されないが、それでも入力すればここに来る. 
+		RETURN 2
+	ELSEIF LOCAL == 3
+		PRINTW 더 경험을 쌓지 않으면 안 된다!
+	ELSEIF LOCAL == 4
+		PRINTW 그 캐릭터는 전직할 수 있는 상태가 아니다
+	ENDIF
+	RETURN 0
+ENDIF
+
+;可能なら処理に移る
+
+$INPUT_LOOP
+
+PRINT [0]  전사　　 
+PRINT [1]  마술사　 
+PRINTL [2]  신관　　 
+PRINT [3]  도적　　 
+PRINT [4]  육변기　 
+PRINTL [5]  기사　　 
+PRINT [6]  무녀　　 
+PRINT [7]  닌자　　 
+PRINTL [8]  궁사　　 
+PRINT [9]  씨받이　　 
+SIF EXP:ARG:81 > 9
+	PRINT [10] 마계 장군
+SIF EXP:ARG:81 > 9
+	PRINT [11] 마도 신관 
+PRINTL  
+PRINTL [999] 그만둔다
+
+INPUT
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 12 && RESULT > 9
+	;上位職は勲章が必要
+	IF EXP:ARG:81 < 10
+		PRINTW *훈장이 부족하다*
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF RESULT < 0 || RESULT > 9
+	GOTO INPUT_LOOP
+ENDIF
+
+;職業フラグを１度全部オフ
+CFLAG:ARG:1 = 0
+FOR COUNT, 0, 12
+	TALENT:ARG:(COUNT+200) = 0
+NEXT
+;常識改変をリセット
+TALENT:ARG:281 = 0
+;入力値をフラグ番号に変換
+LOCAL = RESULT+200
+;職業フラグの再設定
+TALENT:ARG:LOCAL = 1
+;レベル1にする
+CFLAG:ARG:9 = 1
+;戦闘技能
+IF LOCAL == 200
+	TALENT:ARG:240 = 1
+ELSEIF LOCAL == 201
+	TALENT:ARG:241 = 1
+ELSEIF LOCAL == 202
+	TALENT:ARG:242 = 1
+ELSEIF LOCAL == 203
+	TALENT:ARG:243 = 1
+ELSEIF LOCAL == 205
+	TALENT:ARG:249 = 1
+ELSEIF LOCAL == 206
+	TALENT:ARG:250 = 1
+ELSEIF LOCAL == 207
+	TALENT:ARG:251 = 1
+ELSEIF LOCAL == 208
+	TALENT:ARG:252 = 1
+ELSEIF LOCAL == 209
+	CFLAG:ARG:1 = 7
+ENDIF
+
+;職ごとの基礎パラメーター
+IF TALENT:ARG:200 == 1 || TALENT:ARG:205 == 1
+	;전사&기사
+	CFLAG:ARG:11 = 20
+	CFLAG:ARG:12 = 20
+	CFLAG:ARG:13 = 20
+	CFLAG:ARG:14 = 20
+ELSEIF TALENT:ARG:201 == 1 || TALENT:ARG:206 == 1
+	;마술사&무녀
+	CFLAG:ARG:11 = 15
+	CFLAG:ARG:12 = 15
+	CFLAG:ARG:13 = 15
+	CFLAG:ARG:14 = 15
+ELSEIF TALENT:ARG:202 == 1 || TALENT:ARG:207 == 1
+	;신관&닌자
+	CFLAG:ARG:11 = 15
+	CFLAG:ARG:12 = 20
+	CFLAG:ARG:13 = 15
+	CFLAG:ARG:14 = 20
+ELSEIF TALENT:ARG:203 == 1 || TALENT:ARG:208 == 1
+	;도적&궁사
+	CFLAG:ARG:11 = 20
+	CFLAG:ARG:12 = 15
+	CFLAG:ARG:13 = 20
+	CFLAG:ARG:14 = 15
+ELSEIF TALENT:ARG:210 == 1 || TALENT:ARG:211 == 1
+	;마계장군&마도신관
+	CFLAG:ARG:11 = 40
+	CFLAG:ARG:12 = 40
+	CFLAG:ARG:13 = 40
+	CFLAG:ARG:14 = 40
+ELSE
+	;その他
+	CFLAG:ARG:11 = 15
+	CFLAG:ARG:12 = 15
+	CFLAG:ARG:13 = 15
+	CFLAG:ARG:14 = 15
+ENDIF
+
+MAXBASE:ARG:0 = 2000
+MAXBASE:ARG:1 = 2000
+IF TALENT:ARG:210 == 1 || TALENT:ARG:211 == 1
+	;마계장군&마도신관
+	MAXBASE:ARG:0 += 500
+	MAXBASE:ARG:1 += 500
+ENDIF
+BASE:ARG:0 = MAXBASE:ARG:0
+BASE:ARG:1 = MAXBASE:ARG:1
+
+PRINTFORMW %SAVESTR:ARG%는 %TALENTNAME:LOCAL%로 전직했다! 
+
+IF TALENT:ARG:204 == 1
+	CALL JOB_CHANGE_BENKI(ARG)
+ENDIF
+
+IF (TALENT:ARG:202 == 0 && TALENT:ARG:206 == 0) && (TALENT:ARG:250 || TALENT:ARG:242) && TALENT:ARG:282 == 0
+	;神官でも巫女でもない場合、神を冒涜するか選べる
+	
+	PRINTFORML 이전에 믿던 신을 모독할 수 있습니다
+	PRINT  [0] 모독한다  
+	PRINTL  [1] 하지않는다
+	
+	INPUT
+	
+	IF RESULT == 0
+		TALENT:ARG:282 = 1
+		PRINTW *모독했습니다*
+	ENDIF
+	
+ENDIF
+
+RETURN 0
+
+;-----------------------------------------------
+@JOB_CHANGE_BENKI(ARG)
+;-----------------------------------------------
+
+$INPUT_LOOP
+
+PRINTFORML 상식을 성적인 것으로 개편할 수 있습니다
+PRINT  [0] 전투 상식을 바꾼다  -  
+PRINTFORML %GET_LOOK_INFO(ARG, "상식개변【전투】")%
+
+PRINT  [1] 일상의 상식을 바꾼다  -  
+PRINTFORML %GET_LOOK_INFO(ARG, "상식개변【일상】")%
+
+PRINTL  [999] 종료한다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT == 0
+	TALENT:ARG:281 += 1
+	TALENT:ARG:281 %= 3
+ELSEIF RESULT == 1
+	TALENT:ARG:283 += 1
+	;獣姦フィルタ
+	SIF TALENT:ARG:283 == 5 && ITEM:22 == 0
+		TALENT:ARG:283 += 1
+	TALENT:ARG:283 %= 6
+ENDIF
+
+GOTO INPUT_LOOP
+
+

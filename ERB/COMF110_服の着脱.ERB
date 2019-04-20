@@ -1,0 +1,541 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;옷을착탈
+;着衣・脱衣関連コマンド：調教対象の服の着脱を行う
+;このコマンドは実行してもパラメーターは変更せず通常コマンド扱いにならない
+;-------------------------------------------------
+@COM110
+
+$INPUT_LOOP
+
+PRINTL 옷을착탈
+
+A = CFLAG:40
+CALL WEARING_CLOTH_ALL
+B = CFLAG:40
+CFLAG:40 = A
+
+;-------------------------------------------------
+;着脱の確認
+;-------------------------------------------------
+PRINTFORM 현재 %SAVESTR:TARGET%의 모습은、
+CALL PRINT_CLOTHTYPE
+PRINTFORML 입니다……
+
+;着脱判定変数をTとWに保存
+CALL COM110_ABLE0T
+T:0 = RESULT
+CALL COM110_ABLE0W
+W:0 = RESULT
+CALL COM110_ABLE1T
+T:1 = RESULT
+CALL COM110_ABLE1W
+W:1 = RESULT
+CALL COM110_ABLE2T
+T:2 = RESULT
+CALL COM110_ABLE2W
+W:2 = RESULT
+CALL COM110_ABLE3T
+T:3 = RESULT
+CALL COM110_ABLE3W
+W:3 = RESULT
+CALL COM110_ABLE4T
+T:4 = RESULT
+CALL COM110_ABLE4W
+W:4 = RESULT
+CALL COM110_ABLE5T
+T:5 = RESULT
+CALL COM110_ABLE5W
+W:5 = RESULT
+
+;特別コス脱衣
+IF T:0
+	PRINT  [0] - 
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	IF CFLAG:42 >= 51
+		PRINTL 을 제외한다
+	ELSE
+		PRINTL 을 벗긴다
+	ENDIF
+ENDIF
+;特別コス装着
+IF W:0
+	PRINT    [0] - 
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	IF CFLAG:42 >= 51
+		PRINTL 을 붙인다
+	ELSE
+		PRINTL 을 입힌다
+	ENDIF
+ENDIF
+;ワンピース脱衣
+IF T:1
+	PRINT  [1] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 을 벗긴다
+ENDIF
+;ワンピース装着
+IF W:1
+	PRINT    [1] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 을 입힌다
+ENDIF
+;ツーピース上脱衣
+IF T:2
+	PRINT  [1] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 위를 벗긴다
+ENDIF
+;ツーピース上装着
+IF W:2
+	PRINT    [1] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 위를 입힌다
+ENDIF
+;ツーピース下脱衣
+IF T:3
+	PRINT  [2] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	IF CFLAG:41 >= 1 && CFLAG:41 <= 100
+		PRINTL 의 스커트를 벗긴다
+	ELSE
+		PRINTL 아래를 벗긴다
+	ENDIF
+ENDIF
+;ツーピース下装着
+IF W:3
+	PRINT    [2] - 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	IF CFLAG:41 >= 1 && CFLAG:41 <= 100
+		PRINTL 의 스커트를 입게 한다
+	ELSE
+		PRINTL 아래를 입힌다
+	ENDIF
+ENDIF
+;ブラジャー脱衣
+SIF T:4
+	PRINTL  [3] - 브래지어를 제외한다
+;ブラジャー装着
+SIF W:4
+	PRINTL    [3] - 브래지어를 입게한다
+;パンツ脱衣
+SIF T:5
+	PRINTL  [4] - 팬티를 벗긴다
+;パンツ装着
+SIF W:5
+	PRINTL    [4] - 팬티를 입게 한다
+;全裸にして終了
+SIF CFLAG:40 != 0
+	PRINTL  [7] - 알몸으로 종료
+;옷을찢는다
+SIF CFLAG:40 != 0
+	PRINTL  [9] - [옷을찢는다]로 이동
+PRINTL  [100] - 그만둔다
+
+INPUT
+
+;-------------------------------------------------
+;着脱処理
+;-------------------------------------------------
+;外せない特別コス
+IF RESULT == 0 && CFLAG:49
+	PRINTFORML %SAVESTR:TARGET%의 정조대의 열쇠는 버렸습니다
+	WAIT
+;特別コス脱衣
+ELSEIF RESULT == 0 && T:0
+	PRINTFORM %SAVESTR:TARGET%(으)로부터 
+	IF  TFLAG:45 & 32
+		PRINT 、오물 투성이의 
+	ELSEIF TFLAG:45 & 16
+		PRINT 、오줌으로 흠뻑 젖은 
+	ENDIF
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	IF CFLAG:42 >= 51
+		PRINTL 을(를) 제외했다
+	ELSE
+		PRINTL 을(를) 벗겨냈다
+	ENDIF
+	CFLAG:40 -= 64
+;特別コス装着
+ELSEIF RESULT == 0 && W:0
+	;汚物まみれの場合
+	IF TFLAG:45 & 32
+		PRINTFORML 오물 투성이로、도저히 사용할 수 있는 상태가 아닙니다
+		;おしっこまみれの場合
+	ELSEIF  TFLAG:45 & 16
+		PRINTFORML 오줌으로 흠뻑 젖어、사용할 수 있는 상태가 아닙니다
+	ELSE
+		PRINTFORM %SAVESTR:TARGET%에게 
+		CALL PRINT_CLOTHTYPE_SPECIAL
+		IF CFLAG:42 >= 51
+			PRINTL 를 붙였다
+		ELSE
+			PRINTL 를 입혔다
+		ENDIF
+		CFLAG:40 |= 64
+	ENDIF
+;ワンピース脱衣
+ELSEIF RESULT == 1 && T:1
+	PRINTFORM %SAVESTR:TARGET%(으)로부터 
+	IF  TFLAG:45 & 8
+		PRINT 오물 투성이의 
+	ELSEIF TFLAG:45 & 4
+		PRINT 오줌으로 흠뻑 젖은 
+	ENDIF
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 을(를) 벗겼다
+	SIF CFLAG:40 & 4
+		CFLAG:40 -= 4
+	SIF CFLAG:40 & 8
+		CFLAG:40 -= 8
+	SIF CFLAG:40 & 16
+		CFLAG:40 -= 16
+;ワンピース装着
+ELSEIF RESULT == 1 && W:1
+	;汚物まみれの場合
+	IF (TFLAG:45 & 8)
+		PRINTFORML 오물 투성이로、도저히 입을 수 있는 상태가 아닙니다
+	;おしっこまみれの場合
+	ELSEIF TFLAG:45 & 4
+		PRINTFORML 오줌으로 흠뻑 젖어、입을 수 있는 상태가 아닙니다
+	ELSE
+		PRINTFORM %SAVESTR:TARGET%에게 
+		CALL PRINT_CLOTHTYPE_MAIN2
+		PRINTL 을 입혔다
+		SIF CFLAG:45 == 0
+			CFLAG:40 |= 4
+		IF CFLAG:46 == 0
+			IF CFLAG:41 <= 250
+				CFLAG:40 |= 8
+			ELSE
+				CFLAG:40 |= 16
+			ENDIF
+		ENDIF
+	ENDIF
+;ツーピース上脱衣
+ELSEIF RESULT == 1 && T:2
+	PRINTFORM %SAVESTR:TARGET%(으)로부터 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 위를 벗겼다 
+	CFLAG:40 -= 4
+;ツーピース上装着
+ELSEIF RESULT == 1 && W:2
+	PRINTFORM %SAVESTR:TARGET%에게 
+	CALL PRINT_CLOTHTYPE_MAIN2
+	PRINTL 위를 입혔다 
+	CFLAG:40 |= 4
+;ツーピース下脱衣
+ELSEIF RESULT == 2 && T:3
+	;脱衣処理
+	PRINTFORM %SAVESTR:TARGET%로부터 
+	IF  TFLAG:45 & 8
+		PRINT 、오물 투성이의 
+	ELSEIF TFLAG:45 & 4
+		PRINT 、오줌으로 흠뻑 젖은 
+	ENDIF
+	CALL PRINT_CLOTHTYPE_MAIN2
+	IF CFLAG:41 >= 1 && CFLAG:41 <= 100
+		PRINTL 의 스커트를 벗겼다
+	ELSE
+		PRINTL 하의를 벗겼다
+	ENDIF
+	SIF CFLAG:40 & 8
+		CFLAG:40 -= 8
+	SIF CFLAG:40 & 16
+		CFLAG:40 -= 16
+;ツーピース下装着
+ELSEIF RESULT == 2 && W:3
+	;汚物まみれの場合
+	IF (TFLAG:45 & 8)
+		PRINTFORML 오물 투성이로、도저히 찰 수 있는 상태가 아닙니다
+	;おしっこまみれの場合
+	ELSEIF (TFLAG:45 & 4)
+		PRINTFORML 오줌으로 흠뻑 젖어、찰 수 있는 상태가 아닙니다
+	ELSE
+		PRINTFORM %SAVESTR:TARGET%에게 
+		CALL PRINT_CLOTHTYPE_MAIN2
+		IF CFLAG:41 >= 1 && CFLAG:41 <= 100
+			PRINTL 의 스커트를 입게 했다
+		ELSE
+			PRINTL 아래를 입게 했다
+		ENDIF
+		IF CFLAG:41 <= 100
+			CFLAG:40 |= 8
+		ELSE
+			CFLAG:40 |= 16
+		ENDIF
+	ENDIF
+;ブラジャー脱衣
+ELSEIF RESULT == 3 && T:4
+	PRINTFORML %SAVESTR:TARGET%의 브레지어를 제외했다
+	CFLAG:40 -= 2
+;ブラジャー装着
+ELSEIF RESULT == 3 && W:4
+	PRINTFORML %SAVESTR:TARGET%에게 브레지어를 입게 했다
+	CFLAG:40 |= 2
+;パンツ脱衣
+ELSEIF RESULT == 4 && T:5
+	PRINTFORM %SAVESTR:TARGET%의 
+	IF (TFLAG:45 & 8)
+		PRINT 오물 투성이의 
+	ELSEIF (TFLAG:45 & 4)
+		PRINT 오줌으로 흠뻑 젖은 
+	ENDIF
+	PRINTL 팬티를 벗겼다
+	CFLAG:40 -= 1
+;パンツ装着
+ELSEIF RESULT == 4 && W:5
+	;汚物まみれの場合
+	IF TFLAG:45 & 2
+		PRINTFORML 오물 투성이로、도저히 찰 수 있는 상태가 아닙니다
+	;おしっこまみれの場合
+	ELSEIF TFLAG:45 & 1
+		PRINTFORML 오줌으로 흠뻑 젖어、찰 수 있는 상태가 아닙니다
+	ELSE
+		PRINTFORML %SAVESTR:TARGET%의 팬티를 입게 했다
+		CFLAG:40 |= 1
+	ENDIF
+;全裸にして終了
+ELSEIF RESULT == 7 && CFLAG:40 != 0
+	;貞操帯は直接選ばないと外せない
+	IF CFLAG:42 == 79 && (CFLAG:40 & 64)
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 정조대를 남기고 알몸으로 했다
+		CFLAG:40 = 64
+	ELSE
+		PRINTFORML %조사선택(SAVESTR:TARGET, "를")% 알몸으로 했다
+		CFLAG:40 = 0
+		WAIT
+		RETURN 0
+	ENDIF
+;衣服を破る
+ELSEIF RESULT == 9 && CFLAG:40 != 0
+	PRINTL 
+	CALL COM111
+	SIF RESULT == 1
+		RETURN 0
+ELSEIF RESULT == 100
+	RETURN 0
+ENDIF
+
+PRINTL 
+
+GOTO INPUT_LOOP
+
+;=================================================
+;判定用関数群
+;=================================================
+;特別コス脱衣判定
+@COM110_ABLE0T
+;特別コスが設定されていないとダメ
+SIF CFLAG:42 == 0
+	RETURN 0
+;特別コスを付けていないとダメ
+SIF (CFLAG:40 & 64) == 0
+	RETURN 0
+;オムツの場合
+IF CFLAG:42 == 69
+	;上着下・ズボンタイプを穿いてるとダメ
+	SIF (CFLAG:40 & 16) 
+		RETURN 0
+	;邪魔になる特別コスを付けているとダメ
+	SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+		RETURN 0
+	;和服の場合は上着下・スカートタイプを着ているとダメ
+	SIF CFLAG:41 == 202 && (CFLAG:40 & 8)
+		RETURN 0
+ENDIF
+RETURN 1
+
+;特別コス装着判定
+@COM110_ABLE0W
+;特別コスが設定されていないとダメ
+SIF CFLAG:42 == 0
+	RETURN 0
+;特別コスを付けているとダメ
+SIF (CFLAG:40 & 64)
+	RETURN 0
+;特別コスが標準装備に含まれてないとダメ
+SIF (B & 64) == 0
+	RETURN 0
+;洗濯中だとダメ
+SIF CFLAG:47 != 0
+	RETURN 0
+;オムツの場合
+IF CFLAG:42 == 69
+	;上着下・ズボンタイプを穿いてるとダメ
+	SIF (CFLAG:40 & 16) 
+		RETURN 0
+	;邪魔になる特別コスを付けているとダメ
+	SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+		RETURN 0
+	;和服の場合は上着下・スカートタイプを着ているとダメ
+	SIF CFLAG:41 == 202 && (CFLAG:40 & 8)
+		RETURN 0
+ENDIF
+RETURN 1
+
+;ワンピース脱衣判定
+@COM110_ABLE1T
+;設定衣装がワンピースでないとダメ
+SIF CFLAG:41 <= 200
+	RETURN 0
+;上着上や上着下のいずれかを着てないとダメ
+SIF (CFLAG:40 & 28) == 0
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ワンピース装着判定
+@COM110_ABLE1W
+;設定衣装がワンピースでないとダメ
+SIF CFLAG:41 <= 200
+	RETURN 0
+;「上着上を付けているか、上着上が洗濯中である」かつ
+;「上着下を付けているか、上着下が洗濯中である」だとダメ
+;（↑衣装が破れた場合を想定して、こんなわかり辛い記述になっています。
+;　　要するに、今装着してなくて洗濯中でもない上半分か下半分がないとダメってことです）
+IF (CFLAG:40 & 4) || CFLAG:45 != 0
+	SIF (CFLAG:40 & 24) || CFLAG:46 != 0
+		RETURN 0
+ENDIF
+;上着上と上着下が標準装備に含まれてないとダメ
+SIF (B & 4) == 0 || ((B & 8) == 0 && (B & 16) == 0)
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ツーピース上脱衣判定
+@COM110_ABLE2T
+;設定衣装がツーピースでないとダメ
+SIF CFLAG:41 >= 201
+	RETURN 0
+;上着上を付けてないとダメ
+SIF (CFLAG:40 & 4) == 0
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ツーピース上装着判定
+@COM110_ABLE2W
+;設定衣装がツーピースでないとダメ
+SIF CFLAG:41 >= 201
+	RETURN 0
+;上着上を付けているとダメ
+SIF (CFLAG:40 & 4)
+	RETURN 0
+;上着上が標準装備に含まれてないとダメ
+SIF (B & 4) == 0
+	RETURN 0
+;上着上が洗濯中だとダメ
+SIF CFLAG:45 != 0
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ツーピース下脱衣判定
+@COM110_ABLE3T
+;設定衣装がツーピースでないとダメ
+SIF CFLAG:41 >= 201
+	RETURN 0
+;なにか上着下を付けてないとダメ
+SIF (CFLAG:40 & 24) == 0
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+RETURN 1
+
+;ツーピース下装着判定
+@COM110_ABLE3W
+;設定衣装がツーピースでないとダメ
+SIF CFLAG:41 >= 201
+	RETURN 0
+;なにか上着下を付けているとダメ
+SIF (CFLAG:40 & 24)
+	RETURN 0
+;上着下が標準装備に含まれてないとダメ
+SIF (B & 24) == 0
+	RETURN 0
+;上着下が洗濯中だとダメ
+SIF CFLAG:46 != 0
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+RETURN 1
+
+;ブラジャー脱衣判定
+@COM110_ABLE4T
+;ブラジャーを付けてないとダメ
+SIF (CFLAG:40 & 2) == 0
+	RETURN 0
+;上着上を着ているとダメ
+SIF (CFLAG:40 & 4)
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;ブラジャー装着判定
+@COM110_ABLE4W
+;上半身裸じゃないとダメ
+SIF (CFLAG:40 & 6)
+	RETURN 0
+;ブラジャーが標準装備に含まれてないとダメ
+SIF (B & 2) == 0
+	RETURN 0
+;ブラジャーが洗濯中だとダメ
+SIF CFLAG:44 != 0
+	RETURN 0
+;邪魔になる特別コスを付けているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 <= 50
+	RETURN 0
+RETURN 1
+
+;パンツ脱衣判定
+@COM110_ABLE5T
+;パンツを穿いてないとダメ
+SIF (CFLAG:40 & 1) == 0
+	RETURN 0
+;上着下・ズボンタイプを穿いてるとダメ
+SIF (CFLAG:40 & 16) 
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+;和服の場合は上着下・スカートタイプを着ているとダメ
+SIF CFLAG:41 == 202 && (CFLAG:40 & 8)
+	RETURN 0
+RETURN 1
+
+;パンツ装着判定
+@COM110_ABLE5W
+;パンツをはいてるとダメ
+SIF (CFLAG:40 & 1)
+	RETURN 0
+;上着下・ズボンタイプを穿いてるとダメ
+SIF (CFLAG:40 & 16)
+	RETURN 0
+;パンツが標準装備に含まれてないとダメ
+SIF (B & 1) == 0
+	RETURN 0
+;パンツが洗濯中だとダメ
+SIF CFLAG:43 != 0
+	RETURN 0
+;ズーコの着ぐるみを着ているとダメ
+SIF (CFLAG:40 & 64) && CFLAG:42 == 11
+	RETURN 0
+;和服の場合は上着下・スカートタイプを着ているとダメ
+SIF CFLAG:41 == 202 && (CFLAG:40 & 8)
+	RETURN 0
+RETURN 1

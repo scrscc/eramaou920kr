@@ -1,0 +1,289 @@
+﻿
+;大型イベント専用処理
+;----------------------------------
+;メニュー
+;----------------------------------
+@CAMPAIGN_MENU
+#DIM CHARA
+
+PRINT 현재 선택중인 이벤트…
+
+IF FLAG:400 > 0
+	TRYCALLFORM CAMPAIGN_NAME_{FLAG:400}
+ELSE
+	PRINT 없음
+ENDIF
+
+PRINTL  
+DRAWLINE
+
+$INPUT_LOOP
+
+IF FLAG:400 == 0
+	PRINTL [0] 캠페인 선택
+ELSE
+	PRINTL [1] 노예 선별（기력-100）
+	PRINTL [2] 노예 파견
+	;PRINTL [3] 奴隷の強化状況確認
+ENDIF
+
+PRINTL [999] 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT == 0 && FLAG:400 != 0
+	PRINTL *캠페인 중에는 변경할 수 없습니다*
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 0
+	CALL SELECT_CAMPAIGN
+ELSEIF FLAG:400 == 0
+	PRINTL *캠페인을 선택하세요*
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 1
+	;奴隷選別
+	;キャラメイクできる
+	PRINTL 기력을 100소비합니다……
+	IF BASE:0:1 < 100
+		PRINTW *기력이 부족하다! *
+		GOTO INPUT_LOOP
+	ENDIF
+	
+	CALL RAND_CHARA_MAKE
+	SIF RESULT == 0
+		GOTO INPUT_LOOP
+	CHARA = RESULT
+	;成功した場合気力100消費
+	BASE:0:1 -= 100
+	;素質ON
+	LOCAL = FLAG:400 + 360
+	TALENT:CHARA:LOCAL = 1
+	
+ELSEIF RESULT == 2
+	;奴隷派遣
+	$INPUT_LOOP_2
+
+	PRINTL 대상의 노예를 적 진영에 파견하겠습니다
+	PRINTL 누구를 파견 하시겠습니까？
+
+	CALL LIFE_LIST
+	PRINTL  [999] - 돌아온다
+	
+	INPUT
+	
+	;イベント素質
+	LOCAL = FLAG:400 + 360
+	IF RESULT == 999
+		GOTO INPUT_LOOP
+	ELSEIF RESULT < 0 || RESULT >= CHARANUM
+		GOTO INPUT_LOOP_2
+	;臨死中のキャラは排除
+	ELSEIF BASE:RESULT:0 < 1
+		GOTO INPUT_LOOP_2
+	ELSEIF TALENT:RESULT:LOCAL == 0
+		PRINTFORMW 【%TALENTNAME:LOCAL%】이 없는 노예는 파견 할 수 없습니다
+		GOTO INPUT_LOOP_2
+	ELSEIF TALENT:RESULT:292
+		PRINTFORMW %SAVESTR:RESULT%는 그림자 때문에 파견할 수 없습니다
+		GOTO INPUT_LOOP_2
+	ELSEIF CFLAG:RESULT:1 == 12
+		PRINTFORMW %SAVESTR:RESULT%는 이미 파견 중 입니다
+		GOTO INPUT_LOOP_2
+	ELSEIF CFLAG:RESULT:1 != 0
+		PRINTFORMW %SAVESTR:RESULT%는 파견 할 수 있는 상태가 아닙니다
+		GOTO INPUT_LOOP_2
+	ENDIF
+	CHARA = RESULT
+	CFLAG:CHARA:1 = 12
+	;現在階層と目標階層をリセット
+	CFLAG:CHARA:501 = 1
+	CFLAG:CHARA:507 = 0
+	CFLAG:CHARA:520 = 0
+	CFLAG:CHARA:521 = 1
+	PRINTFORMW %SAVESTR:CHARA%를 파견했습니다
+	GOTO INPUT_LOOP_2
+ENDIF
+
+GOTO INPUT_LOOP
+
+;----------------------------------
+@SELECT_CAMPAIGN
+;----------------------------------
+;キャンペーン選び放題
+;最大20個だけど、20個もイベント作らないだろう…的な
+
+FOR LOCAL, 1, 21
+	;イベントERBがあればメニューが表示される
+	TRYCALLFORM CAMPAIGN_EXIST_{LOCAL}
+NEXT
+PRINTL [999] 돌아온다
+
+INPUT
+
+SIF RESULT == 999
+	RETURN 0
+;イベントERBがあれば初期設定をしてくれる
+TRYCALLFORM CAMPAIGN_SET_{RESULT}
+;共通初期設定
+;深度リセット
+FLAG:401 = 0
+
+RETURN 0
+
+;----------------------------------
+@CAMPAIGN_ROOM,ARG:0
+;----------------------------------
+;敵ダンジョンの施設をロードする
+;ARG:0=階層
+
+SIF FLAG:400 < 1
+	RETURN 0
+
+RESULT = 0
+TRYCALLFORM CAMPAIGN_ROOM_{FLAG:400},ARG:0
+
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_ROOM_EXTRA,ARG:0
+;----------------------------------
+;敵ダンジョンの施設拡張をロードする
+
+SIF FLAG:400 < 1
+	RETURN 0
+
+RESULT = 0
+TRYCALLFORM CAMPAIGN_ROOM_EXTRA_{FLAG:400},ARG:0
+
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_QUEST,ARG:0
+;----------------------------------
+;階層踏破時に発生するイベント
+;ARG:0はリーダー
+
+SIF FLAG:400 < 1
+	RETURN 0
+;階層を見て進行度と比較
+LOCAL = CFLAG:(ARG:0):501
+IF LOCAL > FLAG:401
+	PRINTL ―STORY―
+	FORCEWAIT
+	TRYCALLFORM CAMPAIGN_STORY_{FLAG:400}
+	;ストーリーが進む
+	FLAG:401 += 1
+ENDIF
+RESULT = 0
+TRYCALLFORM CAMPAIGN_QUEST_{FLAG:400},ARG:0
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_TRAP,ARG:0
+;----------------------------------
+;階層ごとに発生する罠
+;ARG:0はTRAP_NUM（@DUNGEON_TRAP参照）
+
+SIF FLAG:400 < 1
+	RETURN 0
+RESULT = 0
+TRYCALLFORM CAMPAIGN_TRAP_{FLAG:400},ARG:0
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_EQUIP_SELECT,ARG:0
+;----------------------------------
+;敵ダンジョンの指輪宝箱をロードする
+;ARG:0=階層
+SIF FLAG:400 < 1
+	RETURN 0
+RESULT = 0
+TRYCALLFORM CAMPAIGN_EQUIP_SELECT_{FLAG:400},ARG:0
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_MONSTER_LIST,ARG:0
+;----------------------------------
+;敵ダンジョンの出現敵をロードする
+;ARG:0=階層
+;イベント未発の場合、스켈레톤
+SIF FLAG:400 < 1
+	RETURN 190
+RESULT = 190
+TRYCALLFORM CAMPAIGN_MONSTER_LIST_{FLAG:400},ARG:0
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_MONSTER_EXTRA,ARG:0
+;----------------------------------
+;敵ダンジョンの出現敵拡張をロードする
+;ARG:0=INUM
+;イベント未発の場合、스켈레톤
+SIF FLAG:400 < 1
+	RETURN 190
+RESULT = 190
+TRYCALLFORM CAMPAIGN_MONSTER_EXTRA_{FLAG:400},ARG:0
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_DUNGEON_LV
+;----------------------------------
+;ダンジョンLVをロードする
+SIF FLAG:400 < 1
+	RETURN 0
+RESULT = 0
+TRYCALLFORM CAMPAIGN_DUNGEON_LV_{FLAG:400}
+RETURN RESULT
+
+;----------------------------------
+@CAMPAIGN_GAMEOVER
+;----------------------------------
+;ゲームオーバー判定
+SIF FLAG:400 < 1
+	RETURN 0
+
+IF BASE:0:1 <= 0
+	PRINTFORMW **당신의 체력이 떨어졌습니다**
+	PRINTFORMW 캠페인을 종료합니다
+	FLAG:400 = 0
+	BASE:0:1 = 1
+	FOR LOCAL, 0, CHARANUM
+		;ダンジョン攻略キャンセル
+		SIF CFLAG:LOCAL:1 == 12
+			CFLAG:LOCAL:1 = 0
+	NEXT
+ENDIF
+
+RETURN 0
+
+;----------------------------------
+@CAMPAIGN_EXP_PILLORY,ARG:0
+;----------------------------------
+;晒し台による経験値取得
+SIF FLAG:400 < 1
+	RETURN 0
+
+LOCAL:1 = (CFLAG:(ARG:0):661+CFLAG:(ARG:0):662+CFLAG:(ARG:0):663+CFLAG:(ARG:0):664+CFLAG:(ARG:0):665) / 5 + 1
+
+FOR LOCAL, 0, CHARANUM
+	;ダンジョン攻略支援. 経験値取得
+	SIF CFLAG:LOCAL:1 == 12
+		EXP:LOCAL:80 += LOCAL:1
+NEXT
+
+PRINTFORMW 공략 중인 노예는 착취한 에너지를 받아{LOCAL:1}의 경험치를 얻었다
+
+RETURN 0
+
+;----------------------------------
+@CAMPAIGN_ENDING,ARG:0
+;----------------------------------
+;エンディング
+SIF FLAG:400 < 1
+	RETURN 0
+RESULT = 0
+TRYCALLFORM CAMPAIGN_ENDING_{FLAG:400}
+FLAG:400 = 0
+RETURN RESULT
+

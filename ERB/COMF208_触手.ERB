@@ -1,0 +1,71 @@
+﻿;eramaou追加コマンド
+
+;-------------------------------------------------
+;촉수
+;촉수コマンドと変わらないから考え中
+;-------------------------------------------------
+@COM208
+
+PRINTL 촉수
+
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;戦闘値の計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 100
+
+CALL ARENA_SLAVE_POINT
+TFLAG:402 += RAND:RESULT
+;戦闘ポイントが低ければ追加ダメージ
+IF RESULT < (10 * CFLAG:0:9)
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 촉수에 의해 꼼짝도 할 수가 없다
+	LOSEBASE:0 += 10
+	LOSEBASE:1 += 200
+ELSE
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 촉수를 순식간에 쓰러트렸다
+ENDIF
+
+TFLAG:400 = 208
+;戦闘後の処理
+CALL COM_AFTER_ARENA
+SIF RESULT == 0
+	RETURN 1
+
+$INPUT_LOOP_0
+PRINTL 어디를 능욕합니까？
+PRINTL [0] - 입
+PRINTL [1] - 가슴
+SIF TALENT:122 == 0
+	PRINTL [2] - 질
+PRINTL [3] - 애널
+PRINTL [999] 능욕하지 않는다
+
+INPUT
+
+IF RESULT == 0
+	SELECTCOM = 31
+	JUMP COM31
+ELSEIF RESULT == 1
+	SELECTCOM = 5
+	JUMP COM5
+ELSEIF RESULT == 2
+	;対象がオトコなら戻る
+	SIF TALENT:122
+		RETURN 0
+	SELECTCOM = 21
+	JUMP COM21
+ELSEIF RESULT == 3
+	SELECTCOM = 27
+	JUMP COM27
+ELSEIF RESULT == 999
+ELSE
+	GOTO INPUT_LOOP_0
+ENDIF
+
+RETURN 1
+
+;
+;
+;

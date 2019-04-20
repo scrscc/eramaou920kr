@@ -1,0 +1,844 @@
+﻿;------------------------------------------
+@BANISHMENT
+#DIM LV
+#DIMS MATURO
+#DIM FAMILY,3
+;ZはTARGETを保存してるため使用禁止
+;------------------------------------------
+;追放系コマンド
+
+SIF A == 0
+	RETURN 0
+B = A
+
+FAMILY = CFLAG:A:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, A
+FAMILY:2 = RESULT
+
+PRINTW 그냥 추방하는 것만으론 재미가 없어서…
+PRINTL 
+PRINTL [0] 그대로 추방한다.
+SIF TALENT:A:122
+	SETCOLOR (GETDEFCOLOR() - 0x444444)
+PRINTL [1] 남체화의 저주.
+SIF TALENT:A:122
+		RESETCOLOR
+PRINTL [2] 지금까지의 기억을 지운다.
+PRINTL [3] 작은 동물로 변신시켜 들판에 풀어놓는다.
+PRINTL [4] 용사가 되기 전의 생활로 되돌려 준다.
+PRINTL  
+PRINTL [100] 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 5 && RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+SELECTCASE RESULT
+	CASE 1
+		IF TALENT:A:122
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 이미 남자의 몸이다. 다른 방법을 생각해보자. 
+			GOTO INPUT_LOOP
+		ENDIF
+ENDSELECT
+
+IF RESULT == 100
+	TARGET = FLAG:1
+	RETURN 0
+ENDIF
+
+TARGET = A
+TFLAG:510 = RESULT
+
+CALL BANISHMENT_KOUJO
+
+IF TFLAG:510 == 0
+	PRINTFORML %SAVESTR:A%에게 모든 힘을 봉인시키는 낙인을 찍고, 
+	PRINTW 던전의 밖으로 추방시켰다.
+	IF TALENT:A:85
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 어째서 추방 당했는지 알지 못한 채, 사랑하는 당신의 이름을 몇번이고 몇번이고 되뇌었다. 
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 깊은 슬픔에 짓눌려 무너져 버릴거 같은 기분이 되어 숲속으로 사라져갔다…………
+	ELSEIF TALENT:A:85 && TALENT:A:153
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 어째서 추방당하였는지 알지 못한 채, 사랑하는 당신의 이름을 몇번이고 몇번이고 되뇌었다. 
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 임신한 채, 깊은 슬픔에 짓눌려 무너져 버릴거 같은 기분이 되며 숲 속으로 사라져갔다…………
+	ELSEIF TALENT:A:153
+		PRINTFORMW 임신한 몸인 채로 쫒겨난 %조사선택(SAVESTR:A, "는")% 숲 속으로 사라져갔다………
+	ENDIF
+	
+	;末路分岐
+	IF TALENT:A:244 || TALENT:A:245 || TALENT:A:246 || TALENT:A:247
+		;悪魔素質
+		PRINTFORMW %SAVESTR:A%는 악마의 모습이기 때문에 인근 주민들에 의해 포획되어 평생을 구경거리로 보냈다. 
+		MATURO = 구경거리
+	ELSEIF TALENT:A:204
+		;육변기
+		PRINTFORML 육변기 %SAVESTR:A%는, 전신 낙서된 채로 실명과 연락처를 쓴 종이를 보여주면서, 
+		PRINTFORMW 오늘도 수정구 앞에서 음란한 포즈를 취하고 허리를 흔들었다……
+		;動画の内容
+		IF TALENT:A:75 || TALENT:A:76 || TALENT:A:31
+			;음란・섹스광・정조관부실
+			PRINTFORMW %SAVESTR:A%는 연락처를 보고 찾아온 어떤 남성과도 자는 변태 교녀로 유명해졌다.
+			MATURO = 공개 난교녀
+		ELSEIF ABL:A:39 > 0 || TALENT:A:317 == 12
+			;수간중독・かわいい動物が好き
+			PRINTFORMW %SAVESTR:A%는 수간 동영상만 찍는 변태 여자로 유명해졌다.
+			MATURO = 공개 수간녀
+		ELSEIF TALENT:A:121 && TALENT:A:318 == 1
+			;ふたなり巨根
+			PRINTFORML 후타나리인 %SAVESTR:A%는 창녀를 집에 불러
+			PRINTFORMW 자랑스럽게 거근으로 범하는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 후타나리 풍속녀
+		ELSEIF TALENT:A:121 && TALENT:A:318 == 2
+			;ふたなり短小包茎
+			PRINTFORML 후타나리인 %SAVESTR:A%는 포르노를 보면서
+			PRINTFORMW 초라한 단소 포경을 움직이면서 사정하는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 후타나리 자위녀
+		ELSEIF TALENT:A:121
+			;その他のふたなり
+			PRINTFORML 후타나리인 %SAVESTR:A%는 교제중인 그녀를 집으로 불러
+			PRINTFORMW 교배 섹스를 하는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 후타나리 섹스녀
+		ELSEIF ABL:A:22 > 0
+			;레즈끼
+			PRINTFORMW %SAVESTR:A%는 창녀를 집으로 불러 서로 얽히는 변태 레즈비언 여자로 유명해졌다.
+			MATURO = 공개 레즈 풍속녀
+		ELSEIF TALENT:A:104 || TALENT:A:232
+			;V敏感・淫壺
+			PRINTFORMW %SAVESTR:A%는 질에 거대한 드래곤의 딜도를 삽입하는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 보지 확장녀
+		ELSEIF TALENT:A:106 || TALENT:A:233
+			;A敏感・음항
+			PRINTFORMW %SAVESTR:A%는 항문에 거대한 트롤 딜도를 삽입하는 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 애널 확장녀
+		ELSEIF TALENT:A:102 || TALENT:A:230
+			;C敏感・음핵
+			PRINTFORMW %SAVESTR:A%는 음핵을 비정상적으로 극대화 시키는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 클리 비대녀
+		ELSEIF TALENT:A:108 || TALENT:A:231
+			;B敏感・음유
+			PRINTFORMW %SAVESTR:A%는 유두를 비정상적으로 극대화 시키는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 유두 개발녀
+		ELSEIF ABL:A:17 > 0
+			;노출벽
+			PRINTFORMW %SAVESTR:A%는 야외 노출만 찍는 노출증으로 유명세를 타고 있었다
+			MATURO = 공개 야외노출녀
+		ELSEIF ABL:A:21 > 0
+			;마조끼
+			PRINTFORMW %SAVESTR:A%는 마조 노예로 조교되어 가는 모습이 뒤에서 화제가 되고 있었다.
+			MATURO = 공개 마조녀
+		ELSEIF TALENT:A:60 || TALENT:A:74
+			;자위쉬움・자위광
+			PRINTFORMW %SAVESTR:A%는 자위를 격렬하게 하는 자위광으로 유명해졌다.
+			MATURO = 공개 자위녀
+		ELSEIF TALENT:A:317 == 13
+			;綺麗な装飾品が好き
+			PRINTFORML %SAVESTR:A%의 젖꼭지와 음핵, 음순에 붙여진 대량의 피어스를 드러낸
+			PRINTFORMW 육체 개조 매니아로 유명해졌다. 
+			MATURO = 공개 피어스녀
+		ELSEIF TALENT:A:57
+			;오줌싸개
+			PRINTFORMW %SAVESTR:A%는 야외와 인기척이 없는 장소에서 방뇨하는 수정구 동영상으로 유명세를 타고 있었다.
+			MATURO = 공개 야외 방뇨녀
+		ELSEIF TALENT:A:48
+			;근시
+			PRINTFORMW %SAVESTR:A%는 광적인 안경 여배우로 유명했는데
+			MATURO = 공개 섹스 안경녀
+		ELSEIF TALENT:A:314 == 1
+			;엘프
+			PRINTFORMW %SAVESTR:A%는 못생긴 오크와 섹스를 좋아하는 변태 엘프로 유명했는데
+			MATURO = 공개 변태 엘프녀
+		ELSEIF TALENT:A:0
+			;처녀
+			PRINTFORMW %SAVESTR:A%는 처녀인 채 한계까지 항문을 확장하는 변태 엉덩이 구멍 변기로 유명했는데
+			MATURO = 공개 처녀 애널 확장녀
+		ELSE
+			PRINTFORMW %SAVESTR:A%는 이 도시에서 색녀로 유명했는데
+			MATURO = 공개 변태녀
+		ENDIF
+		;見てくれてありがとう
+		IF TALENT:A:317 == 4 || TALENT:317 == 11
+			;故郷の恋人・憧れの人が好き
+			PRINTFORML %SAVESTR:A%의 소식을 찾고 있던 한 남자가 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 변해버린 모습을 보고 울면서 자위 한 것으로 전해졌다.
+		ELSEIF TALENT:A:315 == 1
+			;元学生
+			PRINTFORML 학생 시절에 %SAVESTR:A%를 짝사랑하던 한 소년은 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 음란한 모습을 보며 울면서 자위 한 것으로 전해졌다.
+		ELSEIF TALENT:A:315 == 8
+			;元貴族
+			PRINTFORML 고귀한 귀족의 %SAVESTR:A%를 동경하던 한 남자가 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 치태를 보며 울면서 자위 한 것으로 전해졌다.
+		ELSEIF TALENT:A:315 == 12
+			;元聖女
+			PRINTFORML 신성한 성녀인 %SAVESTR:A%를 동경하던 한 소년은 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 변태 행위를 보며 울면서 자위했다고 전해졌다.
+		ELSEIF TALENT:A:315 == 15
+			;元商人
+			PRINTFORML 가게의 간판 아가씨였던 %SAVESTR:A%를 아는 청년은 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 저속하고 청초한 모습은 한 조각도 보이지 않는 모습을 보며 울면서 자위했다고 전해졌다.
+		ELSEIF TALENT:A:315 == 18
+			;元パン屋
+			PRINTFORML 빵집의 간판 아가씨였던 %SAVESTR:A%를 아는 청년은 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 저속하고 청초한 모습은 한 조각도 보이지 않는 모습을 보며 울면서 자위했다고 전해졌다.
+		ELSEIF TALENT:A:315 == 19
+			;元軍人
+			PRINTFORML 믿음직한 상사였던 %SAVESTR:A%의 전 부하는 그 수정구를 손에 넣어, 
+			PRINTFORMW %SAVESTR:A%의 카리스마는 한 조각도 안보이는 모습을 보며 울면서 자위 한 것으로 전해졌다.
+		ENDIF
+	
+	;深く依存系
+	ELSEIF TALENT:A:46
+		;약물중독
+		PRINTFORMW %SAVESTR:A%는 약물에 중독되어 있었기 때문에, 약물을 얻기 위해서 가랑이를 여는 창녀가 된 것 같다……
+		MATURO = 약물중독 창녀
+	ELSEIF TALENT:A:316 == 3 || TALENT:316 == 18
+		;啓示を受けて・夢に見たから
+		PRINTFORML 믿었던 것에 배신당한 %SAVESTR:A%는 신흥 종교에 빠져 버린 것 같다.
+		PRINTFORMW 신자끼리의 난교 파티에 참가하여 자신의 행복을 찾은 것 같다……
+		MATURO = 사이비 종교 신자
+	
+	;過去の業に引きずられた系
+	ELSEIF TALENT:A:317 == 4 || TALENT:317 == 11
+		;故郷の恋人・憧れの人が好き
+		PRINTFORML %SAVESTR:A%는 긴 여행 끝에 고향에 겨우 도착했지만, 
+		PRINTFORMW 사랑하던 사람이 모르는 여자와 맺어진 것을 알고 조용히 어둠 속으로 사라졌다……
+		MATURO = 행방불명
+	ELSEIF TALENT:A:316 == 7
+		;故郷を救うために勇者になったのに……
+		PRINTFORML 고향을 지키지 못했던 %SAVESTR:A%는, 이미 멸망해 오크의 마을이 된 곳에서 , 
+		PRINTFORML 마을의 광장에 노출되어 원래 마을 주민의 위안용인 공중 변기 노예가 되었다.
+		PRINTFORMW 그 목엔 사과의 말이 새겨진 플레이트가 걸려 있었다……
+		MATURO = 위안용 육변기
+	ELSEIF TALENT:A:315 == 8
+		;元貴族
+		PRINTFORML 원래 귀족인 %SAVESTR:A%는, 고향에서 자신의 집이 몰락한 것을 알았고,
+		;姉がいるか
+		LOCAL = TALENT:A:320 % 1000000
+		LOCAL /= 100000
+		;妹がいるか
+		LOCAL:1 = TALENT:A:320 % 100000000
+		LOCAL:1 /= 10000000
+		IF LOCAL > 0 && LOCAL:1 > 0
+			;姉妹がいる
+			PRINTFORML 아름다운 미모로 유명했던 %SAVESTR:A%의 자매는, 이제 매춘을 하며 생활했다.
+		ELSEIF LOCAL > 0
+			;姉がいる
+			PRINTFORML 아름다운 미모로 유명했던 %SAVESTR:A%의 누나는, 이제 매춘을 하며 생활했다.
+		ELSEIF LOCAL:1 > 0
+			;妹がいる
+			PRINTFORML 아름다운 미모로 유명했던 %SAVESTR:A%의 여동생은, 이제 매춘을 하며 생활했다
+		ENDIF
+		PRINTFORMW 매춘부가 된 %SAVESTR:A%는, 과거에 아래로 보고 있던 시민들에게 저급한 시민으로서의 봉사를 계속 하고 있었다……
+		MATURO = 고급 창녀
+	ELSEIF TALENT:A:316 == 2
+		;お金が必要だったのに……
+		PRINTFORML 돈이 필요했기 때문에 용사가 된 %SAVESTR:A%는, 더 큰 빚을 지고 말았다.
+		PRINTFORML 그리고, 돈 때문에 여자로서의 존엄을 버릴거 같은 일만 계속 하고 있다.
+		PRINTFORMW 변태 성욕을 가진 백만장자가 오늘도 불러서 명령이라고 하면 대변도 먹지 않으면 안 된다……
+		MATURO = 창부
+	ELSEIF TALENT:A:317 == 8
+		;家族が好き
+		;姉がいるか
+		LOCAL = TALENT:A:320 % 1000000
+		LOCAL /= 100000
+		;兄がいるか
+		LOCAL:1 = TALENT:A:320 % 10000000
+		LOCAL:1 /= 1000000
+		;妹がいるか
+		LOCAL:2 = TALENT:A:320 % 100000000
+		LOCAL:2 /= 10000000
+		;弟がいるか
+		LOCAL:3 = TALENT:A:320 % 1000000000
+		LOCAL:3 /= 100000000
+		IF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			;兄弟姉妹
+			PRINT 자신의 형제 자매
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠(형)와 언니(누나)와 여동생
+		ELSEIF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 오빠(형)와 언니(누나)와 남동생
+		ELSEIF LOCAL > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 언니(누나)와 여동생과 남동생
+		ELSEIF LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 오빠(형)와 여동생과 남동생
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0
+			PRINT 오빠(형)와 언니(누나)
+		ELSEIF  LOCAL > 0 && LOCAL:2 > 0
+			PRINT 언니(누나)와 여동생
+		ELSEIF LOCAL > 0 && LOCAL:3 > 0
+			PRINT 언니(누나)와 남동생
+		ELSEIF  LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠(형)와 여동생
+		ELSEIF LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 오빠(형)와 남동생
+		ELSEIF LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 여동생과 남동생
+		ELSEIF  LOCAL > 0
+			PRINT 언니(누나)
+		ELSEIF  LOCAL:1 > 0
+			PRINT 오빠(형)
+		ELSEIF LOCAL:2
+			PRINT 여동생
+		ELSEIF LOCAL:3 > 0
+			PRINT 남동생
+		ELSE
+			PRINT 아버지와 어머니
+		ENDIF
+		PRINTFORML 이(가) 좋아했던%SAVESTR:A%는, 고향에서 자신의 가족이 뿔뿔히 흩어진 것을 알고
+		PRINTFORM %SAVESTR:A%의
+		IF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			;兄弟姉妹
+			PRINT 형제자매
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠(형)와 언니(누나)와 여동생
+		ELSEIF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 오빠(형)와 언니(누나)와 남동생
+		ELSEIF LOCAL > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 언니(누나)와 여동생과 남동생
+		ELSEIF LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 오빠(형)와 여동생과 남동생
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0
+			PRINT 오빠(형)와 언니(누나)
+		ELSEIF  LOCAL > 0 && LOCAL:2 > 0
+			PRINT 언니(누나)와 여동생
+		ELSEIF LOCAL > 0 && LOCAL:3 > 0
+			PRINT 언니(누나)와 남동생
+		ELSEIF  LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠(형)와 여동생
+		ELSEIF LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 오빠(형)와 남동생
+		ELSEIF LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 여동생과 남동생
+		ELSEIF  LOCAL > 0
+			PRINT 언니(누나)
+		ELSEIF  LOCAL:1 > 0
+			PRINT 오빠(형)
+		ELSEIF LOCAL:2
+			PRINT 여동생
+		ELSEIF LOCAL:3 > 0
+			PRINT 남동생
+		ELSE
+			PRINT 아버지와 어머니
+		ENDIF
+		PRINT 은, 빚을 갚기 위해
+		IF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			;兄弟姉妹
+			PRINT 가족 근친상간 물의
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 가족 근친상간 물의
+		ELSEIF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 가족 근친상간 물의
+		ELSEIF LOCAL > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 가족 근친상간 물의
+		ELSEIF LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 가족 근친상간 물의
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0
+			PRINT 오빠(형)와 여동생 근친상간 물의
+		ELSEIF  LOCAL > 0 && LOCAL:2 > 0
+			PRINT 언니와 여동생 근친 레즈 물의
+		ELSEIF LOCAL > 0 && LOCAL:3 > 0
+			PRINT 언니(누나)와 남동생 근친상간 물의
+		ELSEIF  LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠(형)와 여동생 근친상간 물의
+		ELSEIF LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 형제 근친상간 물의
+		ELSEIF LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 여동생과 남동생 근친상간 물의
+		ELSEIF  LOCAL > 0
+			PRINT 오크와 섹스하는
+		ELSEIF  LOCAL:1 > 0
+			PRINT 서큐버스에게 착정당하는
+		ELSEIF LOCAL:2
+			PRINT 변태 마조녀 조교 물의
+		ELSEIF LOCAL:3 > 0
+			PRINT 서큐버스에게 착정당하는
+		ELSE
+			PRINT 숙년 부부 물의
+		ENDIF
+		PRINTL 수정구 영상에 출연했다
+		PRINTFORM 스스로도 포르노 배우가 되었던 %SAVESTR:A%는, 
+		IF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			;兄弟姉妹
+			PRINT 형제 자매 뒤섞이며 섹스를 하면서
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠의 앞에서 자매와 함께 엉덩이를 일렬로 내보이면서
+		ELSEIF LOCAL > 0 && LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 오빠와 동생이 섹스하는 앞에서 남동생의 페니스를 빨면서
+		ELSEIF LOCAL > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 언니와 여동생과 함께 남동생을 범하면서
+		ELSEIF LOCAL:1 > 0 && LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 여동생과 남동생이 섹스하는 옆에서 오빠와 섹스를 하면서
+		ELSEIF  LOCAL > 0 && LOCAL:1 > 0
+			PRINT 오빠의 앞에서 언니와 함께 엉덩이를 일렬로 내보이면서
+		ELSEIF  LOCAL > 0 && LOCAL:2 > 0
+			PRINT 언니와 여동생과 함께 레즈비언 노예로써
+		ELSEIF LOCAL > 0 && LOCAL:3 > 0
+			PRINT 언니와 함께 남동생을 범하면서
+		ELSEIF  LOCAL:1 > 0 && LOCAL:2 > 0
+			PRINT 오빠의 앞에서 여동생과 함께 엉덩이를 일렬로 내보이면서
+		ELSEIF LOCAL:1 > 0 && LOCAL:3 > 0
+			PRINT 오빠와 남동생에게 샌드위치로 범해지면서
+		ELSEIF LOCAL:2 > 0 && LOCAL:3 > 0
+			PRINT 여동생과 함께 남동생을 범하면서
+		ELSEIF  LOCAL > 0
+			PRINT 언니와 서로 뒤얽히면서
+		ELSEIF  LOCAL:1 > 0
+			PRINT 오빠와 섹스하면서
+		ELSEIF LOCAL:2
+			PRINT 여동생과 서로 뒤얽히면서
+		ELSEIF LOCAL:3 > 0
+			PRINT 남동생을 범하면서
+		ELSE
+			PRINT 아버지의 앞에서 어머니와 함께 엉덩이를 일렬로 내보이면서
+		ENDIF
+		PRINTW 망가져버린 가족을 느꼈다
+		MATURO = 포르노 여배우
+		
+	;性癖のせいで変態痴女に系
+	ELSEIF ABL:A:39 > 0
+		;수간중독
+		PRINTFORMW %SAVESTR:A%는 풀밭에서 길 잃은 강아지와 교미하는 모습이 목격되었다……
+		MATURO = 변태 수간녀
+	ELSEIF ABL:A:32 > 0
+		;정액중독
+		PRINTFORML 공중 변소의 낙서로 %SAVESTR:A%의 이름과 연락처가 적혀 있는 것 같다.
+		PRINTFORMW 「정액, 마시고 싶어요. 연락 기다리고 있겠습니다.」
+		MATURO = 걸레녀
+	ELSEIF ABL:A:17 > 0
+		;노출벽
+		PRINTFORMW %SAVESTR:A%는 밤길에 전라로 자위하는 거리의 유명한 색녀가 되어 있었다.
+		MATURO = 노출광
+	ELSEIF ABL:A:21 > 0
+		;마조끼
+		PRINTFORMW %SAVESTR:A%는 도시 도적단의 정부가 되어, 마조 돼지 노예로 무대에 서 있는 것 같다.
+		MATURO = 마조 암퇘지 노예
+	ELSEIF TALENT:A:60 || TALENT:A:74
+		;자위쉬움・자위광
+		PRINTFORML 도시에서 일하게 된 %SAVESTR:A%는, 완전히 자위의 포로가 된 것 같다.
+		PRINTFORMW 야설이나 추잡한 장난감을 사재기 해, 오늘도 음핵에 자국이 남았다……
+		MATURO = 자위광
+	
+	;変わった体質
+	ELSEIF TALENT:A:121 && TALENT:A:318 == 2
+		;ふたなり短小包茎
+		PRINTFORML 후타나리인 %SAVESTR:A%는 단소 포경이기 때문에 여자를 만족시키지 못해, 
+		PRINTFORMW 수정구의 동영상의 포르노를 보며 페니스를 가지고 여자에 대한 욕망을 발산시키고 있는 것 같다……
+		MATURO = 후타나리 포르노 매니아
+	ELSEIF TALENT:A:121
+		;その他のふたなり
+		PRINTFORML 후타나리인 %SAVESTR:A%는, 낮에는 도시에서 일하고, 밤에는 번 돈으로 싼 창관으로 발길을 옮겨
+		PRINTFORMW 페니스에서 솟아나는 성욕을 발산시키는 생활을 하고 있는 것 같다……
+		MATURO = 후타나리 풍속 매니아
+	ELSEIF TALENT:A:273
+		;처녀봉인
+		PRINTFORML 처녀 봉인을 풀 비용이 없는 %SAVESTR:A%는, 항문 전문의 창녀가 되었다.
+		PRINTFORMW 항문을 팔 때 마다, 저축하는 %SAVESTR:A%. 그 조그만 벌이조차, 창관에 들고 간다……
+		MATURO = 애널 전용 풍속녀
+	
+	;夢を叶えた系
+	ELSEIF TALENT:A:317 == 3
+		;歌が好き
+		PRINTFORML 노래를 좋아하는 %SAVESTR:A%는, 가수로 데뷔 한 것 같다.
+		PRINTFORMW 인기가 없어서 %SAVESTR:A%는, 최근 음란 러프 스케치의 모델로서도 일하고 있는 것 같다……
+		MATURO = 팔리지 않는 가수
+	ELSEIF TALENT:A:317 == 6
+		;踊りが好き
+		PRINTFORML 춤을 좋아하는 %SAVESTR:A%는, 무희로 데뷔 한 것 같다.
+		PRINTFORMW 인기가 없어서 %SAVESTR:A%는, 최근 끈이나 다름 없는 의상을 입고 춤을 추고 있는 것 같다……
+		MATURO = 팔리지 않는 무희
+	ELSEIF TALENT:A:317 == 7
+		;絵が好き
+		PRINTFORML 그림을 좋아하는 %SAVESTR:A%는, 화가가 되어 자신의 누드를 그림으로 그려 팔고 있는 것 같다.
+		PRINTFORMW 인기가 없어서 %SAVESTR:A%는, 최근 남녀 관련이나 과격한 모티브에 손을 대고 있는 것 같다……
+		MATURO = 팔리지 않는 화가
+	ELSEIF TALENT:A:317 == 18
+		;小説が好き
+		PRINTFORML 소설을 좋아하는 %SAVESTR:A%는, 관능 소설가로 데뷔했다.
+		PRINTFORMW 인기가 없어서 %SAVESTR:A%의 작품은, 최근 저급한 변태 성벽을 쓰는 것으로 바뀌어 온 것 같다……
+		MATURO = 매니악한 관능 소설가
+		
+	;どこにも転ばず仕方なく系
+	ELSEIF TALENT:A:315 == 5
+		;元娼婦
+		PRINTFORMW %SAVESTR:A%는 예전과 아무 것도 변한 것 없이, 길거리의 창녀로 돌아왔다
+		MATURO = 창부
+	ELSEIF TALENT:A:315 == 7
+		;元物乞い
+		PRINTFORMW %SAVESTR:A%는 예전과 아무 것도 변한 것 없이, 길거리에 앉아 혼자 구걸하는 생활로 돌아왔다.
+		MATURO = 거지
+	ELSEIF TALENT:A:315 == 9
+		;元貧民
+		PRINTFORMW %SAVESTR:A%는 예전과 아무 것도 변한 것 없이, 오두막 집에 사는 빈민으로 돌아왔다.
+		MATURO = 빈민
+	ELSE
+		PRINTFORMW 그 이후의 %SAVESTR:A%의 행방은 묘연하다……
+		MATURO = 행방불명
+	ENDIF
+	
+	PRINTL  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다.
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+
+ELSEIF TFLAG:510 == 1
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인시키는 낙인을 찍고, 그녀의 몸에 돌이킬 수 없는 남체화의 저주를 걸었다
+	PRINTFORMW %NAME:MASTER%는 남체화의 영향으로 체력을 소모한 %SAVESTR:A%를, 던전 밖으로 추방했다.
+	PRINTW 언젠가 자신이「여자」였던 것을 잊고, 「남자」로서 살아가는 것 이다.
+	PRINTL  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다.
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	MATURO = 남자로서
+	
+ELSEIF TFLAG:510 == 2
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인시키는 낙인을 찍고, 그녀의 지금까지 인생 기억을 모두 삭제했다.
+	PRINTFORMW %NAME:MASTER%는 모든 기억을 잃고 망연자실한 %SAVESTR:A%를, 던전 밖으로 추방했다.
+	PRINTW 그녀는 자신이 누구인지도 기억 못한 채, 정처없이 방황을 계속 할 것이다…
+	PRINTL  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다.
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	MATURO = 기억상실자
+	
+ELSEIF TFLAG:510 == 3
+	PRINTFORMW %NAME:MASTER%는 %SAVESTR:A%에게 모든 힘을 봉인시키는 낙인을 찍고, 
+	PRINTFORMW 게다가 %SAVESTR:A%의「사람」으로서의 기억을 모두 봉인했다. 그 후 %NAME:MASTER%는
+	PRINT 그녀를 한 마리의
+		IF RAND:8 == 0
+				;ポニー的な
+				PRINT 망아지
+				MATURO = 망아지
+		ELSEIF RAND:8 == 1
+				;ごすずん! 
+				PRINT 강아지
+				MATURO = 강아지
+		ELSEIF RAND:8 == 2
+				;フライングまうまう
+				PRINT 새
+				MATURO = 새
+		ELSEIF RAND:8 == 3
+				;お…おま…
+				PRINT 토끼
+				MATURO = 토끼
+		ELSEIF RAND:8 == 4
+				;あぁ迷える子羊ってそういう…
+				PRINT 새끼 양
+				MATURO = 새끼 양
+		ELSEIF RAND:8 == 5
+				;こゃーん
+				PRINT 새끼 여우
+				MATURO = 새끼 여우
+		ELSE
+				;ぬっぬっぬ
+				PRINT 새끼 고양이
+				MATURO = 새끼 고양이
+		ENDIF
+	PRINTW 로 바꿨다. 
+	PRINTFORMW %NAME:MASTER%는 새끼 동물이 된 %SAVESTR:A%를 던전 밖으로 추방했다. 
+	PRINTFORMW 그녀는, 자신이「인간」이었음을 떠올릴 수 없을 것 이다…
+	PRINTL  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다.
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+
+ELSEIF TFLAG:510 == 4
+	PRINTFORMW %NAME:MASTER%는 %SAVESTR:A%모든 힘을 봉인시키는 낙인을 찍고, 
+	PRINTFORMW 용자가 되기 전의 생활로 되돌려 주었다.
+	
+	MATURO = 
+	SELECTCASE TALENT:(A):용자가되기이전의생활
+	CASE 0
+		;不明
+		PRINTFORMW 그 이후의 %SAVESTR:A%를 아는 사람은 없다……
+		MATURO = 행방불명
+	CASE 1
+		;学生
+		IF TALENT:A:204
+			;육변기
+			PRINTFORM 육변기인 %SAVESTR:A%는 학교에서 유명한 헤픈 여자가 되어 있었다. 
+			MATURO += "걸레"
+		ENDIF
+		IF TALENT:A:48
+			;근시
+			PRINTFORM 수수한 안경은 공부가 가능할 것 으로 보인다. 
+			MATURO += "안경"
+		ENDIF
+		IF TALENT:A:180
+			;창부
+			PRINTFORM 학교 밖에서는 매춘을 하며 돈을 벌고 있는 것 같다. 
+			MATURO += "매춘"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 학생 생활을 만끽하고 있는 것 같다. 
+		MATURO += "학생"
+	CASE 2
+		;修道女
+		IF ABL:A:13 > 0 || TALENT:A:52
+			;奉仕技術1以上, または舌使い
+			PRINTFORM %SAVESTR:A%는 그늘에서 젊은 신관 소년의 성기를 빨면서 번민하는 모습을 즐기고 있다는 것 같다. 
+			MATURO += "펠라돼지"
+		ENDIF
+		IF ABL:A:3 > 0 || TALENT:A:106
+			;A感覚1以上, またはA敏感
+			PRINTFORM %SAVESTR:A%는 항문의 배덕 행위에 빠져 들어, 그늘에서 애널 매춘을 하고 있는 것 같다. 
+			MATURO += "애널매춘"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 성전에서 잘하고 있는 것 같다. 
+		MATURO += "수녀"
+	CASE 3
+		;農家
+		IF TALENT:A:13
+			;솔직
+			PRINTFORM 솔직한 %SAVESTR:A%는 농가에 시집가 밭일을 열심히 하고 있는 것 같다. 
+			MATURO += "밭일"
+		ENDIF
+		IF EXP:A:56 >= 5
+			;獣姦経験5以上
+			PRINTFORM %SAVESTR:A%는 교미의 경험을 잊지 못하고, 농사용 가축과 왕성하게 교미 하는 것을 기억해 버린 것 같다(의역 오역). 
+			MATURO += "수간"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 농촌에서 잘 하고 있는 것 같다. 
+		MATURO += "여자 농부"
+	CASE 4
+		;漁師
+		IF TALENT:A:13
+			;솔직
+			PRINTFORM 솔직한 %SAVESTR:A%는 그물을 만드는 것이 잘 된 것 같다. 
+			MATURO += "일 유능"
+		ENDIF
+		IF EXP:A:74 >= 5
+			;売春経験5以上
+			PRINTFORM %SAVESTR:A%는 가끔 오는 무역선의 선원에게 가랑이를 열고 돈을 벌고 있는 것 같다. 
+			MATURO += "매춘"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 어업을 잘하고 있는 것 같다. 
+		MATURO += "어부"
+	CASE 5
+		;창부
+		IF ABL:A:21 > 0
+			;マゾっ気1以上
+			PRINTFORM Ｍ 여자인 %SAVESTR:A%는 그런 가게에서 인기라고 한다. 
+			MATURO += "마조돼지"
+		ENDIF
+		IF ABL:A:17 > 0 || TALENT:A:28
+			;露出癖1以上, または目立ちたがり
+			PRINTFORM %SAVESTR:A%는 큰 길에서 당당히 매춘 섹스를 즐기면서, 구경비를 벌고 있는 것 같다. 
+			MATURO += "노출"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 빈민가에서 잘하고 있는 것 같다. 
+		MATURO += "창부"
+	CASE 6
+		;盗人
+		IF ABL:A:22 > 0 || TALENT:A:81 || TALENT:A:82
+			;レズっ気1以上, または両刀, または男嫌い
+			PRINTFORM %SAVESTR:A%는 젊은 여자를 유괴하고, 매춘부로 만드는 일도 하고 있는 것 같다. 그 전에 반드시 먼저 맛을 본다. 
+			MATURO += "레즈납치범"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 빈민가에서 잘하고 있는 것 같다. 
+		MATURO += "도적"
+	CASE 7
+		;物乞い
+		IF TALENT:A:180
+			;창부
+			PRINTFORM %SAVESTR:A%는 빵을 위해서라면 뭐든 할 싸구려 창녀가 된 것 같다. 
+			MATURO += "매춘"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 빈민가에서 잘하고 있는 것 같다. 
+		MATURO += "구걸녀"
+	CASE 8
+		;貴族
+		MATURO = 귀족의
+		PRINTFORM 귀족의 집으로 돌아온 %SAVESTR:A%는 일족의 금기자가 되었다. 
+		IF ABL:A:11 > 0 || TALENT:A:102 || TALENT:A:60
+			;欲望1以上, またはC敏感, または自慰しやすい
+			PRINTFORM %SAVESTR:A%는 달콤한 욕정이 멈추지 않게 자기 방에서 원숭이처럼 자위를 하고 있는 것 같다. 
+			MATURO += "자위광"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 귀족 사교계에서 잘하고 있는 것 같다. 
+		MATURO += "아가씨"
+	CASE 9
+		;貧民
+		IF EXP:A:70 >= 5
+			;被写経験5以上
+			PRINTFORM 수정구 동영상이 유출되고 있던 %SAVESTR:A%는, 자택에 남자가 몰려들어 창녀 방이 되어버린 것 같다. 
+			MATURO += "걸레"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 빈민가에서 잘하고 있는 것 같다. 
+		MATURO += "거지녀"
+	CASE 10
+		;墓守
+		IF ABL:A:17 > 0 || TALENT:A:28
+			;露出癖1以上, または目立ちたがり
+			PRINTFORM %SAVESTR:A%는 아무도 없는 묘지에서 알몸 코트로 배회하며 스릴을 즐기고 있는 것 같다. 
+			MATURO += "노출"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 묘지에서 잘하고 있는 것 같다. 
+		MATURO += "묘지기녀"
+	CASE 11
+		;무녀
+		IF ABL:A:3 > 0 || TALENT:A:106
+			;A感覚1以上, またはA敏感
+			PRINTFORM %SAVESTR:A%는 항문의 배덕 행위에 빠져들어, 그늘에서 애널 매춘을 하고 있는 것 같다. 
+			MATURO += "애널매춘"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 성전에서 잘하고 있는 것 같다. 
+		MATURO += "무녀"
+	CASE 12
+		;聖女
+		IF ABL:A:13 > 0 || TALENT:A:52
+			;奉仕技術1以上, または舌使い
+			PRINTFORM %SAVESTR:A%는 그늘에서 젊은 신관 소년의 성기를 빨면서 번민하는 모습을 즐기고 있다는 것 같다. 
+			MATURO += "펠라돼지"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 성전에서 잘하고 있는 것 같다. 
+		MATURO += "성녀"
+	CASE 13
+		;予言者
+		IF ABL:A:13 > 0 || TALENT:A:52
+			;奉仕技術1以上, または舌使い
+			PRINTFORM %SAVESTR:A% 그늘에서 젊은 신관 소년의 성기를 빨면서 번민하는 모습을 즐기고 있다는 것 같다. 
+			MATURO += "펠라돼지"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 성전에서 잘하고 있는 것 같다. 
+		MATURO += "예언자"
+	CASE 14
+		;占い師
+		IF ABL:A:11 > 0 || TALENT:A:36
+			;欲望1以上, または恥薄い
+			PRINTFORM %SAVESTR:A%는 운세 결과에 성적 요소를 섞어, 손님의 얼굴을 붉히게 만드는 모양이다. 
+			MATURO += "성희롱"
+		ENDIF
+		PRINTFORML 여러가지로 %SAVESTR:A%는 길거리에서 잘하고 있는 것 같다. 
+		MATURO += "점쟁이"
+	CASE 15
+		;商人
+		IF TALENT:A:204
+			;육변기
+			PRINTFORM 육변기로서의 %조사선택(SAVESTR:A, "는")% 가게 뒤에서 의심스러운 부업을 시작한것 같다. 
+			MATURO += "걸레"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 상점에서 잘 해내고 있는 것 같다. 
+		MATURO += "간판녀"
+	CASE 16
+		;薬草取り
+		IF ABL:A:17 > 0 || TALENT:A:28
+			;露出癖1以上, または目立ちたがり
+			PRINTFORM %조사선택(SAVESTR:A, "는")% 숲속에서 알몸이 되어, 삼림욕을 즐기는 취미에 눈을 뜬 것 같다. 
+			MATURO += "노출"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 쇠퇴해진 마을에서 잘 해내고 있는 것 같다. 
+		MATURO += "마을아가씨"
+	CASE 17
+		;隠者
+		IF ABL:A:17 > 0 || TALENT:A:28
+			;露出癖1以上, または目立ちたがり
+			PRINTFORM %조사선택(SAVESTR:A, "는")% 수정구를 사용하여 찍은 영상을 은밀히 거래하고 있는 것 같다. 
+			MATURO += "아마추어AV"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 관저내의 생활에서 잘 해내고 잇는 것 같다. 
+		MATURO += "규중 처녀"
+	CASE 18
+		;パン屋
+		MATURO = パン屋の
+		IF TALENT:A:204
+			;육변기
+			PRINTFORM 육변기로서의 %조사선택(SAVESTR:A, "는")% 가게 뒤에서 의심스러운 부업을 시작한것 같다. 
+			MATURO += "걸레"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 빵가게에서 잘 지내고 있는 것 같다. 
+		MATURO += "간판녀"
+	CASE 19
+		;軍人
+		IF EXP:A:70 >= 5
+			;被写経験5以上
+			PRINTFORM 군에서는 벌써 %SAVESTR:A%의 수정구 영상이 유출되어, 음지에서의 소문이 사그러들지 않는다고 한다. 
+			MATURO += "치욕의"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 군에서 잘 해내고 있는 것 같다. 
+		MATURO += "여장교"
+	CASE 20
+		;奴隷
+		IF TALENT:A:143 || TALENT:A:13
+			;ショタコンまたは素直
+			PRINTFORM %조사선택(SAVESTR:A, "는")% 상냥한 소년 주인의 노예로 구입되어 소중히 다뤄지고 있다고 한다. 
+			MATURO += "소년전용"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 노예주의 덕으로 잘 지내고 있는 것 같다. 
+		MATURO += "노예"
+	CASE 21
+		;主婦
+		IF EXP:A:56 >= 5
+			;獣姦経験5以上
+			PRINTFORM %조사선택(SAVESTR:A, "는")% 최근 반려로 개를 산 것 같다. %조사선택(SAVESTR:A, "는")% 정욕에 둔하게 반짝이고 있었다. 
+			MATURO += "수간"
+		ENDIF
+		PRINTFORML 여러가지로 %조사선택(SAVESTR:A, "는")% 남편의 덕으로 잘 지내고 있는 것 같다. 
+		MATURO += "주부"
+	CASEELSE
+		PRINTFORMW 그 후의 %SAVESTR:A%를 아는 자는 없는 것 같다……
+		MATURO = 행방불명
+	ENDSELECT
+	
+	PRINTFORMW ……%MATURO% END
+	
+ENDIF
+
+SIF FAMILY:2 >= 0
+	CSTR:(FAMILY:2):5 = %MATURO%
+
+A = TARGET
+
+;武器解除
+W:0 = CFLAG:A:550
+CALL EQUIP_GET
+CFLAG:A:550 = -1
+;指輪解除
+W:0 = CFLAG:A:551
+CALL EQUIP_GET
+CFLAG:A:551 = -1
+;指輪解除
+W:0 = CFLAG:A:552
+CALL EQUIP_GET
+CFLAG:A:552 = -1
+
+LV = CFLAG:A:9
+
+X = NO:A + 199
+FLAG:X = 1
+
+;前回の助手・調教対象だった場合はフラグを空に
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;前回の助手・調教対象より前だった場合はフラグを減算
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+CALL PARTY_CHAR_DEL, A
+
+DELCHARA A
+
+CALL NAME_RESET
+
+
+FLAG:80 += 1
+
+LV += 1
+LV *= 50
+
+EXP:0:80 += LV
+PRINTFORMW 《봉인된 용자의 힘을 흡수한 당신은 {LV}의 경험치를 얻었다! 》
+
+TARGET = -1
+RETURN 0
+

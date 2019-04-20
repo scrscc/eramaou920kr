@@ -1,0 +1,557 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;애널バイブ
+;道具使用コマンド：調教対象の애널を애널バイブで刺激
+;-------------------------------------------------
+@COM13
+
+IF TEQUIP:90
+	PRINTL 애널촉수
+	;SAVESTR:22 = 애널촉수
+ELSE
+	PRINTL 애널웜
+	;SAVESTR:22 = 애널웜
+ENDIF
+
+
+IF DAY:2 == 15 && TALENT:191 == 0
+	PRINTL *만월은 웜의 산란기입니다。실행하시겠습니까？*
+	PRINTL [0] 네 [1] 아니오
+	INPUT
+	SIF RESULT != 0
+		RETURN 0
+ENDIF
+
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 60
+LOSEBASE:1 += 150
+
+SOURCE:14 = 300
+
+;ABL:Ａ感覚をみる
+IF ABL:3 == 0
+	SOURCE:2 = 80
+	SOURCE:13 = 300
+ELSEIF ABL:3 == 1
+	SOURCE:2 = 250
+	SOURCE:13 = 800
+ELSEIF ABL:3 == 2
+	SOURCE:2 = 600
+	SOURCE:13 = 1400
+ELSEIF ABL:3 == 3
+	SOURCE:2 = 1000
+	SOURCE:13 = 1800
+ELSEIF ABL:3 == 4
+	SOURCE:2 = 1300
+	SOURCE:13 = 2100
+ELSE
+	SOURCE:2 = 1700
+	SOURCE:13 = 2400
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:1 < EXPLV:1
+	TIMES SOURCE:2 , 0.50
+	SOURCE:6 = 2000
+	SOURCE:14 += 200
+ELSEIF EXP:1 < EXPLV:2
+	TIMES SOURCE:2 , 1.00
+	SOURCE:6 = 300
+	SOURCE:14 += 100
+ELSEIF EXP:1 < EXPLV:3
+	TIMES SOURCE:2 , 1.10
+	SOURCE:6 = 50
+	SOURCE:14 += 50
+ELSEIF EXP:1 < EXPLV:4
+	TIMES SOURCE:2 , 1.20
+	SOURCE:6 = 10
+ELSEIF EXP:1 < EXPLV:5
+	TIMES SOURCE:2 , 1.40
+	SOURCE:6 = 0
+ELSE
+	TIMES SOURCE:2 , 1.60
+	SOURCE:6 = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES SOURCE:2 , 0.40
+	SOURCE:6 += 800
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES SOURCE:2 , 0.80
+	SOURCE:6 += 500
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES SOURCE:2 , 1.00
+	SOURCE:6 += 300
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES SOURCE:2 , 1.40
+	SOURCE:6 += 120
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES SOURCE:2 , 1.80
+	SOURCE:6 += 100
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES SOURCE:2 , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES SOURCE:2 , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES SOURCE:2 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES SOURCE:2 , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES SOURCE:2 , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES SOURCE:2 , 0.80
+	TIMES SOURCE:14 , 2.00
+ELSEIF ABL:10 == 1
+	TIMES SOURCE:2 , 0.90
+	TIMES SOURCE:14 , 1.50
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:14 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:14 , 0.80
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:14 , 0.60
+ELSE
+	TIMES SOURCE:14 , 0.30
+ENDIF
+
+;장신
+SIF TALENT:99
+	TIMES SOURCE:6 , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES SOURCE:6 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 2.00
+
+;Ａ민감、鈍感をみる
+;快Ａ自体のチェックは後でまとめてやる
+IF TALENT:105
+	TIMES SOURCE:6 , 1.50
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ELSEIF TALENT:106
+	TIMES SOURCE:6 , 0.60
+	TIMES SOURCE:13 , 0.60
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+IF EXP:0 == 0 && TALENT:30
+	SOURCE:13 /= 3
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+S = 0
+;Ａ感覚が高いほどＡ経験が入る
+IF ABL:3 <= 1
+	S = 1
+ELSEIF ABL:3 <= 4
+	S = 2
+ELSEIF ABL:3 <= 7
+	S = 3
+ELSE
+	S = 4
+ENDIF
+EXP:1 += S
+PRINTFORML Ａ경험+{S}
+
+;レズ・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+;-------------------------------------------------
+;애널バイブの着脱
+;-------------------------------------------------
+TEQUIP:13 = 1 - TEQUIP:13
+SIF TEQUIP:90
+	T = 0
+
+;-------------------------------------------------
+;汚れ（촉수）
+;-------------------------------------------------
+IF TEQUIP:90 && TEQUIP:13
+	STAIN:4 |= 2
+	STAIN:4 |= 4
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;애널バイブ挿入中
+;-------------------------------------------------
+@EQUIP_COM13
+
+IF TEQUIP:90
+	PRINTL ＜애널촉수삽입중＞
+ELSE
+	PRINTL ＜애널웜삽입중＞
+ENDIF
+
+;満月時はたまに産卵する
+IF DAY:2 == 15 && RAND:3 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 장 안에 웜의 알이 대량으로 산란되었다……
+	SIF TALENT:191 == 0
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:191%】이 되었다
+	TALENT:191 = 1
+ENDIF
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 30
+LOSEBASE:1 += 80
+
+SOURCE:14 = 200
+
+;ABL:Ａ感覚をみる
+IF ABL:3 == 0
+	LOCAL:0 = 40
+	LOCAL:1 = 300
+ELSEIF ABL:3 == 1
+	LOCAL:0 = 120
+	LOCAL:1 = 800
+ELSEIF ABL:3 == 2
+	LOCAL:0 = 300
+	LOCAL:1 = 1400
+ELSEIF ABL:3 == 3
+	LOCAL:0 = 500
+	LOCAL:1 = 1800
+ELSEIF ABL:3 == 4
+	LOCAL:0 = 650
+	LOCAL:1 = 2100
+ELSE
+	LOCAL:0 = 850
+	LOCAL:1 = 2400
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:1 < EXPLV:1
+	TIMES LOCAL:0 , 0.50
+	LOCAL:2 = 2000
+ELSEIF EXP:1 < EXPLV:2
+	TIMES LOCAL:0 , 1.00
+	LOCAL:2 = 300
+ELSEIF EXP:1 < EXPLV:3
+	TIMES LOCAL:0 , 1.10
+	LOCAL:2 = 50
+ELSEIF EXP:1 < EXPLV:4
+	TIMES LOCAL:0 , 1.20
+	LOCAL:2 = 10
+ELSEIF EXP:1 < EXPLV:5
+	TIMES LOCAL:0 , 1.40
+	LOCAL:2 = 0
+ELSE
+	TIMES LOCAL:0 , 1.60
+	LOCAL:2 = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES LOCAL:0 , 0.40
+	LOCAL:2 += 800
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES LOCAL:0 , 0.80
+	LOCAL:2 += 500
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+	LOCAL:2 += 300
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES LOCAL:0 , 1.40
+	LOCAL:2 += 120
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.80
+	LOCAL:2 += 100
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES LOCAL:0 , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES LOCAL:0 , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES LOCAL:0 , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 0.80
+	TIMES SOURCE:14 , 2.00
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.90
+	TIMES SOURCE:14 , 1.50
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:14 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:14 , 0.80
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:14 , 0.60
+ELSE
+	TIMES SOURCE:14 , 0.30
+ENDIF
+
+;장신
+SIF TALENT:99
+	TIMES LOCAL:2 , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES LOCAL:2 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 2.00
+
+;Ａ민감、鈍感をみる
+;快Ａ自体のチェックは後でまとめてやる
+IF TALENT:105
+	TIMES SOURCE:6 , 1.50
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ELSEIF TALENT:106
+	TIMES SOURCE:6 , 0.60
+	TIMES SOURCE:13 , 0.60
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+SOURCE:2 += LOCAL:0
+SOURCE:13 += LOCAL:1
+SOURCE:6 += LOCAL:2
+
+;処女で貞操観念
+IF TALENT:0 && TALENT:30
+	TIMES SOURCE:13 , 0.80
+	TIMES SOURCE:14 , 0.50
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+S = 0
+;自慰実行時は経験＋１
+SIF SELECTCOM == 3
+	S = 1
+;Ａ感覚が高いほどＡ経験が入る
+IF ABL:3 <= 1
+	S += 1
+ELSEIF ABL:3 <= 4
+	S += 2
+ELSEIF ABL:3 <= 7
+	S += 3
+ELSE
+	S += 4
+ENDIF
+EXP:1 += S
+PRINTFORML Ａ경험+{S}
+S = 0
+
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+SIF TEQUIP:90
+	T += 1
+
+RETURN 1
+
+
+;-------------------------------------------------
+;-------------------------------------------------
+;自動アナルワーム
+;-------------------------------------------------
+@COM13_AUTO
+
+;体力・気力の限界を見る
+;HP500未満禁止
+SIF BASE:0 < 500
+	RETURN 0
+;気力300未満禁止
+SIF BASE:1 < 300
+	RETURN 0
+
+IF TEQUIP:90
+	PRINT ＜애널촉수삽입중＞
+ELSE
+	PRINT ＜애널윔삽입중＞
+ENDIF
+
+;満月時の産卵は無し
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 10
+LOSEBASE:1 += 30
+
+SOURCE:14 = 200
+
+;ABL:Ａ感覚をみる
+IF ABL:3 == 0
+	LOCAL:0 = 40
+	LOCAL:1 = 300
+ELSEIF ABL:3 == 1
+	LOCAL:0 = 120
+	LOCAL:1 = 800
+ELSEIF ABL:3 == 2
+	LOCAL:0 = 300
+	LOCAL:1 = 1400
+ELSEIF ABL:3 == 3
+	LOCAL:0 = 500
+	LOCAL:1 = 1800
+ELSEIF ABL:3 == 4
+	LOCAL:0 = 650
+	LOCAL:1 = 2100
+ELSE
+	LOCAL:0 = 850
+	LOCAL:1 = 2400
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:1 < EXPLV:1
+	TIMES LOCAL:0 , 0.50
+	LOCAL:2 = 2000
+ELSEIF EXP:1 < EXPLV:2
+	TIMES LOCAL:0 , 1.00
+	LOCAL:2 = 300
+ELSEIF EXP:1 < EXPLV:3
+	TIMES LOCAL:0 , 1.10
+	LOCAL:2 = 50
+ELSEIF EXP:1 < EXPLV:4
+	TIMES LOCAL:0 , 1.20
+	LOCAL:2 = 10
+ELSEIF EXP:1 < EXPLV:5
+	TIMES LOCAL:0 , 1.40
+	LOCAL:2 = 0
+ELSE
+	TIMES LOCAL:0 , 1.60
+	LOCAL:2 = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES LOCAL:0 , 0.40
+	LOCAL:2 += 800
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES LOCAL:0 , 0.80
+	LOCAL:2 += 500
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+	LOCAL:2 += 300
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES LOCAL:0 , 1.40
+	LOCAL:2 += 120
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.80
+	LOCAL:2 += 100
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES LOCAL:0 , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES LOCAL:0 , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES LOCAL:0 , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 0.80
+	TIMES SOURCE:14 , 2.00
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.90
+	TIMES SOURCE:14 , 1.50
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:14 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:14 , 0.80
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:14 , 0.60
+ELSE
+	TIMES SOURCE:14 , 0.30
+ENDIF
+
+;장신
+SIF TALENT:99
+	TIMES LOCAL:2 , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES LOCAL:2 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 2.00
+
+;Ａ민감、鈍感をみる
+;快Ａ自体のチェックは後でまとめてやる
+IF TALENT:105
+	TIMES SOURCE:6 , 1.50
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ELSEIF TALENT:106
+	TIMES SOURCE:6 , 0.60
+	TIMES SOURCE:13 , 0.60
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+
+SOURCE:2 += LOCAL:0
+SOURCE:13 += LOCAL:1
+SOURCE:6 += LOCAL:2
+
+;処女で貞操観念
+IF TALENT:0 && TALENT:30
+	TIMES SOURCE:13 , 0.80
+	TIMES SOURCE:14 , 0.50
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+LOCAL:3 = 0
+;Ａ感覚が高いほどＡ経験が入る
+IF ABL:3 <= 1
+	LOCAL:3 += 1
+ELSEIF ABL:3 <= 4
+	LOCAL:3 += 2
+ELSEIF ABL:3 <= 7
+	LOCAL:3 += 3
+ELSE
+	LOCAL:3 += 4
+ENDIF
+EXP:1 += LOCAL:3
+PRINTFORML Ａ경험+{LOCAL:3}
+
+;自動回数
+CFLAG:666 += 1
+
+
+RETURN 1
+;
+;
+;
