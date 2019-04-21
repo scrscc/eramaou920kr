@@ -1,0 +1,47 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;모유 판매
+;-------------------------------------------------
+@SELL_MILK
+
+SIF TARGET < 0 || TARGET > CHARANUM
+	RETURN 0
+
+A = TFLAG:35 * 100
+O = A * 5
+IF A > 0
+	DRAWLINE
+
+	IF EXP:54 <= EXPLV:3
+		TIMES O , 1.00
+	ELSEIF EXP:54 <= EXPLV:4
+		TIMES O , 1.20
+	ELSEIF EXP:54 <= EXPLV:5
+		TIMES O , 1.50
+	ELSE
+		TIMES O , 2.00
+	ENDIF
+
+	;처녀라면 매각 금액이 3배
+	SIF TALENT:0
+		O = O * 3
+	;乳狂이라면 매각 금액이 2배
+	SIF TALENT:78
+		O = O * 2
+
+	PRINTFORML 착유기를 써서 %SAVESTR:TARGET%에게서 {A}cc의 모유를 짜냈다。
+	IF ASSI > 0
+		IF ABL:ASSI:15
+			PRINTFORML %SAVESTR:ASSI%의 솜씨좋은 가공 덕분에、%SAVESTR:TARGET%의 모유는 평소보다 비싸게 팔렸다。
+			O *= 100 + ABL:ASSI:15 * 5
+			O /= 100
+		ENDIF
+	ENDIF
+	PRINTFORML %SAVESTR:TARGET%의 모유는 {O}포인트의 가격으로 팔렸다。
+	MONEY += O
+	PRINTFORML 소지금 {O}포인트 증가
+	WAIT
+ENDIF
+
+RETURN 0

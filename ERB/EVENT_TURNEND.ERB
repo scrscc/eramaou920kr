@@ -1,0 +1,135 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;>매각과 조교화 처리를 삭제(SHOP에서 한꺼번에 행한다)
+
+;=================================================
+;BEGIN TURNEND뒤 처음으로 호출되는 함수
+;=================================================
+@EVENTTURNEND
+#PRI
+LOCAL = TARGET
+FOR TARGET,0,CHARANUM
+	;売却可・조수可判定の処理
+	CALL CHECK_SELLASSIABLE
+
+	;特殊素質獲得判定の処理
+	CALL CHECK_SPECIALSKIL
+
+	;妊娠判定の処理
+	CALL IN_VAGINA_ALL
+	
+	;妊娠確定時の処理
+	CALL CONCEPTION_CHECK_ALL
+NEXT
+
+TARGET = LOCAL
+
+;完全に死んだキャラがいたら削除
+;REPEAT CHARANUM
+	;主人公は除外
+;	SIF COUNT == 0
+;		CONTINUE
+	;キャラ人数がCOUNT以下になっていたらREPEAT抜ける
+;	SIF COUNT >= CHARANUM
+;		BREAK
+;
+;	IF BASE:COUNT:0 <= -1
+;		T = -1
+;		SIF TARGET != COUNT
+;			T = TARGET
+;		TARGET = COUNT
+;		C = COUNT
+;		CALL KILL_TARGET
+;		COUNT = C - 1
+;		SIF T != -1
+;			TARGET = T
+;	ENDIF
+;REND
+
+;休憩フラグ外す
+FLAG:0 = 0
+
+;午後なら次の日、午前なら午後にする
+IF TIME == 1
+	;娼館営業結果のイベントの呼び出し
+	;CALL YUUKAKU_RESULT
+
+	LOCAL = TARGET
+	FOR TARGET,0,CHARANUM
+		;売春による妊娠判定
+		CALL IN_VAGINA_EXTRA
+		CALL CONCEPTION_CHECK_EXTRA
+	
+		;狂王と獣姦ショーによる妊娠判定
+		CALL IN_VAGINA_KYOUOU_TO_T
+		CALL CONCEPTION_CHECK_KYOUOU_TO_T
+		CALL IN_VAGINA_NTRD_TO_T
+		CALL CONCEPTION_CHECK_NTRD_TO_T
+	NEXT
+	
+	TARGET = LOCAL
+
+	;日付変更時のイベント呼び出し
+	CALL EVENT_NEXTDAY
+	
+	DAY:0 += 1
+	
+	DAY:2 = DAY:2 + 1
+	;毎月29日以上になってたら月替わり処理
+	SIF DAY:2 > 28
+		CALL EVENT_NEXTMONTH
+
+	DAY:3 = DAY:3 + 1
+	;日曜の次は月曜にする
+	SIF DAY:3 > 6
+		DAY:3 = 0
+
+	TIME = 0
+	
+	CALL ENTER_ENEMY,0
+	SIF DAY >= 100
+		CALL ENTER_ENEMY,0
+	SIF DAY >= 500
+		CALL ENTER_ENEMY,0
+	SIF DAY >= 1000
+		CALL ENTER_ENEMY,0
+	
+ELSE
+	TIME = 1
+ENDIF
+
+;アイテムの自動購入
+CALL AUTO_BUYING
+
+;調教対象と조수を空に
+TARGET = -1
+ASSI = -1
+
+BEGIN SHOP
+
+;-------------------------------------------------
+;アイテムの自動購入処理
+;-------------------------------------------------
+@AUTO_BUYING
+;로션
+IF (FLAG:34 & 1) && MONEY >= 200 && ITEM:25 == 0
+	ITEM:25 += 1
+	MONEY -= 200
+ENDIF
+;ビデオテープ
+IF (FLAG:34 & 2) && MONEY >= 500 && ITEM:6 && ITEM:28 == 0
+	ITEM:28 += 1
+	MONEY -= 500
+ENDIF
+;콘돔
+IF (FLAG:34 & 8)
+	REPEAT 10
+		IF MONEY >= 100 && ITEM:24 < 10
+			ITEM:24 += 1
+			MONEY -= 100
+		ENDIF
+	REND
+ENDIF
+
+
+

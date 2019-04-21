@@ -1,0 +1,596 @@
+﻿;-------------------------------------------------
+;キャラの特殊技能獲得判定
+;2009/11/14 EVENTCHECK_Mより改名
+;erapokeへの改造に際して親愛(TALENT:88)は廃止
+;eraIM@Sから導入しました(eramaou)
+;-------------------------------------------------
+@CHECK_SPECIALSKIL
+;調教対象がいないとダメ
+SIF TARGET < 0 || TARGET >= CHARANUM
+	RETURN 0
+;【붕괴】してるとダメ
+IF TALENT:9
+	CALL CHECK_SPECIALSKIL_BODYSHIFT
+	RETURN 0
+ENDIF
+
+;反発刻印がない場合, 
+;主人による調教経験他依存で特殊技能を獲得
+;女魔王導入でレズ経験による制限を排除
+IF MARK:3 == 0
+	;調教経験2000以上で【애정】か【음란】であれば売却・조수可能に
+	IF CFLAG:2 >= 2000 && CFLAG:0 < 2 && (TALENT:76 || TALENT:85)
+			PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+			PRINTFORML %SAVESTR:TARGET%의 몸과 마음은 %CALLNAME:MASTER%에게 의존해버린 것 같다…
+			IF ABL:10 < 5
+				ABL:10 = 5
+				PRINTL 순종이 LV5가 되었다
+			ENDIF
+			SIF CFLAG:0 < 1
+				PRINTFORML %조사선택(SAVESTR:TARGET, "가")% 매각할 수 있게 되었습니다
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 조수 가능하게 되었습니다
+			CFLAG:0 = 2
+	;主人による調教経験1000以上で
+	ELSEIF CFLAG:2 >= 1000
+		;従順3以上, 奉仕精神LV3以上, 屈服刻印LV3, 奉仕快楽経験200以上で【음란】【구애】がなければ【애정】を獲得
+		IF ABL:10 >= 3 && EXP:21 >= EXPLV:5 && TALENT:76 == 0 && TALENT:85 == 0 && TALENT:184 == 0 && MARK:2 == 3 && ABL:16 >= 3
+			PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+			PRINTFORML %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%와의 행위에 즐거움을 느끼는 것 같다…
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:85%】을 얻었다
+			TALENT:85 = 1
+			;堕とした人数＋１. 既に淫乱だとなし
+			SIF TALENT:76 == 0
+				FLAG:30 += 1
+			;【츤데레】なら【反抗】が【순종】に変化
+			IF  TALENT:11 && TALENT:18
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:11%】을 잃고, 【%TALENTNAME:13%】을 얻었다
+				TALENT:11 = 0
+				TALENT:13 = 1
+			ENDIF
+			;【츤데레】以外での【反抗】は消滅
+			IF  TALENT:18 == 0 && TALENT:11
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:11%】을 잃었다
+				TALENT:11 = 0
+			ENDIF
+			;【자제심】か【무관심】なら消える
+			IF TALENT:20 || TALENT:21
+				PRINTFORM %조사선택(SAVESTR:TARGET, "는")%
+				IF TALENT:20
+					PRINTFORM 【%TALENTNAME:20%】
+					TALENT:20 = 0
+				ENDIF
+				IF TALENT:21
+					PRINTFORM 【%TALENTNAME:21%】
+					TALENT:21 = 0
+				ENDIF
+				PRINTL 를 잃었다
+				PRINTL 부정의 구슬이 절반으로 감소했다
+				JUEL:100 /= 2
+			ENDIF
+			;【一線を越えない】持ちの場合は消える
+			IF TALENT:27 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:27%】를 잃었다
+				TALENT:27 = 0
+			ENDIF
+			;【봉사안함】持ちの場合は消える
+			IF TALENT:151 == 1
+				PRINTFORMW %SAVESTR:TARGET%의【%TALENTNAME:151%】이 사라졌다
+				TALENT:151 = 0
+			ENDIF
+			;【질투】持ちの場合は消える
+			IF TALENT:84 == 1
+				PRINTFORMW %SAVESTR:TARGET%의【%TALENTNAME:84%】가 사라졌다
+				TALENT:84 = 0
+			ENDIF
+			;寿命持ちの場合は残り寿命を表示
+			IF BASE:10 > 0
+				D = BASE:10 / 2
+				PRINTFORMW %SAVESTR:TARGET%의 남은 수명은, 앞으로 {D}일입니다
+			ENDIF
+			;【혼박】持ちの場合は消える
+			IF TALENT:혼박
+				PRINTFORML 주박당한 %SAVESTR:TARGET%의 영혼은 스스로의 사랑을 갈구하는 욕망에 충실할것을 맹세하는 일로 풀어져간다……
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 【혼박】을 잃었다
+				TALENT:혼박 = 0
+			ENDIF
+			;【貞操封印】持ちの場合は消えるか選択できる
+			IF TALENT:273 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:273%】의 힘을 잃어버리고 있다……
+				PRINTFORMW 지금이라면 봉인을 해제하는 것도 가능합니다. 봉인을 풉니까？
+				PRINTL  
+				
+				PRINTL [0] - 봉인을 계속건다
+				PRINTL [1] - 봉인을 해제한다
+				$INPUT_LOOP_SEAL
+				INPUT
+				IF RESULT < 0
+					GOTO INPUT_LOOP_SEAL
+				ELSEIF RESULT >= 2
+					GOTO INPUT_LOOP_SEAL
+				ENDIF
+				IF RESULT == 1
+					PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:273%】을 잃었다
+					TALENT:273 = 0
+				ENDIF
+			ENDIF
+		ENDIF
+		;欲望3以上, CVAB感覚合計10以上, 쾌락・屈服刻印LV3, 異常経験3以上で【애정】がなければ【음란】に
+		IF ABL:11 >= 3 && ABL:0+ABL:1+ABL:2+ABL:3 >= 10 && EXP:50 >= 3 && TALENT:85 == 0 && TALENT:76 == 0 && MARK:1 == 3 && MARK:2 == 3
+			PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+			PRINTFORML %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%가 주는 쾌락에 빠져있는것 같다…
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:76%】를 얻었다
+			TALENT:76 = 1
+			;堕とした人数. 既に愛だとなし
+			SIF TALENT:85 == 0
+				FLAG:30 += 1
+			;【자제심】か【무관심】なら消える
+			IF TALENT:20 || TALENT:21
+				PRINTFORM %조사선택(SAVESTR:TARGET, "는")%
+				IF TALENT:20
+					PRINTFORM 【%TALENTNAME:20%】
+					TALENT:20 = 0
+				ENDIF
+				IF TALENT:21
+					PRINTFORM 【%TALENTNAME:21%】
+					TALENT:21 = 0
+				ENDIF
+				PRINTL 를 잃었다
+				PRINTL 부정의 구슬이 절반으로 감소했다
+				JUEL:100 /= 2
+			ENDIF
+			;【一線を越えない】持ちの場合は消える
+			IF TALENT:27 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:27%】를 잃었다
+				TALENT:27 = 0
+			ENDIF
+			;【억압】か【저항】か【질투】なら消える
+			IF TALENT:32 || TALENT:34 || TALENT:84
+				PRINTFORM %조사선택(SAVESTR:TARGET, "는")%
+				IF TALENT:32
+					PRINTFORM 【%TALENTNAME:32%】
+					TALENT:32 = 0
+				ENDIF
+				IF TALENT:34
+					PRINTFORM 【%TALENTNAME:34%】
+					TALENT:34 = 0
+				ENDIF
+				IF TALENT:84
+					PRINTFORM 【%TALENTNAME:32%】
+					TALENT:84 = 0
+				ENDIF
+				PRINTL 를 잃었다
+				PRINTL 부정의 구슬이 절반으로 감소했다
+				JUEL:100 /= 2
+			ENDIF
+			;【쾌감을부정】持ちの場合は消える
+			IF TALENT:71 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:71%】를 잃었다
+				TALENT:71 = 0
+			ENDIF
+			;【자위안함】持ちの場合は消える
+			IF TALENT:150 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:150%】을 잃었다
+				TALENT:150 = 0
+			ENDIF
+			;悪堕ちする種族は悪堕ちする
+			IF !TALENT:혼박
+				IF TALENT:314 == 1
+					PRINTFORMW %SAVESTR:TARGET%은 고결한 엘프와는 거리가 먼 천한 존재로 타락해버렸다
+					TALENT:314 = 7
+					;青肌以外は褐色肌になる
+					SIF TALENT:244 == 0
+						TALENT:253 = 1
+					TALENT:255 = 0
+				ELSEIF TALENT:314 == 6
+					PRINTFORMW %SAVESTR:TARGET%의 청순한 영혼은 완전히 타락하여, 음미로운 욕망에 지배당한 성욕의 노예가 되어버렸다
+					TALENT:314 = 8
+					;青肌以外は褐色肌になる
+					SIF TALENT:244 == 0
+						TALENT:253 = 1
+					TALENT:255 = 0
+				ENDIF
+			ENDIF
+			;【貞操封印】持ちの場合は消えるか選択できる
+			IF TALENT:273 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:273%】의 힘을 잃어버리고 있다……
+				PRINTFORMW 지금이라면 봉인을 해제하는 것도 가능합니다. 봉인을 풉니까？
+				PRINTL  
+				
+				PRINTL [0] - 봉인을 계속건다
+				PRINTL [1] - 봉인을 해제한다
+				$INPUT_LOOP_SEAL_2
+				INPUT
+				IF RESULT < 0
+					GOTO INPUT_LOOP_SEAL_2
+				ELSEIF RESULT >= 2
+					GOTO INPUT_LOOP_SEAL_2
+				ENDIF
+				IF RESULT == 1
+					PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:273%】을 잃었다
+					TALENT:273 = 0
+				ENDIF
+			ENDIF
+		ENDIF
+		;主人による調教経験5000以上, 従順LV5以上, 쾌락・屈服刻印LV3で, 【자위안함】【봉사안함】【세뇌불가】가 소명
+		IF CFLAG:2 >= 5000 && ABL:10 >= 5 && MARK:1 == 3 && MARK:2 == 3
+			IF TALENT:150
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:150%】를 잃었다
+				TALENT:150 = 0
+			ENDIF
+			IF TALENT:151
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:151%】를 잃었다
+				TALENT:151 = 0
+			ENDIF
+			IF TALENT:152
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:152%】를 잃었다
+				TALENT:152 = 0
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+
+;---------------------------------------------------------
+;特殊技能素質
+;---------------------------------------------------------
+IF TALENT:51
+	;技巧Lv7以上かつ奉仕技術Lv7以上かつフェラ経験1500以上（[습득느림]ありの場合）で【혀놀림】
+	IF ABL:12 >= 7 && ABL:13 >= 7 && EXP:22 >= 1500 && TALENT:52 == 0
+		PRINTFORMW %SAVESTR:TARGET%의 봉사가 상당한 수준이 되었다……
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:52%】를 얻었다
+		TALENT:52 = 1
+	ENDIF
+ELSE
+	;技巧Lv5以上かつ奉仕技術Lv5以上かつフェラ経験1000以上（[습득느림]なしの場合）で【혀놀림】
+	IF ABL:12 >= 5 && ABL:13 >= 5 && EXP:22 >= 1000 && TALENT:52 == 0
+		PRINTFORMW %SAVESTR:TARGET%의 봉사가 상당한 수준이 되었다……
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:52%】를 얻었다
+		TALENT:52 = 1
+	ENDIF
+ENDIF
+
+;---------------------------------------------------------
+;特殊性癖素質
+;---------------------------------------------------------
+
+;サドっ気Lv４以上かつ技巧Lv４以上, 嗜虐快楽経験３００以上で【새드】に
+IF ABL:20 >= 4 && ABL:12 >= 4 && EXP:33 >= 300 && TALENT:83 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 사람에게 고통을 주는 기쁨에 눈뜬 것 같다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:83%】를 얻었다
+	TALENT:83 = 1
+ENDIF
+
+;マゾっ気Lv４以上かつ露出癖Lv２以上, 被虐快楽経験３００以上で【마조】に
+IF ABL:21 >= 4 && ABL:17 >= 2 && EXP:30 >= 300 && TALENT:88 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 몸에 고통받을때 느끼는 쾌락에 눈뜬 것 같다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:88%】를 얻었다
+	TALENT:88 = 1
+ENDIF
+
+;露出癖Lv４以上かつマゾっ気Lv２以上, 조교자위경험＋방뇨경험＋噴乳経験２００以上で【노출광】に
+IF ABL:17 >= 4 && ABL:21 >= 2 && EXP:11 + EXP:31 + EXP:54 >= 200 && TALENT:89 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 상태가 이상하다…
+	PRINTFORML 자신의 부끄러운 모습을 남에게 보일때마다 흥분하는 것 같다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:89%】를 얻었다
+	TALENT:89 = 1
+ENDIF
+
+
+;欲望Lv５以上かつ獣姦中毒Lv３以上, 獣姦経験３００以上で【암캐】に
+IF ABL:11 >= 5 && ABL:39 >= 3 && EXP:56 >= 300 && TALENT:136 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 상태가 이상하다…
+	PRINTFORML 바닥에 네발로 엎드린채, 엉덩이를 흔들며 이쪽을 올려보고 있다
+	PRINTFORML 마치 꼬리가 달린 암캐의 그것같았다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:136%】를 얻었다
+	TALENT:136 = 1
+ENDIF
+
+
+;---------------------------------------------------------
+;特殊性感素質
+;---------------------------------------------------------
+;特殊性感素質は一つだけ
+SIF TALENT:74 || TALENT:75 || TALENT:77 || TALENT:78
+	GOTO END_SEXSKILL_2
+
+;Ｃ感覚４以上, 調教自慰経験１００以上で絶頂経験１００以上で【자위광】
+IF ABL:0 >= 4 && EXP:11 >= 100 && EXP:2 >= 100
+	PRINTFORMW %SAVESTR:TARGET%의 상태가 이상하다…
+	PRINTFORM 조교가 끝났음에도 불구하고, %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%이 보건말건, 
+	IF TALENT:121 || TALENT:122
+		PRINT 페니스
+	ELSE
+		PRINT 클리토리스
+	ENDIF
+	PRINTFORML 를 주무르고 있다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:74%】를 얻었다
+	TALENT:74 = 1
+	GOTO END_SEXSKILL_2
+ENDIF
+
+;Ｖ感覚４以上, Ｖ経験３００以上, 絶頂経験１００以上で【セックス狂い】
+IF ABL:2 >= 4 && EXP:0 >= 300 && EXP:2 >= 100
+	PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+	PRINTFORML 조교가 끝났음에도 불구하고, %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%에게 안아달라고 간청하고 있다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:75%】를 얻었다
+	TALENT:75 = 1
+	GOTO END_SEXSKILL_2
+ENDIF
+
+;Ａ感覚４以上, Ａ快楽経験３００以上, 絶頂経験１００以上で【항문광】
+IF ABL:3 >= 4 && EXP:32 >= 300 && EXP:2 >= 100
+	PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+	PRINTFORML 조교가 끝났음에도 불구하고, %조사선택(SAVESTR:TARGET, "는")% 애널을 만지작거리며 뭔가 원하는듯한 시선을 %CALLNAME:MASTER%에게 보내고 있다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:77%】를 얻었다
+	TALENT:77 = 1
+	GOTO END_SEXSKILL_2
+ENDIF
+
+;Ｂ感覚４以上, 噴乳経験１００以上, 絶頂経験１００以上で【가슴광】
+IF ABL:1 >= 4 && EXP:54 >= 100 && EXP:2 >= 100
+	PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+	PRINTFORML 조교가 끝났음에도 불구하고, %조사선택(SAVESTR:TARGET, "는")% 유두를 만지작거리며 뭔가 원하는듯한 시선을 %CALLNAME:MASTER%에게 보내고 있다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:78%】를 얻었다
+	TALENT:78 = 1
+	GOTO END_SEXSKILL_2
+ENDIF
+
+$END_SEXSKILL_2
+
+;---------------------------------------------------------
+;強化素質
+;---------------------------------------------------------
+;素質強化を適応している場合
+IF FLAG:73 <= 0
+	;Ｃ感覚５以上, 調教自慰経験１００以上で絶頂経験３００以上で【음핵】
+	IF ABL:0 >= 5 && EXP:11 >= 100 && EXP:2 >= 300 && TALENT:230 == 0
+		PRINTFORMW %SAVESTR:TARGET%의 상태가 이상하다…
+		PRINTFORM %SAVESTR:TARGET%의 조교가 끝났음에도 불구하고, %CALLNAME:MASTER%에게
+		IF TALENT:121 || TALENT:122
+			PRINT 페니스
+		ELSE
+			PRINT 클리토리스
+		ENDIF
+			PRINTL 의 욱신거림을 가라앉혀달라고 졸라왔다…
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:230%】를 얻었다
+		TALENT:230 = 1
+	ENDIF
+
+	;Ｖ感覚５以上, Ｖ経験３００以上, 絶頂経験３００以上で【음호】
+	IF ABL:2 >= 5 && EXP:0 >= 300 && EXP:2 >= 300 && TALENT:232 == 0
+		PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 조교가 끝났음에도 불구하고, %CALLNAME:MASTER%에게 자궁의 갈증을 채워달라며 매달려왔다…
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:232%】를 얻었다
+		TALENT:232 = 1
+	ENDIF
+
+	;Ａ感覚５以上, Ａ快楽経験３００以上, 絶頂経験３００以上で【음항】
+	IF ABL:3 >= 5 && EXP:32 >= 300 && EXP:2 >= 300 && TALENT:233 == 0
+		PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 조교가 끝났음에도 불구하고, %CALLNAME:MASTER%에게 엉덩이를 괴롭혀달라며 간청해왔다…
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:233%】를 얻었다
+		TALENT:233 = 1
+	ENDIF
+
+	;Ｂ感覚５以上, 噴乳経験１００以上, 絶頂経験３００以上で【음유】
+	IF ABL:1 >= 5 && EXP:54 >= 100 && EXP:2 >= 300 && TALENT:231 == 0
+		PRINTFORMW %SAVESTR:TARGET%의 이쪽을 보는 눈이 이상하다…
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 조교가 끝났음에도 불구하고, %CALLNAME:MASTER%에게 가슴을 주물러달라고 보채왔다…
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:231%】를 얻었다
+		TALENT:231 = 1
+	ENDIF
+
+	;強化素質を全部取得した場合【성호】
+	IF TALENT:230 && TALENT:231 && TALENT:232 && TALENT:233 && TALENT:272 == 0
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:272%】를 얻었다
+		TALENT:272 = 1
+		;【Ｃ둔감】【Ｖ둔감】【Ａ둔감】【Ｂ둔감】は消える
+		IF TALENT:101
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:101%】을 잃었다
+			TALENT:101 = 0
+		ENDIF
+		IF TALENT:103
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:103%】을 잃었다
+			TALENT:103 = 0
+		ENDIF
+		IF TALENT:105
+			PRINTFORM %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:105%】을 잃었다
+			TALENT:105 = 0
+		ENDIF
+		IF TALENT:107
+			PRINTFORM %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:107%】을 잃었다
+			TALENT:107 = 0
+		ENDIF
+	ENDIF
+ENDIF
+
+;---------------------------------------------------------
+;항시발정
+;---------------------------------------------------------
+;常時発情システムを使用している場合
+IF FLAG:75 <= 0
+	IF TALENT:271 == 0
+		;潤滑の蓄積が700以上, と欲情の蓄積が2250以上
+		IF CFLAG:81 >= 700 && CFLAG:82 >= 2250
+			PRINTFORMW %SAVESTR:TARGET%의 상태가 이상하다…
+			PRINTFORM %SAVESTR:TARGET%의
+			SIF TALENT:TARGET:122 || TALENT:TARGET:121
+				PRINT 페니스의 첨단
+			SIF TALENT:TARGET:121
+				PRINT 과
+			SIF TALENT:TARGET:122 == 0
+				PRINT  질
+			PRINTFORML 에서 투명한 액체가 줄줄 흘러나왔다…
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:271%】를 얻었다
+			TALENT:271 = 1
+			;【젖기어려움】がなければ【젖기쉬움】追加
+			IF TALENT:43 == 0 && TALENT:42 == 0
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:42%】을 얻었다
+				TALENT:42 = 1
+			;【젖기어려움】は消える
+			ELSEIF TALENT:43
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:43%】을 잃었다
+				TALENT:43 = 0
+			ENDIF
+			;【억압】か【저항】か【질투】なら消える
+			IF TALENT:32 || TALENT:34 || TALENT:84
+				PRINTFORM %조사선택(SAVESTR:TARGET, "는")%
+				IF TALENT:32
+					PRINTFORM 【%TALENTNAME:32%】
+					TALENT:32 = 0
+				ENDIF
+				IF TALENT:34
+					PRINTFORM 【%TALENTNAME:34%】
+					TALENT:34 = 0
+				ENDIF
+				IF TALENT:84
+					PRINTFORM 【%TALENTNAME:32%】
+					TALENT:84 = 0
+				ENDIF
+				PRINTL 를 잃었다
+				PRINTL 부정의 구슬이 절반으로 감소했다
+				JUEL:100 /= 2
+			ENDIF
+			;【쾌감을부정】持ちの場合は消える
+			IF TALENT:71 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:71%】를 잃었다
+				TALENT:71 = 0
+			ENDIF
+			;【정조관념】持ちの場合は消える
+			IF TALENT:30 == 1
+				PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:30%】를 잃었다
+				TALENT:30 = 0
+			ENDIF
+		ENDIF
+	ENDIF
+ENDIF
+			
+;---------------------------------------------------------
+;精愛味覚の習得
+;---------------------------------------------------------
+;精愛味覚を持たず, 강제精飲絶頂の回数が規定値を超えた
+IF TFLAG:110 && TALENT:47 == 0
+	PRINTFORMW %SAVESTR:TARGET%의 상태가 이상하다…
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 성적인 자극 없이, 정액을 마시기만 해도 가게된 것 같다. 
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:47%】를 얻었다
+	TALENT:47 = 1
+	;汚臭敏感がなくなる
+	IF TALENT:62 == 1
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:62%】를 잃었다
+		TALENT:62 = 0
+	ENDIF
+	;精液中毒がLV3に上がる
+	IF ABL:32 < 3
+		PRINTFORMW %SAVESTR:TARGET%의 정액중독이 LV3으로 되었다
+		ABL:32 = 3
+	ENDIF
+;取得フラグのリセット
+	TFLAG:110 = 0
+ENDIF
+
+;---------------------------------------------------------
+;マイナス素質の消滅
+;---------------------------------------------------------
+;奉仕精神5以上で【봉사안함】があれば消滅
+IF ABL:16 >= 5 && TALENT:151
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:151%】를 잃었다
+	TALENT:151 = 0
+ENDIF
+;自慰中毒5以上で【자위안함】があれば消滅
+IF ABL:31 >= 5 && TALENT:150
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:150%】를 잃었다
+	TALENT:150 = 0
+ENDIF
+
+;---------------------------------------------------------
+;マスターの特殊能力
+;---------------------------------------------------------
+;堕とした人数が5人以上で, 【수수께끼의매력】が付く
+IF FLAG:30 >= 5 && TALENT:MASTER:92 == 0
+	PRINTFORMW %NAME:MASTER%은【%TALENTNAME:92%】을 몸에 익혔다
+	TALENT:MASTER:92 = 1
+ENDIF
+
+;---------------------------------------------------------
+;창부・傾城の修得
+;---------------------------------------------------------
+
+;娼婦の条件
+IF TALENT:315 == 5 && EXP:74 >= 80 && MARK:3 == 0 && ABL:11 >= 1 && TALENT:180 == 0
+	;元娼婦, 売春経験80以上, 反発刻印なし, 欲望Lv1以上
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 창녀로서의 삶에서 벗어날 수 없는 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:180%】을 얻었다
+	TALENT:180 = 1
+ELSEIF EXP:74 >= 100 && MARK:3 == 0 && ABL:11 >= 2 && ABL:12 >= 1 && TALENT:180 == 0
+	;売春経験100以上, 反発刻印なし, 欲望Lv2以上, 技巧Lv1以上
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 몸을 파는 삶을 자신의 몸에서 찾은 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:180%】을 얻었다
+	TALENT:180 = 1
+ENDIF
+
+;傾城の条件
+IF TALENT:315 == 5 && EXP:74 >= 160 && MARK:3 == 0 && TALENT:180 == 1 && TALENT:181 == 0
+	;元娼婦, 売春経験160以上, 反発刻印なし, 娼婦修得
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 가랑이를 벌리는 일에 기쁨을 찾아낸 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:181%】을 얻었다
+	TALENT:181 = 1
+ELSEIF EXP:74 >= 200 && MARK:3 == 0 && TALENT:180 == 1 && TALENT:181 == 0
+	;売春経験200以上, 反発刻印なし, 娼婦修得
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 가랑이를 벌리는 일에 기쁨을 찾아낸 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")%【%TALENTNAME:181%】을 얻었다
+	TALENT:181 = 1
+ENDIF
+
+;---------------------------------------------------------
+;妄信の修得
+;---------------------------------------------------------
+
+;妄信の条件
+IF TALENT:85 && EXP:81 >= 5 && MARK:3 == 0 && ABL:10 >= 4 && TALENT:86 == 0
+	;애정, 勲章経験5以上, 反発刻印なし, 従順Lv4以上
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 당신에게 완전히 의존하고 있는 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 【%TALENTNAME:86%】을 얻었다
+	TALENT:86 = 1
+ELSEIF TALENT:76 && EXP:81 >= 10 && MARK:3 == 0 && ABL:10 >= 5 && TALENT:86 == 0
+	;음란, 勲章経験10以上, 反発刻印なし, 従順Lv5以上
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 당신에게 완전히 의존하고 있는 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 【%TALENTNAME:86%】을 얻었다
+	TALENT:86 = 1
+ENDIF
+
+
+;---------------------------------------------------------
+;闘姫の修得
+;---------------------------------------------------------
+
+;闘姫の条件
+IF EXP:76 >= 60 && TALENT:188 == 0
+	;闘技勝利経験60以上
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 콜로세움에서 큰 인기를 얻은 것 같다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 【%TALENTNAME:188%】을 얻었다
+	TALENT:188 = 1
+ENDIF
+
+
+CALL CHECK_SPECIALSKIL_BODYSHIFT
+
+RETURN 0
+
+
+;---------------------------------------------------------
+;特殊素質の強制修得
+;---------------------------------------------------------
+@CHECK_SPECIALSKIL_BODYSHIFT
+;本人の意思にかかわらず強制的に肉体や精神が変容する
+;崩壊でも作用してしまう
+
+;동족임신불가
+IF EXP:62 >= 20 && TALENT:158 == 0
+	;異種妊娠経験20以上で取得
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 이종족을 너무 임신하여 정상적인 임신이 불가능해져버렸다……
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 【%TALENTNAME:158%】를 얻었다
+	TALENT:158 = 1
+ENDIF
+
+RETURN 0

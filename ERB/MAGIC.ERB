@@ -1,0 +1,1282 @@
+﻿;-----------------------------------------------
+;마법 관계
+;-----------------------------------------------
+;TARGET_TYPEが1のとき勇者からモンスター, 2のときモンスターから勇者, 3のとき勇者から奴隷, 4のとき奴隷から勇者
+@MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+;-----------------------------------------------
+
+SIF TARGET_TYPE == 1 && E:(B + 3) == 0
+	RETURN 999
+
+CALL MAGIC_SELECT,TARGET_TYPE
+CALL MAGIC_USE,RESULT,TARGET_TYPE
+
+SIF RESULT == 999
+	RETURN 999
+
+;주술 체크
+
+CALL SHAMAN_SELECT,TARGET_TYPE
+CALL MAGIC_USE,RESULT,TARGET_TYPE
+
+SIF RESULT == 999
+	RETURN 999
+
+	
+;법술 체크
+
+IF (TARGET_TYPE == 1 || TARGET_TYPE == 4) && TALENT:A:242 == 0
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	RETURN 0
+ELSEIF TARGET_TYPE == 3 && TALENT:B:242 == 0
+	RETURN 0
+ENDIF
+
+
+IF RAND:2 == 0
+	CALL SHIELD_MAGIC
+ELSE
+	CALL HEAL_MAGIC
+ENDIF
+
+RETURN 0
+
+;--------------------------------------
+@MAGIC_USE,ARG,TARGET_TYPE
+#DIM TARGET_TYPE
+;--------------------------------------
+
+IF ARG == 1
+	CALL TELEPORT_MAGIC,TARGET_TYPE
+ELSEIF ARG == 2
+	CALL SLEEP_MAGIC,TARGET_TYPE
+ELSEIF ARG == 3
+	CALL ENERGY_BOLT_MAGIC,TARGET_TYPE
+ELSEIF ARG == 4
+	CALL ENERGY_DRAIN_MAGIC,TARGET_TYPE
+ELSEIF ARG == 5
+	CALL FIREBALL_MAGIC,TARGET_TYPE
+ELSEIF ARG == 6
+	CALL HEAL_MAGIC,TARGET_TYPE
+ELSEIF ARG == 7
+	CALL CURSE_MAGIC,TARGET_TYPE
+ELSEIF ARG == 8
+	CALL MIND_DRAIN_MAGIC,TARGET_TYPE
+ELSEIF ARG == 9
+	CALL LV_DRAIN_MAGIC,TARGET_TYPE
+ENDIF
+
+SIF RESULT == 999
+	RETURN 999
+
+
+;-------------------------------------
+@MAGIC_SELECT,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM ANTI_MAGIC_DMG,2
+#DIM MAGIC_LV
+;-------------------------------------
+
+;魔法を使えるかチェックと使用魔法
+IF (TARGET_TYPE == 1 || TARGET_TYPE == 4) && TALENT:A:241 == 0
+	RETURN 0
+ELSEIF TARGET_TYPE == 3 && TALENT:B:241 == 0
+	RETURN 0
+ENDIF
+
+;魔力拡散ダメージ
+ANTI_MAGIC_DMG:0 = CFLAG:A:9 * 10 + 200
+SIF ANTI_MAGIC_DMG:0 > 600
+	ANTI_MAGIC_DMG:0 = 600
+ANTI_MAGIC_DMG:1 = CFLAG:A:9 * 20 + 100
+SIF ANTI_MAGIC_DMG:1 > 600
+	ANTI_MAGIC_DMG:1 = 600
+
+;마력 확산 플래그
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	IF CFLAG:A:503 & 2
+		SIF FLAG:5 & 32
+			PRINTW *마력이 폭주했다! *
+		BASE:A:0 -= ANTI_MAGIC_DMG:0
+		BASE:A:1 -= ANTI_MAGIC_DMG:1
+	ENDIF
+ELSEIF TARGET_TYPE == 3
+	IF CFLAG:B:503 & 2
+		SIF FLAG:5 & 32
+			PRINTW *마력이 폭주했다! *
+		BASE:B:0 -= ANTI_MAGIC_DMG:0
+		BASE:B:1 -= ANTI_MAGIC_DMG:1
+	ENDIF
+ENDIF
+
+
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	MAGIC_LV = CFLAG:A:9
+ELSEIF TARGET_TYPE == 2
+	RETURN E:(B + 6)
+ELSEIF TARGET_TYPE == 3
+	MAGIC_LV = CFLAG:B:9
+ENDIF
+
+MAGIC_LV = (MAGIC_LV / 3) + 2
+SIF MAGIC_LV > 7
+	MAGIC_LV = 7
+MAGIC_LV = RAND:MAGIC_LV
+
+IF MAGIC_LV == 0
+	RETURN 0
+ELSEIF MAGIC_LV == 1
+	RETURN 3
+ELSEIF MAGIC_LV == 2
+	RETURN 2
+ELSEIF MAGIC_LV == 3
+	RETURN 1
+ELSEIF MAGIC_LV == 4
+	RETURN 4
+ELSE
+	RETURN 5
+ENDIF
+RETURN 0
+
+;-------------------------------------
+@SHAMAN_SELECT,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM ANTI_MAGIC_DMG,2
+#DIM MAGIC_LV
+;-------------------------------------
+
+;주술을 쓸 수 있을지 확인 사용마법(Y)
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	SIF TALENT:A:250 == 0
+		RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF TALENT:B:250 == 0
+		RETURN 0
+ENDIF
+
+
+;魔力拡散ダメージ
+ANTI_MAGIC_DMG:0 = CFLAG:A:9 * 10 + 200
+SIF ANTI_MAGIC_DMG:0 > 600
+	ANTI_MAGIC_DMG:0 = 600
+ANTI_MAGIC_DMG:1 = CFLAG:A:9 * 20 + 100
+SIF ANTI_MAGIC_DMG:1 > 600
+	ANTI_MAGIC_DMG:1 = 600
+
+;마력 확산 플래그
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	IF CFLAG:A:503 & 2
+		SIF FLAG:5 & 32
+			PRINTW *마력이 폭주했다! *
+		BASE:A:0 -= ANTI_MAGIC_DMG:0
+		BASE:A:1 -= ANTI_MAGIC_DMG:1
+	ENDIF
+ELSEIF TARGET_TYPE == 3
+	IF CFLAG:B:503 & 2
+		SIF FLAG:5 & 32
+			PRINTW *마력이 폭주했다! *
+		BASE:B:0 -= ANTI_MAGIC_DMG:0
+		BASE:B:1 -= ANTI_MAGIC_DMG:1
+	ENDIF
+ENDIF
+
+
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	MAGIC_LV = CFLAG:A:9
+ELSEIF TARGET_TYPE == 2
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	MAGIC_LV = CFLAG:B:9
+ENDIF
+
+MAGIC_LV = (MAGIC_LV / 3) + 2
+SIF MAGIC_LV > 7
+	MAGIC_LV = 7
+MAGIC_LV = RAND:MAGIC_LV
+
+IF MAGIC_LV == 0
+	RETURN 0
+ELSEIF MAGIC_LV == 1
+	RETURN 3
+ELSEIF MAGIC_LV == 2
+	RETURN 7
+ELSEIF MAGIC_LV == 3
+	RETURN 1
+ELSEIF MAGIC_LV == 4
+	RETURN 8
+ELSE
+	RETURN 9
+ENDIF
+RETURN 0
+
+;-------------------------------
+@MAGIC_DAMAGE_CAP,CHARA_LV,ENEMY_LV,DAMAGE,DMG_CAP
+#DIM CHARA_LV
+#DIM DAMAGE
+#DIM ENEMY_LV
+#DIM DMG_CAP
+#DIM CAP_BONUS
+;-------------------------------
+
+;キャップはレベル差で増減
+CAP_BONUS = CHARA_LV - ENEMY_LV
+SIF CAP_BONUS <= -100
+	CAP_BONUS = -99
+DMG_CAP *= 100 + CAP_BONUS
+DMG_CAP /= 100 
+SIF DAMAGE > DMG_CAP
+	DAMAGE = DMG_CAP
+
+SIF DAMAGE <= 0
+	DAMAGE = 1
+
+RETURN DAMAGE
+
+;-------------------------------
+@MAGIC_BONUS_C_TO_M,CHARA,DAMAGE
+#DIM CHARA
+#DIM DAMAGE
+;-------------------------------
+;キャラからモンスターに対する効果補正
+
+;エルフ特性. 1.5倍
+SIF TALENT:CHARA:314 == 1 || TALENT:CHARA:314 == 7
+	DAMAGE += DAMAGE / 2
+
+;青肌特性. 1.33倍
+SIF TALENT:CHARA:244
+	DAMAGE += DAMAGE / 3
+
+;額の目特性. 1.2倍
+SIF TALENT:CHARA:260
+	DAMAGE += DAMAGE / 5
+
+;畏怖・隷属処理
+IF CFLAG:CHARA:130 == E:B && CFLAG:CHARA:131 > 5
+	PRINTFORM 능욕당한 것을 떠올렸다……항거할 수 없다！
+	DAMAGE /= 10
+ELSEIF CFLAG:CHARA:130 == E:B && CFLAG:CHARA:131 >= 0
+	PRINTFORM 능욕당한 것을 떠올렸다……
+	DAMAGE *= 6 - CFLAG:CHARA:131
+	DAMAGE /= 10
+ENDIF
+
+;ボスの魔法抵抗. 1/10
+IF E:(B + 8) == 1
+	DAMAGE /= 10
+	SIF FLAG:5 & 32
+		PRINT 보스는 마법에 저항했다! 
+ENDIF
+
+RETURN DAMAGE
+
+;-------------------------------
+@MAGIC_BONUS_M_TO_C,CHARA,DAMAGE
+#DIM CHARA
+#DIM DAMAGE
+;-------------------------------
+;モンスターからキャラに対する魔法効果補正
+
+;ボスの魔法特効. 1.5倍
+IF E:(B + 8) == 1
+	DAMAGE += DAMAGE / 2
+	SIF FLAG:5 & 32
+		PRINT 보스의 강력한 마법! 
+ENDIF
+
+IF CHARA >= 0
+	;마법내성. 0.77倍
+	IF TALENT:CHARA:257
+		DAMAGE -= DAMAGE / 3
+		SIF FLAG:5 & 32
+			PRINT 마법내성! 　
+	ENDIF
+	
+	;갈색피부. 0.8倍
+	;魔法に耐性があるとダークエルフっぽい？
+	SIF TALENT:CHARA:253
+		DAMAGE -= DAMAGE / 5
+	
+	;魔法デバフ
+	IF CFLAG:CHARA:682 > 50
+		;最大50%増加
+		DAMAGE += DAMAGE / 2
+		;10%程度低下
+		CFLAG:CHARA:682 -= (CFLAG:CHARA:682 / 10) + 1
+	ELSEIF CFLAG:CHARA:682 > 0
+		;%増加
+		DAMAGE *= 100 + CFLAG:CHARA:682
+		DAMAGE /= 100
+		;10%程度低下
+		CFLAG:CHARA:682 -= (CFLAG:CHARA:682 / 10) + 1
+	ENDIF
+	
+	;畏怖・隷属処理
+	IF CFLAG:CHARA:130 == E:B && CFLAG:CHARA:131 > 5
+		PRINTFORM 능욕당한 것을 떠올렸다……항거할 수 없다！
+		DAMAGE *= 2
+	ELSEIF CFLAG:CHARA:130 == E:B && CFLAG:CHARA:131 >= 0
+		PRINTFORM 능욕당한 것을 떠올렸다……
+		DAMAGE *= 6 + CFLAG:CHARA:131
+		DAMAGE /= 5
+	ENDIF
+	
+ENDIF
+
+RETURN DAMAGE
+
+;-------------------------------
+@MAGIC_BONUS_C_TO_C,CHARA,DAMAGE,DEF_CHARA
+#DIM CHARA
+#DIM DAMAGE
+#DIM DEF_CHARA
+;-------------------------------
+
+;エルフ特性. 1.5倍
+SIF TALENT:CHARA:314 == 1 || TALENT:CHARA:314 == 7
+	DAMAGE += DAMAGE / 2
+
+;青肌特性. 1.33倍
+SIF TALENT:CHARA:244
+	DAMAGE += DAMAGE / 3
+
+;額の目特性. 1.2倍
+SIF TALENT:CHARA:260
+	DAMAGE += DAMAGE / 5
+
+IF DEF_CHARA >= 0
+	;마법내성. 0.77倍
+	IF TALENT:DEF_CHARA:257
+		DAMAGE -= DAMAGE / 3
+		SIF FLAG:5 & 32
+			PRINT 마법내성! 　
+	ENDIF
+	
+	;갈색피부. 0.8倍
+	;魔法に耐性があるとダークエルフっぽい？
+	SIF TALENT:CHARA:253
+		DAMAGE -= DAMAGE / 5
+	
+	;魔法デバフ
+	IF CFLAG:CHARA:682 > 50
+		;最大50%増加
+		DAMAGE += DAMAGE / 2
+		;10%程度低下
+		CFLAG:CHARA:682 -= (CFLAG:CHARA:682 / 10) + 1
+	ELSEIF CFLAG:CHARA:682 > 0
+		;%増加
+		DAMAGE *= 100 + CFLAG:CHARA:682
+		DAMAGE /= 100
+		;10%程度低下
+		CFLAG:CHARA:682 -= (CFLAG:CHARA:682 / 10) + 1
+	ENDIF
+	
+ENDIF
+
+RETURN DAMAGE
+
+;-------------------------------
+@TELEPORT_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+;-------------------------------
+;텔레포트
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	
+	;パーティの重症度によって判定する
+	;リーダーの場合全員を見れる
+	;仲間が使用した場合自分とリーダーだけを見る
+	
+	LOCAL:0 = 0
+	;自分が重症か
+	SIF BASE:A:0 <= 600
+		LOCAL:0 += 1
+	;仲間Aが重症か
+	LOCAL:1 = CFLAG:A:531
+	SIF BASE:(LOCAL:1):0 <= 600 && LOCAL:1 > 0
+		LOCAL:0 += 1
+	
+	;仲間Bが重症か
+	LOCAL:1 = CFLAG:A:532
+	SIF BASE:(LOCAL:1):0 <= 600 && LOCAL:1 > 0
+		LOCAL:0 += 1
+	
+	;リーダーが重症か
+	LOCAL:1 = CFLAG:A:533
+	SIF BASE:(LOCAL:1):0 <= 600 && LOCAL:1 > 0
+		LOCAL:0 += 1
+	
+	SIF LOCAL:0 <= 0
+		RETURN 0
+	
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 위험해지자 텔레포트로 탈출했다! 
+	BASE:A:1 -= 10
+	D:20 = RAND:100
+	RETURN 999
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW 몬스터는 %조사선택(SAVESTR:A, "를")% 텔레포트로 날려버렸다
+	D:20 = RAND:100
+	CFLAG:A:509 = 1
+	RETURN 999
+ELSEIF TARGET_TYPE == 3
+	SIF BASE:B:0 > 600
+		RETURN 0
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 위험해지자 텔레포트로 탈출했다! 
+	BASE:B:1 -= 10
+	CFLAG:B:3 = RAND:100
+	RETURN 999
+ENDIF
+RETURN 0
+
+;-------------------------------
+@SLEEP_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+;-------------------------------
+;수면(슬립)
+
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 수면 주문을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;モンスターレベルによる効果軽減
+	DAMAGE -= E:(B + 1) / 5
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,300
+	DAMAGE = RESULT
+	
+
+	C = B + 2
+	E:C -= RAND:DAMAGE
+	
+	IF E:C < 0
+		SIF FLAG:5 & 32
+			PRINTW 몬스터는 완전히 잠들어 있다…
+		E:C = 0
+	ELSEIF DAMAGE <= 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 몬스터는 자고 있다…
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 수면 마법을 시전했다! 
+	
+	DAMAGE = E:(B + 1) + CFLAG:0:9
+	
+	CALL MAGIC_BONUS_M_TO_C,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,E:(B + 1),CFLAG:A:9,DAMAGE,300
+	DAMAGE = RESULT
+
+	CFLAG:A:11 -= RAND:DAMAGE
+	IF CFLAG:A:11 < 0
+		SIF FLAG:5 & 32
+			PRINTW 용사는 완전히 잠들어 있다…
+		CFLAG:A:11 = 0
+	ELSEIF DAMAGE <= 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 용사는 자고있다…
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 수면 주문을 시전했다! 
+	BASE:B:1 -= 30
+	DAMAGE = CFLAG:B:9
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,300
+	DAMAGE = RESULT
+
+	CFLAG:A:11 -= RAND:DAMAGE
+	IF CFLAG:A:11 < 0
+		SIF FLAG:5 & 32
+			PRINTW 노예는 완전히 잠들어 있다…
+		CFLAG:A:11 = 0
+	ELSEIF DAMAGE <= 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 노예는 자고 있다…
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 수면 주문을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,300
+	DAMAGE = RESULT
+
+	CFLAG:B:11 -= RAND:DAMAGE
+	IF CFLAG:B:11 < 0
+		SIF FLAG:5 & 32
+			PRINTW 용사는 완전히 잠들어 있다…
+		CFLAG:B:11 = 0
+	ELSEIF DAMAGE <= 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 용사는 자고있다…
+	ENDIF
+	RETURN 0
+ENDIF
+RETURN 0
+
+
+;------------------------------------
+@ENERGY_BOLT_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+#DIM KILL_MONS
+;------------------------------------
+;마법 화살
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 마법 화살 주문을 시전했다! 
+	BASE:A:1 -= 15
+	DAMAGE = CFLAG:A:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;モンスターレベルによる効果軽減
+	DAMAGE -= E:(B + 1) / 20
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,600
+	DAMAGE = RESULT
+
+	KILL_MONS = DAMAGE / E:(B + 3)
+	
+	IF KILL_MONS <= 0
+		SIF FLAG:5 & 32
+			PRINTW 마법 화살 주문은 전혀 먹히지 않은것 같다
+	ELSEIF KILL_MONS > 0
+		SIF DAMAGE > E:(B + 99)
+			DAMAGE = E:(B + 99)
+		SIF FLAG:5 & 32
+			PRINTFORMW 마법 화살 주문은 {KILL_MONS}마리의 몬스터를 꿰뚫었다! 
+		E:(B + 99) -= KILL_MONS
+		EXP:A:80 += E:(B + 1) * KILL_MONS
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 마법 화살 주문을 시전했다! 
+	DAMAGE = E:(B + 1) + CFLAG:0:9
+	DAMAGE *= 5
+	
+	CALL MAGIC_BONUS_M_TO_C,A,DAMAGE
+	DAMAGE = RESULT
+	
+	BASE:A:0 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 마법 화살 주문은 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 마법 화살 주문을 시전했다! 
+	BASE:B:1 -= 15
+	DAMAGE = CFLAG:B:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,600
+	DAMAGE = RESULT
+	
+	BASE:A:0 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 마법 화살 주문은 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 마법 화살 주문을 시전했다! 
+	BASE:A:1 -= 15
+	DAMAGE = CFLAG:A:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,600
+	DAMAGE = RESULT
+	
+	BASE:B:0 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 마법 화살 주문은 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ENDIF
+RETURN 0
+
+;----------------------------------
+@ENERGY_DRAIN_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+#DIM KILL_MONS
+;----------------------------------
+;에너지 드레인
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 에너지 흡수 주문을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,500
+	DAMAGE = RESULT
+	
+	KILL_MONS = DAMAGE / E:(B + 3)
+	IF KILL_MONS <= 0
+		SIF FLAG:5 & 32
+			PRINTW 에너지 흡수 주문은 먹히지 않는 모양이다
+	ELSEIF KILL_MONS > 0
+		SIF KILL_MONS > E:(B + 99)
+			KILL_MONS = E:(B + 99)
+		SIF FLAG:5 & 32
+			PRINTFORMW 에너지 흡수 주문은 {KILL_MONS}마리의 몬스터의 에너지를 빼았았다! 
+		E:(B + 99) -= KILL_MONS
+		EXP:A:80 += E:(B + 1) * KILL_MONS
+	ENDIF
+	BASE:A:0 += Y
+	SIF FLAG:5 & 32
+		PRINTFORMW HP가 {Y}만큼 회복했다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 에너지 흡수 주문을 시전했다! 
+	
+	DAMAGE = (E:(B + 1) + CFLAG:0:9) * 5
+	
+	CALL MAGIC_BONUS_M_TO_C,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,E:(B + 1),CFLAG:A:9,DAMAGE,500
+	DAMAGE = RESULT
+	
+	BASE:A:1 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 에너지 흡수 주문으로 기력에 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 에너지 흡수 주문을 시전했다! 
+	BASE:B:1 -= 30
+	DAMAGE = CFLAG:B:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,500
+	DAMAGE = RESULT
+	
+	BASE:A:1 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 에너지 흡수 주문으로 기력에 {DAMAGE}의 데미지를 주었다! 
+	BASE:B:0 += DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW HP가 {DAMAGE} 회복했다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 에너지 흡수 주문을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,500
+	DAMAGE = RESULT
+	
+	BASE:B:1 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 에너지 흡수 주문으로 기력에 {DAMAGE}의 데미지를 주었다! 
+	BASE:A:0 += DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW HP가 {DAMAGE} 회복했다! 
+	RETURN 0
+ENDIF
+RETURN 0
+
+;------------------------------
+@FIREBALL_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+#DIM KILL_MONS
+;------------------------------
+;화염구(파이어 볼)
+
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 화염구 주문을 시전했다! 
+	BASE:A:1 -= 40
+	DAMAGE = CFLAG:A:9 * E:(B + 99) / 2
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,800
+	DAMAGE = RESULT
+	
+	KILL_MONS = DAMAGE / E:(B + 3)
+	IF KILL_MONS <= 0
+		SIF FLAG:5 & 32
+			PRINTW 화염구 주문은 효과가 없는것 같다
+	ELSEIF KILL_MONS > 0
+		SIF KILL_MONS > E:(B + 99)
+			KILL_MONS = E:(B + 99)
+		SIF FLAG:5 & 32
+			PRINTFORMW 화염구 주문은  {KILL_MONS}마리의 몬스터를 불태워 버렸다! 
+		E:(B + 99) -= KILL_MONS
+		EXP:A:80 += E:(B + 1) * KILL_MONS
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 화염구 주문을 시전했다! 
+	
+	DAMAGE = (E:(B + 1) + CFLAG:0:9) * 10
+	
+	CALL MAGIC_BONUS_M_TO_C,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,E:(B + 1),CFLAG:A:9,DAMAGE,800
+	DAMAGE = RESULT
+	
+	BASE:A:0 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 화염구 주문은 용사에게 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 화염구 주문을 시전했다! 
+	BASE:B:1 -= 40
+	DAMAGE = CFLAG:B:9 * 10
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,800
+	DAMAGE = RESULT
+	
+	BASE:A:0 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 화염구 주문은 노예에게 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 화염구 주문을 시전했다! 
+	BASE:A:1 -= 40
+	DAMAGE = CFLAG:A:9 * 10
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,800
+	DAMAGE = RESULT
+	
+	BASE:B:0 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 화염구 주문은 용사에게 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ENDIF
+RETURN 0
+
+;--------------------------
+@HEAL_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+;--------------------------
+;회복 (힐)
+
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	
+	;パーティの重症度によって判定する
+	;リーダーの場合全員を見れる
+	;仲間が使用した場合自分とリーダーだけを見る
+	
+	LOCAL:0 = 0
+	;自分が重症か
+	SIF BASE:A:0 * 100 / MAXBASE:A:0 < 60
+		LOCAL:0 = A
+	;仲間Aが重症か
+	LOCAL:1 = CFLAG:A:531
+	SIF BASE:(LOCAL:1):0 * 100 / MAXBASE:(LOCAL:1):0 < 60 && LOCAL:1 > 0
+		LOCAL:0 = LOCAL:1
+	
+	;仲間Bが重症か
+	LOCAL:1 = CFLAG:A:532
+	SIF BASE:(LOCAL:1):0 * 100 / MAXBASE:(LOCAL:1):0 < 60 && LOCAL:1 > 0
+		LOCAL:0 = LOCAL:1
+	
+	;リーダーが重症か
+	LOCAL:1 = CFLAG:A:533
+	SIF BASE:(LOCAL:1):0 * 100 / MAXBASE:(LOCAL:1):0 < 60 && LOCAL:1 > 0
+		LOCAL:0 = LOCAL:1
+	
+	SIF LOCAL:0 <= 0
+		RETURN 0
+	IF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 회복 주문을 시전했다! 
+		IF LOCAL:0 == A
+			PRINT 자신
+		ELSE
+			PRINTS SAVESTR:(LOCAL:0)
+		ENDIF
+		PRINTW 을 치유했다! 
+	ENDIF
+	BASE:A:1 -= 5
+	DAMAGE = CFLAG:A:9 * 5
+	
+	;対象が存在しないので
+	;キャラtoキャラの対象存在なしを使用する
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,-1
+	DAMAGE = RESULT
+	
+	SIF FLAG:5 & 32
+		PRINTFORMW %SAVESTR:(LOCAL:0)%는 HP가 {Y} 회복했다! 
+	BASE:(LOCAL:0):0 += DAMAGE
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 회복 주문을 시전했다! 
+	DAMAGE = E:(B + 1) + CFLAG:0:9
+	
+	;対象が存在しないので
+	;モンスターtoキャラの対象存在なしを使用する
+	CALL MAGIC_BONUS_M_TO_C,-1,DAMAGE
+	DAMAGE = RESULT
+	
+	E:(B + 3) += 1 + (DAMAGE / 60)
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF BASE:B:0 * 100 / MAXBASE:B:0 < 60
+		RETURN 0
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 회복 주문을 시전했다! 
+	BASE:B:1 -= 5
+	DAMAGE = CFLAG:B:9 * 5
+	
+	;対象が存在しないので
+	;キャラtoキャラの対象存在なしを使用する
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,-1
+	DAMAGE = RESULT
+	
+	SIF FLAG:5 & 32
+		PRINTFORMW %SAVESTR:B%는 HP가 {DAMAGE} 회복했다! 
+	BASE:B:0 += DAMAGE
+	RETURN 0
+ENDIF
+RETURN 0
+
+;--------------------------
+@SHIELD_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+;--------------------------
+;盾の護法
+
+IF TARGET_TYPE == 1 || TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 방어의 법술을 시전했다! 
+	BASE:A:1 -= 5
+	DAMAGE = CFLAG:A:9 * 2
+	
+	;対象が存在しないので
+	;キャラtoキャラの対象存在なしを使用する
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,-1
+	DAMAGE = RESULT
+	
+	SIF FLAG:5 & 32
+		PRINTFORMW %SAVESTR:A%는 방어력이 {DAMAGE} 상승했다! 
+	CFLAG:A:12 += DAMAGE
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	;モンスター使用の場合回復魔法と効果は変わらず
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%는 방어의 법술을 시전했다! 
+	DAMAGE = E:(B + 1) + CFLAG:0:9
+	
+	;対象が存在しないので
+	;モンスターtoキャラの対象存在なしを使用する
+	CALL MAGIC_BONUS_M_TO_C,-1,DAMAGE
+	DAMAGE = RESULT
+	
+	E:(B + 3) += 1 + (DAMAGE / 60)
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 방어의 법술을 시전했다! 
+	BASE:B:1 -= 5
+	DAMAGE = CFLAG:B:9 * 2
+	
+	;対象が存在しないので
+	;キャラtoキャラの対象存在なしを使用する
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,-1
+	DAMAGE = RESULT
+	
+	SIF FLAG:5 & 32
+		PRINTFORMW %SAVESTR:B%는 방어력이 {DAMAGE} 상승했다! 
+	CFLAG:B:12 += DAMAGE
+	RETURN 0
+ENDIF
+RETURN 0
+
+
+;-----------------------------------
+@CURSE_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+#DIM KILL_MONS
+;-----------------------------------
+;저주
+
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 저주의 주문을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,200
+	DAMAGE = RESULT
+	
+	E:(B + 3) -= RAND:DAMAGE / 2
+	IF E:(B + 3) <= 0
+		SIF FLAG:5 & 32
+			PRINTW 몬스터는 완전히 저주에 걸렸다…
+		E:(B + 3) = 1
+	ELSEIF DAMAGE == 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 몬스터는 저주에 걸렸다…
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	PRINTFORMW %ITEMNAME:(E:B)%(은)는 저주의 주문을 시전했다! 
+	DAMAGE = E:(B + 1) + CFLAG:0:9
+	
+	CALL MAGIC_BONUS_M_TO_C,A,DAMAGE
+	DAMAGE = RESULT
+
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,E:(B + 1),CFLAG:A:9,DAMAGE,200
+	DAMAGE = RESULT
+
+	CFLAG:A:12 -= RAND:DAMAGE / 2
+	IF CFLAG:A:12 < 0
+		SIF FLAG:5 & 32
+			PRINTW 용사는 완전히 저주에 걸렸다…
+		CFLAG:A:12 = 0
+	ELSEIF DAMAGE == 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 용사는 저주에 걸렸다…
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 저주의 주문을 시전했다! 
+	BASE:B:1 -= 30
+	RESULT = CFLAG:B:9
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,200
+	DAMAGE = RESULT
+	
+	CFLAG:A:12 -= RAND:RESULT / 2
+	IF CFLAG:A:12 < 0
+		SIF FLAG:5 & 32
+			PRINTW 노예는 완전히 저주에 걸렸다…
+		CFLAG:A:12 = 0
+	ELSEIF RESULT == 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 노예는 저주에 걸렸다…
+	ENDIF
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 저주의 주문을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,200
+	DAMAGE = RESULT
+	
+	CFLAG:B:12 -= RAND:DAMAGE / 2
+	IF CFLAG:B:12 < 0
+		SIF FLAG:5 & 32
+			PRINTW 용사는 완전히 저주에 걸렸다…
+		CFLAG:B:12 = 0
+	ELSEIF DAMAGE == 0
+		SIF FLAG:5 & 32
+			PRINTW 주문이 흐지부지 되어버렸다
+	ELSE
+		SIF FLAG:5 & 32
+			PRINTW 용사는 저주에 걸렸다…
+	ENDIF
+	RETURN 0
+ENDIF
+RETURN 0
+
+;----------------------------------
+@MIND_DRAIN_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+#DIM KILL_MONS
+;----------------------------------
+;마인드 드레인
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 정신 흡수 마법을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,500
+	DAMAGE = RESULT
+	
+	KILL_MONS = DAMAGE / E:(B + 3)
+	IF KILL_MONS <= 0
+		SIF FLAG:5 & 32
+			PRINTW 정신 흡수 마법은 잘 먹히지 않는것 같다
+	ELSEIF KILL_MONS > 0
+		SIF KILL_MONS > E:(B + 99)
+			KILL_MONS = E:(B + 99)
+		SIF FLAG:5 & 32
+			PRINTFORMW 정신 흡수 마법은 {KILL_MONS}마리의 몬스터의 정신력을 흡수했다! 
+		E:(B + 99) -= KILL_MONS
+		EXP:A:80 += E:(B + 1) * KILL_MONS
+	ENDIF
+	BASE:A:1 += DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 기력이 {DAMAGE} 회복했다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 정신 흡수 마법을 시전했다! 
+	DAMAGE = (E:(B + 1) + CFLAG:0:9) * 5
+	
+	CALL MAGIC_BONUS_M_TO_C,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,E:(B + 1),CFLAG:A:9,DAMAGE,500
+	DAMAGE = RESULT
+	
+	BASE:A:1 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 정신 흡수 마법은 기력에 {DAMAGE}의 데미지를 주었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 정신 흡수 마법을 시전했다! 
+	BASE:B:1 -= 30
+	DAMAGE = CFLAG:B:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,500
+	DAMAGE = RESULT
+	
+	BASE:A:1 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 정신 흡수 마법은 기력에 {DAMAGE}의 데미지를 주었다! 
+	BASE:B:1 += DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 기력이 {DAMAGE} 회복했다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 정신 흡수 마법을 시전했다! 
+	BASE:A:1 -= 30
+	DAMAGE = CFLAG:A:9 * 5
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,500
+	DAMAGE = RESULT
+	
+	BASE:B:1 -= DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 정신 흡수 마법은 기력에 {DAMAGE}의 데미지를 주었다! 
+	BASE:A:1 += DAMAGE
+	SIF FLAG:5 & 32
+		PRINTFORMW 기력이 {DAMAGE} 회복했다! 
+	RETURN 0
+ENDIF
+RETURN 0
+
+;----------------------------------
+@LV_DRAIN_MAGIC,TARGET_TYPE
+#DIM TARGET_TYPE
+#DIM DAMAGE
+#DIM KILL_MONS
+;----------------------------------
+;레벨 드레인
+IF TARGET_TYPE == 1
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 레벨 흡수 마법을 시전했다! 
+	BASE:A:1 -= 50
+	DAMAGE = CFLAG:A:9 * 10
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,E:(B + 1),DAMAGE,400
+	DAMAGE = RESULT
+	
+	KILL_MONS = DAMAGE / E:(B + 3)
+	IF KILL_MONS <= 0
+		SIF FLAG:5 & 32
+			PRINTW 레벨 흡수 마법은 전혀 효과가 없는것 같다
+	ELSEIF KILL_MONS > 0
+		SIF KILL_MONS > E:(B + 99)
+			KILL_MONS = E:(B + 99)
+		SIF FLAG:5 & 32
+			PRINTFORMW 레벨 흡수 마법은 {KILL_MONS}마리의 몬스터의 경험치를 흡수했다! 
+		E:(B + 99) -= KILL_MONS
+		EXP:A:80 += E:(B + 1) * KILL_MONS
+	ENDIF
+	EXP:A:80 += DAMAGE / 20
+	SIF FLAG:5 & 32
+		PRINTFORMW {DAMAGE/20}의 경험치를 얻었다! 
+	RETURN 0
+ELSEIF TARGET_TYPE == 2
+	SIF FLAG:5 & 32
+		PRINTFORMW %ITEMNAME:(E:B)%(은)는 레벨 흡수 마법을 시전했다! 
+	DAMAGE = E:(B + 1) + CFLAG:0:9
+	
+	CALL MAGIC_BONUS_C_TO_M,A,DAMAGE
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,E:(B + 1),CFLAG:A:9,DAMAGE,400
+	DAMAGE = RESULT
+	
+	EXP:A:80 -= DAMAGE
+	BASE:A:0 -= DAMAGE*10
+	SIF FLAG:5 & 32
+		PRINTFORMW 레벨 흡수 마법은 {DAMAGE}의 경험치를 흡수하고 HP에 {DAMAGE*10}의 데미지를 주었다! 
+	;レベルチェック
+	CALL CHARA_LV_CHECK,A
+	SIF FLAG:5 & 32
+		PRINTFORMW 당신은 {DAMAGE/2}의 경험치를 흡수했다! 
+	EXP:0:80 += DAMAGE / 2
+	RETURN 0
+ELSEIF TARGET_TYPE == 3
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:B, "는")% 레벨 흡수 마법을 시전했다! 
+	BASE:B:1 -= 50
+	DAMAGE = CFLAG:B:9
+	
+	CALL MAGIC_BONUS_C_TO_C,B,DAMAGE,A
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:B:9,CFLAG:A:9,DAMAGE,400
+	DAMAGE = RESULT
+	
+	EXP:A:80 -= DAMAGE
+	BASE:A:0 -= DAMAGE*10
+	SIF FLAG:5 & 32
+		PRINTFORMW 레벨 흡수 마법은 {DAMAGE}의 경험치를 흡수하고 HP에 {DAMAGE*10}의 데미지를 주었다! 
+	;レベルチェック
+	CALL CHARA_LV_CHECK,A
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% {DAMAGE/2}의 경험치를 흡수했다! 
+	EXP:B:80 += DAMAGE / 2
+	RETURN 0
+ELSEIF TARGET_TYPE == 4
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 레벨 흡수 마법을 시전했다! 
+	BASE:A:1 -= 50
+	DAMAGE = CFLAG:A:9
+	
+	CALL MAGIC_BONUS_C_TO_C,A,DAMAGE,B
+	DAMAGE = RESULT
+	
+	;効果量キャップ
+	CALL MAGIC_DAMAGE_CAP,CFLAG:A:9,CFLAG:B:9,DAMAGE,400
+	DAMAGE = RESULT
+	
+	EXP:B:80 -= DAMAGE
+	BASE:B:0 -= DAMAGE*10
+	SIF FLAG:5 & 32
+		PRINTFORMW 레벨 흡수 마법은 {DAMAGE}의 경험치를 흡수하고 HP에 {DAMAGE*10}의 데미지를 주었다! 
+	;レベルチェック
+	CALL CHARA_LV_CHECK,B
+	SIF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% {DAMAGE/2}의 경험치를 흡수했다! 
+	EXP:A:80 += DAMAGE / 2
+	RETURN 0
+ENDIF
+RETURN 0
+

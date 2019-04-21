@@ -1,0 +1,261 @@
+﻿@ENTER_ENEMY,ARG:0
+#DIM CHARA, 1
+;매월 월말에 내습
+;ARG:0 = 0 通常
+;ARG:0 = キャラNo 知り合い・家族確定エントリー
+
+LOCAL = 10
+
+;FLAG:60 = 勇者基礎レベル補正
+;SIF DAY:2 > LOCAL && ARG:0 == 0 && FLAG:60 < 300
+;	RETURN 0
+
+;リリィ出現
+SIF ARG:0 == 0 || TALENT:(ARG:0):마을처녀Ａ
+	CALL K_11_LILY
+
+
+;キャラが多すぎる場合中断
+IF DAY <= 200 && CHARANUM > 200
+	RETURN 0
+ELSEIF DAY <= 400 && CHARANUM > 200
+	RETURN 0
+ELSEIF DAY <= 600 && CHARANUM > 200
+	RETURN 0
+ELSEIF DAY <= 1000 && CHARANUM > 200
+	RETURN 0
+ENDIF
+
+;キャラのNOを選定 
+CHARA = RAND(1, 17) + RAND(2)*30
+;GETCHARA(케릭터 번호, SP플래그)에서 케릭터가 존재하지 않으면-1
+;CFLAG:0이 0らば登録番号を返す. CFLAG:0が1=매각 가능　2=조수可ならば-1が返るので同じキャラ番号のキャラが攻めてくる. 
+IF RAND(2) == 1
+	
+	IF ARG:0 > 0
+		LOCAL = 0
+		ADDCHARA CHARA
+		A = CHARANUM - 1
+		CALL CHAR_MAKE,998,ARG:0
+	ELSE
+		;이국의 용사에 대한 판정
+		CALL CHAR_MAKE_INPORT
+		IF RESULT == 0
+			LOCAL = 0
+			ADDCHARA CHARA
+			A = CHARANUM - 1
+			CALL CHAR_MAKE
+		ELSE
+			LOCAL = 1
+		ENDIF
+	ENDIF
+	PRINTL *****************************************
+	SIF LOCAL
+		PRINT 이국의 
+	PRINT 용사 
+	PRINTS SAVESTR:RESULT
+	PRINTL (이)가 던전 공략을 개시했다! 
+	PRINTL *****************************************
+	WAIT
+	;용사 LVUP
+	IF FLAG:5 & 2
+		FLAG:60 += 1
+		PRINTFORMW 용사 기초 레벨 보정이 {FLAG:60}(이)가 되었습니다
+	ENDIF
+ELSE
+	PRINTL 마왕에 대한 공포 때문인지,  용사는 나타나지 않았다
+	WAIT
+	RETURN 0
+ENDIF
+PRINTL  
+A = RESULT
+
+;카르마 조정
+SIF CFLAG:A:151 < -100
+	CFLAG:A:151 = -100
+
+CALL ENTERENEMY_KOUJO
+
+;초기 좌표
+
+;座標について…このXY座標は2Dマップモードで使用する座標ですが, 現在は死んでいる変数です
+;気が変わったときのために残しています
+
+LOCAL:0 = RAND:32
+LOCAL:1 = RAND:32
+
+IF RAND:4 == 0
+	LOCAL:0 = 0
+ELSEIF RAND:3 == 0
+	LOCAL:1 = 0
+ELSEIF RAND:2 == 0
+	LOCAL:0 = 31
+ELSE
+	LOCAL:1 = 31
+ENDIF
+
+CFLAG:A:510 = LOCAL:0
+CFLAG:A:511 = LOCAL:1
+
+;初期座標設定終わり
+
+IF GETBIT(FLAG:8, 1)
+	PRINTL
+	CALL SHOW_CHARA_INFO, A
+	PRINTL
+ENDIF
+
+RETURN 1
+
+
+
+;村娘姉用出現関数
+@K_11_LILY
+;ゲーム開始から200日以上でマオが存在しリリィが存在せずエントリーフラグが存在せずなおかつ조교중で. 
+;マオが愛か淫乱の場合リリィが出現する. 
+;エントリーフラグが立っていると出ない
+SIF FLAG:223 == 1
+	RETURN
+;200日未満, マオが存在していない, リリィが存在していると出ない
+SIF DAY < 200 || GETCHARA(17) < 0 || GETCHARA(24) > 0
+	RETURN
+LOCAL = GETCHARA(17)
+;念のため
+SIF LOCAL < 0
+	RETURN
+;マオに愛も淫乱もないと出ない
+SIF TALENT:LOCAL:85 == 0 && TALENT:LOCAL:76 == 0
+	RETURN
+;マオが待機中じゃないと出ない
+SIF CFLAG:LOCAL:1 != 0
+	RETURN
+
+ADDCHARA 24
+;エントリーフラグを使用
+;参照したのはSELL_CHARA.ERBの@KILL_TARGET関数
+;これを使用すればキャラが重複することはない
+FLAG:223 = 1
+
+A = CHARANUM - 1
+SAVESTR:A = %NAME:A%
+CSTR:A:1 = %NAME:A%
+;初期装備：소드
+CFLAG:A:550 = 40
+;着替え装着
+TARGET = A
+CALL WEARING_CLOTH_ABLE
+TARGET = FLAG:1
+
+PRINTL
+PRINTL *****************************************
+PRINTL 마왕의 던전 인근 마을에 자매가 있었다．그 자매는 부모님을 잃고, 함께 친척 집에 신세를 지고 있었다.
+PRINTL 어느 날 마왕의 부활과 동시에 동생이 실종되었다．언니는 미친 듯이 동생을 찾아 돌았다녔고 용사에게 동생 탐색을 의뢰했지만 찾을 수 없었다．
+PRINTW 그리고 반년 후 마침내 언니는 마왕의 던전으로 갈 결심을했다． 한 손에 랜턴,  한 손에 용사가 버리고 간 낡은 검을 쥐고．
+PRINTL
+PRINT 마을 소녀
+PRINTS SAVESTR:A
+PRINTL (이)가 던전 공략을 개시했다! 
+PRINTL *****************************************
+CALL ENTERENEMY_KOUJO
+PRINTL
+
+;侵入階層・侵攻度・侵攻中・再起ポイント設定
+CFLAG:A:501 = 1
+CFLAG:A:502 = 0
+CFLAG:A:1 = 2
+CFLAG:A:508 = 3
+
+;ランダム名前決定
+CFLAG:A:6 = RAND:80
+
+;초기 좌표
+LOCAL:0 = RAND:32
+LOCAL:1 = RAND:32
+
+IF RAND:4 == 0
+	LOCAL:0 = 0
+ELSEIF RAND:3 == 0
+	LOCAL:1 = 0
+ELSEIF RAND:2 == 0
+	LOCAL:0 = 31
+ELSE
+	LOCAL:1 = 31
+ENDIF
+
+CFLAG:A:510 = LOCAL:0
+CFLAG:A:511 = LOCAL:1
+
+
+RETURN 1
+
+;------------------------------------------
+@GET_ENEMY
+;------------------------------------------
+#DIM CHARA, 1
+;奴隷確定入手
+
+;キャラが多すぎる場合中断
+IF DAY <= 200 && CHARANUM > 20
+	RETURN 0
+ELSEIF DAY <= 400 && CHARANUM > 25
+	RETURN 0
+ELSEIF DAY <= 600 && CHARANUM > 30
+	RETURN 0
+ELSEIF DAY <= 1000 && CHARANUM > 35
+	RETURN 0
+ENDIF
+
+;キャラのNOを選定 
+CHARA = RAND(1, 17)
+
+;이국의 용사에 대한 판정
+CALL CHAR_MAKE_INPORT,10
+IF RESULT == 0
+	LOCAL = 0
+	ADDCHARA CHARA
+	A = CHARANUM - 1
+	CALL CHAR_MAKE
+ELSE
+	LOCAL = 1
+ENDIF
+PRINTL *****************************************
+SIF LOCAL
+	PRINT 이국의 
+PRINT 용사 
+PRINTS SAVESTR:RESULT
+PRINTL 을 포로로 하였다! 
+PRINTL *****************************************
+WAIT
+PRINTL  
+A = RESULT
+
+;카르마 조정
+SIF CFLAG:A:151 < -100
+	CFLAG:A:151 = -100
+
+;侵入階層・侵攻度・侵攻中・再起ポイント設定
+CFLAG:A:501 = 1
+CFLAG:A:502 = 0
+CFLAG:A:1 = 0
+CFLAG:A:508 = 3
+
+;초기 좌표
+LOCAL:0 = RAND:32
+LOCAL:1 = RAND:32
+
+IF RAND:4 == 0
+	LOCAL:0 = 0
+ELSEIF RAND:3 == 0
+	LOCAL:1 = 0
+ELSEIF RAND:2 == 0
+	LOCAL:0 = 31
+ELSE
+	LOCAL:1 = 31
+ENDIF
+
+CFLAG:A:510 = LOCAL:0
+CFLAG:A:511 = LOCAL:1
+
+
+RETURN A
+

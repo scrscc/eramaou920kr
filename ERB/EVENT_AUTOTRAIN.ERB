@@ -1,0 +1,157 @@
+﻿;--------------------------------------------------
+;自動調教システム
+;罠や呪われた装備, イベントなどで勇者が調教されていく
+;CALL BEFORE_AUTOTRAIN
+;CALL COMxxx_AUTO
+;CALL SOURCE_CHECK_AUTO
+;の順番で挟んで使用します
+;各種調教はCOMF内に新たに作る必要があります
+;一度でも調教を受けると, AUTOTRAINによって珠の修正が行われる
+;--------------------------------------------------
+@AUTOTRAIN
+#DIM KEEP_TARGET
+#DIM KEEP_ASSI
+;--------------------------------------------------
+;自動調教
+
+KEEP_TARGET = TARGET
+KEEP_ASSI = ASSI
+PLAYER = 0
+ASSI = -1
+
+FOR TARGET, 0, CHARANUM
+	
+	;自動調教可能かを見る
+	SIF CFLAG:666 == 0
+		CONTINUE
+	
+	PRINT 【
+	CALL PRINT_CLOTHTYPE
+	PRINT 】
+	
+	PRINTFORML %SAVESTR:TARGET%의 조교결과
+	
+	CALL AFTER_AUTOTRAIN
+	
+	;컨피그「戦闘ログでのSKIP中断」がONなら強制停止
+	IF GETBIT(FLAG:5,9)
+		FORCEWAIT
+	ELSE
+		WAIT
+	ENDIF
+	
+NEXT
+
+TARGET = KEEP_TARGET
+ASSI = KEEP_ASSI
+
+RETURN 0
+
+;--------------------------------------------------
+@FORMAT_AUTOTRAIN
+;--------------------------------------------------
+;自動調教の前にフォーマット
+
+;主人公の射精を0に
+BASE:MASTER:2 = 0
+;いちおう調教対象と助手も
+BASE:TARGET:2 = 0
+SIF ASSI >= 0
+	BASE:ASSI:2 = 0
+BASE:TARGET:3 = 0
+BASE:MASTER:4 = 0
+
+LOSEBASE:0 = 0
+LOSEBASE:1 = 0
+
+;射精フラグ, 処女喪失フラグなどをリセット
+REPEAT 200
+	TFLAG:COUNT = 0
+REND
+
+;PALAMのリセット
+FOR LOCAL,0,17
+	PALAM:LOCAL = 0
+NEXT
+
+CALL BEFORE_AUTOTRAIN
+
+;常時発情ボーナス：潤滑と欲情が3000からスタート
+IF TALENT:TARGET:271
+	PALAM:TARGET:3 = 3000
+	PALAM:TARGET:5 = 3000
+ENDIF
+
+;コロシアムの収入初期化
+TFLAG:402 = 0
+
+RETURN 0
+
+;--------------------------------------------------
+@BEFORE_AUTOTRAIN
+;--------------------------------------------------
+
+;ソースのリセット
+FOR LOCAL,0,17
+	SOURCE:LOCAL = 0
+NEXT
+
+;UPのリセット
+FOR LOCAL,0,17
+	UP:LOCAL = 0
+	DOWN:LOCAL = 0
+NEXT
+
+RETURN 0
+
+;--------------------------------------------------
+@AFTER_AUTOTRAIN
+;--------------------------------------------------
+;自動調教の後処理
+
+;カルマ増減
+IF EX:1
+	PRINTW (V절정으로 인해 카르마가 내려갔습니다:-1)
+	CALL KARMA, TARGET, -1
+ENDIF
+
+IF EX:2
+	PRINTW (A절정으로 인해 카르마가 내려갔습니다:-2)
+	CALL KARMA, TARGET, -2
+ENDIF
+
+;自動調教で得られた観戦, 母乳, ビデオなどはそのうち
+
+;항시발정
+IF FLAG:75 == 0 && TALENT:271 == 0
+	;潤滑の10000分の1を蓄積　潤滑が10000を下回る場合はリセット
+	IF PALAM:3 >= 10000
+		CFLAG:81 += PALAM:3 / 10000
+	ELSE
+		CFLAG:81 = 0
+	ENDIF
+	;欲情の10000分の1を蓄積　欲情が10000を下回る場合はリセット
+	IF PALAM:5 >= 10000
+		CFLAG:82 += PALAM:5 / 10000
+	ELSE
+		CFLAG:82 = 0
+	ENDIF
+ENDIF
+
+;リセット
+GOTJUEL:100 = 0
+
+CFLAG:667 += CFLAG:666
+
+;何の珠を得られたか
+CALL JUEL_CHECK_MAIN
+
+
+
+;自動調教回数. 50回でMAX
+SIF CFLAG:667 > 50
+	CFLAG:667 = 50
+
+RETURN 0
+
+

@@ -1,0 +1,534 @@
+﻿;몬스터들과 노닥노닥
+;とりあえずやっつけ。수정 패치도 환영
+
+;-----------------------------------
+@MONSTER_PLAY
+;-----------------------------------
+$INPUT_LOOP
+
+CALL MONSTERPLAY_LIST
+
+SIF ITEM:22 >= 1
+	PRINT [900] 똥개 
+PRINTL [999] 돌아간다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF ITEM:RESULT <= 0 && RESULT != 900
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 900 && ITEM:22 <= 0
+	GOTO INPUT_LOOP
+ENDIF
+
+LOCAL:0 = RESULT
+IF LOCAL:0 != 900
+	CALL MONSTER_DATA, LOCAL:0, 5
+	LOCAL:1 = E:507
+ENDIF
+
+A = 0
+Y = RAND:5 + 3
+
+IF LOCAL:0 == 900
+	CALL MONSTER_PLAY_DOG
+ELSEIF LOCAL:1 == 1
+	CALL ORC_MONSTER_PLAY
+ELSEIF LOCAL:1 == 2
+	CALL SLIME_MONSTER_PLAY
+ELSEIF LOCAL:1 == 3
+	CALL INSECT_MONSTER_PLAY
+ELSEIF LOCAL:1 == 4
+	CALL IVY_MONSTER_PLAY
+ELSEIF LOCAL:1 == 5
+	CALL SYOKUSYU_MONSTER_PLAY
+ELSEIF LOCAL:1 == 6
+	CALL FAILY_MONSTER_PLAY
+ELSEIF LOCAL:1 == 7
+	CALL GIANT_MONSTER_PLAY
+ELSEIF LOCAL:1 == 8
+	CALL MAN_MONSTER_PLAY
+ELSEIF LOCAL:1 == 9
+	CALL GIRL_MONSTER_PLAY
+ELSEIF LOCAL:1 == 10
+	CALL BEAST_MONSTER_PLAY
+ELSEIF LOCAL:1 == 11
+	CALL BRAIN_MONSTER_PLAY
+ELSEIF LOCAL:1 == 12
+	CALL HORSE_MONSTER_PLAY
+ENDIF
+
+IF TALENT:A:0 == 1 && EXP:A:0 > 0
+	PRINTW 【처녀상실】
+	TALENT:A:0 = 0
+ENDIF
+
+
+
+BEGIN TURNEND
+RETURN 1
+
+;-------------------------------------
+@MONSTERPLAY_LIST
+;-------------------------------------
+
+PRINTL 몬스터를 선택하십시오
+
+LOCAL:1 = 0
+FOR LOCAL:0, 100, 200
+	IF ITEM:(LOCAL:0) >= 1
+		PRINTFORM [{LOCAL:0}] %ITEMNAME:(LOCAL:0)%　　
+		LOCAL:1 += 1
+	ENDIF
+	
+	IF LOCAL:1 >= 3
+		PRINTL  
+		LOCAL:1 = 0
+	ENDIF
+NEXT
+
+SIF LOCAL:1 != 0
+	PRINTL  
+
+RETURN 0
+
+;-----------------------------------------
+@MONSTER_PLAY_DOG
+;-----------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 당신은 개에게 간식을 주었다
+	RETURN 0
+ENDIF
+
+
+PRINTW 『끄ー응、끄으ー응』
+
+PRINTFORMW 달콤하게 울며 %SAVESTR:A%에게 달라붙는 개를 달래며、%조사선택(SAVESTR:A, "는")% 네발로 엎드려, 부풀어오른 개의 음경을 자신의 비소로 이끌었다
+PRINTFORML V경험+{Y}
+EXP:A:0 += Y
+PRINTFORMW 수간경험+{Y}
+EXP:A:56 += Y
+CFLAG:A:106 += Y
+
+RETURN 0
+
+
+;--------------------------------------------
+@ORC_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 『마왕님…』
+	RETURN 0
+ENDIF
+
+X = RAND:5
+IF X == 0
+	PRINTW 『마…마왕님과 섹스 할 수 있다니…！』
+ELSEIF X == 1
+	PRINTW 『감격이다…』
+ELSEIF X == 2
+	PRINTW 『괜찮겠습니까…나 같은 걸로？』
+ELSEIF X == 3
+	PRINTW 『우우…마왕님…』
+ELSE
+	PRINTW 『부히힛、마왕님…』
+ENDIF
+
+
+X = RAND:2
+IF X == 0
+	PRINTW 『마왕님이…내 자지를…！』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 알몸으로 오크들의 페니스에 봉사했다. 진한 정액이 %SAVESTR:A%의 입에 뿌려졌다…
+	PRINTFORML 펠라경험+{Y}
+	PRINTFORML 정액경험+{Y}
+	EXP:A:22 += Y
+	EXP:A:20 += Y
+ELSEIF X == 1
+	PRINTW 『모두、마왕님의 위문이다…！』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 입, 질, 항문 모든 구멍에 오크들의 페니스로 정액을 주입당했다
+	PRINTW 그녀의 얼빠진 눈은, 음침한 지하감옥의 천장을 향한 채, 초점도 잡혀있지 않았다
+	PRINTFORMW {Y}인분의 쌓이고 쌓인 정액으로 화장된 얼굴과 성기를 보며, 오크들은 더욱더 흥분했다
+	PRINTFORML V경험+{Y}
+	PRINTFORML A경험+{Y}
+	PRINTFORML 펠라경험+{Y}
+	PRINTFORML 정액경험+{Y}
+	EXP:A:0 += Y
+	EXP:A:1 += Y
+	EXP:A:22 += Y
+	EXP:A:20 += Y
+	CFLAG:A:107 += Y
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@SLIME_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 당신은 슬라임에게 하반신을 넣고 마음껏 그 서늘한 감각을 느꼈다
+	RETURN 0
+ENDIF
+
+PRINTW 점액이 수상하게 흔들리고있다………
+
+X = RAND:2
+IF X == 0
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 점액목욕을 즐겼다
+	PRINTFORMW …끈적끈적하다！
+	PRINTFORML 치정의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:5 += Y * 10
+	JUEL:A:8 += Y * 10
+ELSEIF X == 1
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 점액목욕을 즐겼다
+	PRINTFORMW %SAVESTR:A%의 항문에 역류하는 대량의 점액으로 몸 안쪽이 깨끗해지는 느낌이었다
+	PRINTFORML A경험+{Y}
+	PRINTFORML 치정의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:5 += Y * 10
+	JUEL:A:8 += Y * 10
+	EXP:A:1 += Y
+ELSEIF X == 2
+	
+ELSE
+	
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@INSECT_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 당신은 곤충관찰을 마음껏 즐겼다
+	RETURN 0
+ENDIF
+
+PRINTW 절지생물의 갑각이 삐걱이고 있었다…
+
+
+X = RAND:2
+IF X == 0
+	PRINTW 『키치키치키치……』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 산란관을 입으로 빨아주었다
+	PRINTFORML 습득의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:7 += Y * 10
+	JUEL:A:5 += Y * 10
+ELSEIF X == 1
+	PRINTW 『키ー키ー키ー』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 항문에 산란관을 쑤셔넣고, 알을 낳게 해주었다
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 네발로 엎드린채 산란을 받아들이고 있다
+	PRINTFORMW {Y}마리가 번갈아가며 그녀에게 달라붙어, 엉덩이나 등까지 유충의 알투성이가 되었다
+	PRINTFORML A경험+{Y}
+	EXP:A:1 += Y
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@IVY_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 당신은 식물관찰을 마음껏 즐겼다
+	RETURN 0
+ENDIF
+
+PRINTW 『스으으 스으으…』
+
+
+X = RAND:2
+IF X == 0
+	PRINTW 덩굴이 몸을 조여왔다！
+	PRINTFORMW 가감을 모르는 덩굴의 조임에 %조사선택(SAVESTR:A, "는")% 괴로워했지만、곧 해방되어、그녀는 거칠게 호흡을 내쉬었다
+	PRINTFORML 고통의 구슬+{Y * 10}
+	PRINTFORML 공포의 구슬+{Y * 10}
+	JUEL:A:9 += Y * 10
+	JUEL:A:10 += Y * 10
+ELSEIF X == 1
+	PRINTW 덩굴이 항문에 뿌리내렸다
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 항문이 유린되며 목이 터져라 비명을 질렀다
+	PRINTW 덩굴은 충분히 양분을 흡수한 뒤, 단번에 항문에서 뿌리를 뽑았다
+	PRINTFORML A경험+{Y}
+	PRINTFORML 고통의 구슬+{Y * 10}
+	PRINTFORML 공포의 구슬+{Y * 10}
+	JUEL:A:9 += Y * 10
+	JUEL:A:10 += Y * 10
+	EXP:A:1 += Y
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@SYOKUSYU_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 촉수는 꿈틀거리며 움직이고 있다…
+	RETURN 0
+ENDIF
+
+PRINTW 촉수가 수상하게 떨리고 있다………
+
+
+X = RAND:4
+IF X == 0
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 촉수의 점액이 나오는 첨단을 입에 넣고 빨았다
+	PRINTFORMW 즉시 대량이 체엑이 분출되어, 숨이 막혔다。그녀의 의식은 점점 혼탁해졌다………
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:5 += Y * 10
+ELSEIF X == 1
+	PRINTFORMW 촉수를 %SAVESTR:A%의 항문 안쪽으로 이끌었다
+	PRINTFORMW 항문에 삼켜진 촉수는, 장내에서 체액을 내뿜었다
+	PRINTW 곧 근육이 이완하여 느슨해진 항문에서, 대향의 탁한 체액이 흘러 나왔다
+	PRINTFORML A경험+{Y}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:5 += Y * 10
+	EXP:A:1 += Y
+ELSEIF X == 2
+	PRINTFORMW %SAVESTR:A%의 성기에 촉수를 받아들였다
+	PRINTFORMW 굵은 촉수가 움직이며 최음성분의 체액을 질벽에 발라갔다
+	PRINTFORML V경험+{Y}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:5 += Y * 10
+	EXP:A:0 += Y
+	CFLAG:A:107 += Y
+ELSEIF X == 3
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 구멍이란 구멍에 촉수가 채워진 채, 촉수의 체액이 흘려넣어졌다
+	PRINTFORMW 최음성분의 체액에 %조사선택(SAVESTR:A, "는")% 욕정하고 있다…
+	PRINTFORML A경험+{Y}
+	PRINTFORML V경험+{Y}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:5 += Y * 10
+	EXP:A:0 += Y
+	EXP:A:1 += Y
+	CFLAG:A:107 += Y
+ENDIF
+PRINTFORMW 촉수경험+{Y}
+EXP:A:55 += Y
+RETURN 0
+
+;--------------------------------------------
+@FAILY_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:A:122 == 1
+	PRINTW 『나 쬐끄매요？ 그래도 조아요？』
+ELSE
+	PRINTW 『마왕니ー임！ 엣찌！』
+ENDIF
+
+IF TALENT:A:122 == 1 || TALENT:A:121 == 1
+	PRINTW 『마왕니ー임의 자지, 삼켜버렸다 꺄ー아』
+	PRINTFORMW %SAVESTR:A%의 페니스를 요정이 전신을 사용해 훑고있다
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:0 += Y * 10
+	JUEL:A:5 += Y * 10
+ELSE
+	PRINTW 『핥쟈ー！』
+	PRINTFORMW %SAVESTR:A%의 클리토리스와 양 젖꼭지에 요정들이 달라붙었다
+	PRINTW 그녀는 요정들의 혀놀림이 주는 쾌락에 번민하고있다
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:0 += Y * 10
+	JUEL:A:5 += Y * 10
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@GIANT_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 『마왕님…용서해줘…』
+	RETURN 0
+ENDIF
+
+PRINTW 『마왕님　부서진다　괜찮은가？』
+
+X = 0
+IF X == 0
+	PRINTFORMW 『마왕님이　오나홀　같이　！！』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 거인에게 잡혀, 그 거대한 페니스를 자극하기 위한 오나홀이 되었다
+	PRINTFORMW 『우웃　마왕님　기분 좋씁니닷』
+	PRINTFORMW 다음순간, 배가 불룩해질 정도로 엄청난 양의 정액이 안쪽에 쏟아졌다…
+	PRINTFORML V경험+{Y}
+	PRINTFORML 정액경험+{Y}
+	PRINTFORML V확장경험+{Y}
+	EXP:A:0 += Y
+	EXP:A:20 += Y
+	EXP:A:53 += Y
+	CFLAG:A:107 += Y
+ELSEIF X == 1
+ELSEIF X == 2
+ELSEIF X == 3
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@MAN_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 『마왕님 그런 농담은 조금……』
+	RETURN 0
+ENDIF
+
+PRINTW 『저、정말 괜찮습니까！？ 마왕님…믿기지 않아…』
+
+X = RAND:2
+IF X == 0
+	PRINTW 『우우웃…마왕님…기분 좋습니다…』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 알몸으로 남자의 페니스에 봉사했다。%SAVESTR:A%의 혀놀림에 남자는 번민하고 있다
+	PRINTFORML 펠라경험+{Y}
+	PRINTFORML 정액경험+{Y}
+	EXP:A:22 += Y
+	EXP:A:20 += Y
+ELSEIF X == 1
+	PRINTW 『마왕님께서…우리들에게 엉덩이를…！』
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 벽에 손을 짚고 남자들에게 엉덩이를 내밀며 유혹했다
+	PRINTFORMW 마족의 남자들은 앞다퉈 성기를 발기시키며 %조사선택(SAVESTR:A, "를")% 범했다
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 달콤한 비음을 흘리며 이 쾌감을 즐겼다
+	PRINTFORML V경험+{Y}
+	PRINTFORML A경험+{Y}
+	PRINTFORML 정액경험+{Y}
+	EXP:A:0 += Y
+	EXP:A:1 += Y
+	EXP:A:20 += Y
+	CFLAG:A:107 += Y
+ELSEIF X == 2
+	
+ELSEIF X == 3
+	
+ELSE
+	
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@GIRL_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:A:122 == 1
+	PRINTW 『어머나ー 마왕님、저희들과 놀고싶으신 건가요？』
+ELSE
+	PRINTW 『마왕님은…그쪽의 취미도 있으셨구나』
+ENDIF
+
+IF TALENT:A:122 == 1
+	PRINTW 『마왕님…괜찮으시다면 매일밤 저희가 봉사해드릴게요…？』
+	PRINTFORMW %SAVESTR:A%의 페니스를 원하는 여마족들이 꺄꺄 거리며 몰려들었다
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:A:0 += Y * 10
+	JUEL:A:5 += Y * 10
+ELSE
+	PRINTW 『아ー앙、마왕니임、저를 노예로 만들어주세요ー♪』
+	PRINTFORM %조사선택(SAVESTR:A, "는")%
+	IF TALENT:A:121 == 1
+		PRINT 페니스
+	ELSE
+		PRINT 딜도
+	ENDIF
+	PRINTFORMW 로 여마족들을 공격했다
+	PRINTW 여자끼리지만 싫지 않아보인다
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	PRINTFORML 레즈경험+{Y}
+	JUEL:A:0 += Y * 10
+	JUEL:A:5 += Y * 10
+	EXP:A:40 += Y
+ENDIF
+
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@BEAST_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 당신은 배를 보이며 따르는 마수의 모피를 마음껏 즐겼다
+	RETURN 0
+ENDIF
+
+PRINTW 『끄으ー응、끼이ー잉』
+
+PRINTFORMW 달콤하게 울며 %SAVESTR:A%에게 달라붙는 마수를 달래며、%조사선택(SAVESTR:A, "는")% 네 발로 엎드린 채, 마수의 페니스를 자신의 비소로 인도했다
+PRINTFORML V경험+{Y}
+EXP:A:0 += Y
+PRINTFORMW 수간경험+{Y}
+EXP:A:56 += Y
+CFLAG:A:107 += Y
+RETURN 0
+
+;--------------------------------------------
+@BRAIN_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 『마왕님… 용서해줘…』
+	RETURN 0
+ENDIF
+
+PRINTW 『마왕님… 용서해줘…』
+RETURN 0
+
+
+X = RAND:40
+IF X == 0
+	PRINTL 「아…아…아゛ー앗、아゛ー앗」
+	PRINTFORML 브레인이터의 단단한 촉수가 %SAVESTR:A%의 두개골을 뚫고、뇌를 홀짝이기 시작했다
+	PRINTL 그녀는 사지를 바들바들 떨며 실금하더니, 죽었다
+	BASE:A:0 = 0
+	PRINTFORML 이상경험+1
+	EXP:A:50 += 1
+ELSE
+	PRINTW 브레인이터의 촉수가 용사를 휘감아 잡았다. 용사는 죽어라 몸부림쳤지만 벗어날 수 없었다
+	PRINTFORMW 브레인이터는 %SAVESTR:A%의 뇌에 촉수를 찔러넣어, 두뇌에 직접 미약성분을 흘려넣었다
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 쾌감으로 실금하다 폐인이 되었다
+	PRINTFORMW 아무래도 배는 줄어들지 않은 것 같다
+	PRINTFORML 이상경험+1
+	EXP:A:50 += 1
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@HORSE_MONSTER_PLAY
+;--------------------------------------------
+
+IF TALENT:MASTER:122 == 1
+	PRINTW 당신은 승마를 마음껏 즐겼다
+	RETURN 0
+ENDIF
+
+PRINTW 『히히잉！』
+
+PRINTFORMW %조사선택(SAVESTR:A, "는")% 거칠게 숨을 내쉬며 당신에게 올라타려는 말을 타이르며, 다리 사이로 엎드려 기어들어갔다
+PRINTFORMW 말의 거대한 페니스는 역시 %SAVESTR:A%에게도 좀 컸던 모양이다
+PRINTFORML 고통의 구슬+{Y * 10}
+PRINTFORML 공포의 구슬+{Y * 10}
+PRINTFORML V경험+{Y}
+EXP:A:0 += Y
+JUEL:A:9 += Y * 10
+JUEL:A:10 += Y * 10
+CFLAG:A:107 += Y
+PRINTFORMW 수간경험+{Y}
+EXP:A:56 += Y
+RETURN 0
+
+
+
+
+

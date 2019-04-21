@@ -1,0 +1,989 @@
+﻿;------------------------------------------
+@MUSEUM
+#DIM LV
+#DIMS MATURO
+#DIM FAMILY,3
+;ZはTARGETを保存してるため使用禁止
+;------------------------------------------
+;処刑コマンド
+
+;FLAG:84  調度品의 수
+
+SIF A == 0
+	RETURN 0
+B = A
+
+FAMILY = CFLAG:A:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, A
+FAMILY:2 = RESULT
+
+;	MATURO = 対象の末路
+;大きいカテゴリにしたけど, 細分化したいときはこの辺の処理を変えてみてください
+
+
+PRINTW 어떻게 장식할까…
+PRINTL 
+PRINTL [0] 석상
+PRINTL [1] 박제
+PRINTL [2] 밀랍인형
+PRINTL [3] 인형(마네킹)
+PRINTL [4] 인형(구체관절)
+PRINTL [5] 금속상
+PRINTL [6] 얼음상
+PRINTL [7] 보석
+PRINTL [8] 실내가구
+PRINTL [9] 회화
+PRINTL  
+PRINTL [100] 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 10 && RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+IF RESULT == 100
+	TARGET = FLAG:1
+	RETURN 0
+ENDIF
+
+TARGET = A
+TFLAG:500 = RESULT
+
+CALL MUSEUM_KOUJO
+
+IF TFLAG:500 == 0
+	FLAG:84 += 1
+	SIF TALENT:A:57 || TALENT:A:121 || TALENT:A:122 || TALENT:A:130
+		FLAG:611 += 1
+	FLAG:600 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 사악한 마법진의 중심에 매달려있다. 
+	PRINTW 그리고 일순 빛이 명멸하자, 
+	PRINT 그녀의 신체는
+		IF RAND:3 == 0
+			;白い石膏像いいよね…
+			PRINT 석고
+		ELSEIF RAND:3 == 1
+			;何か豪華そうなちょっと白めのやつ
+			PRINT 대리석
+		ELSE
+			;普通の灰色の
+			PRINT 돌
+		ENDIF
+	PRINTW (이)가 되어있다. 
+	
+		;噴水像に出来る？
+		IF TALENT:A:57 || TALENT:A:121 || TALENT:A:122 || TALENT:A:130
+			PRINTFORMW %NAME:MASTER%(은)는 %SAVESTR:A%(을)를 분수대 동상로 만들려고 마법진에 직접 손을 대고 있었다
+			;ふたなり噴水
+			IF TALENT:A:121 || TALENT:A:122
+				PRINTFORMW %SAVESTR:A%의 격분한 남근은 예정대로 분수 장치로 바뀌어,  남근의 구멍에서 기세 좋게 물이 분출되고 있다…
+				SIF TALENT:A:130
+				;ふたなりかつ母乳体質な石噴水
+				PRINTFORMW 조금 만지는 것 만으로도 모유를 뿜어내고 있는 %SAVESTR:A%의 유두 또한 분수 장치로 교환되어, 발기한 그 끄트머리에서 물을 뿜어내고 있다…
+				;以下資質分岐
+				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+					PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어서, 조금이라도 틈을 보이면 바로 습격 할 것 같은 분위기였다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 분수대 동상이 되어 보기 흉한 모습을 대중들에게 보이게 되었다
+				ELSEIF MARK:3 == 3
+					;反発刻印Lv3
+					PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+					PRINTW 그러나 그런 저항도 허무하게, 그녀는 분수대 동상으로 그 아름다운 몸을 대중들에게 보이게 되었다
+				ELSEIF TALENT:A:85
+					;애정
+					PRINTFORMW %SAVESTR:A%(은)는 분수대 동상이 되었지만 부드럽게 미소 짓고 있었다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태로 분수대 동상으로 꾸며졌다…
+				ELSEIF TALENT:A:60 || TALENT:A:80
+					;자위쉬움・도착적
+					PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 분수대 동상이 되었다…
+				ELSEIF TALENT:A:28 || TALENT:A:89
+					;눈에띄고싶어함・노출광
+					PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 분수 받침대에 장식되고 있다…
+				ELSEIF TALENT:A:14 || TALENT:A:26
+					;비관적・얌전함
+					PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+				ELSEIF TALENT:A:35
+					;수줍음
+					PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+					PRINTW 숨기려고 하는 도중에 석화 되었기 때문에, 어중간한 위치에 멈춰 있어서 중요한 곳은 숨겨져 있지 않았다
+					PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+				ELSEIF TALENT:A:136
+					;암캐
+					PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+					PRINTW 네발로 엎드린 후, 개가 소변을 보듯이 한쪽 발을 들어 올린 자세로 분수상으로서 장식해지는 것이 되었다…
+				ELSEIF TALENT:A:113
+					;매혹
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+				ELSE
+					;上記素質以外
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는 오줌 싸는 소년과 같은 자세로 장식해지는 것이 되었다…
+				ENDIF
+			
+			ELSEIF TALENT:A:130
+				;母乳体質なら胸噴水
+				PRINTFORMW 항상 모유를 방울져 떨어트리고 있었던 %SAVESTR:A%의 유두는, %NAME:MASTER%의 의도대로 유두 끝부분으로부터 물이 뿜어 나오도록 바뀌었다…
+				SIF TALENT:A:57
+					;母乳体質でおむらし癖の小便少女噴水
+					PRINTFORMW 그리고 오줌싸개 버릇이 있는 %SAVESTR:A%(은)는 요도가 있던 장소로부터도 끝없이 “소변”을 계속 싸게 되었다…
+				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+					PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 분수대 동상이 되어 보기 흉한 모습을 대중들에게 보이게 되었다…
+				ELSEIF MARK:3 == 3
+					;反発刻印Lv3
+					PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+					PRINTW 그러나 그런 저항도 허무하게, 그녀는 분수대 동상으로 그 아름다운 몸을 대중들에게 보이게 되었다
+				ELSEIF TALENT:A:85
+					;애정
+					PRINTFORMW %SAVESTR:A%(은)는 분수대 동상이 되었지만 부드럽게 미소 짓고 있었다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태로 분수대 동상으로 꾸며졌다…
+				ELSEIF TALENT:A:60 || TALENT:A:80
+					;자위쉬움・도착적
+					PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 분수대 동상이 되었다…
+				ELSEIF TALENT:A:28 || TALENT:A:89
+					;눈에띄고싶어함・노출광
+					PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 분수 받침대에 장식되고 있다…
+				ELSEIF TALENT:A:14 || TALENT:A:26
+					;비관적・얌전함
+					PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+				ELSEIF TALENT:A:35
+					;수줍음
+					PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+					PRINTW 숨기려고 하는 도중에 석화 되었기 때문에, 어중간한 위치에 멈춰 있어서 중요한 곳은 숨겨져 있지 않았다
+					PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+				ELSEIF TALENT:A:136
+					;암캐
+					PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+					PRINTW 네발로 엎드린 후, 개가 소변을 보듯이 한쪽 발을 들어 올린 자세로 분수상으로서 장식해지는 것이 되었다…
+				ELSEIF TALENT:A:113
+					;매혹
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+				ELSE
+					;上記素質以外
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 무릎 꿇고 가슴을 내민 자세로 장식해지는 것이 되었다…
+				ENDIF
+				
+			ELSEIF TALENT:A:57
+				;おむらし癖だったらシンプルに小便少女で
+				PRINTFORMW 요도가 느슨했던 %SAVESTR:A%의 요도가 있던 곳은 분수 장치로 바뀌어 %SAVESTR:A%(은)는 대중이 보고있는 앞에서 영원히 방뇨하게 되었다…
+				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+					PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 분수대 동상이 되어 보기 흉한 모습을 대중들에게 보이게 되었다…
+				ELSEIF MARK:3 == 3
+					;反発刻印Lv3
+					PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+					PRINTW 그러나 그런 저항도 허무하게, 그녀는 분수대 동상으로 그 아름다운 몸을 대중들에게 보이게 되었다
+				ELSEIF TALENT:A:85
+					;애정
+					PRINTFORMW %SAVESTR:A%(은)는 분수대 동상이 되었지만 부드럽게 미소 짓고 있었다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태로 분수대 동상으로 꾸며졌다…
+				ELSEIF TALENT:A:60 || TALENT:A:80
+					;자위쉬움・도착적
+					PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 분수대 동상이 되었다…
+				ELSEIF TALENT:A:28 || TALENT:A:89
+					;눈에띄고싶어함・노출광
+					PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 분수 받침대에 장식되고 있다…
+				ELSEIF TALENT:A:14 || TALENT:A:26
+					;비관적・얌전함
+					PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+				ELSEIF TALENT:A:35
+					;수줍음
+					PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+					PRINTW 숨기려고 하는 도중에 석화 되었기 때문에, 어중간한 위치에 멈춰 있어서 중요한 곳은 숨겨져 있지 않았다
+					PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+				ELSEIF TALENT:A:136
+					;암캐
+					PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+					PRINTW 네발로 엎드린 후, 개가 소변을 보듯이 한쪽 발을 들어 올린 자세로 분수상으로서 장식해지는 것이 되었다…
+				ELSEIF TALENT:A:113
+					;매혹
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태로 분수대 동상으로 꾸며졌다…
+				ELSEIF RAND:8 == 0
+					;たまに小便小僧っぽく
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 어찌된 영문인지 소변 싸는 아이와 같은 자세를 취하고 있다…
+					PRINTW 남근이 없는 그녀의 요도 부근에서 물이 아치 모양으로 뿜어져 나오고 있었다…
+				ELSE
+					;上記素質以外
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는 허리를 내리고 양 무릎을 크게 연 자세로 장식해지는 것이 되었다…
+				ENDIF
+			ENDIF
+		
+		;噴水像に出来なかった石像
+		ELSE
+			IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+				;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+				PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+				PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 석상이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다…
+			ELSEIF MARK:3 == 3
+				;反発刻印Lv3
+				PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+				PRINTW 그러나 그런 저항도 허무하게, 그녀는 석상이 되어 그 아름다운 몸을 대중들에게 보이게 되었다
+			ELSEIF TALENT:A:85
+				;애정
+				PRINTFORMW %SAVESTR:A%는 석상이 되었지만, 온화하게 미소짓고 있다…
+			ELSEIF TALENT:A:153
+				;妊娠中
+				PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태로 석상으로 장식 되었다…
+			ELSEIF TALENT:A:60 || TALENT:A:80
+				;자위쉬움・도착적
+				PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 석상이 되었다…
+			ELSEIF TALENT:A:28 || TALENT:A:89
+				;눈에띄고싶어함・노출광
+				PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 석상 받침대에 장식되고 있다…
+			ELSEIF TALENT:A:14 || TALENT:A:26
+				;비관적・얌전함
+				PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+			ELSEIF TALENT:A:35
+				;수줍음
+				PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+				PRINTW 숨기려고 하는 도중에 석화 되었기 때문에, 어중간한 위치에 멈춰 있어서 중요한 곳은 숨겨져 있지 않았다
+				PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 석상으로서 장식해지는 것이 되었다
+			ELSEIF TALENT:A:136
+				;암캐
+				PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+				PRINTW 「앉아」의 자세를 취해, 다음의 명령을 기다리는 상태인 채 석상으로서 장식해지는 것이 되었다…
+			ELSEIF TALENT:A:113
+				;매혹
+				PRINTFORMW 석상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+			ENDIF
+		ENDIF
+	SIF TALENT:A:57 || TALENT:A:121 || TALENT:A:122 || TALENT:A:130
+		PRINTFORMW 현재 분수상의 수…{FLAG:611}개
+	PRINTFORMW 현재 석상의 수…{FLAG:600}개
+	
+	
+	
+		MATURO = 석상
+	
+	
+ELSEIF TFLAG:500 == 1
+	FLAG:84 += 1
+	FLAG:601 += 1
+	PRINTFORML 천장에서 쇠사슬로 사지가 묶인 %조사선택(SAVESTR:A, "를")% 향해 마물이 가까워진다. 
+	PRINTW 날뛰는 그녀의 신체에 나이프가 박혔다. 
+	PRINTW 비명이 사라지고 잠깐 지나자
+	PRINTW 그녀의 신체는 봐줄만한 박제가 되어 있다. 
+		IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+			;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+			PRINTFORMW %SAVESTR:A%(은)는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+			PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 박제가 되어 장식품으로서 벽에 장식 되었다
+		ELSEIF MARK:3 == 3
+			;反発刻印Lv3
+			PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+			PRINTW 그러나 그런 저항도 허무하게, 그녀는 박제가 되어 전시품으로서 벽에 장식되는 것이 되었다
+		ELSEIF TALENT:A:85
+			;애정
+			PRINTFORMW 박제가 된 %SAVESTR:A%(은)는 온화하게 미소짓고 있다…
+		ELSEIF TALENT:A:35
+			;수줍음
+			PRINTFORMW %SAVESTR:A%의 박제는 뺨을 붉게 물들이고 곤혹스러워 한 표정을 띄운 채, 벽에 장식되어져 있다…
+		ELSEIF TALENT:A:28 | TALENT:A:89
+			;눈에띄고싶어함・노출광
+			PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%의 박제는 어딘지 모르게 황홀로 한 표정을 띄우면서, 벽에 장식되어져 있다…
+		ELSEIF TALENT:A:14 || TALENT:A:26
+			;비관적・얌전함
+			PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 벽에 장식되어져 있다…
+		ELSEIF TALENT:A:153
+			;妊娠中・書いておいてなんだけど妊婦の剥製ってすっごいファンタジーな代物だなぁ
+			PRINTFORMW 임신하고 있었던 %SAVESTR:A%의 배는 부풀어 오른 상태인 채로 벽에 장식되어져 있다…
+		ELSEIF TALENT:A:113
+			;매혹
+			PRINTFORMW 박제가 된 %SAVESTR:A%(은)는 말로 이룰수 없는 아름다움을 자아 내었다…
+		ENDIF
+	PRINTFORMW 현재 박제의 수…{FLAG:601}개
+	
+	
+	
+		MATURO = 剥製
+	
+	
+ELSEIF TFLAG:500 == 2
+	FLAG:84 += 1
+	FLAG:602 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 준비된 받침대의 위에 올려져 있다. 
+	PRINTW 부하 마물에게 지시를 내리면, 대량의 밀납이 그녀에게 쏟아져 내린다. 
+	PRINTW 처음은 비명을 지르며 저항하고 있었지만, 시간이 지남에 따라 얌전하게 되어 있다．
+	PRINTW 비명이 사라지고 잠시 뒤, 밀납의 산에서 여분의 밀랍을 깎아버렸다…
+	PRINTW 안에서 드러난 그녀의 신체는 밀납화 되어있다. 
+		IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+			;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+			PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+			PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 밀랍인형이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다…
+		ELSEIF MARK:3 == 3
+			;反発刻印Lv3
+			PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+			PRINTW 그러나 그런 저항도 허무하게, 그녀는 밀랍인형이 되어 그 아름다운 몸을 대중들에게 보이게 되었다
+		ELSEIF TALENT:A:85
+			;애정
+			PRINTFORMW 밀랍인형이 된 %SAVESTR:A%(은)는 온화하게 미소짓고 있다…
+		ELSEIF TALENT:A:35
+			;수줍음
+			PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+			PRINTW 숨기려고 하는 도중에 밀랍화가 되었기 때문에, 양 손은 어중간한 위치에 멈춰 있어서 중요한 곳을 제대로 가리지 못했다
+			PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 밀랍인형으로서 장식하는 것이 되었다
+		ELSEIF TALENT:A:28 | TALENT:A:89
+			;눈에띄고싶어함・노출광
+			PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%의 박제는 어딘지 모르게 황홀로 한 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 밀랍인형이 되어 받침대에 장식되고 있다…
+		ELSEIF TALENT:A:14 || TALENT:A:26
+			;비관적・얌전함
+			PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+		ELSEIF TALENT:A:153
+			;妊娠中
+			PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채 밀랍인형으로서 장식되게 되었다…
+		ELSEIF TALENT:A:113
+			;매혹
+			PRINTFORMW 밀랍인형 된 %SAVESTR:A%(은)는 말로 이룰수 없는 아름다움을 자아 내었다…
+		ENDIF
+	PRINTFORMW 현재 밀랍인형의 수…{FLAG:602}개
+	
+	
+	
+		MATURO = 蝋人形
+	
+	
+ELSEIF TFLAG:500 == 3
+	FLAG:84 += 1
+	FLAG:603 += 1
+	PRINT 모든 힘을 봉쇄된
+	;体型別にしてみた
+		IF TALENT:A:308 <= 201
+			;グラマー
+			PRINT 통통한
+		ELSEIF TALENT:A:308 >= 100
+			;スレンダー
+			PRINT 날씬한 몸매의
+		ELSE
+			;標準
+			PRINT 표준적인 체형의
+		ENDIF
+	PRINTFORM %SAVESTR:A%(은)는
+		;チャームポイントがあればそれを強調
+		IF TALENT:A:312 == 12
+			;美乳
+			PRINT 형태가 좋은 유방을 강조한
+		ELSEIF TALENT:A:312 == 13
+			;くびれ
+			PRINT 여성적인 잘록함을 강조한
+		ELSEIF TALENT:A:312 == 14
+			;ヒップライン
+			PRINT 히프 라인을 강조한
+		ELSEIF TALENT:A:312 == 15
+			;脚線美
+			PRINT 각선미를 강조한
+		ELSEIF TALENT:A:312 == 23
+			;大きな尻
+			PRINT 큰 엉덩이를 강조한
+		ELSE
+			;上記以外
+			PRINT 지정하였다
+		ENDIF
+	PRINTW 자세를 취하도록 지시받았다．
+	PRINTW 지시받은 대로의 자세가 된 것을 가늠해 마물이 다가 가면서, 그녀에게 들리지 않도록 무언가를 영창 한다.
+		IF RAND:3 == 0
+			PRINTW 그녀는, 자신에 대해 무엇도 하지 않는 마물에게 의문을 느끼지만, 어째서 그러한지 생각하는 것은 불가능했다. 
+			PRINTW 그녀의 신체는, 아름다운 지체 그대로 피부 전체를 무엇인가에 의해 코딩당한 것 처럼 보였다. 
+			PRINTW 잘 보면, 관절을 포함해 신체 각부에 선이 들어가 있다. 
+			PRINTW 하반신을 고정하여, 허리 주변에 있는 선을 중심으로 상반신을 회전시켜보면, 아무래도 뽑아내는 것이 가능할 것 같다. 
+		ELSE
+			PRINTW 전신이 작게 튄것 것 같은 반응을 한것과 동시에,  빠직 이라는 소리가 들렸다．
+			PRINTW 그녀의 신체는, 아름다운 몸 그대로 피부 전체를 무엇인가에 의해 코딩당한 것 처럼 보였다. 
+			PRINTW 그러나 생기가 전혀 느껴지지 않는, 사람의 형태를 한 무언가로 변화하고 있었다.
+			PRINTW 표정 하나 바꾸지 않고 미동조차 하지 않게 된 그녀는 가볍게 들어 올려져 전시대로 옮겨졌다．
+		ENDIF
+	PRINTW 그렇게 해서 그녀는 봐줄만한 마네킹 인형이 되었다. 
+		IF TALENT:A:85
+			;애정
+			PRINTFORMW 마네킹 인형이 된%조사선택(SAVESTR:A, "는")%, 최근 구경 나온 마물들의 변덕으로 각부분을 뽑아내져 버린 것 같으나, 
+			PRINTFORMW %SAVESTR:A%의 머리 위쪽 부분은, 괴롭혀지는 것을 받아들이려는 듯이 옅은 웃음을 띄운 채다…
+		ELSEIF TALENT:A:60 || TALENT:A:80
+			;자위쉬움・도착적
+			PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정으로 마네킹 인형이 되었다…
+		ELSEIF TALENT:A:28 || TALENT:A:89
+			;눈에띄고싶어함・노출광
+			PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%는 자신의 몸을 과시하는 것 같은 자세로 마네킹이 되어 받침대에 장식되고 있다…
+		ELSEIF TALENT:A:153
+			;妊娠中
+			PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채 마네킹으로서 장식되게 되었다…
+		ELSEIF TALENT:A:113
+			;매혹
+			PRINTFORMW 마네킹 인형이 된%조사선택(SAVESTR:A, "는")%, 말할 수 없을 정도의 아름다움을 계속 자아내고 있다…
+		ENDIF
+		
+	PRINTFORMW 현재 인형(마네킹)의 수…{FLAG:603}개
+	
+	
+	
+		MATURO = マネキン人形
+	
+	
+ELSEIF TFLAG:500 == 4
+	FLAG:84 += 1
+	FLAG:604 += 1
+	PRINTFORML 모든 힘을 봉인당한 %SAVESTR:A%에게 마물이 접근, 그녀에게 들리지 않도록 무언가를 영창한다. 
+	PRINTW 그녀는 마물에게서 도망치려 하지만, 조금씩 움직임이 둔하게 되어간다. 
+	PRINTW 그녀의 신체는, 조금씩 천연 인간에서 무기질한 것으로 바뀌어, 관절부는 구체로 변화되어 갔다. 
+	PRINTW 그녀는 스스로의 몸에 무엇이 일어나고 있는가를 이해하지 못한 채, 저항을 계속하고 있다…
+	PRINTW …수분후, 그녀는 정교한 구체관절인형이 되어 있다. 
+		IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+			;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+			PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+			PRINTW 그러나 그런 저항이 허무하게 구체 관절 인형이 된 그녀는, 자세를 만지작 거려져 꼴 사나운 모습으로 대중들에게 보이게 되었다
+		ELSEIF MARK:3 == 3
+			;反発刻印Lv3
+			PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+			PRINTW 그러나 그런 저항도 허무하게 구체 관절 인형이 된 그녀는, 사지를 만지작 거려져 대중들에게 아양을 떠는 것 같은 자세로 전시되게 되었다…
+		ELSEIF TALENT:A:85
+			;애정
+			PRINTFORMW %SAVESTR:A%(은)는 구체 관절 인형이 되었지만, 온화하게 미소짓고 있었다…
+		ELSEIF TALENT:A:35
+			;수줍음
+			PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+			PRINTW 숨기려고 하는 도중에 인형화가 완료 되었기 때문에, 양 손은 어중간한 위치에 멈춰 있어서 중요한 곳을 제대로 가리지 못했다
+			PRINTW 그녀는 수치와 곤혹이 뒤섞인 표정인 채, 자세를 만지작 거려져 치욕적인 모습으로 전시되게 되었다…
+		ELSEIF TALENT:A:28 | TALENT:A:89
+			;눈에띄고싶어함・노출광
+			PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 장식장에 전시되고 있다…
+		ELSEIF TALENT:A:14 || TALENT:A:26
+			;비관적・얌전함
+			PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+		ELSEIF TALENT:A:153
+			;妊娠中
+			PRINTFORMW 임신하고 있었던 %SAVESTR:A%(은)는 배가 부풀어 오른 상태인 채 구체 관절 인형으로서 전시되게 되었다…
+		ELSEIF TALENT:A:113
+			;매혹
+			PRINTFORMW 구체 관절 인형이 되었던 %SAVESTR:A%마, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+		ENDIF
+	PRINTFORMW 현재 인형(구체관절)의 수…{FLAG:604}개
+	
+	
+	
+		MATURO = 球体間接人形
+	
+	
+ELSEIF TFLAG:500 == 5
+	FLAG:84 += 1
+	SIF TALENT:A:57 || TALENT:A:121 || TALENT:A:122 || TALENT:A:130
+		FLAG:612 += 1
+	FLAG:605 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 사악한 마법진의 중심에 매달려있다. 
+	PRINTW 부하 마물에 지시를 내려자, 눈부신 빛이 그녀를 감싸안았다. 
+	PRINTW …빛 속에서, 그녀는 스스로의 안이 무엇인가로 가득 차는 듯한 감각을 느꼈다. 
+	PRINTW 정체를 알 수 없는 충족감과 가득차는 기분 좋음에 처음은 당황했었지만, 이윽고 자신의 모든 것을 그 기분 좋음에 맡겨버렸다…
+	PRINTW 잠시 뒤 빛이 걷히자, 
+	PRINT 그녀의 신체는
+		IF RAND:8 == 0
+				;プラチナ
+				PRINT 백금
+		ELSEIF RAND:8 == 1
+				;ゴールド
+				PRINT 황금
+		ELSEIF RAND:8 == 2
+				;シルバー
+				PRINT 백은
+		ELSEIF RAND:8 == 3
+				;カッパー
+				PRINT 적동
+		ELSEIF RAND:8 == 4
+				;…メタル？
+				PRINT 강철
+		ELSE
+				;ブロンズ
+				PRINT 청동
+		ENDIF
+	PRINTW 이 되어있다. 
+		
+		;噴水像に出来る？
+		IF TALENT:A:57 || TALENT:A:121 || TALENT:A:122 || TALENT:A:130
+			PRINTFORMW %NAME:MASTER%(은)는 %SAVESTR:A%의 상으로 분수상 할려고 마법진을 독자적으로 손보고 있었다.
+			
+			;ふたなり噴水
+			IF TALENT:A:121 || TALENT:A:122
+				PRINTFORMW %SAVESTR:A%의 격분한 남근은 예정대로 분수 장치로 바뀌어,  남근의 구멍에서 기세 좋게 물이 분출되고 있었다…
+				SIF TALENT:A:130
+				;ふたなりかつ母乳体質な金属噴水
+				PRINTFORMW 조금 만지는 것 만으로도 모유를 뿜어내고 있는 %SAVESTR:A%의 유두 또한 분수 장치로 바뀌어, 발기한 그 끄트머리에서 물을 뿜어내고 있다…
+				;以下資質分岐
+				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+					PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어서, 조금이라도 틈을 보이면 바로 습격 할 것 같은 분위기였다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 분수상이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다
+				ELSEIF MARK:3 == 3
+					;反発刻印Lv3
+					PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 분수대 동상이 되어,  그 아름다운 몸을 대중들에게 보이게 되었다
+				ELSEIF TALENT:A:85
+					;애정
+					PRINTFORMW %SAVESTR:A%(은)는 분수상이 되었지만, 온화하게 미소짓고 있다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채로 분수대 분수상으로서 장식되었다…
+				ELSEIF TALENT:A:60 || TALENT:A:80
+					;자위쉬움・도착적
+					PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 분수대 동상이 되었다…
+				ELSEIF TALENT:A:28 || TALENT:A:89
+					;눈에띄고싶어함・노출광
+					PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 분수 받침대에 장식되고 있다…
+				ELSEIF TALENT:A:14 || TALENT:A:26
+					;비관적・얌전함
+					PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+				ELSEIF TALENT:A:35
+					;수줍음
+					PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+					PRINTW 숨기려고 하는 도중에 금속화가 되었기 때문에, 양 손은 어중간한 위치에 멈춰 있어서 중요한 곳을 제대로 가리지 못했다
+					PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+				ELSEIF TALENT:A:136
+					;암캐
+					PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+					PRINTW 네발로 엎드린 후, 개가 소변을 보듯이 한쪽 발을 들어 올린 자세로 분수상으로서 장식해지는 것이 되었다…
+				ELSEIF TALENT:A:113
+					;매혹
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+				ELSE
+					;上記素質以外
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는 오줌 싸는 소년과 같은 자세로 장식해지는 것이 되었다…
+				ENDIF
+			
+			ELSEIF TALENT:A:130
+				;母乳体質なら胸噴水
+				PRINTFORMW 항상 모유를 방울져 떨어트리고 있었던 %SAVESTR:A%의 유두는, %NAME:MASTER%의 의도대로 유두 끝부분으로부터 물이 뿜어 나오도록 바뀌었다…
+				SIF TALENT:A:57
+					;母乳体質でおむらし癖の小便少女噴水
+					PRINTFORMW 그리고 오줌싸개 버릇이 있는 %SAVESTR:A%(은)는 요도가 있던 곳에서도 끝없이 “소변”을 계속 싸게 되었다…
+				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+					PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어, 조금이라도 틈을 보이면 당장 습격당할 것 같은 분위기다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 분수상이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다…
+				ELSEIF MARK:3 == 3
+					;反発刻印Lv3
+					PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 분수대 동상이 되어, 그 아름다운 몸을 대중들에게 보이게 되었다
+				ELSEIF TALENT:A:85
+					;애정
+					PRINTFORMW %SAVESTR:A%(은)는 분수상이 되었지만 부드럽게 미소 짓고 있었다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태로 분수상으로서 장식 되어졌다…
+				ELSEIF TALENT:A:60 || TALENT:A:80
+					;자위쉬움・도착적
+					PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 분수상이 되었다…
+				ELSEIF TALENT:A:28 || TALENT:A:89
+					;눈에띄고싶어함・노출광
+					PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 분수 받침대에 장식되고 있다…
+				ELSEIF TALENT:A:14 || TALENT:A:26
+					;비관적・얌전함
+					PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+				ELSEIF TALENT:A:35
+					;수줍음
+					PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+					PRINTW 숨기려고 하는 도중에 금속화가 되었기 때문에, 양 손은 어중간한 위치에 멈춰 있어서 중요한 곳을 제대로 가리지 못했다
+					PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식하는 것이 되었다
+				ELSEIF TALENT:A:136
+					;암캐
+					PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지
+					PRINTW 네발로 엎드린 후, 배를 보이며 복종의 뜻을 나타내는 자세로 분수상으로서 장식하게 되었다…
+				ELSEIF TALENT:A:113
+					;매혹
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+				ELSE
+					;上記素質以外
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는　무릎 꿇은채 가슴을 내민 자세로 장식하게 되었다…
+				ENDIF
+				
+			ELSEIF TALENT:A:57
+				;おむらし癖だったらシンプルに小便少女で
+				PRINTFORMW 요도가 느슨했던 %SAVESTR:A%의 요도가 있었던 곳은 분수 장치로 바뀌어 %SAVESTR:A%는 대중들이 보는 앞에서 영원히 소변을 보게 되었다…
+				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+					PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어서, 조금이라도 틈을 보이면 바로 습격 할 것 같은 분위기였다
+					PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 분수상이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다
+				ELSEIF MARK:3 == 3
+					;反発刻印Lv3
+					PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+					PRINTW 그러나 그런 저항도 허무하게, 그녀는 분수대 동상으로 그 아름다운 몸을 대중들에게 보이게 되었다
+				ELSEIF TALENT:A:85
+					;애정
+					PRINTFORMW %SAVESTR:A%(은)는 분수상이 되었지만 부드럽게 미소 짓고 있었다…
+				ELSEIF TALENT:A:153
+					;妊娠中
+					PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채로 분수상으로 장식 되었다…
+				ELSEIF TALENT:A:60 || TALENT:A:80
+					;자위쉬움・도착적
+					PRINTFORMW 특이한 상황하에도 관계없이, 공포보다 성적 흥분이 이겼는가%SAVESTR:A%는 흥분한 표정인 채 분수상이 되었다…
+				ELSEIF TALENT:A:28 || TALENT:A:89
+					;눈에띄고싶어함・노출광
+					PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 분수 받침대에 장식되고 있다…
+				ELSEIF TALENT:A:14 || TALENT:A:26
+					;비관적・얌전함
+					PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+				ELSEIF TALENT:A:35
+					;수줍음
+					PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+					PRINTW 숨기려고 하는 도중에 금속화 되었기 때문에, 양손이 어중간한 위치에 멈춰 있어서 중요한 곳은 가려지지 않았다
+					PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+				ELSEIF TALENT:A:136
+					;암캐
+					PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+					PRINTW 네발로 엎드린 후, 개가 소변을 보듯이 한쪽 발을 들어 올린 자세로 분수상으로서 장식해지는 것이 되었다…
+				ELSEIF TALENT:A:113
+					;매혹
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+				ELSE
+					;上記素質以外
+					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는, 허리를 내리고 양 무릎을 크게 연 자세로 장식 되게 되었다…
+				ENDIF
+			ENDIF
+		
+		;噴水像に出来なかった金属像
+		ELSE
+			IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+				;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+				PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어서, 조금이라도 틈을 보이면 바로 습격 할 것 같은 분위기였다
+				PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 금속상이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다
+			ELSEIF MARK:3 == 3
+				;反発刻印Lv3
+				PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+				PRINTW 그러나 그런 저항도 허무하게 그녀는 금속상이 되어,  그 아름다운 몸을 대중들에게 보이게 되었다
+			ELSEIF TALENT:A:85
+				;애정
+				PRINTFORMW %SAVESTR:A%(은)는 금속상이 되었지만 부드럽게 미소 짓고 있었다…
+			ELSEIF TALENT:A:153
+				;妊娠中
+				PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채로 금속상으로서 장식되었다…
+			ELSEIF TALENT:A:60 || TALENT:A:80
+				;자위쉬움・도착적
+				PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 금속상이 되었다…
+			ELSEIF TALENT:A:28 || TALENT:A:89
+				;눈에띄고싶어함・노출광
+				PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 받침대에 장식되고 있다…
+			ELSEIF TALENT:A:14 || TALENT:A:26
+				;비관적・얌전함
+				PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+			ELSEIF TALENT:A:35
+				;수줍음
+				PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+				PRINTW 숨기려고 하는 도중에 금속화 되었기 때문에, 양손이 어중간한 위치에 멈춰 있어서 중요한 곳은 가려지지 않았다
+				PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+			ELSEIF TALENT:A:136
+				;암캐
+				PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+				PRINTW 「앉아」의 자세를 취하며, 다음 명령을 기다리는 상태인 채 금속상으로서 장식되는 것이 되었다…
+			ELSEIF TALENT:A:113
+				;매혹
+				PRINTFORMW 금속상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+			ENDIF
+		ENDIF
+	SIF TALENT:A:57 || TALENT:A:121 || TALENT:A:122 || TALENT:A:130
+		PRINTFORMW 현재 분수상(금속)의 수…{FLAG:611}개
+	PRINTFORMW 현재 금속상의 수…{FLAG:605}개
+	
+	
+	
+		MATURO = 金属像
+	
+	
+ELSEIF TFLAG:500 == 6
+	FLAG:84 += 1
+	FLAG:606 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 거대한 마법진의 중심에 매달려있다. 
+	PRINTW 부하 마물에 지시를 내려자, 마방진 전체에 마력을 머금은 강력한 냉기가 발생했다! 
+	PRINTW …잠시간 냉기가 가라앉자, 마방진 중심에 놓인 그녀가 보이면, 
+	PRINT 그녀는  
+		IF RAND:4 == 0
+				;表面に氷が張ってる？くらいの　30～45%凍結封印？
+				PRINT 얼음으로 뒤덮힌 오브제가 
+		ELSEIF RAND:4 == 1
+				;完全に氷になっちゃった系の얼음상　100%氷結
+				PRINT 속이 비칠 정도로 투명한 얼음 조각이 
+		ELSE
+				;普通の얼음상　60%くらい凍結
+				PRINT 훌륭한 얼음 조각상이 
+		ENDIF
+	PRINTW 되어 있다. 
+		IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+			;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+			PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어서, 조금이라도 틈을 보이면 바로 습격 할 것 같은 분위기였다
+			PRINTW 그러나 그런 저항도 허무하게 그녀는 그 모습 그대로 얼음상이 되어 꼴 사나운 모습을 대중들에게 보이게 되었다
+		ELSEIF MARK:3 == 3
+			;反発刻印Lv3
+			PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+			PRINTW 그러나 그런 저항도 허무하게도 그녀는 얼음상으로서, 그 아름다운 몸을 대중들에게 보이게 되었다
+		ELSEIF TALENT:A:85
+			;애정
+			PRINTFORMW 얼음상이 된 %SAVESTR:A%(은)는 온화하게 미소짓고 있었다…
+		ELSEIF TALENT:A:153
+			;妊娠中
+			PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채로 얼음상으로서 장식되었다…
+		ELSEIF TALENT:A:35
+			;수줍음
+			PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+			PRINTW 숨기려고 하는 도중에 얼어 붙었기 때문에, 양손이 어중간한 위치에 멈춰 있어서 중요한 곳은 가려지지 않았다
+			PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 얼음상으로서 장식해지는 것이 되었다
+		ELSEIF TALENT:A:28 | TALENT:A:89
+			;눈에띄고싶어함・노출광
+			PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 얼음상 받침대에 장식되고 있다…
+		ELSEIF TALENT:A:14 || TALENT:A:26
+			;비관적・얌전함
+			PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+		ELSEIF TALENT:A:113
+			;매혹
+			PRINTFORMW 얼음상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+		ENDIF
+	PRINTFORMW 현재 얼음상의 수…{FLAG:606}개
+	
+	
+	
+		MATURO = 氷像
+	
+	
+ELSEIF TFLAG:500 == 7
+	FLAG:84 += 1
+	FLAG:607 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 사악한 마법진의 중심에 매달려있다. 
+	PRINTW 부하 마물에 지시를 내려자, 눈부신 빛이 그녀를 감싸안았다. 
+	PRINTW …빛 속에서, 그녀는 스스로의 안에서 무언가가 개운해지는 듯한 감각을 느꼈다. 
+	PRINTW 정체를 알 수 없는 상쾌감과 개운해지는 기분 좋음에 처음은 당혹해 하고 있었으나, 이윽고 자신의 모든 것을 그 기분 좋음에 맞겨버렸다…
+	PRINTW 잠시 뒤 빛이 걷히자, 
+	PRINT 그녀의 신체는
+		IF RAND:8 == 0
+				;オパール오팔
+				PRINT 단백석
+		ELSEIF RAND:8 == 1
+				;エメラルド에메랄드
+				PRINT 취옥
+		ELSEIF RAND:8 == 2
+				;ルビー루비
+				PRINT 홍옥
+		ELSEIF RAND:8 == 3
+				;サファイア사파이어
+				PRINT 청옥
+		ELSEIF RAND:8 == 4
+				;アクアマリン아쿠아마린
+				PRINT 남옥
+		ELSEIF RAND:8 == 5
+				;アメジスト아메지스트
+				PRINT 자수정
+		ELSE
+				;ガラス글라스(크리스탈)
+				PRINT 유리
+		ENDIF
+	PRINTW (이)가 되어있다. 
+		IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
+			;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）
+			PRINTFORMW %SAVESTR:A%는 험학한 표정으로 이쪽을 노려보고 있어서, 조금이라도 틈을 보이면 바로 습격 할 것 같은 분위기였다
+			PRINTW 그러나 그런 저항도 허무하게도 그녀는 그 모습 그대로 보석상이 되어, 꼴 사나운 모습을 대중들에게 보이게 되었다
+		ELSEIF MARK:3 == 3
+			;反発刻印Lv3
+			PRINTFORMW %SAVESTR:A%(은)는 험악한 표정으로 이쪽을 노려보며, 어떠한 일이 있어도 %NAME:MASTER%에게는 절대 굴하지 않겠다는 강한 의지를 느끼게 해줬다
+			PRINTW 그러나 그런 저항도 허무하게 그녀는 보석상이 되어,  그 아름다운 몸을 대중들에게 보이게 되었다
+		ELSEIF TALENT:A:85
+			;애정
+			PRINTFORMW %SAVESTR:A%(은)는 보석상이 되었지만 부드럽게 미소 짓고 있었다…
+		ELSEIF TALENT:A:153
+			;妊娠中
+			PRINTFORMW 임신하고 있던 %SAVESTR:A%(은)는, 배가 부풀어 오른 상태인 채로 보석상으로서 장식되었다…
+		ELSEIF TALENT:A:60 || TALENT:A:80
+			;자위쉬움・도착적
+			PRINTFORMW 특이한 상황임에도 불구하고, 두려움보다 성적 흥분이 이겼는지 %SAVESTR:A%는 흥분한 표정 그대로 보석상이 되었다…
+		ELSEIF TALENT:A:28 || TALENT:A:89
+			;눈에띄고싶어함・노출광
+			PRINTFORMW 노출증을 숨기고 있었던 %SAVESTR:A%(은)는 어딘지 모르게 황홀해 하는 표정을 띄우면서, 자신의 몸을 과시하는 것 같은 자세로 받침대에 장식되고 있다…
+		ELSEIF TALENT:A:14 || TALENT:A:26
+			;비관적・얌전함
+			PRINTFORMW %SAVESTR:A%는 자신의 상황을 조속하게 받아들였는지, 깨달음과 체념이 뒤섞인 것 같은 표정으로 잠시 조용히 서있었다…
+		ELSEIF TALENT:A:35
+			;수줍음
+			PRINTFORMW %SAVESTR:A%는 부끄러워하면서, 양손으로 자신의 몸을 필사적으로 숨기려고 하려던 것 같았다
+			PRINTW 숨기려고 하는 도중에 보석화 되었기 때문에, 양손이 어중간한 위치에 멈춰 있어서 중요한 곳은 가려지지 않았다
+			PRINTW 그녀의 수치와 곤혹이 뒤섞인 표정도 있기에, 이색적인 분수상으로서 장식해지는 것이 되었다
+		ELSEIF TALENT:A:136
+			;암캐
+			PRINTFORMW %SAVESTR:A%(은)는 몸에 새겨진 짐승으로서의 행동을 무의식 중에 생각해 낸 것인지, 
+			PRINTW 「앉아」의 자세를 취하며, 다음 명령을 기다리는 상태인 채 보석상으로서 장식되는 것이 되었다…
+		ELSEIF TALENT:A:113
+			;매혹
+			PRINTFORMW 보석상이 된 %SAVESTR:A%(은)는, 말로 이룰수 없는 아름다움을 자아 내고 있었다…
+		ENDIF
+	PRINTFORMW 현재 보석상의 수…{FLAG:607}개
+	
+	
+	
+		MATURO = 宝石像
+	
+	
+ELSEIF TFLAG:500 == 8
+	FLAG:84 += 1
+	FLAG:608 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 사악한 마법진의 중심에 매달려있다. 
+	PRINTW 부하 마물에 지시를 내려자, 눈부신 빛이 그녀를 감싸안았다. 
+	PRINTW …빛에 휘감긴 그녀의 신체는, 마치 의사를 가진 것 처럼 산산히 흩어져 녹아내리더니, 가구로 재구조되었다. 
+	PRINTW 본래라면 격통을 동반할 터이나, 그 격통은 마법진의 효과에 의해 쾌감으로 전환되어 있다. 
+	PRINTFORMW 상상을 넘는 쾌감과 행태가 변해가는 신체에 당황해하는 %SAVESTR:A%지만, 차차 재구축단하는 감각을 받아 들이고 있다…
+	PRINTW 잠시 뒤 빛이 걷히자, 
+	PRINT 그녀는  
+		IF RAND:8 == 0
+				;机化
+				PRINT 테이블
+		ELSEIF RAND:8 == 1
+				;椅子化
+				PRINT 의자
+		ELSEIF RAND:8 == 2
+				;ロウソクを乗せる用の台
+				PRINT 촛대
+		ELSEIF RAND:8 == 3
+				;タンス
+				PRINT 장롱
+		ELSE
+				;れ, レディポット…
+				PRINT 꽃병
+		ENDIF
+	PRINTW 으로 개조당해 있다. 
+	PRINTFORMW 현재 가구의 수…{FLAG:608}개
+	
+	
+	
+		MATURO = 家具
+	
+	
+ELSEIF TFLAG:500 == 9
+	FLAG:84 += 1
+	FLAG:609 += 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉인당해, 사악한 마법진의 중심에 매달려있다. 
+	PRINTW 그녀 후방의 벽에는, 같은 마법진이 그려진 그림이 고급 액자와 함께 장식되어 있다. 
+	PRINTW 부하 마물에 지시를 내려자, 마법진들이 공명하며 괴상하게 빛나기 시작한 동시에, 눈부신 빛이 그녀를 감싸안았다. 
+	PRINTW …빛에 휘감긴 그녀는, 발아래에서부터 서서히 입자와 같은 선이 되어, 바람에 날려 어딘가로 흘러들어감을 느꼈다. 
+	PRINTW 입자화 된 그녀의 신체는, 마법진을 통해 액자 안에 전사되고 있었으나, 그녀가 그것을 인식하는 일은 없었다. 
+	PRINTW 그녀는 빛 속에서, 그대로 존재가 사라지는것인가 하고 한순간 생각했으나, 그 답을 내놓지 못한 채 의식을 잃었다. 
+	PRINTW 잠시 뒤 빛이 걷히자, 액자 속 마법진은 점점 옅게 되어, 그 대신 풍경이나 생물들이 점점 떠오르고 있다…
+	PRINT 그녀는 고급 액자 속에 장식되어 있다
+		Z = RAND:8
+		IF TALENT:A:85
+				;애정・「」王様（…の分身？）と思う存分イチャラブックス! 
+				PRINT 「마왕에게 달라붙은 측실의 그림」
+		ELSEIF TALENT:TARGET:317 == 4 || TALENT:TARGET:315 == 21
+				;故郷の恋人が好き・유부녀・最愛の人（…の幻）とフフフ, セックス! 
+				PRINT 「가장 사랑하는 이와 나란히 선 여성의 그림」
+		ELSEIF TALENT:TARGET:315 == 1
+				;学生・教師とか実習生とか委員長とかアイドル的存在とかその他一般生徒全部含めて学生ックス! 
+				PRINT 「강당에서 배우는 학생들의 그림」
+		ELSEIF TALENT:TARGET:315 == 2 || TALENT:TARGET:315 == 12
+				;天界(笑)で天使(偽)に襲われそのままレイプ! 聖母(偽)に襲わレズレイプ! 
+				PRINT 「천사나 성모에 둘러쌓인 채 하늘에 인도받는 성직자의 그림」
+		ELSEIF Z == 0
+				;森の中で獣姦, 妖精ックス, 花とか촉수によるレイプ! 
+				PRINT 「숲 안에서 집승이나 요정에게 희롱당하며 꽃을 사랑하는 여성의 그림」
+		ELSEIF Z == 1
+				;森とかにある湖で水浴びしてたら野盗とかに羅生門される絵! 
+				PRINT 「호수의 논두렁에서 수영을 하는 나부의 그림」
+		ELSEIF Z == 2
+				;街中で娼婦のドレスとか着て道行く人を片っ端から誘惑即レイプ! レイプ! レイプ! ダメよ, もうおよしになって! 
+				PRINT 「거리에서 사람들의 주목을 끌고 있는 여성의 그림」
+		ELSEIF Z == 3
+				;年に数度の祭りの日なので村人のテンションが最高潮! そこかしこで大乱交スペルマブラザーズ! 
+				PRINT 「수확제를 즐기는 민중의 그림」
+		ELSEIF Z == 4
+				;王室…というか高貴な部屋でMっ気のある召使をレズレイプ! 
+				PRINT 「여성귀족과 이야기 하는 하녀의 그림」
+		ELSEIF Z == 5
+				;水中でイカとかタコにレイプされる人魚! …この絵だけ何故か人魚だけど別にいいよね
+				PRINT 「근해 바다에서 수상생물에 희롱당하는 인어의 그림」
+		ELSE
+				;もし狂王に調教されて, 愛がついて嫁扱いになってたらというイメージ
+				PRINT 「광왕에게 달라붙은 벌거벗은 부인의 그림」
+		ENDIF
+	PRINTW 의 안에 있다. 
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 그림 세계의 주민이 되어, 영원히 그림 속에서 살아가는 것이다…
+	SIF TALENT:A:85
+		PRINTFORMW 그림 속 %조사선택(SAVESTR:A, "는")% 마왕에 달라붙으면서 온화하게 미소짓고 있다…
+	PRINTFORMW 현재 회화의 수…{FLAG:609}개
+	
+	
+	
+		MATURO = 絵画
+	
+	
+ENDIF
+
+SIF FAMILY:2 >= 0
+	CSTR:(FAMILY:2):5 = %MATURO%
+
+A = TARGET
+
+;武器解除
+W:0 = CFLAG:A:550
+CALL EQUIP_GET
+CFLAG:A:550 = -1
+;指輪解除
+W:0 = CFLAG:A:551
+CALL EQUIP_GET
+CFLAG:A:551 = -1
+;指輪解除
+W:0 = CFLAG:A:552
+CALL EQUIP_GET
+CFLAG:A:552 = -1
+
+LV = CFLAG:A:9
+
+X = NO:A + 199
+FLAG:X = 1
+
+;前回の조수・調教対象だった場合はフラグを空に
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;前回の조수・調教対象より前だった場合はフラグを減算
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+CALL PARTY_CHAR_DEL, A
+
+DELCHARA A
+
+CALL NAME_RESET
+
+
+FLAG:80 += 1
+
+LV += 1
+LV *= 50
+
+EXP:0:80 += LV
+PRINTFORMW 《봉인한 용자의 힘을 흡수하여 당신은 {LV}의 경험치를 얻었다! 》
+
+IF FLAG:84 >= 20 && DAY < 60 && TALENT:MASTER:329 == 0
+	PRINTFORMW 마왕 토벌에 용사를 파견해서、거리는 상당히 평화로운 나날을 보내고 있었다……
+	PRINTFORMW 어느 날、마왕으로부터「우호의 표시」로서、던전 가까이 박물관을 건설했다、라는 통지가 날아온다
+	PRINTFORMW 「용자가……마왕과 교섭한 건가？」
+	PRINTFORMW 「싸움은 어떻게 된 거야？」
+	PRINTFORMW 거리의 외교관이 호위를 거느리고 박물관을 방문한다
+	PRINTFORMW 거기서 거리의 인간들이 본 것은……변해버린「용자」의 모습이었다
+	PRINTFORMW …………
+	PRINTFORMW ……
+	PRINTFORMW 당신은 %TALENTNAME:329%을 얻었다
+	TALENT:MASTER:329 = 1
+ENDIF
+
+TARGET = -1
+RETURN 0
+
+

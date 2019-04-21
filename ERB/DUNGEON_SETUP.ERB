@@ -1,0 +1,519 @@
+﻿;던전 정보
+;有志の「」からいただきました
+;だいぶ改造してます
+;----------------------------------------------
+@DUNGEON_INFO
+;----------------------------------------------
+
+IF FLAG:502 == 1
+	CALL DUNGEON_INFO_MAP
+	RETURN 0
+ENDIF 
+
+;명령 입력 표시
+DRAWLINE
+$INPUT_LOOP
+REPEAT 9
+	SETCOLORBYNAME RoyalBlue
+	;함정A
+	X = COUNT + 300
+	Y = FLAG:X
+	IF Y <= 0
+		PRINTFORM [{COUNT}] 제{COUNT + 1}계층　함정：없음
+	ELSEIF ITEM:Y > 0
+		PRINTFORM [{COUNT}] 제{COUNT + 1}계층　함정：%ITEMNAME:Y%({ITEM:Y})
+	ELSE
+		PRINTFORM [{COUNT}] 제{COUNT + 1}계층　함정：없음
+		FLAG:X = -1
+	ENDIF
+	
+	;함정B
+	X = COUNT + 310
+	Y = FLAG:X
+	IF Y <= 0
+		PRINTFORM ：없음
+	ELSEIF ITEM:Y > 0
+		PRINTFORM ：%ITEMNAME:Y%({ITEM:Y})
+	ELSE
+		PRINTFORM ：없음
+		FLAG:X = -1
+	ENDIF
+	
+	;함정C
+	X = COUNT + 320
+	Y = FLAG:X
+	IF Y <= 0
+		PRINTFORML ：없음
+	ELSEIF ITEM:Y > 0
+		PRINTFORML ：%ITEMNAME:Y%({ITEM:Y})
+	ELSE
+		PRINTFORML ：없음
+		FLAG:X = -1
+	ENDIF
+	
+	RESETCOLOR
+	
+	;시설
+	X = COUNT + 350
+	Y = FLAG:X
+	IF Y <= 0
+		PRINTFORM 　시설：통로
+	ELSEIF Y >= 500 && Y <= 507
+		PRINTFORM 　시설：%ITEMNAME:Y%
+	ELSE
+		PRINTFORM 　시설：통로
+		FLAG:X = 0
+	ENDIF
+	
+	;반지
+	X = COUNT + 340
+	Y = FLAG:X
+	IF Y <= 0
+		PRINTFORML 　보물상자：없음
+	ELSEIF ITEM:Y > 0
+		PRINTFORML 　보물상자：%ITEMNAME:Y%({ITEM:Y})
+	ELSE
+		PRINTFORML 　보물상자：없음
+		FLAG:X = -1
+	ENDIF
+REND
+
+	PRINTFORML [9] 부하 일람 표시
+	PRINTFORML [10]1～3층 [11]4～6층 [12]7～9층 의 부하 표시
+
+DRAWLINE
+PRINTL [100] - 돌아온다
+
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 13 && RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+;부하의 표시
+IF RESULT >= 9 && RESULT <= 12
+
+	PRINTL ******************
+	PRINTL 던전 내의 부하
+	PRINTL ******************
+
+	Z = 0
+	R = 100
+	IF RESULT >= 10
+			R = 30
+		IF RESULT == 11
+			Z = 30
+		ELSEIF RESULT == 12
+			Z = 60
+		ENDIF
+	ENDIF
+		REPEAT 100
+		SIF Z >= 100 || R <= 0
+			BREAK
+		Y = Z % 10
+		IF Y == 0
+			X = Z / 10
+			X += 1
+			DRAWLINE
+			IF X != 10
+				PRINTFORML 제{X}계층
+			ELSEIF X == 10
+				PRINTFORML 근위병
+			ENDIF
+			CALL ENEMY_EXIST
+		ENDIF
+		A = Z + 100
+		B = ITEM:A
+		IF B > 0
+			PRINTV B
+			PRINT 체의
+			PRINTS ITEMNAME:A
+			PRINTL  
+		ENDIF
+		Z += 1
+		R -= 1
+
+	REND
+	
+	DRAWLINE
+	WAIT
+
+	GOTO INPUT_LOOP
+ENDIF
+
+SIF RESULT == 100
+	RETURN 0
+
+X = RESULT
+
+PRINTFORML 제{X + 1}계층의 설정을 합니다
+PRINTL 《설치할 함정이나 보물상자를 선택해주세요》
+
+Y = 0
+REPEAT 29
+	Z = COUNT + 60
+	IF Y >= 2 && ITEM:Z > 0
+		PRINTFORML [{Z}] %ITEMNAME:Z%（{ITEM:Z}）
+		Y = 0
+	ELSEIF ITEM:Z > 0
+		PRINTFORM [{Z}] %ITEMNAME:Z%（{ITEM:Z}）
+		Y += 1
+	ENDIF
+REND
+REPEAT 21
+	Z = COUNT + 300
+	IF Y >= 2 && ITEM:Z > 0
+		PRINTFORML [{Z}] %ITEMNAME:Z%（{ITEM:Z}）
+		Y = 0
+	ELSEIF ITEM:Z > 0
+		PRINTFORM [{Z}] %ITEMNAME:Z%（{ITEM:Z}）
+		Y += 1
+	ENDIF
+REND
+PRINTL  
+DRAWLINE
+PRINTL [0] - 함정을 뺀다 [1] - 보물상자를 뺀다 [2] - 설비를 설정한다
+PRINTL [998] - 그만둔다 [999] - 던전의 설정을 종료한다
+
+$INPUT_LOOP_2
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP_2
+ELSEIF RESULT >= 321 && RESULT != 998 && RESULT != 999
+	GOTO INPUT_LOOP_2
+ENDIF
+
+IF RESULT == 0
+	Y = X + 300
+	FLAG:Y = -1
+	Y = X + 310
+	FLAG:Y = -1
+	Y = X + 320
+	FLAG:Y = -1
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 1
+	Y = X + 340
+	FLAG:Y = -1
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 2
+	CALL ROOM_SETUP
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 998
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 999
+	RETURN 0
+ENDIF
+Z = RESULT
+IF Z < 100
+	$INPUT_LOOP_3
+	PRINTL [0]A  [1]B  [2]C  [3]전부
+	INPUT
+	IF RESULT < 0
+		GOTO INPUT_LOOP_3
+	ELSEIF RESULT >= 4
+		GOTO INPUT_LOOP_3
+	ELSEIF RESULT == 3
+		Y = X + 300
+		FLAG:Y = Z
+		Y = X + 310
+		FLAG:Y = Z
+		Y = X + 320
+		FLAG:Y = Z
+		GOTO INPUT_LOOP
+	ENDIF
+	Y = X + 300
+	Y += RESULT * 10
+ELSEIF Z > 300
+	Y = X + 340
+ENDIF
+FLAG:Y = Z
+GOTO INPUT_LOOP
+
+
+
+
+;-----------------------------------
+@ENEMY_EXIST
+;-----------------------------------
+REPEAT CHARANUM
+	IF CFLAG:COUNT:501 == X && COUNT != 0
+		SETCOLOR 255,255,0
+		IF CFLAG:COUNT:1 == 2
+			PRINTFORM %SAVESTR:COUNT%[침공중]
+			IF CFLAG:COUNT:507 == 1
+				PRINTL *도주중*
+			ELSE
+				PRINTL  
+			ENDIF
+		ELSEIF CFLAG:COUNT:1 == 3
+			PRINTFORM %SAVESTR:COUNT%[영격중]
+			IF CFLAG:COUNT:507 == 1
+				PRINTL *도주중*
+			ELSE
+				PRINTL  
+			ENDIF
+		ENDIF
+		RESETCOLOR
+	ENDIF
+REND
+
+RETURN 0
+
+
+;--------------------------------------
+@ROOM_SETUP
+;--------------------------------------
+
+$INPUT_LOOP_4
+
+PRINTFORML 제{X + 1}계층
+PRINTL [0] 통로
+Y = 0 
+REPEAT 7
+	Z = COUNT + 500
+	PRINTFORM [{Z}] %ITEMNAME:Z%  
+	Y += 1
+	IF Y >= 3
+		PRINTL  
+		Y = 0
+	ENDIF
+REND
+PRINTL [999] 그만둔다
+PRINTL 통로는 무료。그 외엔 개조비 10000p
+
+INPUT
+
+IF RESULT == 0
+	Y = X + 350
+	FLAG:Y = 0
+ELSEIF RESULT == 999
+	RETURN 0
+ELSEIF RESULT >= 500 && RESULT <= 506
+	IF MONEY < 10000
+		PRINTL *돈이 부족합니다！！*
+		RETURN 0
+	ENDIF
+	MONEY -= 10000
+	Y = X + 350
+	FLAG:Y = RESULT
+ELSE
+	GOTO INPUT_LOOP_4
+ENDIF
+RETURN 0
+
+
+;-------------------------------------------------
+@DUNGEON_INFO_MAP
+;-------------------------------------------------
+
+$INPUT_LOOP_MAP
+
+DRAWLINE
+PRINTFORML [0] 부하를 배치
+PRINTFORML [1] 맵 표시
+PRINTFORML [2] 부하 일람 표시
+PRINTFORML [3]1～3Lv [4]4～6Lv [5]7～9Lv 의 부하를 표시
+
+DRAWLINE
+PRINTL [100] - 돌아온다
+
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP_MAP
+ELSEIF RESULT >= 6 && RESULT != 100
+	GOTO INPUT_LOOP_MAP
+ENDIF
+
+IF RESULT == 1
+	CALL GEO_OUTPUT_2
+	GOTO INPUT_LOOP_MAP
+ELSEIF RESULT >= 2 && RESULT <= 5
+	;부하의 표시
+	
+	PRINTL ******************
+	PRINTL 　　　마왕군
+	PRINTL ******************
+
+	Z = 0
+	R = 100
+	IF RESULT >= 3
+			R = 30
+		IF RESULT == 4
+			Z = 30
+		ELSEIF RESULT == 5
+			Z = 60
+		ENDIF
+	ENDIF
+		REPEAT 100
+		SIF Z >= 100 || R <= 0
+			BREAK
+		Y = Z % 10
+		IF Y == 0
+			X = Z / 10
+			X += 1
+			DRAWLINE
+			IF X != 10
+				PRINTFORML 제{X}계층
+			ELSEIF X == 10
+				PRINTFORML 근위병
+			ENDIF
+			CALL ENEMY_EXIST
+		ENDIF
+		A = Z + 100
+		B = ITEM:A
+		IF B > 0
+			PRINTV B
+			PRINT 체의
+			PRINTS ITEMNAME:A
+			PRINTL  
+		ENDIF
+		Z += 1
+		R -= 1
+
+	REND
+	
+	DRAWLINE
+	WAIT
+
+	GOTO INPUT_LOOP_MAP
+ENDIF
+
+SIF RESULT == 100
+	RETURN 0
+
+
+;허용량 체크
+CALL MON_LIMIT
+SIF RESULT == 0
+	GOTO INPUT_LOOP_MAP
+
+$INPUT_LOOP_MONSET
+
+PRINTL *몬스터를 배치합니다*
+PRINTL 몬스터의 레벨을 설정해주십시오
+PRINTL [1] [2] [3] [4] [5] [6] [7] [8] [9] [10]
+PRINTL [0] 그만둔다 [100] 알아서 맡긴다
+INPUT
+
+IF RESULT == 0
+	GOTO INPUT_LOOP_MAP
+ELSEIF RESULT == 100
+	CALL MON_SET_OMAKASE
+	PRINTW *몬스터를 랜덤으로 배치했습니다*
+	GOTO INPUT_LOOP_MAP
+ELSEIF RESULT < 0 || RESULT >= 11
+	GOTO INPUT_LOOP_MONSET
+ENDIF
+
+LOCAL:2 = RESULT
+
+PRINTL 몬스터의 좌표를 설정해주세요
+PRINTL [01] [02] [03] [04] [05] [06] [07] [08] [09] [10]
+PRINTL [11] [12] [13] [14] [15] [16] [17] [18] [19] [20]
+PRINTL [21] [22] [23] [24] [25] [26] [27] [28] [29] [30]
+PRINTL [31] [32]
+PRINTL [0] 그만둔다
+INPUT
+
+
+IF RESULT == 0
+	GOTO INPUT_LOOP_MAP
+ELSEIF RESULT < 0 || RESULT >= 33
+	GOTO INPUT_LOOP_MONSET
+ENDIF
+
+LOCAL:3 = RESULT
+
+PRINTL 몬스터의 Y좌표를 설정해주세요
+PRINTL [01] [02] [03] [04] [05] [06] [07] [08] [09] [10]
+PRINTL [11] [12] [13] [14] [15] [16] [17] [18] [19] [20]
+PRINTL [21] [22] [23] [24] [25] [26] [27] [28] [29] [30]
+PRINTL [31] [32]
+PRINTL [0] 그만둔다
+INPUT
+
+IF RESULT == 0
+	GOTO INPUT_LOOP_MAP
+ELSEIF RESULT < 0 || RESULT >= 33
+	GOTO INPUT_LOOP_MONSET
+ENDIF
+
+LOCAL:4 = RESULT
+
+IF LOCAL:3 == 16 && LOCAL:4 == 16
+	PRINTW 거기에는 배치할 수 없다
+	GOTO INPUT_LOOP_MONSET
+ENDIF
+
+SETFONT "ＭＳ ゴシック"
+
+;맵을 출력
+FOR LOCAL:1,0,32
+	FOR LOCAL:0,0,32
+		IF LOCAL:0 == LOCAL:3 && LOCAL:1 == LOCAL:4
+			PRINT ★
+			PRINT ,
+		ELSE
+			P:0 = LOCAL:0
+			P:1 = LOCAL:1
+			CALL CHIP_DRAW
+		ENDIF
+	NEXT
+	PRINTL 
+NEXT
+
+SETFONT
+
+PRINTW ★이 표시된 장소로 괜찮겠습니까？
+PRINTL [0] 네  [1] 아니오
+INPUT
+SIF RESULT != 0
+	GOTO INPUT_LOOP_MAP
+
+DB:(LOCAL:4):(LOCAL:3) = LOCAL:2
+
+PRINTW *몬스터를 배치했습니다*
+
+
+GOTO INPUT_LOOP_MAP
+
+;-----------------------------------
+@MON_SET_OMAKASE
+;-----------------------------------
+;몬스터 랜덤 배치
+;귀찮아하는 당신에게
+
+;루프 카운터
+LOCAL:0 = 0
+
+$INPUT_LOOP_MONSET_OMAKASE
+
+SIF LOCAL:0 > 100
+	RETURN 0
+
+;許容量チェック
+CALL MON_LIMIT
+SIF RESULT == 0
+	RETURN 0
+
+
+LOCAL:2 = RAND:10
+LOCAL:3 = RAND:32
+LOCAL:4 = RAND:32
+
+IF LOCAL:3 == 16 && LOCAL:4 == 16
+	GOTO INPUT_LOOP_MONSET_OMAKASE
+ENDIF
+DB:(LOCAL:4):(LOCAL:3) = LOCAL:2
+
+LOCAL:0 += 1
+GOTO INPUT_LOOP_MONSET_OMAKASE
+
+
+
+
+
+
+RETURN 0
+

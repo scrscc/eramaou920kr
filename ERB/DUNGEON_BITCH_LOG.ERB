@@ -1,0 +1,2164 @@
+﻿;地の文関連, 切り分けられるところだけここに
+
+;未記入箇所は[SKIPSTART]～[SKIPEND]でくくってコメントアウトしているので
+;記入したら外して下さい
+
+
+;売春直前の文章（まだヤってない, 正否や回数は不明）
+@LOG_TRY_BITCH(ARG, PLACE)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+;描写分岐はF関数化して使い回しができるようにした（ついでにバリエーション追加）
+;しかし使い途無いかも
+PRINTFORM %FS_BITCH("LOOKS", ARG)%은(는) 
+
+IF PLACE == "DUNGEON"
+	;侵入中
+	IF CFLAG:ARG:1 == 2
+		;売春中毒か淫乱
+		IF ABL:ARG:37 >= 1 || TALENT:ARG:76
+			PRINTFORM 성욕을 참지못하고 
+		ELSEIF (CFLAG:ARG:580 + CFLAG:ARG:581 + CFLAG:ARG:582) < -5000
+			PRINTFORM 조금이라도 빚을 줄이기 위해
+		ELSE
+			PRINTFORM 심심함을 주체못하고 
+		ENDIF
+	ELSEIF CFLAG:ARG:1 == 3 && CFLAG:(ARG:0):533 > 1
+		PRINTFORM 동료의 눈을 속이고 
+	ELSEIF CFLAG:ARG:500 == 1
+		SIF TALENT:ARG:85 && !(TALENT:ARG:180 || TALENT:ARG:181)
+			PRINTFORM 본의 아니게 
+		PRINTFORM 명령에 따라서
+	ELSE
+		PRINTFORM 성욕을 참지못하고 
+	ENDIF
+ELSE
+	;売春中毒か淫乱
+	IF ABL:ARG:37 >= 1 || TALENT:ARG:76
+		PRINTFORM 성욕을 참지못하고 
+	;借金金額を微改変
+	ELSEIF (CFLAG:ARG:580 + CFLAG:ARG:581 + CFLAG:ARG:582) < -5000
+		PRINTFORM 빚이 너무 불어서 
+	ELSE
+		PRINTFORM 모험자금이 바닥나버려
+	ENDIF
+ENDIF
+PRINTFORMW 매춘을 떠올린듯 하다…
+
+
+;売春用各種文字列取得関数
+@FS_BITCH(TYPE, ARG)
+#FUNCTIONS
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS TYPE
+#DIM DICE
+SELECTCASE TYPE
+;数値→プレイ内容変換
+;関数の利用に
+CASE "PLAY"
+	SELECTCASE ARG
+	CASE 1
+		LOCALS = HAND
+	CASE 2
+		LOCALS = ORAL
+	CASE 3
+		LOCALS = LES
+	CASE 4
+		LOCALS = ANAL
+	CASE 5
+		LOCALS = SEX
+	;ダンジョン内では売春扱いではない
+	CASE 6
+		LOCALS = ANIMAL
+	;売春では使わない
+	CASE 7
+		LOCALS = SELF
+	CASEELSE
+		$ERROR_ARG
+		THROW 불분명한 인수{ARG}
+	ENDSELECT
+;表示用
+CASE "PLAYNAME"
+	SELECTCASE ARG
+	CASE 1
+		LOCALS = 자위매춘
+	CASE 2
+		LOCALS = 구음매춘
+	CASE 3
+		LOCALS = 레즈매춘
+	CASE 4
+		LOCALS = 항교매춘
+	CASE 5
+		LOCALS = 성교매춘
+	CASE 6
+		LOCALS = 수교매춘
+	CASEELSE
+		GOTO ERROR_ARG
+	ENDSELECT
+CASE "TOWN_MAN"
+	SELECTCASE ARG
+	CASE 1
+		LOCALS = 마을의남자
+	CASE 2
+		LOCALS = 남자모험가
+	CASE 3
+		LOCALS = 마을의소년
+	CASE 4
+		LOCALS = 거리의졸부
+	CASE 5
+		LOCALS = 행상인남자
+	CASEELSE
+		GOTO ERROR_ARG
+	ENDSELECT
+CASE "TOWN_GIRL"
+	SELECTCASE ARG
+	CASE 1
+		LOCALS = 주부
+	CASE 2
+		LOCALS = 여자모험가
+	CASE 3
+		LOCALS = 여거지
+	CASE 4
+		LOCALS = 미행중의귀부인
+	CASE 5
+		LOCALS = 여자연예인
+	CASEELSE
+		GOTO ERROR_ARG
+	ENDSELECT
+CASE "DUNGEON_MAN"
+	SELECTCASE ARG
+	CASE 1
+		LOCALS = 오크
+	CASE 2
+		LOCALS = 마족의남자
+	CASE 3
+		LOCALS = 마족의소년
+	CASE 4
+		LOCALS = 마족의졸부
+	CASE 5
+		LOCALS = 코볼트상인
+	CASEELSE
+		GOTO ERROR_ARG
+	ENDSELECT
+CASE "DUNGEON_GIRL"
+	SELECTCASE ARG
+	CASE 1
+		LOCALS = 음마
+	CASE 2
+		LOCALS = 마족의여자
+	CASE 3
+		LOCALS = 엘프여자거지
+	CASE 4
+		LOCALS = 마족의귀부인
+	CASE 5
+		LOCALS = 마족여자사제
+	CASEELSE
+		GOTO ERROR_ARG
+	ENDSELECT
+;本人の描写
+;ABLカンスト系に再現性が無いので注意
+CASE "LOOKS"
+	;ランダムで上書きさせることで
+	;重複した素質が入れ替わりで出現するように
+	
+	;本当はDICEの数を増やして確率を公平にしたいけど
+	;美しくないのでこの形に
+	
+	DICE = 2
+	;一回も上書きされない場合髪色が出る
+	LOCALS = %GET_LOOK_INFO(ARG, "머리색")%의 
+
+	SIF TALENT:ARG:253 && RAND:DICE == 0
+		LOCALS = 구리빛피부의 
+	SIF TALENT:ARG:255 && RAND:DICE == 0
+		LOCALS = 흰 피부의 
+	SIF TALENT:ARG:244 && RAND:DICE == 0
+		LOCALS = 푸른피부의 
+
+	SIF TALENT:ARG:음모의상태 == 1 && RAND:DICE == 0
+		LOCALS = 백보지의
+	SIF TALENT:ARG:음모의상태 > 150 && RAND:DICE == 0
+		LOCALS = 음모가 짙은
+
+	SIF TALENT:ARG:버릇 == 7 && RAND:DICE == 0
+		LOCALS = 침착성이 없는 
+	SIF TALENT:ARG:버릇 == 9 && RAND:DICE == 0
+		LOCALS = 눈을 치켜뜨고있는 
+	SIF TALENT:ARG:버릇 == 10 && RAND:DICE == 0
+		LOCALS = 고개를 기울이고 
+	SIF TALENT:ARG:버릇 == 11 && RAND:DICE == 0
+		LOCALS = 우울해보이는 
+	SIF TALENT:ARG:버릇 == 14 && RAND:DICE == 0
+		LOCALS = 뾰로통한 얼굴의 
+	SIF TALENT:ARG:버릇 == 18 && RAND:DICE == 0
+		LOCALS = 나른한듯한 
+	SIF TALENT:ARG:버릇 == 19 && RAND:DICE == 0
+		LOCALS = 어딘가 불만어린 
+
+	SIF TALENT:ARG:눈 == 7 && RAND:DICE == 0
+		LOCALS = 강직한 눈매를 가진 
+	
+	SIF TALENT:ARG:차밍포인트 == 10 && RAND:DICE == 0
+		LOCALS = 깨끗한 손가락인
+	SIF TALENT:ARG:차밍포인트 == 13 && RAND:DICE == 0
+		LOCALS = 잘록함이 자랑인 
+	SIF TALENT:ARG:차밍포인트 == 14 && RAND:DICE == 0
+		LOCALS = 엉덩이 형태가 예쁜
+	SIF TALENT:ARG:차밍포인트 == 15 && RAND:DICE == 0
+		LOCALS = 늘씬한 다리를 지닌
+	SIF TALENT:ARG:차밍포인트 == 22 && RAND:DICE == 0
+		LOCALS = 요염한 머리결을 지닌 
+	SIF TALENT:ARG:차밍포인트 == 23 && RAND:DICE == 0
+		LOCALS = 커다란 엉덩이를 가진 
+	SIF TALENT:ARG:차밍포인트 == 25 && RAND:DICE == 0
+		LOCALS = 덧니가 사랑스러운 
+	
+	SIF TALENT:ARG:용자가되기이전의생활 == 8 && RAND:DICE == 0
+		LOCALS = 전귀족으로
+	SIF TALENT:ARG:용자가되기이전의생활 == 12 && RAND:DICE == 0
+		LOCALS = 원래 성녀로
+	;SIF TALENT:ARG:204 && RAND:DICE == 0
+	;	LOCALS = 육변기로 
+	SIF TALENT:ARG:99 && RAND:DICE == 0
+		LOCALS = 키가 큰 
+	SIF TALENT:ARG:100 && RAND:DICE == 0
+		LOCALS = 작은 
+	SIF TALENT:ARG:256 && RAND:DICE == 0
+		LOCALS = 안색이 나쁜 
+	SIF (TALENT:ARG:21 || TALENT:ARG:22) && RAND:DICE == 0
+		LOCALS = 새침한 얼굴로 
+	SIF TALENT:ARG:35 && RAND:DICE == 0
+		LOCALS = 수줍은 얼굴의
+	SIF (TALENT:ARG:15 || TALENT:ARG:16) && RAND:DICE == 0
+		LOCALS = 버릇없는 여자의 
+	SIF TALENT:ARG:17 && RAND:DICE == 0
+		LOCALS = 비굴하게 웃는 얼굴의 
+	SIF TALENT:ARG:12 && RAND:DICE == 0
+		LOCALS = 겁없는 웃는 얼굴의 
+	SIF (TALENT:ARG:10 || TALENT:ARG:26) && RAND:DICE == 0
+		LOCALS = 울것만같은 
+	SIF (TALENT:ARG:23 || TALENT:ARG:25) && RAND:DICE == 0
+		LOCALS = 건강이 가득한 
+	SIF TALENT:ARG:73 && RAND:DICE == 0
+		LOCALS = 엉덩이가 가벼운 
+	
+	SIF CFLAG:ARG:509 == 1 && RAND:DICE == 0
+		LOCALS = 미아의 
+	SIF INRANGE(ABL:ARG:37, 1, 3) && RAND:DICE == 0
+		LOCALS = 몸을 파는 기쁨을 알아버린 
+	;ABL系は共存しうるため変化を出すためにとりあえず確率で
+	SIF ABL:ARG:30 == 10 && RAND:DICE == 0
+		LOCALS = 자지없는 생활은 생각할수조차 없게 되어버린
+	SIF ABL:ARG:31 == 10 && RAND:DICE == 0
+		LOCALS = 한가 할때면 자위만 하고있는
+	SIF ABL:ARG:32 == 10 && RAND:DICE == 0
+		LOCALS = 냄새나는 정액을 아주 좋아하게 된
+	SIF ABL:ARG:33 == 10 && RAND:DICE == 0
+		LOCALS = 여성을 보면 머리속으로 범하지 않고는 배길수 없게된
+	SIF ABL:ARG:37 == 10 && RAND:DICE == 0
+		LOCALS = 언제부터인가 매춘의 포로가 되어버린
+
+	;陥落済みである
+	IF TALENT:ARG:76
+		LOCALS += "엣찌한 "
+	ELSEIF TALENT:ARG:85
+		LOCALS += "배신자의 "
+	ENDIF
+	LOCALS += @"%GET_LOOK_INFO(ARG, "종족")%의 %SAVESTR:ARG%"
+CASEELSE
+	THROW 불명한 TYPE%TYPE%
+ENDSELECT
+RETURNF LOCALS
+
+
+
+;売春ログ表示文字列関数
+;プレイ回数や客の合計を出力
+@FS_LOG_BITCH(TYPE, ARG:1, ARG:2, ARG:3, ARG:4, ARG:5)
+#FUNCTIONS
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS TYPE
+#DIM LCOUNT
+VARSET LOCALS
+SELECTCASE TYPE
+CASE "DUNGEON_MAN", "DUNGEON_GIRL", "TOWN_MAN", "TOWN_GIRL"
+	FOR LCOUNT, 1, 6
+		SIF !ARG:LCOUNT
+			CONTINUE
+		SIF STRLENS(LOCALS)
+			LOCALS += ", "
+		LOCALS += @"{ARG:LCOUNT}사람의 %FS_BITCH(TYPE, LCOUNT)%"
+	NEXT
+CASE "PLAYNAME"
+	FOR LCOUNT, 1, 6
+		SIF !ARG:LCOUNT
+			CONTINUE
+		SIF STRLENS(LOCALS)
+			LOCALS += ", "
+		LOCALS += @"{ARG:LCOUNT}회의 %FS_BITCH("PLAYNAME", LCOUNT)%"
+	NEXT
+CASEELSE
+	THROW 불명한 TYPE%TYPE%
+ENDSELECT
+RETURNF LOCALS
+
+
+
+;売春描写関数呼び出し関数
+;売春が全て終わって（成功して）から呼ぶ
+;BIT利用で売春の内容を記録した引数CHECKを元に描写分岐を行う
+;0 　　　=TOWN/DUNGEON
+;1～6　　プレイ内容（1=HAND, 2=ORAL, 3=LES, 4=ANAL, 5=SEX, 6=ANIMAL）
+;11～15　男性客の種類
+;21～25　女性客の種類
+;ARG＝キャラ登録番号はこの関数では使用しないが描写関数側で必要となるためそのまま渡す
+@LOG_AFTER_BITCH(ARG, CHECK)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM CHECK
+#DIM KYAKU
+#DIM PLAY
+;けも
+IF GETBIT(CHECK, 6)
+	PLAY = 6
+;れず
+ELSEIF GETBIT(CHECK, 3) && RAND:10 < 5
+	DO
+		KYAKU = RAND(1, 6)
+		SIF GETBIT(CHECK, (KYAKU + 20))
+			BREAK
+	LOOP 1
+	PLAY = 3
+;ふつう
+ELSE
+	;デバッグ加筆
+	;恐らくレズ設定でRAND判定から外れてこっちに来た時に
+	;女性客を取りたいのに男性客から判定しているため
+	;無限ループが発生していると解釈して
+	;処置を行いました
+	IF GETBIT(CHECK, 3)
+		DO
+			KYAKU = RAND(1, 6)
+			SIF GETBIT(CHECK, (KYAKU + 20))
+				BREAK
+		LOOP 1
+		PLAY = 3
+	ELSE
+		DO
+			KYAKU = RAND(1, 6)
+			SIF GETBIT(CHECK, (KYAKU + 10))
+				BREAK
+		LOOP 1
+		DO
+			PLAY = RAND(1, 6)
+			SIF PLAY == 3
+				CONTINUE
+			SIF GETBIT(CHECK, PLAY)
+				BREAK
+		LOOP 1
+	ENDIF
+	
+ENDIF
+
+LOCALS = %FS_BITCH("PLAY", PLAY)%
+IF GETBIT(CHECK, 0)
+	CALLFORM LOG_BITCH_%LOCALS%(ARG, "DUNGEON", KYAKU)
+ELSE
+	CALLFORM LOG_BITCH_%LOCALS%(ARG, "TOWN", KYAKU)
+ENDIF
+WAIT
+
+
+;ここから売春描写関数群
+;ただし以下は例外なので注意
+;・DUNGEONでのANIMALは無報酬, 自主的なプレイの一環
+;・SELFは売春ではない（DUNGEON, TOWN問わず）
+
+@LOG_BITCH_HAND(ARG, PLACE, KYAKU)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM KYAKU
+
+PRINTFORM %SAVESTR:ARG%은(는)
+SELECTCASE ABL:ARG:13
+CASE 0
+	PRINTFORM 죄악감을 참으면서 사무적으로 
+CASE 1
+	PRINTFORM 페니스가 눈에 들어오지 않는다는듯이 눈을 가리고 
+CASE 2
+	PRINTFORM 불쾌하다는듯히 페니스를 바라보면서 
+CASE 3, 4
+	PRINTFORM 손님의 반응을 살펴보면서
+CASE 5, 6
+	PRINTFORM 손님의 반응을 즐기면서 
+CASE 7, 8
+	PRINTFORM 때때로 미소를 보이면서
+CASE 9, 10
+	PRINTFORM 손에 익은 모습으로 음어를 섞으면서
+ENDSELECT
+PRINTFORMW 수음매춘을 하고있다…
+
+SELECTCASE PLACE
+CASE "DUNGEON"
+	LOCALS = %FS_BITCH("DUNGEON_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;오크
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「부히잇…더러븐 좆으로 미아내」
+			DATAFORM 두꺼운 뱃살을 흔들며, 오크는 기뻐하고 있다……
+			DATAFORM 「3발정도, 자뜩 싸주거야」
+		ENDDATA
+	;魔族の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「좋은 솜씨네……암컷의 재능이 있네」
+			DATAFORM 「상대가 누구라도 이런 일 하는 건가？」
+			DATAFORM 마족 남자는 팔짱을 낀채 내려다 보고 있다……
+		ENDDATA
+	;魔族の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「우으……엄청 에로해에……」
+			DATAFORM 「누나의 손, 차갑다……」
+			DATAFORM 마족 소년은 이미 사정 해 버린 것 같다……
+		ENDDATA
+	;魔族の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「흥……미천한 년」
+			DATAFORM 「이 걸레년이……」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「좀더 능숙하게 다루지 못하겠느냐」
+			DATAFORM 「돈 낸만큼 즐길테니까」
+		ENDDATA
+	;コボルトの商人
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「상냥한 손이구마……」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「조은 얼굴이구마」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「좀더 강하게 쥐라곳」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「아가씨 익숙하구마」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「무서븐 얼굴이구마」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「냄새 맡으라곳…」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「불알 쪽도 잘 부탁한다곳」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+CASE "TOWN"
+	LOCALS = %FS_BITCH("TOWN_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;村の男
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「으헤헿……고맙다고……」
+			DATAFORM 마을의 남자는 히죽히죽 웃으며 %SAVESTR:ARG%를 매도했다
+		ENDDATA
+	;冒険者の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「완전히 창녀가 다 되버렸군」
+			DATAFORM 남자 모험가는 돈을 %SAVESTR:ARG%의 속옷에 끼워 넣었다
+		ENDDATA
+	;村の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「진짜로…있었어, 야한 누나가……」
+			DATAFORM 소년은 허리를 부들부들 떨며 깊이 감동하고 있다
+		ENDDATA
+	;街の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「빗치년! 」
+			DATAFORM 「암퇘지가! 」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「한 발 싼뒤에는 네 년의 머리로 닦아줄까」
+			DATAFORM 「뭐어, 솜씨는 좋은 편이구만」
+		ENDDATA
+	;行商人の男
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「헤헤……상냥하구만」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「강하게 쥐라고」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「뭐야 그 눈은」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「귀한 아가씨인 주제에……제법 하는 구만」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「반항적이군」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「확실히 자지를 보라구」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「훌륭해훌륭해」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+ENDSELECT
+
+
+
+@LOG_BITCH_ORAL(ARG, PLACE, KYAKU)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM KYAKU
+PRINTFORM %SAVESTR:ARG%은(는)
+SELECTCASE ABL:ARG:32
+CASE 0
+	PRINTFORM 코앞에 내밀어진 페니스를 새파랗게 질린 얼굴로 
+CASE 1, 2
+	PRINTFORM 냄새와 맛에 당혹감을 느끼면서 
+CASE 3, 4
+	PRINTFORM 쥬풋 쥬풋 추접스러운 소리를 내면서 
+CASE 5, 6
+	PRINTFORM 냄새와 맛에 기쁨을 느끼면서
+CASE 7, 8
+	PRINTFORM 완전히 느긋해진 모습으로 기쁜듯이 
+CASE 9, 10
+	PRINTFORM 손님쪽이 당황할 정도로 적극적으로 
+ENDSELECT
+PRINTFORMW 구음매춘을 하고있다…
+
+SELECTCASE PLACE
+CASE "DUNGEON"
+	LOCALS = %FS_BITCH("DUNGEON_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;오크
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「그흐흐……제대루 빠라구 부힛」
+			DATAFORM 「브흡, 혀가 기붕조아 부히잇」
+		ENDDATA
+	;魔族の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「나중에 애널도 핥게 해볼까나」
+			DATAFORM 「그래, 목구멍을 쓰라고」
+		ENDDATA
+	;魔族の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「나와버렷……뭔가 나와버린다구우」
+			DATAFORM 「누나 엄청 야해」
+		ENDDATA
+	;魔族の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「어떠냐,  맛있냐？」
+			DATAFORM 「맛은 어떠냐？」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「맛있다고 말해봐라,  이 매춘부년! 」
+			DATAFORM 「걸레년……」
+		ENDDATA
+	;コボルトの商人
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「부드럽게 혀룰 쓰라곳……헤헷」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「이쪼을 보라곳」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「내리뜬 눈도 귀엽구마」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「정말이라면, 평생 자지를 물게 될 얼굴이구마」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「조은 눈이네」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「깨무지는 마라곳」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「오옷……조은 기분이다」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+CASE "TOWN"
+	LOCALS = %FS_BITCH("TOWN_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;村の男
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「하아하아……능숙하네……」
+			DATAFORM 「어쩔 수 없으니까 사용해 준다구」
+		ENDDATA
+	;冒険者の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「최근 씻지 않았으니까아……깨끗하게 해달라구」
+			DATAFORM 「그렇게 돈이 없는거냐？」
+		ENDDATA
+	;村の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「아앗……조앗……」
+			DATAFORM 소년은 이 펠라로 정액이 물처럼 옅어질 때까지 사정 한 것 같다
+		ENDDATA
+	;街の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「하등한 입보지를 사용해 주마」
+			DATAFORM 「암퇘지에게는 잘 어울리는 일이군」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「고맙다고 생각 하지 마라」
+			DATAFORM 「열심히 봉사를 하는 거다」
+		ENDDATA
+	;行商人の男
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「상냥한 눈이구나」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「굉장한 흡입력이다……」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「그렇게 무서워 하지 말라구」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「좋은 여자가 이런 일을 하다니……」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「차가운 얼굴만 보이는구만」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「오오,  무셔라무셔」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「능숙 하잖아」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+ENDSELECT
+
+
+@LOG_BITCH_LES(ARG, PLACE, KYAKU)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM KYAKU
+PRINTFORM %SAVESTR:ARG%은(는)
+SELECTCASE ABL:ARG:33
+CASE 0
+	PRINTFORM 삽입이 없는만큼 다행이라고 자신을 타이르면서 
+CASE 1, 2
+	PRINTFORM 조금씩 흥분을 알아가면서 
+CASE 3, 4
+	PRINTFORM 질척질척한 물소리를 내면서
+CASE 5, 6
+	PRINTFORM 흥분을 감추려고도 하지않고
+CASE 7, 8
+	PRINTFORM 상스러운 말을 입밖에 내면서 
+CASE 9, 10
+	PRINTFORM 시간도 잊고 몇번이고 손님을 붙잡고 
+ENDSELECT
+PRINTFORMW 레즈매춘을 하고있다…
+
+SELECTCASE PLACE
+CASE "DUNGEON"
+	LOCALS = %FS_BITCH("DUNGEON_GIRL", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;淫魔
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「당신의 정기 잘먹겟습니다♪」
+			DATAFORM 「당신, 맛있어보이네～」
+			DATAFORM 「가슴에서 빨아들여줄게」
+			DATAFORM 「잘먹엇습니다♪」
+			DATAFORM 「아가씨 같은 사람이 저녁밥이라 행복해」
+			DATAFORM 「키스만으로 가버렷어？」
+			DATAFORM 「잔뜩 짜줄테니까말이야」
+			DATAFORM 「잘먹겟습니다~♪」
+		ENDDATA
+	;魔族の女
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「노예님의 오줌 뿌려줘~」
+			DATAFORM 「귀엽네, 아가씨」
+			DATAFORM 「자, 빨리 시작하자. 이런거 익숙하지？」
+			DATAFORM 「음탕한 암퇘지에게 채찍을 주세요, 노예님……」
+			DATAFORM 「이대로 계속 안고있고싶어……」
+			DATAFORM 「점점 꿀이 넘치고있어」
+			DATAFORM 「하룻밤만, 연인이 되어줘……」
+			DATAFORM 「아가씨, 항상 어떤 자위 하고있어？」
+		ENDDATA
+	;エルフの女乞食
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「돈, 들고왓어요……」
+			DATAFORM 「부드러워, 부드러워어~」
+			DATAFORM 「나를 부셔줘, 아무것도 생각할수 없을정도로……」
+			DATAFORM 「여자라도 안지않으면, 해먹을수가 없어」
+			DATAFORM 「사치부리면, 안될까나」
+			DATAFORM 「엉덩이구멍 판돈으로, 여자를 사서 위안한다니……」
+			DATAFORM 「노예님을 사기위해서라면, 정액이라도 마시겟어」
+			DATAFORM 「더럽혀진 나를……당신의 애액으로 깨끗하게해줘……」
+		ENDDATA
+	;魔族の貴婦人
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「나의 성욕을 채워주지않겟어？」
+			DATAFORM 「이것봐, 돈을 원하는거지？」
+			DATAFORM 「후후, 야한 아기고양이네」
+			DATAFORM 「돈이라면 내겟어, 자……」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「페니스밴드로 팡팡 찔러주렴」
+			DATAFORM 「자, 좀더 끈적하게 핥는거야」
+			DATAFORM 「저기, 엉덩이까지 핥아줘……」
+			DATAFORM 「좀더 키스해요」
+			DATAFORM 「나를 채찍으로 때려줘……암퇘지라고 불러줘……」
+			DATAFORM 「저기, 자위 해줘」
+			DATAFORM 「페니스밴드로 내 아날을 쑤셔줘」
+			DATAFORM 「나의 거기, 애무해줄래?」
+			DATAFORM 「조개비비기 할래？ 당신 좋은 다리네……」
+		ENDDATA
+	;魔族の女司祭
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「서로 사랑하도록 하죠」
+				DATAFORM 「키스하죠, 진득하게」
+				DATAFORM 「이대로 계속 안고있고싶어……」
+				DATAFORM 「쾌락은 저희들의 교리에요」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「좀더 때려줘!  폭력은 멋진 행위에요」
+				DATAFORM 「아앙, 유두를……좀더 찢겨나갈정도로……」
+				DATAFORM 「엉덩이도 좀더 깨려줘……새빨개져도 좋으니까」
+				DATAFORM 「타락은 우리들의 교리에요」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「좀더 제대로 쿤니 하렴……」
+				DATAFORM 「엉덩이까지 제대로 핥는으라구」
+				DATAFORM 「아아, 멋진 얼굴. 좀더 좋은소리로 울렴……」
+				DATAFORM 「아양떠는건 우리들의 교리에요」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「끝나면, 같이 차를 마시죠」
+				DATAFORM 「침대에서 이대로 잠들도록 하죠」
+				DATAFORM 「아아, 오줌 마시게 해주세요……」
+				DATAFORM 「음탕은 저희들의 교리에요」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「새침한 얼굴……이뻐」
+				DATAFORM 「당신 매춘에 재능이 있네, 검을 휘두로는것보다 훨씬더」
+				DATAFORM 「겨드랑이밑이……약한가보네」
+				DATAFORM 「폭력은 우리들의 교리에요」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「이번에 우리들의 신전에 오지않을래？」
+				DATAFORM 「피부가 깨끗하네……」
+				DATAFORM 「엉덩이, 이쁘네」
+				DATAFORM 「일탈은 우리들의 교리에요」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「함께 이렇게 얽혀있어요」
+				DATAFORM 「저희들의 신전에 서도 할수 있을것같네」
+				DATAFORM 「우후후 또 지명해버릴지도」
+				DATAFORM 「쾌락은 저희들의 교리에요」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+CASE "TOWN"
+	LOCALS = %FS_BITCH("TOWN_GIRL", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;主婦
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「좋겠네~, 살결도 부드럽고」
+			DATAFORM 「젊구나……이런 일하는거」
+		ENDDATA
+	;女冒険者
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「안으면서 잠 자게 해줘……」
+			DATAFORM 「후후, 그렇게 겁먹지 말라구」
+		ENDDATA
+	;女乞食
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「이게,  오늘의 벌이 입니다……」
+			DATAFORM 여자 거지는 필사적으로 허리를 문지르며 절정 하고 있다
+		ENDDATA
+	;お忍びの貴婦人
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「좋은 애네」
+			DATAFORM 「예쁜 아이네」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「술 마실래？」
+			DATAFORM 「목욕탕 먼저 들어갈래？」
+		ENDDATA
+	;旅芸人の娘
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「부드러운 손놀림이네요」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「멋진 사람 좋아해요」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「내가 리드 시켜줄게요」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「아가씨라는 느낌～」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「억세보여～」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「매도 해 주세요! 」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「내가 원하는 대로 해도 좋아？」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+ENDSELECT
+
+@LOG_BITCH_ANAL(ARG, PLACE, KYAKU)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM KYAKU
+PRINTFORM %SAVESTR:ARG%은(는)
+SELECTCASE ABL:ARG:3
+CASE 0
+	PRINTFORM 고통을 필사적으로 참으면서 
+CASE 1
+	PRINTFORM 경험이 적은 
+CASE 2
+	PRINTFORM 쾌락에 몸부림치며 
+CASE 3, 4
+	PRINTFORM 완전히 개발되고만 
+CASE 5, 6
+	PRINTFORM 몇번이고 사용되서 성기화 되어버린 
+CASE 7, 8
+	PRINTFORM 스스로 엉덩이를 흔들면서 
+CASE 9, 10
+	PRINTFORM 목적을 잊고 쾌락에 몸부림치며 
+ENDSELECT
+PRINTFORMW 항문으로 항문매춘을 하고있다…
+
+
+SELECTCASE PLACE
+CASE "DUNGEON"
+	LOCALS = %FS_BITCH("DUNGEON_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;오크
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「엉덩이구멍인가……뭐 좋아」
+			DATAFORM 「이건 뭐 성기구만」
+			DATAFORM 「질척질척하게 풀려있구만」
+			DATAFORM 「엉덩이를……팔고있는거냐」
+			DATAFORM 「조아, 엉덩이 내밀어라」
+			DATAFORM 「음란한 엉덩이구멍이다」
+			DATAFORM 「엉덩이를 팔아서 즐겁냐？」
+			DATAFORM 「우우, 대단한 엉덩이다」
+			DATAFORM 「아나루가 움찔거리고있다제」
+			DATAFORM 「이쁜 아나루구만」
+			DATAFORM 「엉덩이애 감도는 어떠냐？」
+			DATAFORM 「엉덩이가 다보인다제」
+			DATAFORM 「꽤나 익숙해졋자나」
+			DATAFORM 「몇명이나 넣엇냐？」
+			DATAFORM 「대단한 엉덩이다……」
+		ENDDATA
+	;魔族の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「엉덩이로 느끼는 변태녀석! 」
+			DATAFORM 「엉덩이로 몇번 가버렷냐？오랏!, 한번더 가라! 」
+			DATAFORM 「엄청 조이는구만……」
+			DATAFORM 「이 애널, 상당히 조교되있구만……」
+			DATAFORM 「엉덩이구멍 벌리고 꼬시고 앉아서는……」
+			DATAFORM 「이 변태 엉덩이구먼 노예가! 」
+			DATAFORM 「엉덩이구멍으로 돈을 버는건 기분좋냐？」
+			DATAFORM 「엉덩이구멍으로 느낄수있다니, 재능이 있군」
+		ENDDATA
+	;魔族の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「누나의 엉덩이, 좋아아」
+			DATAFORM 「엣? 엉덩이로 하는거야……？」
+			DATAFORM 「엉덩이란건, 기분이 좋은거엿네」
+			DATAFORM 「돈이 없으니까, 엉덩이로……」
+			DATAFORM 「대단해……엉덩이에 삼켜지고있어……」
+			DATAFORM 「엉덩이에……나와버렷! 」
+			DATAFORM 「이렇게 기분이 좋다면, 이젠 엉덩이로밖에 할수없어」
+			DATAFORM 「누나의 엉덩이, 굉장히 기분좋아……」
+		ENDDATA
+	;魔族の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「돈을 원한다면……알고있겟지？」
+			DATAFORM 「돈을 좀더 주겟어! 　좀더 원한다면……」
+			DATAFORM 「좀더 원하는건가, 이 음란한년! 」
+			DATAFORM 「돈을 위해서라면 무엇이든 한다고 말햇겟다？」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「엉덩이를 핥아봐라, 아날까지라굿」
+			DATAFORM 「허리를 흔들어서 춤춰봐라, 안짱다리로말야」
+			DATAFORM 「땅에 업드려서 돈을 주세요라고 말해」
+			DATAFORM 「암퇘지에게 돈을 배풀어달라고 말해」
+			DATAFORM 「돈을 위해서라면 무엇이든 하는 빗치입니다 라고 말해」
+			DATAFORM 「치구를 깨끗하게 청소하라구」
+			DATAFORM 「엎드려서 엉덩이에 자지 주세요 라고 말해」
+			DATAFORM 「앞드려서 개같이 허리를 흔들어봐라」
+			DATAFORM 「여기서 오줌을 싸봐라, 개처럼말야」
+			DATAFORM 「자지와 돈, 어느쪽으로 뺨맞는게 좋으냐？」
+			DATAFORM 「자지 정말 좋아하는 음란 엉덩이구멍 노예입니다 라고 말해」
+			DATAFORM 「여기서 엉덩이구멍 자위 해봐라」
+			DATAFORM 「돈을 위해서 엉덩이구멍을 파는 창녀에요 라고 말해」
+			DATAFORM 「엎드려서 애널에 자지 주세요 라고 말해」
+			DATAFORM 「좀더 아첨을 떨어봐, 한심한 얼굴로말야」
+		ENDDATA
+	;コボルトの商人
+	CASE 5
+		;娼婦のドレス
+		SIF (CFLAG:40 & 28) && CFLAG:41 == 203
+			PRINTFORML 「에로한 옷이라구」
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「엉덩이를 사랑받는게 좋은건가?」
+				DATAFORM 「애널바이브 넣어볼게」
+				DATAFORM 「애널에 뭐들지 들어갈거같네」
+				DATAFORM 「이런곳도 귀여워해주길 바라는걸까？」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「애널바이브가 약한것같네」
+				DATAFORM 「이것봐, 하나더 넣을게! 」
+				DATAFORM 「기가센 녀석은 애널이 약하단게 정말이엿군」
+				DATAFORM 「손가락이 빨려들어갈거같네」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「애널에 바이브를 넣겟어……힘을 빼라」
+				DATAFORM 「입으론 싫다곤 말해도 애널은 솔직하구만」
+				DATAFORM 「애널이 헐렁헐렁하구만……」
+				DATAFORM 「엉덩이를 좀더 올려라……전부 보이도록말야」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「아가씨라도 더러운곳은 더럽구만」
+				DATAFORM 「이런 엉덩이구멍으로 느끼다니……수치를알아라! 」
+				DATAFORM 「애널이 벌려지고있다구」
+				DATAFORM 「바이브를 삼키고있다구……대단한 엉덩이구멍이다」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「엉덩이구멍 파는게 아무렇지도 않은거냐？」
+				DATAFORM 「엉덩이 구멍이 그렇게 좋으냐……？　어이」
+				DATAFORM 「애널바이브가 상당이 맘에든듯 하군」
+				DATAFORM 「하하, 애널이 질척질척 하다구」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「더러운 여자는 애널도 더럽구만! 」
+				DATAFORM 「용사님, 애널은 기분좋습니까～？」
+				DATAFORM 「엉덩이를 내밀고 애널을 벌려봐라! 」
+				DATAFORM 「엉덩이구멍은 솔직하구만」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「이 엉덩이구만 창녀년! 」
+				DATAFORM 「애널매춘부라니 타락햇구만」
+				DATAFORM 「어찌됫든, 빨리 엉덩이를 내밀어라」
+				DATAFORM 「애널로 앙앙 울어대고말야……! 」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+CASE "TOWN"
+	LOCALS = %FS_BITCH("TOWN_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;村の男
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「부드러운 애닐이구나」
+			DATAFORM 「앞은 안돼는 건가？」
+		ENDDATA
+	;冒険者の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「관장 하고 왔나？」
+			DATAFORM 「웃……안에 쌌다구」
+		ENDDATA
+	;村の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「애널로 참아줄게……」
+			DATAFORM 「엉덩이로도 할 수 있구나……」
+		ENDDATA
+	;街の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「엉덩이 구멍까지 팔줄이야……」
+			DATAFORM 「엉덩이 구멍 봉사인가……」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「더러운 계집이다」
+			DATAFORM 「한심 하지도 않은가？」
+		ENDDATA
+	;行商人の男
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「봉사를 받아 가도록 하지」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「이런 아이는 항문이 약하지! 」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「좀더 엉덩이를 들어 올리라구」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「귀한 아가씨라도 애널은 있는구나……」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「그런 눈……애널이 약점이라는 눈이군」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「울부 짖어도 상관 없다고」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「잘 부탁해」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+ENDSELECT
+
+@LOG_BITCH_SEX(ARG, PLACE, KYAKU)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM KYAKU
+
+PRINTFORM %SAVESTR:ARG%은(는)
+SELECTCASE ABL:ARG:2
+CASE 0
+	PRINTFORM 고통에 필사적으로 견디면서 
+CASE 1
+	PRINTFORM 경험이 적은 
+CASE 2
+	PRINTFORM 쾌락에 몸부림치며 
+CASE 3, 4
+	PRINTFORM 완전히 개발되고만 
+CASE 5, 6
+	PRINTFORM 몇번이고 써댄 역전의
+CASE 7, 8
+	IF RAND:2 == 1 && ABL:ARG:14 >= 3
+		PRINTFORM 요염하게 허리를 쓰면서
+	ELSE
+		PRINTFORM 몇번이고 절정을 억누르면서
+	ENDIF
+CASE 9, 10
+	IF RAND:2 == 1 && ABL:ARG:14 >= 5
+		PRINTFORM 쥐어짜버릴 기세로 허리를 흔들며 
+	ELSE
+		PRINTFORM 손님은 신경쓰지못하고 마구 가버리면서 
+	ENDIF
+ENDSELECT
+PRINTFORMW 허리로 성교매춘을 하고있다…
+
+SELECTCASE PLACE
+CASE "DUNGEON"
+	LOCALS = %FS_BITCH("DUNGEON_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;오크
+	CASE 1
+		;娼婦のドレス
+		SIF (CFLAG:ARG:40 & 28) && CFLAG:ARG:41 == 203
+			PRINTFORML 「변태옷으로 유혹하긴……」
+		PRINTDATAL
+			DATAFORM 「마왕님의 노예를 안을수있다니……」
+			DATAFORM 「오옷, 우오옷, 이런 구멍이라니! 」
+			DATAFORM 「그렇게 정액이 좋으냐」
+			DATAFORM 「간단하게 가랑이를 열긴말야」
+			DATAFORM 「벽에 손을대고 엉덩이를 내밀어라」
+			DATAFORM 「피~스해라, 피~스」
+			DATAFORM 「자지 기분좋냐？」
+			DATAFORM 「자, 자지가 녹아버려! 」
+			DATAFORM 「최저의 암퇘지구만! 」
+			DATAFORM 「엉덩이 흔들어서 발정해선말야」
+			DATAFORM 「음탕한 차림 하고있구만, 구헤헤」
+			DATAFORM 「가랑이 열고 마왕군에 자러온거냐？」
+			DATAFORM 「자지 삼키는건 익숙해졋냐？」
+			DATAFORM 「정액 어울리는구만」
+			DATAFORM 「머리카락에 뿌려주마……우웃! 」
+		ENDDATA
+	;魔族の男
+	CASE 2
+		;娼婦のドレス
+		SIF (CFLAG:ARG:40 & 28) && CFLAG:ARG:41 == 203
+			PRINTFORML 「그옷……완전히 그럴생각이구만」
+		PRINTDATAL
+			DATAFORM 「이런곳을 그런 차림으로 돌아다니다니……변태녀석」
+			DATAFORM 「정액의 냄새가 어울리지 않으냐」
+			DATAFORM 「꼬시는거냐？ 허리를 흔들고말야」
+			DATAFORM 「마침 성욕이 넘칠때다」
+			DATAFORM 「이것도 일이란거냐？」
+			DATAFORM 「클리 부풀리고 침이 흐르고있다구……헤헤」
+			DATAFORM 「용사도 타락햇구만, 음란하긴」
+			DATAFORM 「벽에 손을대고 엉덩이를 내밀어라」
+			DATAFORM 「너에겐 잔뜩 아픈꼴을 당햇으니깐말야……」
+			DATAFORM 「모유는 안나오는거냐？」
+			DATAFORM 「완전히 순종하게 되엇지않느냐」
+			DATAFORM 「일단 빨아주지 않겟나？」
+			DATAFORM 「가랑이를 벌리고 거기를 벌려봐라」
+			DATAFORM 「용사 그만두고 귀여워졋구만」
+			DATAFORM 「이젠 우리들의 동료구만」
+		ENDDATA
+	;魔族の少年
+	CASE 3
+		;娼婦のドレス
+		SIF (CFLAG:ARG:40 & 28) && CFLAG:ARG:41 == 203
+			PRINTFORML 「누나 야한 옷……」
+		PRINTDATAL
+			DATAFORM 「누, 누나……돈 가지고왓어」
+			DATAFORM 「나, 동정이야……」
+			DATAFORM 「야하네, 누나는」
+			DATAFORM 「이게 여자……」
+			DATAFORM 「이게 누나의 일이야？」
+			DATAFORM 「와아……대단해」
+			DATAFORM 「우우……나와버렷어! 」
+			DATAFORM 「누나 부드러워……」
+			DATAFORM 「말랑말랑하네」
+			DATAFORM 「가슴 주물러도 돼？」
+			DATAFORM 「가슴 빨면 젖이 나올까나」
+			DATAFORM 「엉덩이 대단해……후와아」
+			DATAFORM 「누나 가르쳐줘……」
+			DATAFORM 「후후, 누나 귀엽네」
+			DATAFORM 「꼬추가 폭발해버려! 」
+		ENDDATA
+	;魔族の成金
+	CASE 4
+		;娼婦のドレス
+		SIF (CFLAG:ARG:40 & 28) && CFLAG:ARG:41 == 203
+			PRINTFORML 「창녀에게 어울리는 차림이구만」
+		PRINTDATAL
+			DATAFORM 「돈을 원한다면……알고있겟지？」
+			DATAFORM 「돈을 좀더 주겟어! 　좀더 원한다면……」
+			DATAFORM 「좀더 원하는건가, 이 음란한년! 」
+			DATAFORM 「돈을 위해서라면 무엇이든 한다고 말햇겟다？」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「엉덩이를 핥아봐라, 아날까지라굿」
+			DATAFORM 「허리를 흔들어서 춤춰봐라, 안짱다리로말야」
+			DATAFORM 「땅에 업드려서 돈을 주세요라고 말해」
+			DATAFORM 「암퇘지에게 돈을 배풀어달라고 말해」
+			DATAFORM 「돈을 위해서라면 무엇이든 하는 빗치입니다 라고 말해」
+			DATAFORM 「치구를 깨끗하게 청소하라구」
+			DATAFORM 「업드려서 자지 주세요 라고 말해」
+			DATAFORM 「업드려서 개같이 허리를 흔들어봐라」
+			DATAFORM 「여기서 오줌을 싸봐라, 개처럼말야」
+			DATAFORM 「자지와 돈, 어느쪽으로 뺨맞는게 좋으냐？」
+			DATAFORM 「자지 정말 좋아하는 음한노예입니다 라고 말해」
+			DATAFORM 「여기서 자위 해봐라」
+			DATAFORM 「돈을 위해서 가랑이를 여는 창녀입니다 라고 말해」
+			DATAFORM 「업드려서 자지 주세요 라고 말해」
+			DATAFORM 「좀더 아첨을 떨어봐, 한심한 얼굴로말야」
+		ENDDATA
+	;コボルトの商人
+	CASE 5
+		;娼婦のドレス
+		SIF (CFLAG:ARG:40 & 28) && CFLAG:ARG:41 == 203
+			PRINTFORML 「에로한 옷이라구」
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「나도 귀여워해주지～」
+				DATAFORM 「애정 가득히, 봉사 해달라구」
+				DATAFORM 「제대로 자지에 봉사해라! 」
+				DATAFORM 「니런 나라도……사랑해주는거냐」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「저 용사님이 이렇게 순종적이 될줄이야」
+				DATAFORM 「성기에는 자신이 있는거냐？」
+				DATAFORM 「이런것도 특기겟지! 」
+				DATAFORM 「완전히 음란해졋구만」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「어이, 입에 물어라! 」
+				DATAFORM 「가랑이를 열어! 　오랏」
+				DATAFORM 「뭐하고있어, 입에 물란말야」
+				DATAFORM 「솜씨가 안좋구만……엉덩이를 내밀면 된다구」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「자지의 맛은 익숙해졋나？」
+				DATAFORM 「제대로 봉사하라구! 」
+				DATAFORM 「상냥한 손이다……자지가 폭발할것같다구」
+				DATAFORM 「이런 음란한 아가씨가 있냐는거다」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「좋구만, 그 차가운 눈」
+				DATAFORM 「이건 일이란거냐？」
+				DATAFORM 「좀더 기분좋은 얼굴 하라구! 」
+				DATAFORM 「미소가 부족하지않으냐？　피-스다, 피-스」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「세련된것 치곤 자지를 앞에드고 온순해졋구나」
+				DATAFORM 「저 성격나쁜 용사님이 이젠 자지의포로냐？」
+				DATAFORM 「이것저것 말하지말고 다리를 벌려! 」
+				DATAFORM 「뭐냐 그눈은……젠장」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「이 창녀년! 」
+				DATAFORM 「매춘부라니 타락햇구만」
+				DATAFORM 「뭐하고있어, 빨리 다리를 벌리는거다」
+				DATAFORM 「앙앙 울고앉아선……! 」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+CASE "TOWN"
+	LOCALS = %FS_BITCH("TOWN_MAN", KYAKU)%
+	PRINTFORML 손님：%LOCALS%
+	SELECTCASE KYAKU
+	;村の男
+	CASE 1
+		PRINTDATAL
+			DATAFORM 「이 허벌보지년! 」
+			DATAFORM 「용사님들도 영업질인가……」
+		ENDDATA
+	;冒険者の男
+	CASE 2
+		PRINTDATAL
+			DATAFORM 「그 용사님이……」
+			DATAFORM 「옷, 너……알고 있다구」
+		ENDDATA
+	;村の少年
+	CASE 3
+		PRINTDATAL
+			DATAFORM 「나의 처음……읏」
+			DATAFORM 「나, 동정이야……」
+		ENDDATA
+	;街の成金
+	CASE 4
+		PRINTDATAL
+			DATAFORM 「창녀의 보지지만 사용해 줄까」
+			DATAFORM 「돈이라면 주마」
+		ENDDATA
+		PRINTDATAL
+			DATAFORM 「감사하라구」
+			DATAFORM 「확실히 그 지폐를 쥐고 있으라구」
+		ENDDATA
+	;行商人の男
+	CASE 5
+		;자애로움
+		IF TALENT:ARG:160
+			PRINTDATAL
+				DATAFORM 「아름다워……」
+			ENDDATA
+		;자신만만
+		ELSEIF TALENT:ARG:161
+			PRINTDATAL
+				DATAFORM 「엉덩이를 들라구」
+			ENDDATA
+		;기가약함
+		ELSEIF TALENT:ARG:162
+			PRINTDATAL
+				DATAFORM 「비명같은 신음 소리구만」
+			ENDDATA
+		;고귀함
+		ELSEIF TALENT:ARG:163
+			PRINTDATAL
+				DATAFORM 「미천한 아기씨를 받으라고옷」
+			ENDDATA
+		;냉철함
+		ELSEIF TALENT:ARG:164
+			PRINTDATAL
+				DATAFORM 「잘 조이는군……」
+			ENDDATA
+		;악녀
+		ELSEIF TALENT:ARG:166
+			PRINTDATAL
+				DATAFORM 「네 쪽이 먼저 권유했다구」
+			ENDDATA
+		ELSE
+			PRINTDATAL
+				DATAFORM 「얼마 만큼 벌었나？ 응？」
+			ENDDATA
+		ENDIF
+	ENDSELECT
+ENDSELECT
+
+
+;いろいろ扱いが特殊なので注意
+;・DUNGEONでは金銭の授受は無く自主的に行うプレイ
+;・TOWNでのARG:1は無意味（公衆プレイで客に種別が無い）
+;自分の性癖からは外れるため地の文は書けません
+;どなたか拡充おねがいします
+@LOG_BITCH_ANIMAL(ARG, PLACE, ARG:1)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM KYAKU
+SELECTCASE PLACE
+CASE "DUNGEON"
+CASE "TOWN"
+	PRINTFORM %SAVESTR:ARG%은(는)
+	[SKIPSTART]
+	SELECTCASE ABL:ARG:2
+	ENDSELECT
+	[SKIPEND]
+	PRINTFORMW 수많은 관중의 눈을 앞에두고 수간매춘을 하고있다…
+	
+	[SKIPSTART]
+	;てきとーなアイデアだけ書いておく
+	;・普通に様子を描写
+	;・司会者や観衆からの野次
+	;・金を貸してる人が見ての一言
+	;・스태프（主催者やら出演者やら）との楽屋裏でのやりとり「ゴム使うなんてダメだよ! 」って叱られたり
+	PRINTDATAL
+		DATAFORM 
+	ENDDATA
+	[SKIPEND]
+	
+ENDSELECT
+
+
+;一応は置いておくが口上向きな気もする
+;呼び出し側で分岐描写が入っているため優先度は低めでいい
+@LOG_BITCH_SELF(ARG, PLACE, PLAY)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIMS PLACE
+#DIM PLAY
+SELECTCASE PLACE
+CASE "DUNGEON"
+	SELECTCASE PLAY
+	;レズ妄想
+	CASE 1
+	;獣姦妄想
+	CASE 2
+	;あなたを妄想
+	CASE 3
+	;夢中で
+	CASE 4
+	;控えめに
+	CASE 5
+	ENDSELECT
+CASE "TOWN"
+	SELECTCASE PLAY
+	;レズ妄想
+	CASE 1
+	;獣姦妄想
+	CASE 2
+	;あなたを妄想
+	CASE 3
+	;夢中で
+	CASE 4
+	;控えめに
+	CASE 5
+	ENDSELECT
+ENDSELECT
+
+
+
+
+;とりあえず関数名変えたから競合は無いはず
+[SKIPSTART]
+;売春時に表示するメッセージ
+;基本的にARG:0=客の番号
+;売春노예はTARGET
+
+;とりあえずセリフだけ表示
+;そのうち地の文を強化したい
+
+;------------------------------
+@DUNGEON_SEX_LOG, ARG:0
+;------------------------------
+;ARG:0
+;0 = 오크
+;1 = 魔族の男
+;2 = 魔族の少年
+;3 = 魔族の成金
+;ELSE = コボルトの商人
+
+
+IF ARG:0 == 0
+	;오크
+	;娼婦のドレス
+	SIF (CFLAG:40 & 28) && CFLAG:41 == 203
+		PRINTFORML 「변태옷으로 유혹하긴……」
+	IF RAND:15 == 0
+		PRINTFORML 「마왕님의 노예를 안고 케륵……」
+	ELSEIF RAND:14==0
+		PRINTFORML 「옷-정액, 우오 옷, 전부 구멍에 낸다」
+	ELSEIF RAND:13==0
+		PRINTFORML 「그렇게나 정액이 좋나 케케」
+	ELSEIF RAND:12==0
+		PRINTFORML 「간단하게 가랑이를 벌리고 박아주마 크룩」
+	ELSEIF RAND:11==0
+		PRINTFORML 「손으로 엉덩이를 벌려라」
+	ELSEIF RAND:10==0
+		PRINTFORML 「싼다 싼다」
+	ELSEIF RAND:9==0
+		PRINTFORML 「자지 기분이 좋지?」
+	ELSEIF RAND:8==0
+		PRINTFORML 「자, 자지가 마음에 드나 크룩!」
+	ELSEIF RAND:7==0
+		PRINTFORML 「최저의 암퇘지다!」
+	ELSEIF RAND:6==0
+		PRINTFORML 「엉덩이가 발정이 났구나」
+	ELSEIF RAND:5==0
+		PRINTFORML 「변태의 모습이다, 그헤헤」
+	ELSEIF RAND:4==0
+		PRINTFORML 「너도 이제 마왕 군으로 배신한 쓰레기군?」
+	ELSEIF RAND:3==0
+		PRINTFORML 「내 자지냄새가 어떠냐 크룩」
+	ELSEIF RAND:2==0
+		PRINTFORML 「정액 어울린다」
+	ELSE
+		PRINTFORML 「머리를 좀더 흔들어라 ……웃!」
+	ENDIF
+ELSEIF ARG:0 == 1
+	;魔族の男
+	;娼婦のドレス
+	SIF (CFLAG:40 & 28) && CFLAG:41 == 203
+		PRINTFORML 「그옷……완전히 그럴생각이구만」
+	IF RAND:15 == 0
+		PRINTFORML 「이런 곳을 그런 모습에서 맴돌다니....변태 녀석」
+	ELSEIF RAND:14==0
+		PRINTFORML 「정액 냄새가 어울리잖아」
+	ELSEIF RAND:13==0
+		PRINTFORML 「원하는 거?허리를 흔들어라」
+	ELSEIF RAND:12==0
+		PRINTFORML 「정확히 성욕이 솟구치는 몸이다」
+	ELSEIF RAND:11==0
+		PRINTFORML 「이것도 펠라치오 라고 하는가?」
+	ELSEIF RAND:10==0
+		PRINTFORML 「뺨 부풀려서 침이 나오고 있어...헤헤」
+	ELSEIF RAND:9==0
+		PRINTFORML 「용사도 나락에 빠졌구먼, 음란한 년」
+	ELSEIF RAND:8==0
+		PRINTFORML 「벽에 손을 짚고 엉덩이를 위로 올려라」
+	ELSEIF RAND:7==0
+		PRINTFORML 「너에게는 몹시 당했었으니까……」
+	ELSEIF RAND:6==0
+		PRINTFORML 「젖은 나오지 않는지?」
+	ELSEIF RAND:5==0
+		PRINTFORML 「완전히 유순하게 되었잖아?」
+	ELSEIF RAND:4==0
+		PRINTFORML 「일단 물어 주지 않겠나?」
+	ELSEIF RAND:3==0
+		PRINTFORML 「가랑이를 벌리고 그곳을 펼쳐 봐라」
+	ELSEIF RAND:2==0
+		PRINTFORML 「용자는 그만둬라 귀여워 졌다.」
+	ELSE
+		PRINTFORML 「이제 우리의 동료구나」
+	ENDIF
+ELSEIF ARG:0 == 2
+	;魔族の少年
+	;娼婦のドレス
+	SIF (CFLAG:40 & 28) && CFLAG:41 == 203
+		PRINTFORML 「누나 야한 옷……」
+	IF RAND:15 == 0
+		PRINTFORML 「오, 누나……돈 가져왔어」
+	ELSEIF RAND:14==0
+		PRINTFORML 「나, 동정이야……」
+	ELSEIF RAND:13==0
+		PRINTFORML 「야하네, 누나」
+	ELSEIF RAND:12==0
+		PRINTFORML 「이것이 여자……」
+	ELSEIF RAND:11==0
+		PRINTFORML 「이게 누나의 일이야?」
+	ELSEIF RAND:10==0
+		PRINTFORML 「와……굉장히」
+	ELSEIF RAND:9==0
+		PRINTFORML 「우우……안에 싸버리겠어 우와!」
+	ELSEIF RAND:8==0
+		PRINTFORML 「언니 부드러운……」
+	ELSEIF RAND:7==0
+		PRINTFORML 「부들부들하네」
+	ELSEIF RAND:6==0
+		PRINTFORML 「가슴 주무르면 좋아?」
+	ELSEIF RAND:5==0
+		PRINTFORML 「찌찌 짜면 젖이 나올까」
+	ELSEIF RAND:4==0
+		PRINTFORML 「엉덩이 정말……후 와」
+	ELSEIF RAND:3==0
+		PRINTFORML 「누나 가르쳐 줘……」
+	ELSEIF RAND:2==0
+		PRINTFORML 「훗, 누나 예쁘네」
+	ELSE
+		PRINTFORML 「꼬추가 폭발해!!!」
+	ENDIF
+ELSEIF ARG:0 == 3
+	;魔族の成金
+	;娼婦のドレス
+	SIF (CFLAG:40 & 28) && CFLAG:41 == 203
+		PRINTFORML 「창녀에게 어울리는 차림이구만」
+	IF RAND:4 == 0
+		PRINTFORML 「돈을 원하잖아…… 알아?」
+	ELSEIF RAND:3==0
+		PRINTFORML 「돈을 제대로 잡고 다물어!더 원하나……」
+	ELSEIF RAND:2==0
+		PRINTFORML 「더 갖고 싶은 것인지?이 음란한 년!」
+	ELSE
+		PRINTFORML 「돈을 위해서라면 무엇이든 한다고 했지?」
+	ENDIF
+	
+	IF RAND:15 == 0
+		PRINTFORML 「궁둥이를 빨아 보고 똥꼬까지이야」
+	ELSEIF RAND:14==0
+		PRINTFORML 「허리를 흔들어 춤 춰 봐라, 안짱 다리로 말야」 
+	ELSEIF RAND:13==0
+		PRINTFORML 「무릎 꿇고 엎드려서 돈을 달라고 해봐」
+	ELSEIF RAND:12==0
+		PRINTFORML 「암퇘지 돈을 은혜주세요라고 말해라」 
+	ELSEIF RAND:11==0
+		PRINTFORML 「돈을 위해 무엇이든하는 창녀입니다라고」 
+	ELSEIF RAND:10==0
+		PRINTFORML 「좆밥을 깨끗하게 청소하구나」
+	ELSEIF RAND:9==0
+		PRINTFORML 「무릎 꿇고 엎드려 자지 달라고 말해」
+	ELSEIF RAND:8==0
+		PRINTFORML 「무릎 꿇고 개처럼 허리 흔들어 볼까」
+	ELSEIF RAND:7==0
+		PRINTFORML 「여기에서 소변 봐라, 개처럼 말이야」
+	ELSEIF RAND:6==0
+		PRINTFORML 「자지와 돈, 어느 쪽으로 따귀때리는 것을 좋아해?」
+	ELSEIF RAND:5==0
+		PRINTFORML 「자지 아주 좋아하는 음란 노예입니다라고 말해」
+	ELSEIF RAND:4==0
+		PRINTFORML 「여기서 자위해 봐」
+	ELSEIF RAND:3==0
+		PRINTFORML 「금을 위해 가랑이를 열 매춘녀입니다라고 말해」 
+	ELSEIF RAND:2==0
+		PRINTFORML 「무릎 꿇고 엎드려 자지 달라고 말해」
+	ELSE
+		PRINTFORML 「더 아첨 보여라, 느슨한 미소로 말이야」
+	ENDIF
+	
+ELSE
+	;コボルトの商人
+	;娼婦のドレス
+	SIF (CFLAG:40 & 28) && CFLAG:41 == 203
+		PRINTFORML 「에로한 옷이라구」
+	IF TALENT:160
+		;자애로움
+		IF RAND:4 == 0
+			PRINTFORML 「나도 사랑해줘~」
+		ELSEIF RAND:3==0
+			PRINTFORML 「애정 듬뿍에 봉사 줘」 
+		ELSEIF RAND:2==0
+			PRINTFORML 「자지에 잘 봉사 해라!」 
+		ELSE
+			PRINTFORML 「이런 나라도 ...... 사랑 주는지」
+		ENDIF
+	ELSEIF TALENT:161
+		;자신만만
+		IF RAND:4 == 0
+			PRINTFORML 「저 용자님이 이렇게 유순하게 되다니.」
+		ELSEIF RAND:3==0
+			PRINTFORML 「성기술에는 자신이 있는가？」
+		ELSEIF RAND:2==0
+			PRINTFORML 「이런 것도 잘했지! 」
+		ELSE
+			PRINTFORML 「완전히 음란하게 되었군」
+		ENDIF
+	ELSEIF TALENT:162
+		;기가약함
+		IF RAND:4 == 0
+			PRINTFORML 「오랏, 빨아라! 」
+		ELSEIF RAND:3==0
+			PRINTFORML 「가랑이를 열어!오랏」
+		ELSEIF RAND:2==0
+			PRINTFORML 「뭐 하는 거야, 물어라」
+		ELSE
+			PRINTFORML 「솜씨가 없구나……엉덩이 내밀면 되잖아」
+		ENDIF
+	ELSEIF TALENT:163
+		;고귀함
+		IF RAND:4 == 0
+			PRINTFORML 「귀두의 맛은 익숙한가？」
+		ELSEIF RAND:3==0
+			PRINTFORML 「잘 봉사할게! 」
+		ELSEIF RAND:2==0
+			PRINTFORML 「따뜻한 손이다……귀두가 폭발할 것 같네」
+		ELSE
+			PRINTFORML 「이런 음란한 따님이 있나」
+		ENDIF
+	ELSEIF TALENT:164
+		;냉철함
+		IF RAND:4 == 0
+			PRINTFORML 「좋네. 그런 차가운 눈」
+		ELSEIF RAND:3==0
+			PRINTFORML 「이것도 일인가？」
+		ELSEIF RAND:2==0
+			PRINTFORML 「훨씬 기분 좋은 얼굴이다! 」
+		ELSE
+			PRINTFORML 「미소가 없잖아? 피스, 피스」
+		ENDIF
+	ELSEIF TALENT:166
+		;악녀
+		IF RAND:4 == 0
+			PRINTFORML 「멋지다고 생각한데 비해 좆을 쳐다보고는 기특한 아이가 됐잖아」
+		ELSEIF RAND:3==0
+			PRINTFORML 「그 성격 나쁜 용자님이 좆의 포로？」
+		ELSEIF RAND:2==0
+			PRINTFORML 「이러쿵 저러쿵 말하지 말고 가랑이를 열어! 」
+		ELSE
+			PRINTFORML 「뭐야 그 눈은……쓰레기」
+		ENDIF
+	ELSE
+		IF RAND:4 == 0
+			PRINTFORML 「이 포주여자. 녀석!」
+		ELSEIF RAND:3==0
+			PRINTFORML 「창녀로 추락한 거냐」
+		ELSEIF RAND:2==0
+			PRINTFORML 「뭐 하냐, 서둘러 가랑이를 벌려」
+		ELSE
+			PRINTFORML 「아아 헉헉……!」
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;------------------------------
+@DUNGEON_ANAL_LOG, ARG:0
+;------------------------------
+;ARG:0
+;0 = 오크
+;1 = 魔族の男
+;2 = 魔族の少年
+;3 = 魔族の成金
+;ELSE = コボルトの商人
+
+
+IF ARG:0 == 0
+	;오크
+	IF RAND:15 == 0
+		PRINTFORML 「엉덩이 구멍……좋구나」
+	ELSEIF RAND:14==0
+		PRINTFORML 「더럽고 냄새나는 성기다」
+	ELSEIF RAND:13==0
+		PRINTFORML 「걸쭉한 덩어리가 닿는데」
+	ELSEIF RAND:12==0
+		PRINTFORML 「엉덩이……가 꼬리가 없네」
+	ELSEIF RAND:11==0
+		PRINTFORML 「좋아, 엉덩이를 이쪽방향으로」
+	ELSEIF RAND:10==0
+		PRINTFORML 「야한 항문이다」
+	ELSEIF RAND:9==0
+		PRINTFORML 「엉덩이 매맞으면 좋은가？」
+	ELSEIF RAND:8==0
+		PRINTFORML 「우욱, 완전한 엉덩이다」
+	ELSEIF RAND:7==0
+		PRINTFORML 「애널 가스가 자꾸 나온다」
+	ELSEIF RAND:6==0
+		PRINTFORML 「예쁜 애널이다」
+	ELSEIF RAND:5==0
+		PRINTFORML 「엉덩이의 감도가 좋다？」
+	ELSEIF RAND:4==0
+		PRINTFORML 「오 엉덩이에서 눈을 못떼겠다」
+	ELSEIF RAND:3==0
+		PRINTFORML 「다이빙하는 모습같다」
+	ELSEIF RAND:2==0
+		PRINTFORML 「얼마나 많은 사람이 니 애널 따먹었냐？」
+	ELSE
+		PRINTFORML 「완전한 항문이다……」
+	ENDIF
+ELSEIF ARG:0 == 1
+	;魔族の男
+	IF RAND:8 == 0
+		PRINTFORML 「항문에서 느끼는 변태 녀석!」
+	ELSEIF RAND:7==0
+		PRINTFORML 「항문에서 몇번 갔어?오랏, 한번 가!」
+	ELSEIF RAND:6==0
+		PRINTFORML 「정말 옥죄어 오는……」
+	ELSEIF RAND:5==0
+		PRINTFORML 「이 항문, 꽤 조련된다……」
+	ELSEIF RAND:4==0
+		PRINTFORML 「엉덩이 구멍 넓히도록 권유당하다니……」
+	ELSEIF RAND:3==0
+		PRINTFORML 「이 변태 항문 노예가! 」
+	ELSEIF RAND:2==0
+		PRINTFORML 「항문으로 돈을 벌고, 기분 좋냐？」
+	ELSE
+		PRINTFORML 「엉덩이 구멍으로 느끼다니, 재능이 있다.」
+	ENDIF
+ELSEIF ARG:0 == 2
+	;魔族の少年
+	IF RAND:8 == 0
+		PRINTFORML 「누나의 똥꼬, 내 꼬추가 끊어질것 같이 좋아」
+	ELSEIF RAND:7==0
+		PRINTFORML 「또, 똥묻는 똥꼬로 해……？」
+	ELSEIF RAND:6==0
+		PRINTFORML 「냄새나는 똥꼬는, 기분이 좋아」
+	ELSEIF RAND:5==0
+		PRINTFORML 「돈 없어서, 똥꼬로……또 더러운게 묻어버려……」
+	ELSEIF RAND:4==0
+		PRINTFORML 「정말……똥꼬로 느껴버리는거야?……」
+	ELSEIF RAND:3==0
+		PRINTFORML 「똥꼬에……낸다! 」
+	ELSEIF RAND:2==0
+		PRINTFORML 「이렇게 기분이 좋다면, 다시는 냄새나는 똥꼬에 밖에 못해」
+	ELSE
+		PRINTFORML 「누나의 똥꼬, 너무 기분이 좋다……냄새는 너무 지독하지만…」
+	ENDIF
+ELSEIF ARG:0 == 3
+	;魔族の成金
+	IF RAND:4 == 0
+		PRINTFORML 「돈을 원하잖아…… 알아?」
+	ELSEIF RAND:3==0
+		PRINTFORML 「돈을 제대로 잡고 다물어!더 원하나……」
+	ELSEIF RAND:2==0
+		PRINTFORML 「더 갖고 싶은 것인지?이 음란한 년!」
+	ELSE
+		PRINTFORML 「돈을 위해서라면 무엇이든 한다고 했지?」
+	ENDIF
+	
+	IF RAND:15 == 0
+		PRINTFORML 「궁둥이를 빨아 보고 똥꼬까지이야」
+	ELSEIF RAND:14==0
+		PRINTFORML 「허리를 흔들어 춤 춰 봐라, 안짱 다리로 말야」 
+	ELSEIF RAND:13==0
+		PRINTFORML 「무릎 꿇고 엎드려서 돈을 달라고 해봐」
+	ELSEIF RAND:12==0
+		PRINTFORML 「암퇘지 돈을 은혜주세요라고 말해라」 
+	ELSEIF RAND:11==0
+		PRINTFORML 「돈을 위해 무엇이든하는 창녀입니다라고」 
+	ELSEIF RAND:10==0
+		PRINTFORML 「좆밥을 깨끗하게 청소하구나」
+	ELSEIF RAND:9==0
+		PRINTFORML 「무릎 꿇고 엉덩이에 넣어달라고 빌어라」
+	ELSEIF RAND:8==0
+		PRINTFORML 「무릎 꿇고 개처럼 허리 흔들어 볼까」
+	ELSEIF RAND:7==0
+		PRINTFORML 「여기에서 소변 봐라, 개처럼 말이야」
+	ELSEIF RAND:6==0
+		PRINTFORML 「자지와 돈, 어느 쪽으로 따귀때리는 것을 좋아해?」
+	ELSEIF RAND:5==0
+		PRINTFORML 「자지 사랑 음란 엉덩이 구멍 노예라고 말해라」
+	ELSEIF RAND:4==0
+		PRINTFORML 「여기에서 엉덩이 구멍 자위를 해라」
+	ELSEIF RAND:3==0
+		PRINTFORML 「돈 때문에 항문을 판 행상녀 입니다 라고 말해라」
+	ELSEIF RAND:2==0
+		PRINTFORML 「무릎 꿇고 항문에 삽입해 달라고 말해라」
+	ELSE
+		PRINTFORML 「더 아첨 보여라, 느슨한 미소로 말이야」
+	ENDIF
+	
+ELSE
+	;コボルトの商人
+	IF TALENT:160
+		;자애로움
+		IF RAND:4 == 0
+			PRINTFORML 「엉덩이를 사랑받는 것을 좋아하는 거니」
+		ELSEIF RAND:3==0
+			PRINTFORML 「아날 바이브 삼키는 애널아가씨구나」
+		ELSEIF RAND:2==0
+			PRINTFORML 「항문에 무엇이든 들어있을 것 같다」
+		ELSE
+			PRINTFORML 「이런 곳도 사랑을 원하는거냐？」
+		ENDIF
+	ELSEIF TALENT:161
+		;자신만만
+		IF RAND:4 == 0
+			PRINTFORML 「아날 바이브가 약한 것 같다」
+		ELSEIF RAND:3==0
+			PRINTFORML 「자, 하나 더 넣을거야! 」
+		ELSEIF RAND:2==0
+			PRINTFORML 「기가 쎈 사람은 항문이 약한게 정말이구나」
+		ELSE
+			PRINTFORML 「손가락이 빨려 들어갈 것 같아」
+		ENDIF
+	ELSEIF TALENT:162
+		;기가약함
+		IF RAND:4 == 0
+			PRINTFORML 「아날 바이브 넣는거야……힘을 빼라」
+		ELSEIF RAND:3==0
+			PRINTFORML 「입으로는 마지 못해해도 항문은 정직하구나」
+		ELSEIF RAND:2==0
+			PRINTFORML 「항문이 흔들 흔들 한다……」
+		ELSE
+			PRINTFORML 「엉덩이를 더 높이 올려……안쪽에 들어있는 더러운게 전부 보이게」
+		ENDIF
+	ELSEIF TALENT:163
+		;고귀함
+		IF RAND:4 == 0
+			PRINTFORML 「고귀한 아가씨도 더러운 곳은 역겨운것으로 가득하구나」
+		ELSEIF RAND:3==0
+			PRINTFORML 「이런 엉덩이 구멍으로 번민하다니 ...... 부끄러운 줄 알아라! 」
+		ELSEIF RAND:2==0
+			PRINTFORML 「항문이 펼쳐져있다구」
+		ELSE
+			PRINTFORML 「바이브를 삼켜가는거야 ...... 대단한 엉덩이 구멍이다」
+		ENDIF
+	ELSEIF TALENT:164
+		;냉철함
+		IF RAND:4 == 0
+			PRINTFORML 「엉덩이 구멍 판매.. 무슨 생각이야？」
+		ELSEIF RAND:3==0
+			PRINTFORML 「엉덩이 구멍이 그렇게 좋을까……？」
+		ELSEIF RAND:2==0
+			PRINTFORML 「아날 바이브가 상당히 마음에 든 것 같다」
+		ELSE
+			PRINTFORML 「엄마, 항문이 걸쭉해」
+		ENDIF
+	ELSEIF TALENT:166
+		;악녀
+		IF RAND:4 == 0
+			PRINTFORML 「더러운 여자는 아날도 더러운 것이다! 」
+		ELSEIF RAND:3==0
+			PRINTFORML 「용사 님, 아날는 기분습니까 ~？」
+		ELSEIF RAND:2==0
+			PRINTFORML 「엉덩이를 내밀고 애널을 펼쳐 봐라! 」
+		ELSE
+			PRINTFORML 「엉덩이 구멍은 정직 하군」
+		ENDIF
+	ELSE
+		IF RAND:4 == 0
+			PRINTFORML 「이 엉덩이 구멍 매춘부 놈! 」
+		ELSEIF RAND:3==0
+			PRINTFORML 「항문 매춘부로 타락한 것이구나」
+		ELSEIF RAND:2==0
+			PRINTFORML 「뭐, 빨리 엉덩이를내는거야」
+		ELSE
+			PRINTFORML 「항문에서 앙앙 신음 나가는……!」
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;------------------------------
+@DUNGEON_LES_LOG, ARG:0
+;------------------------------
+;ARG:0
+;0 = 淫魔
+;1 = 魔族の女
+;2 = エルフの女乞食
+;3 = 魔族の貴婦人
+;ELSE = 魔族の女司祭
+
+
+IF ARG:0 == 0
+	;淫魔
+	IF RAND:8 == 0
+		PRINTFORML 「당신의 정기를받습니다♪」
+	ELSEIF RAND:7==0
+		PRINTFORML 「당신, 맛있겠다~」
+	ELSEIF RAND:6==0
+		PRINTFORML 「가슴에서 빨아버릴꺼에요」
+	ELSEIF RAND:5==0
+		PRINTFORML 「잘 먹었어요♪」
+	ELSEIF RAND:4==0
+		PRINTFORML 「아가씨 같은 저녁 식사로 행복 해요」
+	ELSEIF RAND:3==0
+		PRINTFORML 「키스만으로 가버려했다？」
+	ELSEIF RAND:2==0
+		PRINTFORML 「가득 쥐어 짜는니까요」
+	ELSE
+		PRINTFORML 「잘먹겠습니~다♪」
+	ENDIF
+ELSEIF ARG:0 == 1
+	;魔族の女
+	IF RAND:8 == 0
+		PRINTFORML 「노예님의 오줌 뿌려줘~」
+	ELSEIF RAND:7==0
+		PRINTFORML 「귀엽네, 아가씨」
+	ELSEIF RAND:6==0
+		PRINTFORML 「자, 빨리 시작해볼까. 익숙해있는 거죠？」
+	ELSEIF RAND:5==0
+		PRINTFORML 「불쌍한 암퇘지에 채찍을 주세요, 노예님……」
+	ELSEIF RAND:4==0
+		PRINTFORML 「이대로 계속 안고 싶어……」
+	ELSEIF RAND:3==0
+		PRINTFORML 「점점 꿀이 흘러 와요」
+	ELSEIF RAND:2==0
+		PRINTFORML 「하룻밤만, 연인이되어……」
+	ELSE
+		PRINTFORML 「아가씨, 항상 어떤 자위해？」
+	ENDIF
+ELSEIF ARG:0 == 2
+	;エルフの女乞食
+	IF RAND:8 == 0
+		PRINTFORML 「돈 가지고 왔습니다……」
+	ELSEIF RAND:7==0
+		PRINTFORML 「부드러워, 부드러워요」
+	ELSEIF RAND:6==0
+		PRINTFORML 「나를 아프게해줘어, 아무것도 생각할 수 없을 정도……」
+	ELSEIF RAND:5==0
+		PRINTFORML 「여자도 안겨 않으면 일을 할 수 없어」
+	ELSEIF RAND:4==0
+		PRINTFORML 「사치품 사버리면, 안될까」
+	ELSEIF RAND:3==0
+		PRINTFORML 「엉덩이 구멍 판 돈으로 여자를 사서 치유될 줄이야……」
+	ELSEIF RAND:2==0
+		PRINTFORML 「노예 님을 사기 위해서라면 정액도 한잔 해요」
+	ELSE
+		PRINTFORML 「더러운 나를……그대의 애액으로 정화해줘요……」
+	ENDIF
+ELSEIF ARG:0 == 3
+	;魔族の貴婦人
+	IF RAND:4 == 0
+		PRINTFORML 「내 성욕을 충족주지 않을래？」
+	ELSEIF RAND:3==0
+		PRINTFORML 「자, 돈이 필요 거죠？」
+	ELSEIF RAND:2==0
+		PRINTFORML 「후후, 음란한 새끼 고양이」
+	ELSE
+		PRINTFORML 「돈이라면 내요, 자……」
+	ENDIF
+	
+	IF RAND:9 == 0
+		PRINTFORML 「페니스밴드로 팡팡 찔러주세요」
+	ELSEIF RAND:8==0
+		PRINTFORML 「자, 더 끈적 끈적 핥는거야」
+	ELSEIF RAND:7==0
+		PRINTFORML 「저기, 엉덩이까지 핥아……」
+	ELSEIF RAND:6==0
+		PRINTFORML 「더 키스하자」
+	ELSEIF RAND:5==0
+		PRINTFORML 「나를 채찍으로 때려줘……암퇘지라고 경멸해줘……」
+	ELSEIF RAND:4==0
+		PRINTFORML 「저기, 자위 해요」
+	ELSEIF RAND:3==0
+		PRINTFORML 「페니스밴드로 내 아날을 쑤셔줘」
+	ELSEIF RAND:2==0
+		PRINTFORML 「내 거기, 애무 해줘」
+	ELSE
+		PRINTFORML 「조개 맞춰보세요？　당신 좋은 다리 네요……」
+	ENDIF
+	
+ELSE
+	;魔族の女司祭
+	IF TALENT:160
+		;자애로움
+		IF RAND:4 == 0
+			PRINTFORML 「함께 사랑합시다」
+		ELSEIF RAND:3==0
+			PRINTFORML 「키스하자, 끈적 끈적하네요」
+		ELSEIF RAND:2==0
+			PRINTFORML 「이대로 계속 안고 서로 싶다……」
+		ELSE
+			PRINTFORML 「쾌락은 우리의 교리입니다」
+		ENDIF
+	ELSEIF TALENT:161
+		;자신만만
+		IF RAND:4 == 0
+			PRINTFORML 「더 때려! 　폭력은 좋은 것입니다」
+		ELSEIF RAND:3==0
+			PRINTFORML 「아앙, 유두를……좀 더 막대기를 잘라 버릴 정도로……」
+		ELSEIF RAND:2==0
+			PRINTFORML 「엉덩이를 두드려줘……새 빨개져서도 좋으니까」
+		ELSE
+			PRINTFORML 「타락은 우리의 교리입니다」
+		ENDIF
+	ELSEIF TALENT:162
+		;기가약함
+		IF RAND:4 == 0
+			PRINTFORML 「더 성실하게 애무하십시오……」
+		ELSEIF RAND:3==0
+			PRINTFORML 「엉덩이까지 제대로 핥는거야」
+		ELSEIF RAND:2==0
+			PRINTFORML 「아, 좋은 얼굴. 더 좋은 소리로 울어……」
+		ELSE
+			PRINTFORML 「아첨은 우리의 교리입니다」
+		ENDIF
+	ELSEIF TALENT:163
+		;고귀함
+		IF RAND:4 == 0
+			PRINTFORML 「끝나면, 함께 차를 마십시다」
+		ELSEIF RAND:3==0
+			PRINTFORML 「침대에서 이대로 눈 감고 잡시다」
+		ELSEIF RAND:2==0
+			PRINTFORML 「아아, 소변 마시세요……」
+		ELSE
+			PRINTFORML 「음탕는 우리의 교리입니다」
+		ENDIF
+	ELSEIF TALENT:164
+		;냉철함
+		IF RAND:4 == 0
+			PRINTFORML 「새침한 얼굴 ……예쁘네요」
+		ELSEIF RAND:3==0
+			PRINTFORML 「당신은 매춘의 재능있는거야,검을 휘두르는보다 상당히」
+		ELSEIF RAND:2==0
+			PRINTFORML 「겨드랑이……약하군요」
+		ELSE
+			PRINTFORML 「폭력은 우리의 교리입니다」
+		ENDIF
+	ELSEIF TALENT:166
+		;악녀
+		IF RAND:4 == 0
+			PRINTFORML 「이번 우리의 성전에 오지 않는다？」
+		ELSEIF RAND:3==0
+			PRINTFORML 「피부가 깨끗하네요……」
+		ELSEIF RAND:2==0
+			PRINTFORML 「엉덩이 깨끗 해요」
+		ELSE
+			PRINTFORML 「일탈은 우리의 교리입니다」
+		ENDIF
+	ELSE
+		IF RAND:4 == 0
+			PRINTFORML 「함께 이렇게 얽혀합시다」
+		ELSEIF RAND:3==0
+			PRINTFORML 「우리 신전에서도 해 나갈 것 같구나」
+		ELSEIF RAND:2==0
+			PRINTFORML 「후후, 또 지명 버릴지도」
+		ELSE
+			PRINTFORML 「쾌락은 우리의 교리입니다」
+		ENDIF
+	ENDIF
+ENDIF
+
+RETURN 0
+[SKIPEND]
+
+
+
+
+
+
+
+

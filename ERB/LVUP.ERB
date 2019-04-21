@@ -1,0 +1,62 @@
+﻿;----------------------------------
+@LVUP, ARG:0
+;----------------------------------
+;ARG:0はキャラNo
+
+LOCAL:0 = CFLAG:(ARG:0):9 * 10 + 10
+
+$LVUP_REPEAT
+IF EXP:(ARG:0):80 >= LOCAL:0
+	EXP:(ARG:0):80 -= LOCAL:0
+	CALL ST_UP, ARG:0
+	LOCAL:0 = CFLAG:(ARG:0):9 * 10 + 10
+	SIF EXP:(ARG:0):80 >= LOCAL:0
+		GOTO LVUP_REPEAT
+	PRINTFORML *%조사선택(SAVESTR:(ARG:0), "는")% 레벨 업해서 {CFLAG:(ARG:0):9} 레벨이 되었다*
+	IF TALENT:(ARG:0):291 && CFLAG:(ARG:0):9 >= 30
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 싸움에서 망설임을 버리고, 진정한 용사로 성장했다……
+		PRINTFORML  %조사선택(SAVESTR:(ARG:0), "는")% [초보자]를 잃었다
+		TALENT:(ARG:0):291 = 0
+	ENDIF
+ENDIF
+
+RETURN 0
+
+@ST_UP, ARG:0
+CFLAG:(ARG:0):9 += 1
+CFLAG:(ARG:0):13 += 1
+CFLAG:(ARG:0):14 += 1
+;ランダムでさらに強く
+LOCAL:0 = RAND:2
+IF LOCAL:0 == 0
+	CFLAG:(ARG:0):13 += 1
+ELSEIF LOCAL:0 == 1
+	CFLAG:(ARG:0):14 += 1
+ENDIF
+IF DAY >= 100
+	CFLAG:(ARG:0):13 += RAND:3
+	CFLAG:(ARG:0):14 += RAND:3
+ENDIF
+IF TALENT:(ARG:0):240 == 1
+	CFLAG:(ARG:0):13 += RAND:3
+	CFLAG:(ARG:0):14 += RAND:3
+ENDIF
+IF TALENT:(ARG:0):248 == 1
+	CFLAG:(ARG:0):13 += RAND:2
+	CFLAG:(ARG:0):14 += RAND:2
+ENDIF
+
+;ドラゴン戦闘補正
+IF TALENT:(ARG:0):314 == 5
+	CFLAG:(ARG:0):13 += RAND:2
+	CFLAG:(ARG:0):14 += RAND:2
+ENDIF
+
+;ドワーフ防御補正
+SIF TALENT:(ARG:0):314 == 11
+	CFLAG:(ARG:0):14 += RAND:2
+
+MAXBASE:(ARG:0):0 += 10
+MAXBASE:(ARG:0):1 += 10
+
+RETURN 0

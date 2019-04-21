@@ -1,0 +1,312 @@
+﻿
+;パーティー関連処理のERBです
+
+;------------------------------------
+@PARTY_UNITE
+#DIM CHARID
+#DIM RESTCHAR
+#DIM LEADER
+;------------------------------------
+;パーティ結成に関する初期準備
+;RESTCHAR = 仲間勇者控え
+
+;まず行動終了フラグOFF
+
+FOR CHARID, 0, CHARANUM
+	CFLAG:CHARID:530 = 0
+NEXT
+
+;次に、リーダー以外のキャラを行動終了にしていく
+;戦闘処理はリーダーを軸にして、
+;行動終了した仲間勇者はリーダーの戦闘内で追従して動く
+
+FOR CHARID, 0, CHARANUM
+	;仲間Aを見る
+	RESTCHAR = CFLAG:CHARID:531
+	IF RESTCHAR >= CHARANUM
+		;仲間指定を外しておく
+		CFLAG:CHARID:531 = 0
+	ELSEIF RESTCHAR > 0 && CFLAG:RESTCHAR:530 == 1
+		;おかしい状況
+		;仲間のはずなのにすでに他の誰かの仲間になっている
+		;仲間指定を外しておく
+		CFLAG:CHARID:531 = 0
+	ELSEIF RESTCHAR > 0
+		;リーダー指定を返しているか見る
+		LEADER = CFLAG:RESTCHAR:533
+		IF LEADER == CHARID
+			;リーダーと照合
+			;合っていたら行動終了になる
+			CFLAG:RESTCHAR:530 = 1
+		ELSE
+			;変な指定
+			;バグの元なので初期化して戻す
+			CFLAG:CHARID:531 = 0
+			CFLAG:RESTCHAR:530 = 0
+			CFLAG:RESTCHAR:531 = 0
+			CFLAG:RESTCHAR:532 = 0
+			CFLAG:RESTCHAR:533 = 0
+		ENDIF
+	ENDIF
+	
+	;仲間Bを見る
+	RESTCHAR = CFLAG:CHARID:532
+	IF RESTCHAR >= CHARANUM
+		;仲間指定を外しておく
+		CFLAG:CHARID:532 = 0
+	ELSEIF RESTCHAR > 0 && CFLAG:RESTCHAR:530 == 1
+		;おかしい状況
+		;仲間のはずなのにすでに他の誰かの仲間になっている
+		;仲間指定を外しておく
+		CFLAG:CHARID:532 = 0
+	ELSEIF RESTCHAR > 0
+		;リーダー指定を返しているか見る
+		LEADER = CFLAG:RESTCHAR:533
+		IF LEADER == CHARID
+			;リーダーと照合
+			;合っていたら行動終了になる
+			CFLAG:RESTCHAR:530 = 1
+		ELSE
+			;変な指定
+			;バグの元なので初期化して戻す
+			CFLAG:CHARID:532 = 0
+			CFLAG:RESTCHAR:530 = 0
+			CFLAG:RESTCHAR:531 = 0
+			CFLAG:RESTCHAR:532 = 0
+			CFLAG:RESTCHAR:533 = 0
+		ENDIF
+	ENDIF
+NEXT
+
+;行動終了していないキャラはリーダーとなり、移動等を受け持つ
+
+RETURN 0
+
+;------------------------------------
+@PARTY_JOIN
+#DIM CHARID
+#DIM RESTCHAR
+#DIM FLOOR
+#DIM NEW
+;------------------------------------
+;パーティ加入に関する処理
+;RESTCHAR = 仲間勇者空き確認
+;FLOOR    = 階層
+;NEW      = 新人
+
+;行動完了初期化
+CALL PARTY_UNITE
+
+FOR CHARID, 0, CHARANUM
+	;行動完了を除く
+	SIF CFLAG:CHARID:530 == 1
+		CONTINUE
+	
+	;侵攻中以外を除く
+	SIF CFLAG:CHARID:1 != 2 && CFLAG:CHARID:1 != 12
+		CONTINUE
+
+	;階層
+	FLOOR = CFLAG:CHARID:501
+	
+	;仲間Aを見る
+	RESTCHAR = CFLAG:CHARID:531
+	IF RESTCHAR == 0
+		;仲間Aが空欄の場合
+		;フリーの勇者を勧誘する
+		CALL SEARCH_FREE, FLOOR, CHARID
+		
+		SIF RESULT == 0
+			GOTO FINALIZE
+		
+		NEW = RESULT
+		SIF CFLAG:CHARID:533 == 0 && CHARID == NEW
+			PRINTFORMW %SAVESTR:CHARID%는 파티의 리더가 되었다！
+		
+		;枠に入れて、行動完了と、リーダー記憶と、初期化を行う
+		CFLAG:CHARID:531 = NEW
+		CFLAG:NEW:530 = 1
+		CFLAG:NEW:531 = 0
+		CFLAG:NEW:532 = 0
+		CFLAG:NEW:533 = CHARID
+		SIF CHARID != NEW
+			PRINTFORMW %SAVESTR:NEW%는 %SAVESTR:CHARID%의 파티에 참가했다！
+	ENDIF
+	
+	;仲間Bを見る
+	RESTCHAR = CFLAG:CHARID:532
+	IF RESTCHAR == 0
+		;仲間Bが空欄の場合
+		;フリーの勇者を勧誘する
+		CALL SEARCH_FREE, FLOOR, CHARID
+		
+		SIF RESULT == 0
+			GOTO FINALIZE
+		
+		NEW = RESULT
+		SIF CFLAG:CHARID:533 == 0 && CHARID == NEW
+			PRINTFORMW %SAVESTR:CHARID%는 파티의 리더가 되었다！
+
+		;枠に入れて、行動完了と、リーダー記憶と、初期化を行う
+		CFLAG:CHARID:532 = NEW
+		CFLAG:NEW:530 = 1
+		CFLAG:NEW:531 = 0
+		CFLAG:NEW:532 = 0
+		CFLAG:NEW:533 = CHARID
+		SIF CHARID != NEW
+			PRINTFORMW %SAVESTR:NEW%는 %SAVESTR:CHARID%의 파티에 참가했다！
+	ENDIF
+
+	$FINALIZE
+	;潜入노예のキャラ番号がCHARIDより若い場合、自分をメンバー登録する前に（CFLAG:CHARID:531などが代入されることで）
+	;SEARCH_FREEの条件から外れてしまうために初期化が行われないので改めてここで自分をリーダーとして設定する
+	IF CFLAG:CHARID:533 == 0 && CFLAG:CHARID:531
+		PRINTFORMW %SAVESTR:CHARID%는 파티의 리더가 되었다！
+		CFLAG:CHARID:533 = CHARID
+	ENDIF
+
+NEXT
+
+
+
+
+RETURN 0
+
+;------------------------------------
+@SEARCH_FREE, ARG:0, ARG:1
+#DIM CHARID
+#DIM TYPE
+;------------------------------------
+;階層でフリーの勇者を探す処理
+;行動完了初期化前提
+;FINDCHARA使いたかったけど条件が複雑なので手動
+;ARG:0 = 階層
+
+TYPE =  CFLAG:(ARG:1):1
+
+FOR CHARID, 1, CHARANUM
+	
+	;行動完了（仲間済み）を除く
+	SIF CFLAG:CHARID:530 == 1
+		CONTINUE
+	
+	;同階層以外を除く
+	SIF ARG:0 != CFLAG:CHARID:501
+		CONTINUE
+	
+	;仲間Aを見る
+	SIF CFLAG:CHARID:531 > 0
+		CONTINUE
+	
+	;仲間Bを見る
+	SIF CFLAG:CHARID:532 > 0
+		CONTINUE
+	
+	;そもそも侵攻中？
+	IF CFLAG:CHARID:1 == TYPE
+		;全ての条件をクリアしたのでCHARIDを返す
+		RETURN CHARID
+	ELSEIF CFLAG:CHARID:1 == 3 && CFLAG:CHARID:500 == 4
+		;忍び寄る潜入工作の魔の手
+		;全ての条件をクリアしたのでCHARIDを返す
+		RETURN CHARID
+	ENDIF
+NEXT
+
+;お探しの勇者はいませんでした
+RETURN 0
+
+;------------------------------------
+@PARTY_DEL, ARG:0
+#DIM CHARID
+#DIM RESTCHAR_A
+#DIM RESTCHAR_B
+#DIM LEADER
+;------------------------------------
+;パーティ脱退に関する処理
+;ARG:0    = 抜けるキャラ
+;RESTCHAR_A = 仲間A勇者空き確認 CFLAG:531
+;RESTCHAR_B = 仲間B勇者空き確認 CFLAG:532
+;LEADER   = リーダー			CFLAG:533
+
+;リーダーが抜ける場合
+;CFLAG:531 CFLAG:532 CFLAG:533 をクリア
+;仲間Ａと仲間ＢのCFLAG:533をクリア
+
+;仲間Ａが抜ける場合
+;仲間ＡのCFLAG:533をクリア、リーダーのCFLAG:531をクリア。
+;仲間Ｂが抜ける場合
+;仲間ＢのCFLAG:533をクリア、リーダーのCFLAG:532をクリア。
+
+LEADER = CFLAG:(ARG:0):533
+RESTCHAR_A = CFLAG:LEADER:531
+RESTCHAR_B = CFLAG:LEADER:532
+
+;脱退キャラがリーダーの場合
+IF ARG:0 == LEADER
+	;パーティ解散。リーダーのパーティデータと仲間のパーティデータを初期化し、未行動状態にする
+	CFLAG:LEADER:530 = 0
+	CFLAG:LEADER:531 = 0
+	CFLAG:LEADER:532 = 0
+	CFLAG:LEADER:533 = 0
+	CFLAG:RESTCHAR_A:530 = 0
+	CFLAG:RESTCHAR_A:533 = 0
+	CFLAG:RESTCHAR_B:530 = 0
+	CFLAG:RESTCHAR_B:533 = 0
+;脱退キャラがLEADERの仲間Aだった場合
+ELSEIF ARG:0 == RESTCHAR_A
+	;仲間Aのパーティデータを初期化、リーダーの仲間データを初期化し、未行動状態にする
+	CFLAG:LEADER:531 = 0
+	CFLAG:RESTCHAR_A:530 = 0
+	CFLAG:RESTCHAR_A:533 = 0
+;脱退キャラがLEADERの仲間Bだった場合
+ELSEIF ARG:0 == RESTCHAR_B
+	;仲間Bのパーティデータを初期化、リーダーの仲間データを初期化し、未行動状態にする
+	CFLAG:LEADER:532 = 0
+	CFLAG:RESTCHAR_B:530 = 0
+	CFLAG:RESTCHAR_B:533 = 0
+ELSE
+	;バグ対策、パーティ解散と同じ。
+	;PRINTFORMW バグ出てるかも？
+	CFLAG:LEADER:530 = 0
+	CFLAG:LEADER:531 = 0
+	CFLAG:LEADER:532 = 0
+	CFLAG:LEADER:533 = 0
+	CFLAG:RESTCHAR_A:530 = 0
+	CFLAG:RESTCHAR_A:533 = 0
+	CFLAG:RESTCHAR_B:530 = 0
+	CFLAG:RESTCHAR_B:533 = 0
+ENDIF
+
+RETURN 0
+
+;------------------------------------
+@PARTY_CHAR_DEL, ARG:0
+#DIM CHARID
+#DIM RESTCHAR
+#DIM LEADER
+;------------------------------------
+;キャラ消去時に関する処理
+;ARG:0    = 消えるキャラ
+;RESTCHAR = 仲間勇者控え
+;LEADER   = リーダー
+
+CALL PARTY_DEL, ARG:0
+
+FOR CHARID, 1, CHARANUM
+	
+	RESTCHAR = CFLAG:CHARID:531
+	SIF RESTCHAR > ARG:0
+		CFLAG:CHARID:531 -= 1
+	RESTCHAR = CFLAG:CHARID:532
+	SIF RESTCHAR > ARG:0
+		CFLAG:CHARID:532 -= 1
+	RESTCHAR = CFLAG:CHARID:533
+	SIF RESTCHAR > ARG:0
+		CFLAG:CHARID:533 -= 1
+	
+NEXT
+
+RETURN 0
+
+

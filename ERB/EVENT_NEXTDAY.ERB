@@ -1,0 +1,2371 @@
+﻿;=================================================
+;日付変更時に起きるイベント
+;=================================================
+;eraIM@Sから流用
+
+@EVENT_NEXTDAY
+#DIM NEXTDAY_COUNT
+
+;キャラの素質変更に関わるチェック
+FOR NEXTDAY_COUNT, 1, CHARANUM
+	SIF NEXTDAY_COUNT == 0
+		CONTINUE
+
+	TARGET = NEXTDAY_COUNT
+
+	;不思議の根持ちで精液経験が150以上で【후타나리】に変化
+	IF TALENT:121 == 0 && TALENT:122 == 0
+		SIF TALENT:326 == 1 && EXP:20 >= 150
+			CALL EVENT_FUTA_F
+	ENDIF
+
+	;放尿経験40以上（【유치】があれば15以上）で【오줌싸개】がつく
+	IF TALENT:57 == 0
+		SIF TALENT:132 && EXP:31 >= 15
+			CALL EVENT_MORASI
+		SIF TALENT:132 == 0 && EXP:31 >= 40
+			CALL EVENT_MORASI
+	ENDIF
+	;反発刻印３があり
+	IF MARK:3 == 3
+		;かつ【유치】か【멘탈약함】である時に, 欲望が5かつ従順が5かつマゾっ気が5かつ異常経験が５以上になると幼児退行する
+		IF (TALENT:132 || TALENT:134) && ABL:11 >= 5 && ABL:10 >= 5 && ABL:21 >= 5 && EXP:50 >= 5
+			CALL EVENT_YOUJI
+		;欲望が5かつ従順が5かつマゾっ気が5かつ露出５と異常経験が７以上に加え【오줌싸개】がつくと【유아퇴행】する
+		ELSEIF ABL:11 >= 5 && ABL:10 >= 5 && ABL:21 >= 5 && ABL:17 >= 5 && EXP:50 >= 7 && TALENT:57 == 1
+			CALL EVENT_YOUJI
+		ENDIF
+	ENDIF
+
+	;【파란피부】【悪魔羽】【악마꼬리】【악마안】が全て揃っていると種族が魔族になる. 
+	IF TALENT:314 != 9
+		SIF TALENT:244 == 1  &&  TALENT:245 == 1  &&  TALENT:246 == 1  &&  TALENT:247 == 1
+			CALL EVENT_MAZOKU
+	ENDIF
+
+	;媚薬中毒
+	CALL APHRODISIAC_ADDICT
+	
+NEXT
+
+;排卵誘発剤の効果終了処理
+REPEAT CHARANUM
+	IF CFLAG:COUNT:109
+		PRINTFORML %SAVESTR:COUNT%의 배란유발제의 효과가 끊어진 것 같다
+		DRAWLINE
+		CFLAG:COUNT:109 = 0
+	ENDIF
+REND
+
+;お香の使用回数をクリア
+FLAG:61 = 0
+
+;妊娠発覚
+CALL GET_CHILD_ALL
+
+;出産･育児室関連
+FOR LOCAL, 0, CHARANUM
+	IF TALENT:LOCAL:153 || TALENT:LOCAL:154
+		;出産3日前からは臨月突入で調教不可に
+		IF (CFLAG:LOCAL:110 - 3) == DAY
+			DRAWLINE
+			CALL REACH_FULL_TERM(LOCAL)
+		;出産前日には育児室への訪問を問うイベント発生
+		ELSEIF (CFLAG:LOCAL:110 - 1) == DAY
+			DRAWLINE
+			PRINTFORML %SAVESTR:LOCAL%는 출산이 가까워진 것 같다……
+			DRAWLINE
+		;出産予定日なら出産
+		ELSEIF CFLAG:LOCAL:110 == DAY
+			DRAWLINE
+			CALL CHILD_BIRTH(LOCAL)
+		;出産5日で親離れで調教可能に
+		ELSEIF (CFLAG:LOCAL:110 + 5) == DAY
+			DRAWLINE
+			CALL DEPEARENT(LOCAL)
+		ELSEIF TALENT:LOCAL:154
+			DRAWLINE
+			PRINTFORML %SAVESTR:LOCAL%는 육아중입니다……
+			DRAWLINE
+		ENDIF
+	ENDIF
+NEXT
+
+;着衣設定の場合, 汚れた衣類を洗濯する
+;SIF FLAG:37
+;	CALL WASHING_CLOTH
+
+;処女チェック
+REPEAT CHARANUM
+	SIF COUNT == 0
+		CONTINUE
+	TARGET = COUNT
+
+	;処女なら処女献上チェック
+	IF TALENT:0
+		CALL OFFERVIRGIN_CHECK
+	ENDIF
+
+	COUNT = TARGET
+REND
+
+;性交中毒による夜這いチェック
+CALL NIGHT_STALKING_CHECK
+
+;運営費
+;CALL RUNNING_COST
+
+;指輪と召喚
+CALL CURSE_EQUIP_RING
+
+;5/21
+CALL SUMMON_MONSTER, 0
+
+;施設効果
+CALL DUNGEON_ROOM_DAY
+
+;キャライベント
+REPEAT CHARANUM
+	SIF COUNT == 0
+		CONTINUE
+
+	TARGET = COUNT
+	
+	CALL PILLORY
+	
+	CALL SABBATH
+	
+	CALL NTR_VIDEO
+	
+	CALL EVENT_VIDEO_DAY
+	
+	;カルマ増減
+	;処女の場合カルマ上昇
+	SIF TALENT:0 == 0 && RAND:3 == 0
+		CALL KARMA, TARGET, 1
+	;愛の場合カルマ上昇
+	SIF TALENT:85 == 1 && RAND:3 == 0
+		CALL KARMA, TARGET, 1
+	;侵攻中の場合カルマ上昇
+	SIF CFLAG:1 == 2 && RAND:3 == 0
+		CALL KARMA, TARGET, 1
+	;何は無くともちょっとずつ変動
+	IF RAND:2 == 0
+		CALL KARMA, TARGET, 1
+	ELSE
+		CALL KARMA, TARGET, -1
+	ENDIF
+	
+	;信仰値増加
+	;聖女・신관・巫女は信仰値が上昇
+	IF TALENT:용자가되기이전의생활 == 12 || TALENT:202 || TALENT:206
+		CALL FAITH, TARGET, 1
+	ELSEIF CFLAG:152 < 30
+		;そうでない場合, 中途半端な信仰は減少
+		CALL FAITH, TARGET, -1
+	ELSEIF RAND:4 == 0
+		;ランダムで増えたり
+		CALL FAITH, TARGET, 1
+	ELSEIF RAND:3 == 0
+		;減ったり
+		CALL FAITH, TARGET, -1
+	ENDIF
+	
+	COUNT = TARGET
+REND
+
+;税収
+CALL TAX_GET
+
+RETURN 1
+;=================================================
+;朝に起こるイベント
+;=================================================
+@EVENT_NEWDAY
+#DIM COUNT_TEMP
+;彼女はときどき帰ってくる
+;D = 0
+;CALL SOMETIMES_SHE_COMES_BACK
+;SIF D
+;	RETURN 1
+
+
+A = 0
+REPEAT CHARANUM
+	SIF A >= CHARANUM
+		BREAK
+	TARGET = A
+	;影の寿命
+	IF TALENT:A:292 && CFLAG:A:1 != 11
+		CFLAG:A:820 -= 1
+		PRINTFORML %SAVESTR:A%의 남은 수명은 {CFLAG:A:820}일 입니다
+	ENDIF
+	
+	;影の寿命
+	IF TALENT:A:292 && CFLAG:A:820 <= 0 && CFLAG:A:1 != 11
+		PRINTFORML %SAVESTR:A%는 빛 속으로 사라져 간다……
+		CFLAG:A:9 = 1
+		COUNT_TEMP = COUNT
+		CALL EXECUTION_MINI("NO_LOG")
+		COUNT = COUNT_TEMP
+		A -=1
+	ENDIF
+	A += 1
+REND
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+
+;起床(朝フェラ)→日付確認(誕生日)→朝食(おねしょ)の順番で処理が良いかなーと. 
+
+;朝フェラ
+CALL MORNING_FELLATIO
+
+;誕生日
+;CALL HAPPY_BIRTHDAY
+
+;おねしょ
+CALL ONESHO
+
+;特定日付のイベント
+;CALL PARTICULAR_DATE
+
+;犬の散歩
+CALL DOG_WALK
+
+RETURN 1
+;===========================================================
+;娼館の維持費と노예達の生活費
+;===========================================================
+@RUNNING_COST
+;基礎維持運営費
+A = 500
+
+;日付が30日を超えると$1000追加
+SIF DAY > 31
+	A += 1000
+;日付が50日を超えると$2000追加
+SIF DAY > 51
+	A += 2000
+
+;個室を拡張していると$500追加
+SIF FLAG:48 & 1
+	A += 500
+;ＳＭグッズを購入していると$100追加
+SIF FLAG:48 & 2
+	A += 100
+;護衛を雇用していると$1000追加
+SIF FLAG:48 & 4
+	A += 1000
+;浴室を拡張していると$500追加
+SIF FLAG:48 & 32
+	A += 500
+;多目的ホールを建てていると$1800追加
+SIF FLAG:48 & 8
+	A += 1800
+;マイクを購入していると$100追加
+SIF FLAG:48 & 16
+	A += 100
+;警備員を雇用していると人数*$500追加
+SIF FLAG:48 & 64
+	A += FLAG:40 * 500
+
+;娼館人気が50以上で1割増, 70以上で2割増, 90以上で3割増
+IF EXP:MASTER:91 >= 50
+	TIMES A , 1.10
+ELSEIF EXP:MASTER:91 >= 70
+	TIMES A , 1.20
+ELSEIF EXP:MASTER:91 >= 90
+	TIMES A , 1.30
+ENDIF
+
+;貢献度が100以上で1割減, 200以上で2割減, 400以上で3割減, 700以上で4割減……
+IF EXP:MASTER:90 >= 3000
+	TIMES A , 0.10
+ELSEIF EXP:MASTER:90 >= 2000
+	TIMES A , 0.30
+ELSEIF EXP:MASTER:90 >= 1200
+	TIMES A , 0.50
+ELSEIF EXP:MASTER:90 >= 700
+	TIMES A , 0.60
+ELSEIF EXP:MASTER:90 >= 400
+	TIMES A , 0.70
+ELSEIF EXP:MASTER:90 >= 200
+	TIMES A , 0.80
+ELSEIF EXP:MASTER:90 >= 100
+	TIMES A , 0.90
+ENDIF
+
+;基礎生活費（生活費機能実装までの暫定的な処理）
+;1人あたりEASY/NORMAL/EXTRAは$100, HARDは$200, LUNATICは$300, PHANTASMは$400
+IF FLAG:5 <= 2 || FLAG:5 == 9
+	A += CHARANUM*100
+ELSEIF FLAG:5 == 3
+	A += CHARANUM*200
+ELSEIF FLAG:5 == 4
+	A += CHARANUM*300
+ELSEIF FLAG:5 == 5
+	A += CHARANUM*400
+ENDIF
+;MASTERの分は無料or割引
+A -= 100
+
+;難易度EASYで0.8倍, HARDで1.2～2.5倍, POWERFULで1.4～5.0倍, PHANTASMで2.0～16.0倍
+IF FLAG:5 == 1
+	TIMES A , 0.80
+ELSEIF FLAG:5 == 3
+	IF DAY <= 20
+		TIMES A , 1.20
+	ELSEIF DAY <= 40
+		TIMES A , 1.50
+	ELSEIF DAY <= 60
+		TIMES A , 2.00
+	ELSE
+		TIMES A , 2.50
+	ENDIF
+ELSEIF FLAG:5 == 4
+	IF DAY <= 20
+		TIMES A , 1.40
+	ELSEIF DAY <= 30
+		TIMES A , 1.80
+	ELSEIF DAY <= 40
+		TIMES A , 3.00
+	ELSE
+		TIMES A , 5.00
+	ENDIF
+ELSEIF FLAG:5 == 5
+	IF DAY <= 15
+		TIMES A , 2.00
+	ELSEIF DAY <= 25
+		TIMES A , 4.00
+	ELSEIF DAY <= 35
+		TIMES A , 8.00
+	ELSE
+		TIMES A , 16.00
+	ENDIF
+ENDIF
+
+;EASYは21日目から, NORMAL以上は11日目から維持費＆生活費が発生する
+IF FLAG:5 != 9
+	IF (FLAG:5 == 1 && DAY >= 20) || (FLAG:5 >= 2 && DAY >= 10)
+		PRINTFORML 조교 센터의 유지비와 노예들의 생활비로 ${A} 정도 들었다……
+		DRAWLINE
+		MONEY -= A
+	ENDIF
+ENDIF
+;------------------------------------------------
+;ふたなり化
+;-------------------------------------------------
+@EVENT_FUTA_F
+PRINTFORML （뭐…뭐야 이거？）
+$INPUT_LOOP
+PRINTFORML %조사선택(NAME:TARGET, "는")%【%TALENTNAME:121%】로 합니까？
+PRINTL [0] - 네
+PRINTL [1] - 아니오
+INPUT
+IF RESULT == 0
+	PRINTFORML %조사선택(NAME:TARGET, "는")%【%TALENTNAME:121%】가 되었다. 
+	TALENT:326 = 0
+	TALENT:121 = 1
+	TALENT:1 = 1
+ELSEIF RESULT == 1
+	PRINTFORML %조사선택(NAME:TARGET, "는")%【%TALENTNAME:326%】를 잃었다. 
+	TALENT:326 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+WAIT
+;-------------------------------------------------
+;おもらし
+;-------------------------------------------------
+@EVENT_MORASI
+PRINTFORML 그날 밤, %조사선택(SAVESTR:TARGET, "는")% 오줌을 싸버린 것 같다…
+PRINTFORML %조사선택(NAME:TARGET, "는")%【%TALENTNAME:57%】가 붙었다. 
+TALENT:57 = 1
+
+WAIT
+;-------------------------------------------------
+;유아퇴행
+;-------------------------------------------------
+@EVENT_YOUJI
+PRINTFORML （웅･･･무슨 일이야？）
+PRINTFORMW %SAVESTR:TARGET%의 모습이 이상하다…
+PRINTFORMW %NAME:TARGET%는 혹독한 조교를 견디지 못하고, 【%TALENTNAME:131%】해버린 것 같다…
+TALENT:131 = 1
+
+IF TALENT:20
+	TALENT:20 = 0
+	PRINTFORML 【%TALENTNAME:20%】가 없어졌다
+ENDIF
+IF TALENT:21
+	TALENT:21 = 0
+	PRINTFORML 【%TALENTNAME:21%】가 없어졌다
+ENDIF
+IF TALENT:22
+	TALENT:22 = 0
+	PRINTFORML 【%TALENTNAME:22%】가 없어졌다
+ENDIF
+IF TALENT:24
+	TALENT:24 = 0
+	PRINTFORML 【%TALENTNAME:24%】가 없어졌다
+ENDIF
+IF TALENT:26
+	TALENT:26 = 0
+	PRINTFORML 【%TALENTNAME:26%】가 없어졌다
+ENDIF
+IF TALENT:27
+	TALENT:27 = 0
+	PRINTFORML 【%TALENTNAME:27%】가 없어졌다
+ENDIF
+IF TALENT:30
+	TALENT:30 = 0
+	PRINTFORML 【%TALENTNAME:30%】가 없어졌다
+ENDIF
+IF TALENT:32
+	TALENT:32 = 0
+	PRINTFORML 【%TALENTNAME:32%】가 없어졌다
+ENDIF
+IF TALENT:34
+	TALENT:34 = 0
+	PRINTFORML 【%TALENTNAME:34%】가 없어졌다
+ENDIF
+IF TALENT:35
+	TALENT:35 = 0
+	PRINTFORML 【%TALENTNAME:35%】가 없어졌다
+ENDIF
+IF TALENT:37
+	TALENT:37 = 0
+	PRINTFORML 【%TALENTNAME:37%】가 없어졌다
+ENDIF
+IF TALENT:55
+	TALENT:55 = 0
+	PRINTFORML 【%TALENTNAME:55%】가 없어졌다
+ENDIF
+IF TALENT:93
+	TALENT:93 = 0
+	PRINTFORML 【%TALENTNAME:93%】가 없어졌다
+ENDIF
+IF TALENT:57 == 0
+	TALENT:57 = 1
+	PRINTFORML 【%TALENTNAME:57%】가 붙었다
+ENDIF
+
+MARK:3 = 0
+PRINTFORML 【%MARKNAME:3%】가 0이 됐다
+
+WAIT
+
+;-------------------------------------------------
+;魔族化
+;-------------------------------------------------
+@EVENT_MAZOKU
+SIF TALENT:혼박
+	RETURN
+
+TALENT:원료족 = TALENT:종족
+IF ABL:욕망 >= 3
+	TALENT:서브종족 = TALENT:음란 ? 152 # 132 ;淫乱ならサキュバス, それ以外はナイトガール
+ELSE
+	TALENT:서브종족 = 132 ;임프
+ENDIF
+TALENT:314 = 9
+PRINTFORMW 농후한 마력이 넘쳐 가득찬다………
+PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 개조의 결과, 원래 종족을 그만두고 
+PRINTFORMW 훌륭한 【마족・%ITEMNAME:(TALENT:서브종족)%】이 되었다
+PRINTFORML 
+WAIT
+;-------------------------------------------------
+;彼女はときどき帰ってくる
+;-------------------------------------------------
+@SOMETIMES_SHE_COMES_BACK
+REPEAT CHARANUM
+	;主人公は判定から省く
+	SIF COUNT == 0
+		CONTINUE
+
+	IF BASE:COUNT:0 == 0
+		BASE:COUNT:0 = MAXBASE:COUNT:0 / 10
+		BASE:COUNT:1 = MAXBASE:COUNT:1
+		DRAWLINE
+		PRINTFORML 아침에, %NAME:MASTER%(이)가 눈을 뜨자, 확실히 죽었음이 분명한 %조사선택(SAVESTR:COUNT, "가")% 거기에 있었다
+		PRINTFORML %조사선택(SAVESTR:COUNT, "는")% 아무것도 없었다는듯이, 아침의 인사를 했다
+		PRINTL  
+		WAIT 
+		PRINTFORML %조사선택(SAVESTR:COUNT, "가")% 복귀했습니다……
+		DRAWLINE
+		WAIT
+		;一度に帰ってくるのは一人ずつ
+		D = 1
+		RETURN 1
+	ENDIF
+REND
+
+RETURN 0
+;-------------------------------------------------
+;朝フェラ
+;-------------------------------------------------
+;欲望4以上かつ奉仕精神4以上かつ精液中毒のキャラがいれば翌日朝フェラ
+;複数いる場合はランダムで当番制
+;-------------------------------------------------
+@MORNING_FELLATIO
+;主人がオトコかふたなりでないとダメ
+SIF TALENT:MASTER:122 == 0 && TALENT:MASTER:121 == 0
+	RETURN 0
+
+;朝フェラ係が決まっている場合
+L = 0
+;REPEAT CHARANUM
+;	SIF CFLAG:COUNT:60 & 1
+;		L = COUNT
+;REND
+;IF L
+;	M = L
+;	;瀕死, あるいは死んでしまった
+;	SIF BASE:L:0 <= 500
+;		L = 0
+;	;육아중
+;	SIF TALENT:L:154
+;		L = 0
+;	;臨月
+;	SIF CFLAG:L:110 - 2 <= DAY && TALENT:L:153
+;		L = 0
+;	;봉사안함
+;	SIF TALENT:L:151
+;		L = 0
+;	;반발각인
+;	SIF MARK:L:3 > 0
+;		L = 0
+;	;条件を満たさなくなった
+;	SIF ABL:L:11 < 4 || ABL:L:16 < 4 || ABL:L:32 < 1
+;		L = 0
+;	SIF L
+;		GOTO FELLATIO_START
+;	DRAWLINE
+;	PRINTFORMW 오늘 아침은 어쩐지 쓸쓸하다……
+;	PRINTFORML 매일 아침, 이불안에서 아침 인사를 하던 %SAVESTR:M%(이)가, 
+;	PRINTFORMW 오늘은 모습을 보여주지 않는 것이다
+;	M = 0
+;	RETURN 1
+;ENDIF
+
+F = 0
+REPEAT CHARANUM
+	IF ABL:COUNT:11 >= 4 && ABL:COUNT:16 >= 4 && ABL:COUNT:32 >= 1
+		;死んでたり臨死中だとダメ
+		SIF BASE:COUNT:0 <= 0
+			CONTINUE
+		;瀕死だとダメ
+		SIF BASE:COUNT:0 <= 500
+			CONTINUE
+		;育児中や臨月だとダメ
+		SIF TALENT:COUNT:154 || (CFLAG:COUNT:110 - 2 <= DAY && TALENT:COUNT:153)
+			CONTINUE
+		;魔王部屋にいないとダメ
+		SIF CFLAG:COUNT:1 != 0
+			CONTINUE
+		;未婚か魔王と結婚していないとダメ
+		SIF CFLAG:COUNT:601 != 0 && CFLAG:COUNT:601 != 901
+			CONTINUE
+		;奉仕しないがあるとダメ
+		SIF TALENT:COUNT:151
+			CONTINUE
+		;反発刻印があるとダメ
+		SIF MARK:COUNT:3 > 0
+			CONTINUE
+		A = ABL:COUNT:32
+		;악취둔감
+		SIF TALENT:COUNT:61
+			A += 1
+		;악취민감
+		SIF TALENT:COUNT:62
+			A -= 1
+		;헌신적
+		SIF TALENT:COUNT:63
+			A += 1
+		;음란
+		SIF TALENT:COUNT:76
+			A += 1
+		;애정
+		SIF TALENT:COUNT:85
+			A += 1
+		SIF A > 0
+			F += 1
+	ENDIF
+REND
+
+SIF F == 0
+	RETURN 0
+
+E = RAND:F
+
+REPEAT CHARANUM
+	IF ABL:COUNT:11 >= 4 && ABL:COUNT:16 >= 4 && ABL:COUNT:32 >= 1
+		;死んでたり臨死中だとダメ
+		SIF  BASE:COUNT:0 <= 0
+			CONTINUE
+		;瀕死だとダメ
+		SIF BASE:COUNT:0 <= 500
+			CONTINUE
+		;育児中や臨月だとダメ
+		SIF TALENT:COUNT:154 || (CFLAG:COUNT:110 - 2 <= DAY && TALENT:COUNT:153)
+			CONTINUE
+		;魔王部屋にいないとダメ
+		SIF CFLAG:COUNT:1 != 0
+			CONTINUE
+		;未婚か魔王と結婚していないとダメ
+		SIF CFLAG:COUNT:601 != 0 && CFLAG:COUNT:601 != 901
+			CONTINUE
+		;奉仕しないがあるとダメ
+		SIF TALENT:COUNT:151
+			CONTINUE
+		;反発刻印があるとダメ
+		SIF MARK:COUNT:3 > 0
+			CONTINUE
+		A = ABL:COUNT:32
+		;악취둔감
+		SIF TALENT:COUNT:61
+			A += 1
+		;악취민감
+		SIF TALENT:COUNT:62
+			A -= 1
+		;헌신적
+		SIF TALENT:COUNT:63
+			A += 1
+		;음란
+		SIF TALENT:COUNT:76
+			A += 1
+		;애정
+		SIF TALENT:COUNT:85
+			A += 1
+
+		IF A > 0 && E == 0
+			L = COUNT
+			BREAK
+		ELSEIF A > 0
+			E -= 1
+		ENDIF
+
+	ENDIF
+REND
+
+;セルフフェラ発生を防止
+SIF L == 0
+	RETURN 0
+
+$FELLATIO_START
+DRAWLINE
+PRINTFORMW 아침, %SAVESTR:L%의 펠라에 눈을 떴다. 
+EXP:L:22 += A
+PRINTFORML %EXPNAME:22%＋{A}
+EXP:L:20 += A/2
+PRINTFORML %EXPNAME:20%＋{A/2}
+PRINTFORML %SAVESTR:L%(은)는 정액이 묻어 있는 얼굴로 아침 인사를 해왔다
+PRINTFORML %PALAMNAME:4%의 구슬＋{A*100}
+PRINTFORML %PALAMNAME:6%의 구슬＋{A*30}
+PRINTFORMW %PALAMNAME:7%의 구슬＋{A*40}
+JUEL:L:4 += A*100
+JUEL:L:6 += A*30
+JUEL:L:7 += A*40
+
+;朝フェラ口上
+TARGET = L
+TFLAG:13 = 3
+CALL SELF_KOJO
+
+RETURN 1
+;-------------------------------------------------
+;【오줌싸개】持ちのおねしょチェック
+;TALENT:おもらし癖を持つキャラは放尿回数依存でおねしょ
+;-------------------------------------------------
+@ONESHO
+REPEAT CHARANUM
+	IF TALENT:COUNT:57 ==1 && RAND:12 <= EXP:COUNT:31/10 + TALENT:COUNT:132*2
+		;死んでたらダメ
+		SIF  BASE:COUNT:0 <= 0
+			CONTINUE
+		DRAWLINE
+
+;		※カテーテル等装備判定
+		IF CFLAG:COUNT:42 == 99 || CFLAG:COUNT:42 == 98
+			IF (CFLAG:COUNT:40 & 64) && FLAG:37
+;			※この上の二つのIF文でカテーテルありの装備判定. システム上における変数読み込みかなにかで個数関係で一つに繋げられず, エラーが出る？
+				IF CFLAG:COUNT:1 < 2
+;				※キャラの状態判定. 魔王部屋, または待機中の場合
+					IF ABL:COUNT:10 < 3
+;					※従順度判定(3未満, 6未満, それ以外で判定)
+						PRINTFORML 신비의 요도 카테터를 장착된 그 날 늦은 밤,  자신도 모르게 오줌을 싸고 있는 감각이 엄습함을 느낀  %SAVESTR:COUNT%였지만, 
+						PRINTFORML 불가사의하게도 침대보엔 한방울의 얼룩도 없었지만, 소변을 지린 감각에 대한 부끄러움은 참을 수 없어서 카테터를 장착한 %CALLNAME:MASTER%을 노려보고 있었다．
+;						※恥辱または苦痛の珠を10, 20で増加. 
+						SELECTCASE RAND:4
+							CASE 0
+								PRINTFORML %PALAMNAME:8%の珠＋10
+								JUEL:L:8 += 10
+							CASE 1
+								PRINTFORML %PALAMNAME:8%の珠＋20
+								JUEL:L:8 += 20
+							CASE 2
+								PRINTFORML %PALAMNAME:9%の珠＋10
+								JUEL:L:9 += 10
+							CASE 3
+								PRINTFORML %PALAMNAME:9%の珠＋20
+								JUEL:L:9 += 20
+						ENDSELECT
+					ELSEIF ABL:COUNT:10 < 6
+						PRINTFORML 신비의 요도 카테터의 장착되자 무심코 실금 해버렸다고 느낀 %SAVESTR:COUNT%였으나, 
+						PRINTFORML 어디에도 오줌얼룩이 묻어 있지 않은 걸 보고,  신경 안 쓰기로 했다
+					ELSE
+						PRINTFORML %SAVESTR:COUNT%는 신비의 요도 카테터를 장착 하면서,  밤새 푹 자고 있는 와중에
+						PRINTFORML 오줌을 싸버린 느낌은 있었지만,  방에 구비된 용기에 카테터의 끝이 뻗어 있었기 때문에
+						PRINTFORML 깨끗한 몸 그대로 아침을 맞이 했다．
+;						※恭順の珠などを10くらいの単位で増やす. 
+;						※중독되기쉬움, 도착적, 마조, 노출광, のいずれかを所持している場合はイベント追加. 
+						IF TALENT:COUNT:72 == 1 || TALENT:COUNT:80 == 1 || TALENT:COUNT:88 == 1 || TALENT:COUNT:89 == 1
+							IF TALENT:COUNT:60 == 1
+;							※자위쉬움(TALENT:COUNT:60 == 1), の場合更にイベント追加. 自慰回数と欲情, 恥辱の珠を増加. 
+								PRINTFORML %SAVESTR:COUNT%는 %CALLNAME:MASTER%에 오줌을 싸버린 것과, 
+								PRINTFORML 그 후에 카테터 특유의 근질거리는 장착감에 카테터를 이용한 자위를 한 일을 고백했다．
+								PRINTFORML %EXPNAME:10%＋1
+								PRINTFORMW %PALAMNAME:5%의 구슬＋800
+								PRINTFORMW %PALAMNAME:8%의 구슬＋800
+								EXP:COUNT:10 += 1
+								JUEL:COUNT:5 += 800
+								JUEL:COUNT:8 += 800
+							ELSE
+								PRINTFORML %SAVESTR:COUNT%는 %CALLNAME:MASTER%에게 오줌을 지린 것을  보고하고 수치감으로 인해 얼굴을 븕게 물들였다
+								PRINTFORMW %PALAMNAME:8%의 구슬＋300
+								JUEL:COUNT:8 += 300
+							ENDIF
+						ENDIF
+						SELECTCASE RAND:3
+							CASE 0
+								PRINTFORML %PALAMNAME:4%의 구슬＋10
+								JUEL:L:4 += 10
+							CASE 1
+								PRINTFORML %PALAMNAME:4%의 구슬＋20
+								JUEL:L:4 += 20
+							CASE 2
+								PRINTFORML %PALAMNAME:4%의 구슬＋30
+								JUEL:L:4 += 30
+						ENDSELECT
+					ENDIF
+
+				ENDIF
+			ENDIF
+;			※カテーテル装備の判定式2段目の終わり. 次のELSE以降がカテーテル等装備無しの判定. 
+;		※↓は元々あった記述, カテーテル等装備してない状態
+
+		ELSE
+			PRINTFORML %SAVESTR:COUNT%(은)는, 밤에 오줌을 싸버린 것 같다…
+			EXP:COUNT:31 += 1
+			PRINTFORML %EXPNAME:31%＋1
+			;着衣設定なら衣類が汚れる
+			TARGET = COUNT
+			CALL SOILING_CLOTH_NO1
+			CALL AFTERTRAIN_CLOTH
+			;魔王部屋にいないとダメ
+			SIF CFLAG:COUNT:1 != 0
+				CONTINUE
+			;露出+マゾっ気が8以上ならみんなに報告
+			IF ABL:COUNT:17+ABL:COUNT:21 >= 8
+				PRINTFORM %조사선택(SAVESTR:COUNT, "는")% 밤에 오줌을 싼 것을 
+					IF CHARANUM >= 3
+						PRINTL 아침 식사 자리에서 모두에게 발표했다
+					ELSE
+						PRINTL 보고해왔다
+					ENDIF
+				PRINTFORMW %PALAMNAME:8%의 구슬＋1000
+				JUEL:COUNT:8 += 1000
+			ENDIF
+		ENDIF
+
+	ENDIF
+REND
+
+RETURN 1
+
+
+
+;-------------------------------------------------
+;調教対象からの処女献上
+;-------------------------------------------------
+@OFFERVIRGIN_CHECK
+
+;処女献上が禁止されてたらスキップ
+SIF FLAG:38 <= -1
+	RETURN 0
+;調教対象が空だとダメ
+SIF TARGET < 0
+	RETURN 0
+;奉仕しないが付いてるとダメ
+SIF TALENT:151
+	RETURN 0
+;未熟だとダメ
+SIF TALENT:135
+	RETURN 0
+;非処女やオトコだと発動しない
+SIF TALENT:0 == 0 || TALENT:122
+	RETURN 0
+;主人がオトコかフタナリじゃないとダメ
+SIF TALENT:MASTER:122 == 0 && TALENT:MASTER:121 == 0
+	RETURN 0
+;愛か淫乱で, かつ愛情経験200以上でないとダメ
+SIF (TALENT:85 == 0 && TALENT:76 == 0) || EXP:23 < 200
+	RETURN 0
+;순종+욕망+奉仕精神が10以下だとダメ
+SIF ABL:10+ABL:11+ABL:16 <= 10
+	RETURN 0
+;瀕死だとダメ
+SIF BASE:0 < 500
+	RETURN 0
+;処女膜再生済だとダメ
+SIF CFLAG:71 > 0
+	RETURN 0
+;貞操帯着用時, 鍵を捨てていてなおかつ奴隷がその鍵を発見済でないとダメ
+SIF CFLAG:42 == 79 && (CFLAG:49 == 0 || CFLAG:50 == 0)
+	RETURN 0
+;上の式で一纏めにしたので揃ってコメントアウト
+;;貞操帯の鍵を捨ててないとダメ
+;SIF CFLAG:49 == 0
+;	RETURN 0
+;;貞操帯の鍵を見つけてないとダメ
+;SIF CFLAG:50 == 0
+;	RETURN 0
+;魔王部屋にいないとダメ
+SIF CFLAG:1 != 0
+	RETURN 0
+;前回の調教対象と同じじゃないとダメ
+SIF FLAG:1 != TARGET
+	RETURN 0
+;もうダメだぞ
+SIF FLAG:38 == 0 && CFLAG:62
+	RETURN 0
+
+
+;判定変数
+S = -2
+
+;愛の場合は従順依存
+IF TALENT:85
+	IF ABL:10 == 4
+		S += 1
+	ELSEIF ABL:10 == 5
+		S += 2
+	ELSEIF ABL:10 >= 6
+		S += 3
+	ENDIF
+ENDIF
+
+;淫乱の場合は欲望依存
+IF TALENT:76
+	IF ABL:11 == 4
+		S += 1
+	ELSEIF ABL:11 == 5
+		S += 2
+	ELSEIF ABL:11 >= 6
+		S += 3
+	ENDIF
+ENDIF
+	
+;PALAM:欲情がLV4以上
+;欲望ＬＶ５以上奉仕精神５以上で+1（下と合わせて+2）
+SIF ABL:11 >= 5 && ABL:16 >= 5 && PALAM:5 >= PALAMLV:4
+	S += 1
+;欲望ＬＶ４以上奉仕精神４以上で+1
+SIF ABL:11 >= 4 && ABL:16 >= 4 && PALAM:5 >= PALAMLV:4
+	S += 1
+
+;쾌감에솔직, 쾌감을부정
+IF TALENT:70
+	S += 1
+ELSEIF TALENT:71
+	S -= 2
+ENDIF
+
+;정조관념, 정조관부실
+IF TALENT:30
+	S -= 2
+ELSEIF TALENT:31
+	S += 1
+ENDIF
+
+;호기심
+SIF TALENT:27
+	S += 1
+
+;일선넘지않음
+SIF TALENT:27
+	S -= 2
+
+;判定変数が0以下だったら終了
+SIF S <= 0
+	RETURN 0
+
+;コンドーム使用フラグ
+TEQUIP:35 = 0
+PRINTW ＜처녀헌상＞
+
+PRINTFORML 하루가 끝나, %조사선택(CALLNAME:MASTER, "가")% 잠자리에 들려 하자, 
+PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 깊은 생각에 빠진 모습으로 방에 방문해왔다 
+PRINTFORMW 아무래도, 자신의 처녀를 %CALLNAME:MASTER%에게 바칠 생각인 것 같다……
+IF CFLAG:49
+	PRINTFORML 그 손에는, 이전에 %조사선택(CALLNAME:MASTER, "가")% 버린 
+	PRINTFORMW 자신의 정조대 열쇠를 꽉 쥐고 있었다 
+	PRINTFORMW 아무래도, 오늘밤을 위해 필사적으로 계속 찾아다녔던 것 같다
+ENDIF
+IF TALENT:273
+	PRINTFORML 봉인의 힘은 이제 본인의 욕망에 의해 파탄 직전까지 흔들리고 있었다 
+	PRINTFORMW 그녀의 바람에 의해 그 제약은 너무도 쉽사리 찢어져버릴 것이다
+ENDIF
+$INPUT_LOOP_01
+PRINTFORML %SAVESTR:TARGET%의 처녀를 빼았습니까？
+PRINTL  [0] - 네
+PRINTL  [1] - 아니오
+INPUT
+IF RESULT == 1
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 실망한 얼굴로 돌아갔다
+	ABL:10 -= 2
+	SIF ABL:10 < 0
+		ABL:10 = 0
+	PRINTFORMW %ABLNAME:10%(이)가 {ABL:10}가 되었다
+	IF CFLAG:49
+		PRINTFORMW %SAVESTR:TARGET%의 정조대 열쇠를 되찾았다
+		CFLAG:49 = 0
+		;CFLAG:50も0にしないと再度捨てた時に鍵が直に奴隷の手元へ飛んでしまう
+		CFLAG:50 = 0
+	ENDIF
+	;発生が一人一度のみの場合, ここで発生済フラグを立てる
+	SIF FLAG:38 == 0
+		CFLAG:62 = 1
+	RETURN 0
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP_01
+ENDIF
+IF ITEM:24
+	$INPUT_LOOP_02
+	PRINTFORML 콘돔을 사용합니까?
+	PRINTL  [0] - 사용한다
+	PRINTL  [1] - 생으로 한다
+	INPUT
+	IF RESULT == 0
+		TEQUIP:35 = 1
+		ITEM:24 -= 1
+	ELSEIF RESULT != 1
+		GOTO INPUT_LOOP_02
+	ENDIF
+ENDIF
+
+PRINTFORML %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%에게 처녀를 바쳤다……
+PRINTW 【처녀상실】
+TALENT:0 = 0
+
+;封印も解かれる
+IF TALENT:273
+	PRINTFORMW 동정을 지키는 힘은 부서져, 더 이상 침입을 막을 힘은 조금조차도 없었다
+	TALENT:273 = 0
+ENDIF
+
+;経験・珠の獲得
+PRINTFORML %EXPNAME:0%＋2
+PRINTFORML %EXPNAME:5%＋1
+PRINTFORMW %EXPNAME:20%＋1
+PRINTFORML %PALAMNAME:1%의 구슬＋{S*400}
+PRINTFORML %PALAMNAME:4%의 구슬＋{S*1000}
+PRINTFORML %PALAMNAME:5%의 구슬＋{S*500}
+PRINTFORML %PALAMNAME:6%의 구슬＋{S*1000}
+PRINTFORMW %PALAMNAME:9%의 구슬＋{S*1000}
+EXP:0 += 2
+EXP:5 += 1
+EXP:20 += 1
+JUEL:1 += S*400
+JUEL:4 += S*1000
+JUEL:5 += S*500
+JUEL:6 += S*1000
+JUEL:9 += S*1000
+
+;コンドームを使ってない場合は膣内사정チェック
+;通常のセックスより妊娠リスクがかなり高い（理由：その方が面白いから）
+IF TEQUIP:35 == 0
+	CFLAG:101 = 30
+	CALL IN_VAGINA_M_TO_T
+	CALL CONCEPTION_CHECK_M_TO_T
+ENDIF
+TEQUIP:35 = 0
+
+;親族関係の判定
+PLAYER = MASTER
+TFLAG:14 = 0
+CALL INCEST
+;初体験の相手を記録
+IF CFLAG:15 == 0
+	;初体験の相手を記録（初期値が0のため, +1して記録）
+	CFLAG:15 = NO:PLAYER + 1
+	;初体験が近親상간
+	;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+	IF TFLAG:14 == 1 && TALENT:PLAYER:122
+		CFLAG:15 = 300
+	ELSEIF TFLAG:14 == 1 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 301
+	ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122
+		CFLAG:15 = 304
+	ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 305
+	ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122
+		CFLAG:15 = 306
+	ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 307
+	ELSEIF TFLAG:14 == 5 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 308
+	ELSEIF TFLAG:14 == 6 && TALENT:PLAYER:122
+		CFLAG:15 = 309
+	ENDIF
+ENDIF
+
+;マスターが童貞なら童貞喪失
+IF TALENT:MASTER:1
+	TALENT:MASTER:1 = 0
+	IF CFLAG:MASTER:15 == 0
+		CFLAG:MASTER:15 = NO:TARGET + 1
+		CSTR:MASTER:3 = %SAVESTR:TARGET%
+		;初体験が近親상간
+		;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+		IF TFLAG:14 == 2 && TALENT:122
+			CFLAG:MASTER:15 = 300
+		ELSEIF TFLAG:14 == 2 && TALENT:122 == 0
+			CFLAG:MASTER:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:122
+			CFLAG:MASTER:15 = 306
+		ELSEIF TFLAG:14 == 3 && TALENT:122 == 0
+			CFLAG:MASTER:15 = 307
+		ELSEIF TFLAG:14 == 4 && TALENT:122
+			CFLAG:MASTER:15 = 304
+		ELSEIF TFLAG:14 == 4 && TALENT:122 == 0
+			CFLAG:MASTER:15 = 305
+		ELSEIF TFLAG:14 == 5 && TALENT:122
+			CFLAG:MASTER:15 = 309
+		ELSEIF TFLAG:14 == 6 && TALENT:122 == 0
+			CFLAG:MASTER:15 = 308
+		ENDIF
+	ENDIF
+ENDIF
+TFLAG:14 = 0
+
+IF CFLAG:49
+	PRINTFORMW %SAVESTR:TARGET%의 정조대 열쇠를 되찾았다
+	CFLAG:49 = 0
+	CFLAG:40 -= 64
+	;断った時と同様の理由でCFLAG:50と, このままだと外れたはずの貞操帯が衣装変更時にまた付いてしまうので
+	;CFLAG:42（特別コスチューム）も元に戻す
+	CFLAG:50 = 0
+	CFLAG:42 = 0
+ENDIF
+
+DRAWLINE
+
+RETURN 1
+;-------------------------------------------------
+;調教対象からの夜這い
+;-------------------------------------------------
+;欲望4以上かつ性交中毒のキャラがいれば夜這い
+;複数いる場合はランダムで当番制
+;-------------------------------------------------
+@NIGHT_STALKING_CHECK
+#DIM NIGHT_COUNT
+#DIM OK_FLAG,2
+#DIM NIGHT_TARGET
+#DIM PLAY
+;主人がオトコかふたなりでないとダメ
+SIF TALENT:MASTER:122 == 0 && TALENT:MASTER:121 == 0
+	RETURN 0
+
+LOCAL:1 = 0
+FOR NIGHT_COUNT, 1, CHARANUM
+	IF ABL:NIGHT_COUNT:11 >= 4 && ABL:NIGHT_COUNT:30 >= 1
+		;死んでたり臨死中だとダメ
+		SIF BASE:NIGHT_COUNT:0 <= 0
+			CONTINUE
+		;瀕死だとダメ
+		SIF BASE:NIGHT_COUNT:0 <= 500
+			CONTINUE
+		;育児中や臨月だとダメ
+		SIF TALENT:NIGHT_COUNT:154 || (CFLAG:NIGHT_COUNT:110 - 2 <= DAY && TALENT:NIGHT_COUNT:153)
+			CONTINUE
+		;魔王部屋にいないとダメ
+		SIF CFLAG:NIGHT_COUNT:1 != 0
+			CONTINUE
+		;未婚か魔王と結婚していないとダメ
+		SIF CFLAG:NIGHT_COUNT:601 != 0 && CFLAG:NIGHT_COUNT:601 != 901
+			CONTINUE
+		;奉仕しないがあるとダメ
+		SIF TALENT:NIGHT_COUNT:151
+			CONTINUE
+		;反発刻印があるとダメ
+		SIF MARK:NIGHT_COUNT:3 > 0
+			CONTINUE
+		;処女の場合は従順+욕망+Ａ감각+14以下だとダメ
+		SIF TALENT:NIGHT_COUNT:0 && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 14
+			CONTINUE
+		;オトコでない場合は「순종+욕망+V感覚+12以下」かつ「순종+욕망+Ａ감각+14以下」だとダメ
+		SIF TALENT:NIGHT_COUNT:122 == 0 && (ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:2 <= 12 && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 14)
+			CONTINUE
+		;オトコの場合は従順+욕망+Ａ감각+12以下だとダメ
+		SIF TALENT:NIGHT_COUNT:122 && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 12
+			CONTINUE
+		;貞操帯の場合は従順+욕망+Ａ감각+14以下だとダメ
+		SIF CFLAG:NIGHT_COUNT:42 == 79 && (CFLAG:NIGHT_COUNT:40 & 64)  && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 14
+			CONTINUE
+
+		;성교중독
+		OK_FLAG = ABL:NIGHT_COUNT:30
+
+		;해방
+		SIF TALENT:NIGHT_COUNT:33
+			OK_FLAG += 1
+		;자제심
+		SIF TALENT:NIGHT_COUNT:20
+			OK_FLAG -= 2
+		;쾌감에솔직
+		SIF TALENT:NIGHT_COUNT:70
+			OK_FLAG += 1
+		;쾌감을부정
+		SIF TALENT:NIGHT_COUNT:71
+			OK_FLAG -= 1
+		;섹스광
+		SIF TALENT:NIGHT_COUNT:75 && TALENT:NIGHT_COUNT:0 == 0 && ABL:NIGHT_COUNT:2 >= ABL:NIGHT_COUNT:3
+			OK_FLAG += 1
+		;항문광
+		SIF TALENT:NIGHT_COUNT:77 && (TALENT:NIGHT_COUNT:0 || ABL:NIGHT_COUNT:3 > ABL:NIGHT_COUNT:2)
+			OK_FLAG += 1
+		;음란
+		SIF TALENT:NIGHT_COUNT:76 && TALENT:NIGHT_COUNT:0
+			OK_FLAG += 1
+		SIF OK_FLAG > 0
+			LOCAL:1 += 1
+	ENDIF
+NEXT
+
+SIF LOCAL:1 == 0
+	RETURN 0
+
+LOCAL:2 = RAND:(LOCAL:1)
+
+FOR NIGHT_COUNT, 1, CHARANUM
+	IF ABL:NIGHT_COUNT:11 >= 4 && ABL:NIGHT_COUNT:30 >= 1
+		;死んでたり臨死中だとダメ
+		SIF BASE:NIGHT_COUNT:0 <= 0
+			CONTINUE
+		;瀕死だとダメ
+		SIF BASE:NIGHT_COUNT:0 <= 500
+			CONTINUE
+		;育児中や臨月だとダメ
+		SIF TALENT:NIGHT_COUNT:154 || (CFLAG:NIGHT_COUNT:110 - 2 <= DAY && TALENT:NIGHT_COUNT:153)
+			CONTINUE
+		;魔王部屋にいないとダメ
+		SIF CFLAG:NIGHT_COUNT:1 != 0
+			CONTINUE
+		;未婚か魔王と結婚していないとダメ
+		SIF CFLAG:NIGHT_COUNT:601 != 0 && CFLAG:NIGHT_COUNT:601 != 901
+			CONTINUE
+		;奉仕しないがあるとダメ
+		SIF TALENT:NIGHT_COUNT:151
+			CONTINUE
+		;反発刻印があるとダメ
+		SIF MARK:NIGHT_COUNT:3 > 0
+			CONTINUE
+		;処女の場合は従順+욕망+Ａ감각+14以下だとダメ
+		SIF TALENT:NIGHT_COUNT:0 && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 14
+			CONTINUE
+		;オトコでない場合は「순종+욕망+V感覚+12以下」かつ「순종+욕망+Ａ감각+14以下」だとダメ
+		SIF TALENT:NIGHT_COUNT:122 == 0 && (ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:2 <= 12 && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 14)
+			CONTINUE
+		;オトコの場合は従順+욕망+Ａ감각+12以下だとダメ
+		SIF TALENT:NIGHT_COUNT:122 && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 12
+			CONTINUE
+		;貞操帯の場合は従順+욕망+Ａ감각+14以下だとダメ
+		SIF CFLAG:NIGHT_COUNT:42 == 79 && (CFLAG:NIGHT_COUNT:40 & 64)  && ABL:NIGHT_COUNT:10+ABL:NIGHT_COUNT:11+ABL:NIGHT_COUNT:3 <= 14
+			CONTINUE
+
+		;성교중독
+		OK_FLAG = ABL:NIGHT_COUNT:30
+		;해방
+		SIF TALENT:NIGHT_COUNT:33
+			OK_FLAG += 1
+		;자제심
+		SIF TALENT:NIGHT_COUNT:20
+			OK_FLAG -= 2
+		;쾌감에솔직
+		SIF TALENT:NIGHT_COUNT:70
+			OK_FLAG += 1
+		;쾌감을부정
+		SIF TALENT:NIGHT_COUNT:71
+			OK_FLAG -= 1
+		;섹스광
+		SIF TALENT:NIGHT_COUNT:75 && TALENT:NIGHT_COUNT:0 == 0 && ABL:NIGHT_COUNT:2 >= ABL:NIGHT_COUNT:3
+			OK_FLAG += 1
+		;항문광
+		SIF TALENT:NIGHT_COUNT:77 && (TALENT:NIGHT_COUNT:0 || ABL:NIGHT_COUNT:3 > ABL:NIGHT_COUNT:2)
+			OK_FLAG += 1
+		;음란
+		SIF TALENT:NIGHT_COUNT:76 && TALENT:NIGHT_COUNT:0
+			OK_FLAG += 1
+
+		IF OK_FLAG > 0 && LOCAL:2 == 0
+			NIGHT_TARGET = NIGHT_COUNT
+			BREAK
+		ELSEIF OK_FLAG > 0
+			LOCAL:2 -= 1
+		ENDIF
+
+	ENDIF
+NEXT
+
+PRINTFORML 조교가 끝나고 %CALLNAME:MASTER%은(는) 잠자리에 들려고 했을 때, %SAVESTR:NIGHT_TARGET%가 돌연 방에 찾아왔다
+WAIT
+
+;夜這い口上
+TARGET = NIGHT_TARGET
+TFLAG:13 = 5
+CALL SELF_KOJO
+
+;Ｖ使用フラグ
+OK_FLAG:1 = 1
+;オトコだとダメ
+SIF TALENT:NIGHT_TARGET:122
+	OK_FLAG:1 = 0
+;処女だとダメ
+SIF TALENT:NIGHT_TARGET:0
+	OK_FLAG:1 = 0
+;貞操帯だとダメ
+SIF CFLAG:NIGHT_TARGET:42 == 79 && (CFLAG:NIGHT_TARGET:40 & 64)
+	OK_FLAG:1 = 0
+;貞操封印だとダメ
+SIF TALENT:NIGHT_TARGET:273
+	OK_FLAG:1 = 0
+;Ａ感覚がＶより高いとダメ
+SIF ABL:NIGHT_TARGET:2 < ABL:NIGHT_TARGET:3
+	OK_FLAG:1 = 0
+
+IF OK_FLAG:1 == 1
+	;セックス回数
+	PLAY = ABL:NIGHT_TARGET:30
+	;V感覚
+	IF ABL:NIGHT_TARGET:2 <= 4
+		PLAY += 1
+	ELSEIF ABL:NIGHT_TARGET:2 == 5
+		PLAY += 2
+	ELSEIF ABL:NIGHT_TARGET:2 >= 6
+		PLAY += 4
+	ENDIF
+	PRINTFORML %CALLNAME:MASTER%에게 안기고 싶어서, 자궁이 욱신거려서 어쩔 수 없어 하는 것 같다……
+	PRINTFORML {PLAY}회 몸을 뒤섞은 뒤에,  두사람은 연결된 채 끌어안고 깊은 잠에 떨어졌다
+	PRINTFORML %EXPNAME:0%＋{PLAY}
+	PRINTFORML %EXPNAME:5%＋{PLAY}
+	EXP:NIGHT_TARGET:0 += PLAY
+	EXP:NIGHT_TARGET:5 += PLAY
+	PRINTFORML %PALAMNAME:1%의 구슬＋{PLAY*400}
+	PRINTFORML %PALAMNAME:4%의 구슬＋{PLAY*250}
+	PRINTFORMW %PALAMNAME:5%의 구슬＋{PLAY*250}
+	JUEL:NIGHT_TARGET:1 += PLAY*400
+	JUEL:NIGHT_TARGET:4 += PLAY*250
+	JUEL:NIGHT_TARGET:5 += PLAY*250
+ELSE
+	;애널セックス回数
+	PLAY = ABL:NIGHT_TARGET:30
+	;Ａ감각
+	IF ABL:NIGHT_TARGET:3 <= 4
+		PLAY += 1
+	ELSEIF ABL:NIGHT_TARGET:3 == 5
+		PLAY += 2
+	ELSEIF ABL:NIGHT_TARGET:3 >= 6
+		PLAY += 4
+	ENDIF
+	PRINTFORML %CALLNAME:MASTER%에게 안기고 싶어서, 애널이 쑤셔 어쩔 수 없어 하는 것 같다……
+	PRINTFORML {PLAY}회 몸을 뒤섞은 뒤에,  두사람은 연결된 채 끌어안고 깊은 잠에 떨어졌다
+	PRINTFORML %EXPNAME:1%＋{PLAY}
+	PRINTFORML %EXPNAME:5%＋{PLAY}
+	EXP:NIGHT_TARGET:1 += PLAY
+	EXP:NIGHT_TARGET:5 += PLAY
+	PRINTFORML %PALAMNAME:2%의 구슬＋{PLAY*400}
+	PRINTFORML %PALAMNAME:4%의 구슬＋{PLAY*250}
+	PRINTFORMW %PALAMNAME:5%의 구슬＋{PLAY*250}
+	JUEL:NIGHT_TARGET:2 += PLAY*400
+	JUEL:NIGHT_TARGET:4 += PLAY*250
+	JUEL:NIGHT_TARGET:5 += PLAY*250
+ENDIF
+
+DRAWLINE
+
+RETURN 1
+
+
+;--------------------------------------
+@DOG_WALK
+#DIM DOG_WALKING
+#DIM PLAY
+#DIM OPEN
+#DIM NO_SEX
+#DIM SAVE_TARGET
+;--------------------------------------
+;野良犬を散歩させる
+
+;いぬを持ってないとダメ
+SIF ITEM:22 == 0 && NOITEM == 0
+	RETURN 0
+
+SAVE_TARGET = TARGET
+
+;散歩するひと選択
+DOG_WALKING = CHARANUM -1
+;노예がいなければあなたが散歩
+IF DOG_WALKING == 0
+	PRINTL  
+	PRINTFORMW %SAVESTR:DOG_WALKING%는 들개와 산책하고 왔다
+	RETURN 0
+ENDIF
+DOG_WALKING = RAND:DOG_WALKING
+
+;あなた以外で함락してない노예で調教可能でなければ, あなたが散歩
+IF DOG_WALKING != 0 && CFLAG:DOG_WALKING:0 == 0 && CFLAG:DOG_WALKING:1 != 0
+	DOG_WALKING = 0
+;あなた以外で함락してる노예でも調教可能でなければ, あなたが散歩
+ELSEIF DOG_WALKING != 0 && CFLAG:DOG_WALKING:1 != 0
+	DOG_WALKING = 0
+;あなた以外で함락してない노예なら, あなたが散歩
+ELSEIF DOG_WALKING != 0 && CFLAG:DOG_WALKING:0 == 0
+	DOG_WALKING = 0
+ENDIF
+PRINTL  
+
+TARGET = DOG_WALKING
+
+;興奮度
+PLAY = 0
+;露出要素（若干の抵抗あり）
+OPEN = -2
+;V禁止
+NO_SEX = 0
+
+;수간중독
+PLAY += ABL:DOG_WALKING:39
+;암캐
+SIF TALENT:DOG_WALKING:136
+	PLAY += 2
+
+;노출벽
+OPEN += ABL:DOG_WALKING:17
+;노출광
+SIF TALENT:DOG_WALKING:89
+	OPEN += 1
+;눈에띄고싶어함
+SIF TALENT:DOG_WALKING:28
+	OPEN += 1
+
+;ボーナス素質
+;동물귀
+SIF TALENT:DOG_WALKING:124 && PLAY > 0
+	PLAY += 1
+;かわいい動物が好き
+SIF TALENT:DOG_WALKING:317 == 12 && PLAY > 0
+	PLAY += 1
+
+IF TALENT:DOG_WALKING:0
+	;처녀
+	NO_SEX = 1
+ELSEIF TALENT:DOG_WALKING:273
+	;처녀봉인
+	NO_SEX = 1
+ELSEIF CFLAG:DOG_WALKING:42 == 79 && (CFLAG:DOG_WALKING:40 & 64) && FLAG:37
+	;貞操帯
+	NO_SEX = 1
+ENDIF
+
+;服
+CALL PRINT_CLOTHTYPE
+PRINTFORM 인 %SAVESTR:DOG_WALKING%는
+SIF PLAY > 0
+	PRINT 마치 자신이 산책 되는 것 같이 네발로 엎드려 걸으며 목걸이를 개목걸이에 연결하고, 
+PRINTL 들개와 함께 산책을 했다
+
+
+IF PLAY > 0 && NO_SEX == 0
+	;交尾
+	PRINTFORML %SAVESTR:DOG_WALKING%는 산책중애 발정해 참을 수 없게 되어 
+	SIF OPEN > 0
+		PRINTFORM 행인들에게 치태를 과시하며
+	PRINTFORML 들개와 교미하고 온 것 같다
+	PRINTFORML %EXPNAME:56%+1
+	PRINTFORML %PALAMNAME:0%의 구슬+{5*PLAY}
+	PRINTFORML %PALAMNAME:5%의 구슬+{5*PLAY}
+	EXP:DOG_WALKING:56 += 1
+	JUEL:DOG_WALKING:0 += 5*PLAY
+	JUEL:DOG_WALKING:5 += 5*PLAY
+	
+	PRINTFORML %EXPNAME:5%+1
+	PRINTFORML %EXPNAME:0%+1
+	PRINTFORML %PALAMNAME:1%의 구슬+{4*PLAY}
+	JUEL:DOG_WALKING:1 += 4*PLAY
+	EXP:DOG_WALKING:5 += 1
+	EXP:DOG_WALKING:0 += 1
+ELSEIF PLAY > 0 && NO_SEX == 1
+	;交尾無し
+	PRINTFORML %SAVESTR:DOG_WALKING%는 산책중애 발정해 참을 수 없게 되어 
+	SIF OPEN > 0
+		PRINTFORM 행인들에게 치태를 과시하면서
+	PRINTFORML 들개에게 펠라를 해준 모양이다
+	PRINTFORML %EXPNAME:56%+1
+	PRINTFORML %PALAMNAME:5%의 구슬+{5*PLAY}
+	EXP:DOG_WALKING:56 += 1
+	JUEL:DOG_WALKING:5 += 5*PLAY
+	
+	;펠라경험, 정액경험
+	PRINTFORML %EXPNAME:22%+1
+	PRINTFORML %EXPNAME:20%+1
+	EXP:DOG_WALKING:22 += 1
+	EXP:DOG_WALKING:20 += 1
+	
+ENDIF
+
+IF PLAY > 0 && OPEN > 0
+	;露出した場合恥情の珠
+	PRINTFORMW %PALAMNAME:8%의 구슬+{5*PLAY}
+	JUEL:DOG_WALKING:8 += 5*PLAY
+ELSE
+	WAIT
+ENDIF
+
+TARGET = SAVE_TARGET
+
+RETURN 1
+
+;----------------------------------
+@PILLORY
+#DIM PILLORY_USER
+#DIM COUNT_F
+#DIM COUNT_A
+#DIM COUNT_B
+#DIM COUNT_V
+#DIM COUNT_S
+#DIM COUNT_Z
+;----------------------------------
+;프라이드높음, 보수적, 정조관념, 高貴に特効
+;晒し台状態以外は除外
+SIF CFLAG:1 != 8
+	RETURN 0
+
+;各種回数 Fフェラ A애널 B胸 V性器 S精液 Z獣姦
+COUNT_F = 0
+COUNT_A = 0
+COUNT_B = 0
+COUNT_V = 0
+COUNT_S = 0
+COUNT_Z = 0
+
+;使用者の代表
+PILLORY_USER = RAND:5
+
+DRAWLINE
+PRINTFORM 노출대 형벌：%SAVESTR:TARGET%
+IF CFLAG:110 == DAY
+	PRINT （출산）
+ELSEIF CFLAG:110 - 2 <= DAY && TALENT:153
+	PRINT （임월）
+ELSEIF TALENT:153
+	PRINT （임신중）
+ELSEIF TALENT:0 
+	PRINT （처녀）
+ELSEIF TALENT:273
+	PRINT （앞구멍봉인）
+ENDIF
+PRINTL
+DRAWLINE
+PRINT 노출대에 고정된 
+CALL PRINT_CLOTHTYPE
+PRINTFORML 인 %SAVESTR:TARGET%에게 많은 남자들이 몰려 들고 있었다
+PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+IF CFLAG:COUNT:110 - 2 <= DAY && TALENT:COUNT:153
+	PRINT 부풀어 오른 배를 감싸고서, 
+ELSEIF CFLAG:661 +CFLAG:662  == 0
+	PRINT 불안으로 떨면서, 
+ELSEIF CFLAG:661+CFLAG:662 < 20
+	PRINT 몇번씩 안에 사정되는 불쾌감에 시달리면서, 
+ELSEIF CFLAG:661+CFLAG:662 < 50
+	PRINT 자지도 못하고 눈 아래를 기미로 물들이고서, 
+ELSEIF CFLAG:661+CFLAG:662 <100
+	PRINT 끝없는 능욕에 숨이 끊어질듯한 상태로, 
+ELSE
+	PRINT 온몸이 정액 투성이인 몸으로, 
+ENDIF
+;고귀함
+IF TALENT:163
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTL 이를 악물며 가만히 견디고 있다……
+		CASE 1
+			PRINTL 소리를 내지 않고 견디고 있다……
+		CASE 2
+			PRINTL 울음을 억눌러 참고 있다……
+	ENDSELECT
+;프라이드높음, 보수적, 정조관념
+ELSEIF TALENT:15 || TALENT:24 || TALENT:30
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTL 몸을 비비꼬지도 못하고 범해지고 있다……
+		CASE 1
+			PRINTL 능욕자를 노려보며 견디고 있다……
+		CASE 2
+			PRINTL 원망의 말을 중얼거리고 있다……
+	ENDSELECT
+ELSE
+	PRINTL 치욕을 견디고 있다……
+ENDIF
+
+PRINTL
+;落書きスタート
+;臨月
+IF CFLAG:110 - 2 <= DAY && TALENT:153
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM 『음란 보테배 변기인 %SAVESTR:TARGET%쨩』
+		CASE 1
+			PRINTFORM 『임월이지만 자지의 맛을 잊을 수 없어요～』
+		CASE 2
+			PRINTFORM 『아～앙, 이런 창녀같은 마마는 싫어～』
+	ENDSELECT
+ELSEIF TALENT:153
+;임신
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM 『축! 회임! 』
+		CASE 1
+			PRINTFORM 『멋대로 임신하는 얌체인 %SAVESTR:TARGET%쨩』
+		CASE 2
+			PRINTFORM 『부친 불명의 아이를 임신했습니다』
+	ENDSELECT
+ELSE
+	SELECTCASE RAND:6
+		CASE 0
+			PRINTFORM 『정액 변기인 %SAVESTR:TARGET%쨩입니다』
+		CASE 1
+			PRINTFORM 『%SAVESTR:TARGET%에게 벌을 내려주세요』
+		CASE 2
+			PRINTFORM 『자유롭게 사용해 주세요』
+		CASE 3
+			PRINTFORM 『성 처리용 변기』
+		CASE 4
+			PRINTFORM 『남자 화장실』
+		CASE 5
+			PRINTFORM 『자지를 정말 좋아하는 음탕한 걸레입니다』
+	ENDSELECT
+ENDIF
+
+REPEAT 10
+	;職業による分岐
+	LOCAL = COUNT + 200
+	SIF TALENT:LOCAL > 0
+		LOCALS = %TALENTNAME:LOCAL%
+	;これ以降%locals:0%で職業名が出せます
+	IF TALENT:LOCAL > 0 && (TALENT:0 || TALENT:273)
+		;性器使えない
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORM 『%조사선택(SAVESTR:TARGET, "는")% 항문으로 느끼는 변태 %TALENTNAME:LOCAL%』
+			CASE 1
+				PRINTFORM 『%TALENTNAME:LOCAL% 용자 %조사선택(SAVESTR:TARGET, "는")% 여러분의 애널 전용 섹스 와이프입니다』
+			CASE 2
+				PRINTFORM 『앞구멍은 마왕 전용』
+		ENDSELECT
+	ELSEIF TALENT:LOCAL > 0
+		;性器使える
+		SELECTCASE RAND:3
+			CASE 0
+				PRINTFORM 『보지로 사과합니다』
+			CASE 1
+				PRINTFORM 『%TALENTNAME:LOCAL% 용사 %조사선택(SAVESTR:TARGET, "는")% 질내사정만 받아들입니다』
+			CASE 2
+				PRINTFORM 『씻지 않은 자지 삽입구』
+		ENDSELECT
+	ENDIF
+REND
+
+IF TALENT:0
+	PRINTFORM 『처녀』
+	COUNT_A += RAND:20 + 1
+	COUNT_F += RAND:10 + 1
+	COUNT_S += COUNT_A + COUNT_F + RAND:10
+ELSEIF TALENT:273
+	PRINTFORM 『똥구멍전용』
+	COUNT_A += RAND:20 + 1
+	COUNT_F += RAND:10 + 1
+	COUNT_S += COUNT_A + COUNT_F + RAND:10
+ELSEIF ABL:39 >= 1 && RAND:2 == 0
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM 『누구의 자지라도 OK! 』
+		CASE 1
+			PRINTFORM 『동물 너무 좋아! 』
+		CASE 2
+			PRINTFORM 『수간 매니아』
+	ENDSELECT
+	COUNT_F += RAND:10 + 1
+	COUNT_V += RAND:10 + 1
+	;貞操帯
+	SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+		COUNT_V = 0
+	COUNT_A += RAND:10 + 1
+	COUNT_S += COUNT_F + COUNT_A + COUNT_V + RAND:10
+	COUNT_Z += COUNT_S
+ELSEIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	;貞操帯
+	PRINTFORM 『보지 사용 금지 중』
+	COUNT_A += RAND:20 + 1
+	COUNT_F += RAND:10 + 1
+	COUNT_S += COUNT_A + COUNT_F + RAND:10
+ELSE
+	SELECTCASE RAND:4
+		CASE 0
+			PRINTFORM 『뭐든지 들어갈 수 있어요』
+		CASE 1
+			PRINTFORM 『정액 쓰레기통』
+		CASE 2
+			PRINTFORM 『음란』
+		CASE 3
+			PRINTFORM 『질내사정 기록 갱신中』
+	ENDSELECT
+	COUNT_F += RAND:10 + 1
+	COUNT_V += RAND:10 + 1
+	COUNT_A += RAND:10 + 1
+	COUNT_S += COUNT_F + COUNT_A + COUNT_V + RAND:10
+ENDIF
+
+IF TALENT:15
+	;프라이드높음
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『변기이지만 프라이드는 높거든! 』
+		CASE 1
+			PRINT 『
+			IF TALENT:314 == 0
+				PRINT 인간
+			ELSEIF TALENT:314 == 1
+				PRINT 엘프
+			ELSEIF TALENT:314 == 2
+				PRINT 인랑
+			ELSEIF TALENT:314 == 3
+				PRINT 흡혈귀
+			ELSEIF TALENT:314 == 4
+				PRINT 듀라한
+			ELSEIF TALENT:314 == 5
+				PRINT 드래곤
+			ELSEIF TALENT:314 == 6
+				PRINT 천사
+			ELSEIF TALENT:314 == 7
+				PRINT 다크엘프
+			ELSEIF TALENT:314 == 8
+				PRINT 타천사
+			ELSEIF TALENT:314 == 9
+				PRINT 마족
+			ELSEIF TALENT:314 == 10
+				PRINT 호빗
+			ELSEIF TALENT:314 == 11
+				PRINT 드워프
+			ENDIF
+			PRINT 의 수치』
+		CASE 2
+			PRINT 『고지식쨩』
+	ENDSELECT
+ENDIF
+
+IF TALENT:22 || TALENT:21
+	;감정부족・무관심
+	PRINT 『목석녀』
+ENDIF
+
+
+IF TALENT:24 || TALENT:30 || TALENT:163
+	;보수적・정조관념・고귀함
+	SELECTCASE RAND:5
+		CASE 0
+			PRINT 『○○가문의 아가씨야』
+		CASE 1
+			IF TALENT:0 || TALENT:273
+				PRINT 『명문가 ○○의 애널을 드세요』
+			ELSE
+				PRINT 『명문가 ○○의 보지를 드세요』
+			ENDIF
+		CASE 2
+			PRINT 『세상물정 모르는 저를 여러분의 자지로 교육해 주세요』
+		CASE 3
+			PRINT 『귀한 아가씨』 
+		CASE 3
+			PRINT 『영애』
+	ENDSELECT
+ENDIF
+IF TALENT:42
+	;젖기쉬움
+	PRINT 『금방 젖는 음란녀』
+ENDIF
+
+IF TALENT:61
+	;악취둔감・악취민감
+	SELECTCASE RAND:5
+		CASE 0
+			PRINT 『좋아하는 것→더러운 자지』
+		CASE 1
+			PRINT 『여러분의 엉덩이를 핥게 해주세요』
+		CASE 2
+			PRINT 『더러운 자지 우선』
+		CASE 3
+			PRINT 『더러운 자지 대환영』
+		CASE 4
+			PRINT 『좆밥도, 오줌도 잔뜩 뿌려주세요』
+	ENDSELECT
+ENDIF
+
+IF TALENT:70 || TALENT:73
+	;쾌감에솔직・즉각함락
+	PRINT 『BITCH』
+ENDIF
+
+IF TALENT:82
+	;남성혐오
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM 『변태 레즈비언』
+		CASE 1
+			PRINT 『여자 아이와 섹스하고 싶어요』
+		CASE 2
+			PRINT 『남자의 자지는 거절』
+	ENDSELECT
+ENDIF
+
+IF TALENT:100
+	;작은체형
+	SELECTCASE RAND:3
+		CASE 0
+			PRINTFORM 『%SAVESTR:TARGET%○○세』
+		CASE 1
+			PRINT 『←마조 꼬마』
+		CASE 2
+			PRINT 『아이 보지』
+	ENDSELECT
+ENDIF
+
+IF TALENT:109 || TALENT:116
+	;빈유・절벽
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『귀여운 절벽이어서 미안합니다』 
+		CASE 1
+			PRINT 『모두 주물러 크게 해주세요』
+		CASE 2
+			PRINT 『허리라고 생각했는데 가슴이네』
+	ENDSELECT
+ENDIF
+
+IF TALENT:110 || TALENT:114 || TALENT:119
+	;거유・폭유・超乳
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『큰 가슴』 
+		CASE 1
+			PRINT 『바보 유방』
+		CASE 2
+			PRINT 『뇌의 영양이 모두 가슴에 가서 버렸어』
+	ENDSELECT
+ENDIF
+
+IF TALENT:121
+	;후타나리
+	IF TALENT:페니스의상태 == 1
+		PRINT 『자지 존나 커』
+	ELSEIF TALENT:페니스의상태 == 2
+		PRINT 『단소포경 암컷 자지에서 정액 줄줄 샘』
+	ELSEIF TALENT:페니스의상태 == 3
+		PRINT 『암컷 자지에 좃때가 모여 있습니다』
+	ELSEIF TALENT:페니스의상태 == 4
+		PRINT 『개조 말자지』
+	ELSE
+		PRINT 『암컷자지 발기 중』
+	ENDIF
+ELSEIF TALENT:122
+	;남자
+	PRINT 『오카마 새끼』
+ENDIF
+
+IF TALENT:248
+	;근육질
+	PRINT 『고릴라』
+ENDIF
+
+IF TALENT:마더콘
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『엄마 봐줘～』 
+		CASE 1
+			PRINT 『엄마 살려줘～』
+		CASE 2
+			PRINT 『마마보다 음란하게 되어버렸어요』
+	ENDSELECT
+ENDIF
+
+IF TALENT:파더콘
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『아빠 봐줘～』 
+		CASE 1
+			PRINT 『아빠 자지 원해～』
+		CASE 2
+			PRINT 『파파의 페니스가 일품! 』
+	ENDSELECT
+ENDIF
+
+IF TALENT:로리콘
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『로리돼지』 
+		CASE 1
+			PRINT 『로리 보지로 흥분합니다』
+		CASE 2
+			PRINT 『음란 로리콘』
+	ENDSELECT
+ENDIF
+
+IF TALENT:쇼타콘
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『쇼타 전용 변기』 
+		CASE 1
+			PRINT 『쇼타 자지 애호가』
+		CASE 2
+			PRINT 『나, 색녀라 미안해?』
+	ENDSELECT
+ENDIF
+
+IF TALENT:153
+	;임신
+	SELECTCASE RAND:3
+		CASE 0
+			PRINT 『임신 축하해! 』
+		CASE 1
+			PRINT 『임신했습니다 감사합니다』
+		CASE 2
+			PRINT 『음란 암퇘지 너무 속도위반해서 아기가 생겼습니다』
+	ENDSELECT
+ENDIF
+
+SELECTCASE RAND:14
+	CASE 0
+		PRINT 『정액 냄새 미안! 』 
+	CASE 1
+		PRINT 『용사의 망신』
+	CASE 2
+		PRINT 『무책임한 질내 사정 환영』
+	CASE 3
+		PRINTFORM 『%SAVESTR:TARGET%의 이름 기억해줘』 
+	CASE 4
+		PRINT 『구타하면서 범해지는 것이 좋아』 
+	CASE 5
+		PRINT 『너무 약해』 
+	CASE 6
+		PRINT 『헐렁헐렁을 목표로 합니다』 
+	CASE 7
+		PRINT 『정액 안쪽에 부탁합니다』 
+	CASE 8
+		PRINT 『ＷＣ』
+	CASE 9
+		PRINT 『시골에서 먼길을 와서 범해졌습니다』
+	CASE 10
+		PRINT 『팍팍쓰고 시원해지십시오』 
+	CASE 11
+		PRINT 『자지 원해요』
+	CASE 12
+		PRINTFORM 『초호색가 %LOCALS%』
+	CASE 13
+		PRINTFORM 『보지 %LOCALS%』 
+ENDSELECT
+
+IF CFLAG:661 >=30
+	IF COUNT_V > 0
+		;臨月
+		IF (CFLAG:110 - 2 <= DAY && TALENT:153)
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORM 『%SAVESTR:TARGET%쨩는 임신중에도 성욕왕성』 
+				CASE 1
+					PRINT 『임신 중에 우유 마시는거 무제한』
+				CASE 2
+					PRINT 『아버지를 모르는 아이를 임신했습니다』
+				CASE 3
+					PRINTFORM 『%SAVESTR:TARGET%의 아기도 잘 부탁해』 
+				CASE 4
+					PRINT 『차세대 약하디약한 용사를 기대주세요』 
+				CASE 5
+					PRINT 『보태배』 
+				CASE 6
+					PRINT 『배 나왔다ー』 
+				CASE 7
+					PRINT 『아기도 정액 주세요』 
+				CASE 8
+					PRINT 『임신해서 더욱 더 흔들흔들하게 되었습니다』
+				CASE 9
+					PRINT 『아～배가 방해예요～』
+			ENDSELECT
+		;임신
+		ELSEIF TALENT:153
+			SELECTCASE RAND:10
+				CASE 0
+					PRINTFORM 『%SAVESTR:TARGET% 조금 살찌지 않았어？』 
+				CASE 1
+					PRINT 『녀석 수정하지 않을까』
+				CASE 2
+					PRINT 『수정 해 버렸다』
+				CASE 3
+					PRINTFORM 『%SAVESTR:TARGET%의 아기도 잘 부탁해』 
+				CASE 4
+					PRINT 『약하디약한 용사의 아이도 잘 부탁해』 
+				CASE 5
+					PRINT 『패배기념수정』
+				CASE 6
+					PRINT 『여러분 덕분에 가슴이 커졌습니다 ← 임신해서 잖아』
+				CASE 7
+					PRINT 『생리정지중』 
+				CASE 8
+					PRINT 『유두가 검게되어 버렸다』
+				CASE 9
+					PRINT 『이 녀석 배가 부풀어 않은가』
+			ENDSELECT
+		ELSE
+			;妊娠してない
+			SELECTCASE RAND:12
+				CASE 0
+					PRINT 『현재 보지 이완 중』 
+				CASE 1
+					PRINT 『헐렁헐렁하게 해 주셔서 감사합니다』
+				CASE 2
+					PRINT 『뭐라도 임신 싶어요～』
+				CASE 3
+					PRINTFORM 『%SAVESTR:TARGET%에게 아기받습니다』 
+				CASE 4
+					PRINT 『음란 암퇘지』 
+				CASE 5
+					PRINT 『임신 보장』 
+				CASE 6
+					PRINT 『정액 보태 감사』 
+				CASE 7
+					PRINT 『수정희망! 』 
+				CASE 8
+					PRINT 『이녀석 보지 크로테스크해』
+				CASE 9
+					PRINT 『보지가 너무 달라붙게 되어 버렸다』
+				CASE 10
+					PRINT 『←허벌보지(ユルマン)』
+				CASE 11
+					PRINT 『↓떠벌보지(ガバマン)』
+			ENDSELECT
+		ENDIF
+	ELSE
+		SELECTCASE RAND:10
+			CASE 0
+				PRINT 『과다 사용에 대해 항문 이완 중』 
+			CASE 1
+				PRINT 『똥구멍 이완중』
+			CASE 2
+				PRINT 『오줌에서 깨끗하네』
+			CASE 3
+				PRINT 『냄새 너무나』
+			CASE 4
+				PRINT 『처녀인데 엉덩이가 헐렁헐렁하면 위험하지 않냐』 
+			CASE 5
+				PRINT 『저의 엉덩이 보지에 정자 잔뜩 먹여주세요』
+			CASE 6
+				PRINT 『아차...괄약근 끊어져버렸다』
+			CASE 7
+				PRINT 『녀석의 똥구명 진짜 냄새나』
+			CASE 8
+				PRINT 『이녀석은 아날변기』
+			CASE 9
+				PRINT 『항문에 사과합니다』
+		ENDSELECT
+	ENDIF
+ENDIF
+
+;正の字を書こう
+;CFLAG:661を晒し台での精液経験に使います
+;晒し台から解放されるとリセット
+;COUNT_Vの使用数
+CFLAG:661 += COUNT_V
+;COUNT_Aの使用数
+CFLAG:662 += COUNT_A
+;口の使用数
+CFLAG:663 += COUNT_F
+;胸の使用数
+CFLAG:664 += COUNT_B
+;その他の使用数
+CFLAG:665 += COUNT_S - COUNT_V - COUNT_A - COUNT_F - COUNT_B
+REPEAT 5
+;使用回数があるならば
+	IF CFLAG:(661+COUNT) > 0
+		SELECTCASE COUNT
+			CASE 0
+				SELECTCASE RAND:5
+					CASE 0
+						PRINT 『보지 사용 횟수：
+					CASE 1
+						PRINT 『질내사정 횟수：
+					CASE 2
+						PRINT 『남성 경험 급상승 중：
+					CASE 3
+						PRINT 『보지：
+					CASE 4
+						PRINT 『교배：
+				ENDSELECT
+			CASE 1
+				SELECTCASE RAND:4
+					CASE 0
+						PRINT 『아날 사용횟수：
+					CASE 1
+						PRINT 『엉덩이 구멍 이용 횟수：
+					CASE 2
+						PRINT 『엉덩이보지：
+					CASE 3
+						PRINT 『엉덩이：
+				ENDSELECT
+			CASE 2
+				SELECTCASE RAND:3
+					CASE 0
+						PRINT 『유두：
+					CASE 1
+						PRINT 『구슬 청소：
+					CASE 2
+						PRINT 『자지 빠는 구멍：
+				ENDSELECT
+			CASE 3
+				SELECTCASE RAND:2
+					CASE 0
+						PRINT 『가슴：
+					CASE 1
+						PRINT 『유방：
+				ENDSELECT
+			CASE 4
+				PRINT 『
+		ENDSELECT
+		IF CFLAG:(661+COUNT) >= 5
+			FOR LOCAL, 0, CFLAG:(661+COUNT) /5
+				PRINT 正 
+			NEXT
+		ENDIF
+		;５で割ったあまりを出します
+		SELECTCASE CFLAG:(661+COUNT) % 5
+			CASE 1
+				PRINT 一
+			CASE 2
+				PRINT 二
+			CASE 3
+				PRINT 下
+			CASE 4
+				PRINT ,下
+		ENDSELECT
+		PRINT 』
+	ELSE
+	ENDIF
+REND
+
+SIF CFLAG:661 > 9
+	PRINT 『역시나 １０사람에게 뽑았군』
+SIF CFLAG:661 > 29
+	PRINT 『３０회 돌파! 』
+SIF CFLAG:661 > 49
+	PRINT 『축! ５０명 사정』
+SIF CFLAG:661 > 99
+	PRINT 『바를 정 자가 너무 많아서 기분 나쁘다』
+PRINTL
+PRINTFORML %조사선택(SAVESTR:TARGET, "를")% 명예를 뭉개버리는 말이 신체에 쓰이고 추가되었다……
+
+WAIT
+
+PRINTL
+
+IF COUNT_Z > 0
+	;獣姦
+	PRINTFORM 구속된 %조사선택(SAVESTR:TARGET, "는")%, 엉덩이를 내미는 모습으로 
+	
+	IF PILLORY_USER == 1
+		PRINT 마수
+	ELSEIF PILLORY_USER == 2
+		PRINT 돼지
+	ELSEIF PILLORY_USER == 3
+		PRINT 망아지
+	ELSEIF PILLORY_USER == 4
+		PRINT 개
+	ELSE
+		PRINT 개
+	ENDIF
+	
+	PRINTL 에게 범해지고 있다
+	
+	IF RAND:3 == 0
+		PRINT 『이 변태가! 　
+		IF PILLORY_USER == 1
+			PRINT 마수
+		ELSEIF PILLORY_USER == 2
+			PRINT 돼지
+		ELSEIF PILLORY_USER == 3
+			PRINT 망아지
+		ELSEIF PILLORY_USER == 4
+			PRINT 개
+		ELSE
+			PRINT 개
+		ENDIF
+		PRINTL 자지가 그렇게 기분 좋냐!』
+	ELSEIF RAND:2 == 0
+		PRINTL 『싫어, 가축 같아……』
+	ELSE
+		PRINTL 『기분은 어때! ？　짝짓기 기분 좋습니다 라고 말해! 』
+	ENDIF
+ELSEIF COUNT_A > 0 && COUNT_V > 0
+	;A&V
+	PRINTFORM 구속된 %조사선택(SAVESTR:TARGET, "는")%, 엉덩이를 내미는 모습으로 
+	
+	SIF TALENT:쇼타콘
+		PILLORY_USER = 2
+	
+	IF PILLORY_USER == 1
+		PRINT 마족 남자
+	ELSEIF PILLORY_USER == 2
+		PRINT 다크 엘프 소년
+	ELSEIF PILLORY_USER == 3
+		PRINT 하급 악마
+	ELSEIF PILLORY_USER == 4
+		PRINT 오크
+	ELSE
+		PRINT 오크
+	ENDIF
+	
+	PRINTL 에게 범해지고 있다
+	
+	IF PILLORY_USER == 1
+		IF RAND:3 == 0
+			PRINTL 『앗싸, 진짜 무료 보지다! 』
+		ELSEIF RAND:2 == 0
+			PRINTL 마족 남자가 힘차게 사정한다
+			PRINTL 『흘리지 말라구, 흘리면 곧장 입에 처박아줄테니까 말이야』
+		ELSE
+			PRINTL 『읏…나온다! 』『어이, 빨리 해! 　뒤에 줄 서있으니까 말야……』
+		ENDIF
+	ELSEIF PILLORY_USER == 2
+		IF RAND:3 == 0
+			PRINTL 『누나……나 더는 못 참겠어! 』
+		ELSEIF RAND:2 == 0
+			PRINTL 『아아아……퓻퓻 나와버려! 』
+		ELSE
+			PRINTL 소년은 필사적으로 허리를 박아넣고 있다
+			PRINTL 『누나! 　누나앗! 』
+		ENDIF
+	ELSEIF PILLORY_USER == 3
+		IF RAND:3 == 0
+			PRINTL 『이 하등변기가! 』
+		ELSEIF RAND:2 == 0
+			PRINTL 『무료 보지라고 들어보니…냄새나고 더럽네』
+		ELSE
+			PRINTL 『제대로 봉사하는 게 좋다고』
+		ENDIF
+	ELSE
+		IF RAND:3 == 0
+			PRINTL 『브힛! ! 　아날도 채고다! 　자, 오크 정액으로 임신해라』
+		ELSEIF RAND:2 == 0
+			PRINTL 『브히브히, 마왕님, 감사함미다……』
+		ELSE
+			PRINTL 『브히브힛! ! 　사과가 부조카잖아! 』
+		ENDIF
+	ENDIF
+	
+ELSEIF COUNT_A > 0
+	;アナル
+	
+	PRINTFORM 구속된 %조사선택(SAVESTR:TARGET, "는")%, 엉덩이를 내미는 모습으로 
+	
+	SIF TALENT:쇼타콘
+		PILLORY_USER = 2
+	
+	IF PILLORY_USER == 1
+		PRINT 마족 남자
+	ELSEIF PILLORY_USER == 2
+		PRINT 다크 엘프 소년
+	ELSEIF PILLORY_USER == 3
+		PRINT 하급 악마
+	ELSEIF PILLORY_USER == 4
+		PRINT 오크
+	ELSE
+		PRINT 오크
+	ENDIF
+	
+	PRINTL 에게 범해지고 있다
+	
+	IF PILLORY_USER == 1
+		IF RAND:3 == 0
+			PRINTL 『보지 구멍에서 엄청나게 시오후키 뿜어 내고 있네』
+		ELSEIF RAND:2 == 0
+			PRINTL 『음란한 애널이구만……』
+		ELSE
+			PRINTL 『완전히 부드럽게 들어갈수 있게 되 버렸구만』
+		ENDIF
+	ELSEIF PILLORY_USER == 2
+		IF RAND:3 == 0
+			PRINTL 『누나……애널도 기분 좋아』
+		ELSEIF RAND:2 == 0
+			PRINTL 『아아아……애널에 퓻퓻해버려! 』
+		ELSE
+			PRINTL 소년은 필사적으로 허리를 박아넣고 있다
+			PRINTL 『동정졸업……누나의 애널로, 동정졸업이야……』
+		ENDIF
+	ELSEIF PILLORY_USER == 3
+		IF RAND:3 == 0
+			PRINTL 『이 하등변기가! 』
+		ELSEIF RAND:2 == 0
+			PRINTL 『무료 애널이라고 듣고 와봤지만…냄새나고 더러운데』
+		ELSE
+			PRINTL 『제대로 봉사하는 게 좋다고』
+		ENDIF
+	ELSE
+		IF RAND:3 == 0
+			PRINTL 『브히잇! ! 애널 최고 브힛! 얌마, 오크의 정액으로 관장이닷』
+		ELSEIF RAND:2 == 0
+			PRINTL 『브히브히, 마왕님, 감사함미다……』
+		ELSE
+			PRINTL 『브히브힛! ! 　사과가 부조카잖아! 』
+		ENDIF
+	ENDIF
+	
+ELSE
+	IF RAND:3 == 0
+		PRINTL 오크의 거근이 격렬하게 정액처리를 하고 있다…
+		PRINTL 『브히잇! ! 　보지 정도는 도움이 되는구나! 』
+	ELSEIF RAND:2 == 0
+		PRINTL 코볼트가 줄지어 그녀의 엉덩이를 탐하고 있다
+		PRINTL 『헤헤헷, 기분 좋다…』
+	ELSE
+		PRINTL 뚱뚱하게 살찐 오크가 뒤에서 범하고 있다…
+		PRINTL 『브히히잇! ! 교배해주테다! 』
+	ENDIF
+ENDIF
+
+
+IF COUNT_A > 0
+	;A経験
+	PRINTFORML %EXPNAME:1%+{COUNT_A}
+	EXP:1 += COUNT_A
+ENDIF
+
+IF COUNT_V > 0
+	;V経験
+	PRINTFORML %EXPNAME:0%+{COUNT_V}
+	EXP:0 += COUNT_V
+ENDIF
+
+LOCAL:0 = COUNT_A + COUNT_V
+
+IF LOCAL:0 > 0
+	;성교경험
+	PRINTFORML %EXPNAME:5%+{LOCAL:0}
+	EXP:5 += LOCAL:0
+ENDIF
+
+IF COUNT_S > 0
+	;정액경험
+	PRINTFORML %EXPNAME:20%+{COUNT_S}
+	EXP:20 += COUNT_S
+ENDIF
+
+IF COUNT_F > 0
+	;펠라경험
+	PRINTFORML %EXPNAME:22%+{COUNT_F}
+	EXP:22 += COUNT_F
+ENDIF
+
+IF COUNT_Z > 0
+	;수간경험
+	PRINTFORML %EXPNAME:56%+{COUNT_Z}
+	EXP:56 += COUNT_Z
+ENDIF
+
+IF COUNT_A > 0
+	;快A
+	PRINTFORML %PALAMNAME:2%의 구슬+{COUNT_A}
+	JUEL:2 += COUNT_A
+ENDIF
+
+IF COUNT_V > 0
+	;快V
+	PRINTFORML %PALAMNAME:1%의 구슬+{COUNT_V}
+	JUEL:1 += COUNT_V
+ENDIF
+
+
+LOCAL:0 = (COUNT_A + COUNT_V + COUNT_S + COUNT_Z) * (10 + TALENT:0 + TALENT:15 + TALENT:24 + TALENT:30 + TALENT:163 ) / 2
+;처녀, 프라이드높음, 보수적, 정조관념, 高貴で取得率アップ
+;굴복・恥情は元々のものより少し多めになっています
+;V使用回数が50回を超えると屈服に使用回数に比例したボーナスが入ります
+IF LOCAL:0 > 0
+	;굴복・치정
+	IF CFLAG:661 > 50
+		PRINTFORML %PALAMNAME:6%의 구슬+{LOCAL:0 * CFLAG:661 / 50}
+		JUEL:6 += LOCAL:0 * CFLAG:661 / 50
+	ELSE
+		PRINTFORML %PALAMNAME:6%의 구슬+{LOCAL:0}
+		JUEL:6 += LOCAL:0
+	ENDIF
+	PRINTFORML %PALAMNAME:8%의 구슬+{LOCAL:0}
+	JUEL:8 += LOCAL:0
+ENDIF
+
+LOCAL:0 = (COUNT_A + COUNT_V + COUNT_S + COUNT_Z)
+
+IF LOCAL:0 > 0
+	;부정
+	PRINTFORML %PALAMNAME:100%의 구슬+{LOCAL:0}
+	JUEL:100 += LOCAL:0
+ENDIF
+PRINTFORML %SAVESTR:TARGET%의 신체에 {CFLAG:661+CFLAG:662+CFLAG:663+CFLAG:664+CFLAG:665}회, 정액이 토해내진 모양이다……
+
+CALL CAMPAIGN_EXP_PILLORY,TARGET
+
+WAIT
+
+;レベルが強ければもうちょっと耐えられる
+IF JUEL:100 > 120 + CFLAG:9 * 40
+	PRINTFORMW %SAVESTR:TARGET%의 정신이 한계에 도달했다……
+	PRINTW *노출대에서 해제합니다*
+	CFLAG:661 = 0
+	CFLAG:662 = 0
+	CFLAG:663 = 0
+	CFLAG:664 = 0
+	CFLAG:665 = 0
+	CFLAG:1 = 0
+ELSEIF JUEL:100 > 120 + 50 * 40
+	;50レベル以上は長すぎるので強制終了
+	PRINTFORMW %SAVESTR:TARGET%의 정신이 한계에 도달했다……
+	PRINTW *노출대에서 해제합니다*
+	CFLAG:661 = 0
+	CFLAG:662 = 0
+	CFLAG:663 = 0
+	CFLAG:664 = 0
+	CFLAG:665 = 0
+	CFLAG:1 = 0
+ENDIF
+
+;妊娠チェック
+IF COUNT_V > 0
+	CFLAG:107 += COUNT_V
+	CALL IN_VAGINA_SYOKU_TO_T
+	CALL CONCEPTION_CHECK_SYOKU_TO_T
+ENDIF
+
+
+RETURN 0
+
+
+
+
+
+
+

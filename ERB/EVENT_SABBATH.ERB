@@ -1,0 +1,326 @@
+﻿
+;----------------------------------
+@SABBATH
+#DIM SABBATH_USER
+#DIM COUNT_F
+#DIM COUNT_A
+#DIM COUNT_B
+#DIM COUNT_V
+#DIM COUNT_S
+#DIM COUNT_Z
+;----------------------------------
+
+;調教状態以外は除外
+SIF CFLAG:1 != 0
+	RETURN 0
+
+;満月以外は通常
+IF DAY:2 <= 14 || DAY:2 >= 16
+	CALL SABBATH_DAY
+	RETURN 0
+ENDIF
+
+;法術か呪術を持っていないと除外
+SIF TALENT:242 == 0 && TALENT:250 == 0
+	RETURN 0
+
+;淫乱以外は除外
+SIF TALENT:76 == 0
+	RETURN 0
+
+;信仰値が40以上必要
+SIF CFLAG:152 < 40
+	RETURN 0
+
+;各種回数 Fフェラ Aアナル B胸 V性器 S精液 Z獣姦
+COUNT_F = 0
+COUNT_A = 0
+COUNT_B = 0
+COUNT_V = 0
+COUNT_S = 0
+COUNT_Z = 0
+
+PRINTL  
+PRINTFORM %SAVESTR:TARGET%는 이름 없는 음탕한 여신에게 바치는 의식으로
+IF TALENT:122
+	;남자
+	PRINTFORM 전라의 여자 마족이나 여자 노예의 시중을 들며
+ELSEIF TALENT:121
+	;후타나리
+	PRINTFORM 사악한
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 으로 페니스를 발기 시켰다
+ELSE
+	PRINTFORM 사악한
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 으로
+ENDIF
+
+PRINTFORMW 던전의 몬스터에게 성(性)스러운 봉사를 베풀었다
+
+
+IF TALENT:122
+	;남자
+	PRINTFORML %SAVESTR:TARGET%는 여자 마족을 안으며
+	PRINTFORMW 정액을 베풀어 줬다
+ELSEIF TALENT:121
+	;후타나리
+	PRINTFORML %SAVESTR:TARGET%는 여자 마족을 안으며
+	PRINTFORMW 정액을 베풀어 줬다
+	
+	IF TALENT:0 || TALENT:273
+		;처녀・처녀봉인
+		PRINTFORML %SAVESTR:TARGET%의 성기는 봉인 되어 있기 때문에
+		PRINTFORMW 자발적으로 항문과 입에 차례 차례로 페니스를 물었다
+		IF TALENT:77
+			;ふたなり処女尻穴狂い
+			PRINTFORMW %SAVESTR:TARGET%는 보지구멍까지 전해지는 항문의 쾌감에 취해 있었다
+			COUNT_A += 1
+		ENDIF
+		COUNT_A += RAND:10 + 1
+		COUNT_S += COUNT_A + RAND:10
+	ELSE
+		PRINTFORMW 자발적으로 모든 구멍에 차례 차례로 페니스를 물었다
+		COUNT_V += RAND:10 + 1
+		COUNT_A += RAND:10 + 1
+		COUNT_S += COUNT_A + COUNT_V + RAND:10
+	ENDIF
+	
+ELSEIF TALENT:0
+	;처녀
+	PRINTFORML %SAVESTR:TARGET%는 성기에 순결의 봉인이 붙어 있어서,  
+	PRINTFORMW 항문과 입으로 페니스를 차례 차례로 물어 갔다 
+	IF TALENT:77
+		;処女尻穴狂い
+		PRINTFORMW %SAVESTR:TARGET%는 애널의 쾌감을 견딜 수 없는 것 같다
+		COUNT_A += 1
+	ENDIF
+	COUNT_A += RAND:10 + 1
+	COUNT_S += COUNT_A + RAND:10
+ELSEIF TALENT:273
+	;처녀봉인
+	PRINTFORML %SAVESTR:TARGET%의 성기는 봉인 되어 있어서
+	PRINTFORMW 항문과 입으로 페니스를 차례 차례로 물어 갔다
+	IF TALENT:77
+		;処女封印尻穴狂い
+		PRINTFORMW %SAVESTR:TARGET%는 보지구멍까지 전해지는 항문의 쾌감에 취해 있었다
+		COUNT_A += 1
+	ENDIF
+	COUNT_A += RAND:10 + 1
+	COUNT_S += COUNT_A + RAND:10
+ELSEIF CFLAG:42 == 79 && (CFLAG:40 & 64) && FLAG:37
+	;貞操帯
+	PRINTFORML %SAVESTR:TARGET%는 정조대가 붙여져 있기 떄문에
+	PRINTFORMW 항문과 입으로 페니스를 차례 차례로 물어 갔다
+	IF TALENT:77
+		;貞操帯尻穴狂い
+		PRINTFORMW %SAVESTR:TARGET%는 보지구멍까지 전해지는 항문의 쾌감에 취해 있었다
+		COUNT_A += 1
+	ENDIF
+	COUNT_A += RAND:10 + 1
+	COUNT_S += COUNT_A + RAND:10
+ELSEIF ABL:39 >= 1 && RAND:2 == 0
+	;수간중독
+	
+	IF ABL:17 >= 1
+		;노출벽
+		PRINTFORML %SAVESTR:TARGET%가 짐승과 교미한다는 이야기를 듣고, 던전에 호사가들이 모였다
+		COUNT_V += ABL:17
+		COUNT_A += ABL:17
+	ENDIF
+	
+	PRINTFORML %SAVESTR:TARGET%는 기뻐하며 돼지의 성기를 보지에 가져다 댔다
+	PRINTFORMW 악신에게 바치는 수간 쇼를 통행인들에게 보여 주었다
+	
+	;섹스광
+	SIF TALENT:75
+		COUNT_V += 1
+	
+	;항문광
+	SIF TALENT:77
+		COUNT_A += 1
+	
+	COUNT_V += RAND:10 + ABL:39
+	COUNT_A += RAND:10 + ABL:39
+	COUNT_S += COUNT_A + COUNT_V + RAND:10
+	COUNT_Z += COUNT_S
+ELSE
+	
+	IF ABL:17 >= 1
+		;노출벽
+		PRINTFORML %SAVESTR:TARGET%는 군중을 불러 모아 공개 난교 파티를 열었다
+		COUNT_V += ABL:17
+		COUNT_A += ABL:17
+	ENDIF
+	
+	IF ABL:16 >= 1
+		;봉사정신
+		PRINTFORML %SAVESTR:TARGET%는 어떤 추악한 몬스터나 마족에게도 평등하게 봉사를 베풀어 줬다
+		COUNT_V += ABL:16
+		COUNT_A += ABL:16
+	ENDIF
+	
+	PRINTFORML 한가한 몬스터들이 줄 지어 그녀의 모든 구멍을 범하고 있다
+	PRINTFORMW 온몸에 정액이 잔뜩 걸쳐져서 광장은 이상한 악취로 가득했다
+	
+	;섹스광
+	SIF TALENT:75
+		COUNT_V += 1
+	
+	;항문광
+	SIF TALENT:77
+		COUNT_A += 1
+	
+	COUNT_V += RAND:10 + 1
+	COUNT_A += RAND:10 + 1
+	COUNT_S += COUNT_A + COUNT_V + RAND:10
+ENDIF
+
+IF COUNT_A > 0
+	;A経験
+	PRINTFORML %EXPNAME:1%+{COUNT_A}
+	EXP:1 += COUNT_A
+ENDIF
+
+IF COUNT_V > 0
+	;V経験
+	PRINTFORML %EXPNAME:0%+{COUNT_V}
+	EXP:0 += COUNT_V
+ENDIF
+
+LOCAL:0 = COUNT_A + COUNT_V
+
+IF LOCAL:0 > 0
+	;성교경험
+	PRINTFORML %EXPNAME:5%+{LOCAL:0}
+	EXP:5 += LOCAL:0
+ENDIF
+
+IF S > 0
+	;정액경험
+	PRINTFORML %EXPNAME:20%+{COUNT_S}
+	EXP:20 += COUNT_S
+ENDIF
+
+IF COUNT_Z > 0
+	;수간경험
+	PRINTFORML %EXPNAME:56%+{COUNT_Z}
+	EXP:56 += COUNT_Z
+ENDIF
+
+IF COUNT_A > 0
+	;快A
+	PRINTFORML %PALAMNAME:2%의 구슬+{COUNT_A}
+	JUEL:2 += COUNT_A
+ENDIF
+
+IF COUNT_V > 0
+	;快V
+	PRINTFORML %PALAMNAME:1%의 구슬+{COUNT_V}
+	JUEL:1 += COUNT_V
+ENDIF
+
+LOCAL:0 = (COUNT_A + COUNT_V + COUNT_S + COUNT_Z) * 10
+
+IF LOCAL:0 > 0
+	;욕정・치정
+	PRINTFORML %PALAMNAME:5%의 구슬+{LOCAL:0}
+	PRINTFORML %PALAMNAME:8%의 구슬+{LOCAL:0}
+	JUEL:5 += LOCAL:0
+	JUEL:8 += LOCAL:0
+ENDIF
+
+IF TALENT:1
+	PRINTL 【동정상실】
+	TALENT:1 = 0
+ENDIF
+
+WAIT
+
+RETURN 0
+
+;----------------------------------
+@SABBATH_DAY
+#DIM SABBATH_USER
+;----------------------------------
+;モブ姦儀式
+
+;3日に一度
+LOCAL = DAY:2
+LOCAL %= 3
+SIF LOCAL > 0
+	RETURN 0
+
+;法術か呪術を持っていないと除外
+SIF TALENT:242 == 0 && TALENT:250 == 0
+	RETURN 0
+
+;陥落以外は除外
+SIF CFLAG:0 == 0
+	RETURN 0
+
+;信仰値が40以上必要
+SIF CFLAG:152 < 40
+	RETURN 0
+
+SABBATH_USER = RAND:4
+
+
+PRINTL  
+PRINTFORML %SAVESTR:TARGET%는 이름없는 음탕한 여신에게 바치는 의식으로
+
+IF SABBATH_USER == 0 && ITEM:22
+	;野良犬がいれば, 獣姦儀式
+	PRINTDATAW
+		DATAFORM 제단 앞에서 신자인 소녀와 염소를 교미 시켰다……
+		DATAFORM 개의 정액을 모으기 위해서 여자 신자들에게 개에게 펠라치오를 하게 한듯 하다……
+		DATAFORM 제단 앞에서 신자인 유부녀와 개를 교미 시킨 것 같다……
+	ENDDATA
+ELSEIF SABBATH_USER == 1 && CFLAG:152 > 80
+	;乱交儀式
+	PRINTDATAW
+		DATAFORM 제단 앞에서 신자끼리 섹스를 하게 한 것 같다……
+		DATAFORM 신혼부부인 신자들에게 스와핑 하게 해 신에게 바친 것 같다……
+		DATAFORM 제단 앞에서 젊은 신자들에게 난교를 시킨 것 같다……
+	ENDDATA
+
+;かつて信じていた神を冒涜する
+ELSEIF SABBATH_USER == 2 && CFLAG:152 > 60 && TALENT:250 && (TALENT:17 || TALENT:282)
+	PRINTFORM 땅속에 숨은 죽음을 관장하는 있는 여신
+	PRINTDATAW
+		DATAFORM 을 모독하는 음란한 그림을 바친 것 같다……
+		DATAFORM 의 성물로 자위를 선보인 것 같다……
+	ENDDATA
+	
+ELSEIF SABBATH_USER == 2 && CFLAG:152 > 60 && TALENT:242 && (TALENT:17 || TALENT:282)
+	PRINTFORM 청정무구한 성천의 여신
+	PRINTDATAW
+		DATAFORM 을 모독하는 음어를 주창 한 것 같다……
+		DATAFORM 을 더럽히기 위해 여신의 신자를 야외노출 시킨 것 같다……
+	ENDDATA
+	
+ELSEIF SABBATH_USER == 2 && CFLAG:152 > 60 && TALENT:315 == 11 && (TALENT:17 || TALENT:282)
+	PRINTFORM 풍요로운 대지의 여신
+	PRINTDATAW
+		DATAFORM 의 신자를 오코에게 범하게 한 것 같다……
+		DATAFORM 의 성스러운 잔에 정액을 가득 채워 신에게 바친 것 같다……
+	ENDDATA
+	
+ELSEIF SABBATH_USER == 2 && CFLAG:152 > 60 && TALENT:315 == 12 && (TALENT:17 || TALENT:282)
+	PRINTFORM 모든 것을 감싸는 바다의 여신
+	PRINTDATAW
+		DATAFORM 의 동상에 정액을 뿌린 것 같다……
+		DATAFORM 의 신관복을 음란하게 개조하고 음탕한 춤을 신에게 바친 것 같다……
+	ENDDATA
+	
+ELSE
+	;その他
+	PRINTDATAW
+		DATAFORM 제단의 앞에서 신자인 소녀에게 공개 자위를 시킨 것 같다……
+		DATAFORM 음란한 조각상을 봉납하고 소년 신자에게 정액을 걸치게 한 것 같다……
+		DATAFORM 여자 엘프 신자와 오크의 섹스를 신에게 바친 것 같다……
+	ENDDATA
+ENDIF
+
+RETURN 0
+

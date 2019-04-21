@@ -1,0 +1,358 @@
+﻿;有志「」より頂きました。大変感謝です
+
+@LABO
+
+$INPUT_LOOP
+PRINTL ----------
+PRINTL [LABORATORY]
+PRINTL [001] 문자컬러테스트
+PRINTL [004] GEO_MAKE
+PRINTL [005] GEO_OUTPUT
+PRINTL [006] GEO클리어
+PRINTL [100] 돌아온다
+INPUT
+SELECTCASE RESULT
+CASE 100
+	RETURN 0
+CASE 1
+	CALL COLOR_OUTPUT_TEST
+CASE 2
+	GOTO INPUT_LOOP
+CASE 3
+	GOTO INPUT_LOOP
+CASE 4
+	CALL GEO_TEST
+CASE 5
+	CALL GEO_OUTPUT
+CASE 6
+	CALL DA_CLEAR
+CASEELSE
+	GOTO INPUT_LOOP
+ENDSELECT
+
+GOTO INPUT_LOOP
+
+@DA_CLEAR
+;マップの初期化
+FOR LOCAL:0,0,50
+	FOR LOCAL:1,0,50
+		DA:(LOCAL:0):(LOCAL:1) = 0
+	NEXT
+NEXT
+
+@COLOR_OUTPUT_TEST
+FOR COUNT,0,8
+	CALL C_OUT(COUNT)
+NEXT
+PRINTL 
+RETURN 0
+
+@C_OUT,ARG:0
+;いろ文字出力
+LOCAL:0 = ARG:0
+
+SELECTCASE LOCAL:0
+	CASE 7
+		SETCOLOR 0xe16745
+		PRINT ７
+	CASE 6
+		SETCOLOR 0xf7b357
+		PRINT ６
+	CASE 5
+		SETCOLOR 0xb8d26b
+		PRINT ５
+	CASE 4
+		SETCOLOR 0x8cc06c
+		PRINT ４
+	CASE 3
+		SETCOLOR 0x5aad6d
+		PRINT ３
+	CASE 2
+		SETCOLOR 0x4cb5e8
+		PRINT ２
+	CASE 1
+		SETCOLOR 0x5984bd
+		PRINT １
+	CASE 0
+		SETCOLOR 0x5c6aa6
+		PRINT ０
+	CASEELSE
+		RESETCOLOR
+ENDSELECT
+;PRINTFORM {LOCAL:0} 
+PRINT ,
+RESETCOLOR
+
+RETURN 0
+
+
+@GEO_OUTPUT
+
+;マップを出力
+FOR LOCAL:1,0,32
+	FOR LOCAL:0,0,32
+		LOCAL:2 = DA:(LOCAL:1):(LOCAL:0)/32
+		CALL C_OUT(LOCAL:2)
+		;PRINTFORM {LOCAL:2,2}
+		;PRINT ,
+	NEXT
+	PRINTL 
+NEXT
+
+@GEO_TEST
+;------------------------------
+;ローカル変数の整理
+;------------------------------
+;LOCAL:0	その場でしか使わない一時変数
+;LOCAL:1	その場でしか使わない一時変数
+;LOCAL:2	その場でしか使わない一時変数
+;LOCAL:3	ポイント数
+;LOCAL:4	世界のマス数
+;LOCAL:5	作業中のｘ
+;LOCAL:6	作業中のｙ
+;LOCAL:7	px
+;LOCAL:8	py
+;LOCAL:10	その場でしか使わない一時変数
+;LOCAL:11	その場でしか使わない一時変数
+;LOCAL:12	その場でしか使わない一時変数
+;LOCAL:13	その場でしか使わない一時変数
+;LOCAL:14	その場でしか使わない一時変数
+;LOCAL:15	その場でしか使わない一時変数
+;------------------------------
+;パラメータ設定
+;------------------------------
+;ポイント数：正方形の1辺の頂点数。2以上にすること
+;正方形を作る
+LOCAL:3 = 5
+;世界のマス数：ポイント数から決まる
+;中心点にダンジョンを置く
+LOCAL:4 = (LOCAL:3 - 1) * 8
+
+;------------------------------
+;ポイントの乱数出力
+;------------------------------
+;PRINTL ---
+;x
+LOCAL:5 = 0
+;y
+LOCAL:6 = 0
+
+FOR (LOCAL:6),0,LOCAL:3
+	;ターゲットｙ座標
+	LOCAL:1 = (LOCAL:6) * 8
+	FOR (LOCAL:5),0,LOCAL:3
+		;ターゲットｘ座標
+		LOCAL:0 = (LOCAL:5) * 8
+		;PRINTFORML x:{LOCAL:0},y:{LOCAL:1}
+		;ランダマイズ
+		DA:(LOCAL:1):(LOCAL:0) = RAND:256
+;		PRINTFORML z({LOCAL:0},{LOCAL:1}) = DA:{LOCAL:1}:{LOCAL:0} = {DA:(LOCAL:1):(LOCAL:0)}
+	NEXT
+NEXT
+
+;------------------------------
+;補完 (1)ポイントの間を補完
+;------------------------------
+;横線,Ｘ方向の補完：
+;Y繰り返し
+FOR LOCAL:10,0,LOCAL:3
+;	PRINTFORM LOCAL:10 = {LOCAL:10} 
+	;X繰り返し
+	FOR LOCAL:11,0,LOCAL:3 - 1
+;		PRINTFORML LOCAL:11 = {LOCAL:11}
+		;対象ブロックの左上をとる
+		;[x,y]=[LOCAL:0,LOCAL:1]
+		LOCAL:0 = (LOCAL:11) * 8
+		LOCAL:1 = (LOCAL:10) * 8
+		;ｘ方向にループ開始
+		FOR LOCAL:5,(LOCAL:0 + 1),(LOCAL:0 + 8)
+			DA:(LOCAL:1):(LOCAL:5) = LINEAR_INTERP_COS_X((LOCAL:0),(LOCAL:0 + 8),(LOCAL:5),(LOCAL:1))
+;			PRINTFORM ({LOCAL:5},{LOCAL:1}) = {DA:(LOCAL:1):(LOCAL:5)} 
+		NEXT
+;		PRINTL 
+	NEXT
+NEXT
+
+;縦線,Ｙ方向の補完
+;X繰り返し
+FOR LOCAL:11,0,LOCAL:3
+;	PRINTFORM LOCAL:10 = {LOCAL:10} 
+	;Y繰り返し
+	FOR LOCAL:10,0,LOCAL:3 - 1
+;		PRINTFORML LOCAL:11 = {LOCAL:11}
+		;対象ブロックの左上をとる
+		;[x,y]=[LOCAL:0,LOCAL:1]
+		LOCAL:0 = (LOCAL:11) * 8
+		LOCAL:1 = (LOCAL:10) * 8
+		;y方向にループ開始
+		FOR LOCAL:6,(LOCAL:1 + 1),(LOCAL:1 + 8)
+			DA:(LOCAL:6):(LOCAL:0) = LINEAR_INTERP_COS_Y((LOCAL:1),(LOCAL:1 + 8),(LOCAL:6),(LOCAL:0))
+			;PRINTFORM ({LOCAL:0},{LOCAL:6}) = {DA:(LOCAL:6):(LOCAL:0)}
+		NEXT
+;		PRINTL 
+	NEXT
+NEXT
+
+;------------------------------
+;補完 (2)内側を補完
+;------------------------------
+;X繰り返し
+FOR LOCAL:11,0,LOCAL:3 - 1
+	;PRINTFORM LOCAL:10 = {LOCAL:10} 
+	;Y繰り返し
+	FOR LOCAL:10,0,LOCAL:3 - 1
+		;PRINTFORML LOCAL:11 = {LOCAL:11}
+		;対象ブロックの左上をとる
+		;左上[x,y]=[LOCAL:0,LOCAL:1]
+		LOCAL:0 = (LOCAL:11) * 8
+		LOCAL:1 = (LOCAL:10) * 8
+		;ブロックの4点のzをとる
+		;左上
+		LOCAL:12 = DA:(LOCAL:1):(LOCAL:0)
+		;右上
+		LOCAL:13 = DA:(LOCAL:1):(LOCAL:0 + 8)
+		;左下
+		LOCAL:14 = DA:(LOCAL:1 + 8):(LOCAL:0)
+		;右下
+		LOCAL:15 = DA:(LOCAL:1 + 8):(LOCAL:0 + 8)
+		
+		;y繰り返し
+		FOR LOCAL:6,(LOCAL:1 + 1),(LOCAL:1 + 8)
+			;x繰り返し
+			FOR LOCAL:5,(LOCAL:0 + 1),(LOCAL:0 + 8)
+				;PRINTFORM ({LOCAL:5},{LOCAL:6})=> UL={LOCAL:12,3} UR={LOCAL:13,3} DL={LOCAL:14,3} DR={LOCAL:15,3} 
+				;PRINTFORM 左から{LOCAL:5-LOCAL:0},上から{LOCAL:6-LOCAL:1} 
+				CALL GEO_CALC_INTERP( LOCAL:12,LOCAL:13,LOCAL:14,LOCAL:15,(LOCAL:5-LOCAL:0),(LOCAL:6-LOCAL:1),LOCAL:5,LOCAL:6 )
+			NEXT
+;			PRINTL 
+		NEXT
+		
+		
+		
+	NEXT
+NEXT
+
+
+@GEO_CALC_INTERP(ARG:0,ARG:1,ARG:2,ARG:3,ARG:4,ARG:5,ARG:6,ARG:7)
+;ARG:0	対象ブロックの左上のz,a
+;ARG:1	対象ブロックの右上のz,b
+;ARG:2	対象ブロックの左下のz,c
+;ARG:3	対象ブロックの右下のz,d
+;ARG:4	対象のマスが左からいくつか
+;ARG:5	対象のマスが上からいくつか
+;ARG:6	対象x
+;ARG:7	対象y
+;LOCAL:0	px
+;LOCAL:1	py
+;------------------------------
+;係数設定
+SELECTCASE ARG:4
+CASE 1
+	LOCAL:0 = 4
+CASE 2
+	LOCAL:0 = 15
+CASE 3
+	LOCAL:0 = 31
+CASE 4
+	LOCAL:0 = 50
+CASE 5
+	LOCAL:0 = 69
+CASE 6
+	LOCAL:0 = 85
+CASE 7
+	LOCAL:0 = 96
+CASEELSE
+	LOCAL:0 = 0
+ENDSELECT
+
+SELECTCASE ARG:5
+CASE 1
+	LOCAL:1 = 4
+CASE 2
+	LOCAL:1 = 15
+CASE 3
+	LOCAL:1 = 31
+CASE 4
+	LOCAL:1 = 50
+CASE 5
+	LOCAL:1 = 69
+CASE 6
+	LOCAL:1 = 85
+CASE 7
+	LOCAL:1 = 96
+CASEELSE
+	LOCAL:1 = 0
+ENDSELECT
+
+;計算
+DA:(ARG:7):(ARG:6) = (ARG:0-ARG:1-ARG:2+ARG:3)*(LOCAL:0)*(LOCAL:1)/10000 + (ARG:1-ARG:0)*(LOCAL:0)/100 + (ARG:2-ARG:0)*(LOCAL:1)/100 + ARG:0
+;PRINTFORML ({ARG:6},{ARG:7}) = {DA:(ARG:7):(ARG:6)}
+
+
+@LINEAR_INTERP_COS_X(ARG:0,ARG:1,ARG:2,ARG:3)
+#FUNCTION
+;X軸上の補完
+;---------------
+;ARG:0 = ｘ0
+;ARG:1 = ｘ1
+;ARG:2 = ｚを求める点のｘ
+;ARG:3 = ｚを求める点のｙ
+;LOCAL:0:z0
+;LOCAL:1:z1
+;LOCAL:2:係数
+LOCAL:0 = DA:(ARG:3):(ARG:0)
+LOCAL:1 = DA:(ARG:3):(ARG:1)
+SELECTCASE ARG:2 - ARG:0
+CASE 1
+	LOCAL:2 = 4
+CASE 2
+	LOCAL:2 = 15
+CASE 3
+	LOCAL:2 = 31
+CASE 4
+	LOCAL:2 = 50
+CASE 5
+	LOCAL:2 = 69
+CASE 6
+	LOCAL:2 = 85
+CASE 7
+	LOCAL:2 = 96
+CASEELSE
+	LOCAL:2 = 0
+ENDSELECT
+RETURNF LOCAL:0 + ((LOCAL:1 - LOCAL:0)*LOCAL:2)/100
+
+
+@LINEAR_INTERP_COS_Y(ARG:0,ARG:1,ARG:2,ARG:3)
+#FUNCTION
+;X軸上の補完
+;---------------
+;ARG:0 = ｙ0
+;ARG:1 = ｙ1
+;ARG:2 = ｚを求める点のｙ
+;ARG:3 = ｚを求める点のｘ
+;LOCAL:0:z0
+;LOCAL:1:z1
+;LOCAL:2:係数
+LOCAL:0 = DA:(ARG:0):(ARG:3)
+LOCAL:1 = DA:(ARG:1):(ARG:3)
+SELECTCASE ARG:2 - ARG:0
+CASE 1
+	LOCAL:2 = 4
+CASE 2
+	LOCAL:2 = 15
+CASE 3
+	LOCAL:2 = 31
+CASE 4
+	LOCAL:2 = 50
+CASE 5
+	LOCAL:2 = 69
+CASE 6
+	LOCAL:2 = 85
+CASE 7
+	LOCAL:2 = 96
+CASEELSE
+	LOCAL:2 = 0
+ENDSELECT
+RETURNF LOCAL:0 + ((LOCAL:1 - LOCAL:0)*LOCAL:2)/100
+

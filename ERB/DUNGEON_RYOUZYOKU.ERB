@@ -1,0 +1,2759 @@
+﻿;-------------------------------------
+@RYOUZYOKU,ARG
+#DIM VIRGIN
+#DIM MON_COUNT
+#DIM MON_FEAR
+#DIM FEAR
+;-------------------------------------
+
+ARG = A
+VIRGIN = TALENT:ARG:0
+FEAR = 0
+PRINTFORML %SAVESTR:ARG%의 능욕――
+PRINTL  
+DRAWLINE
+CALL SHOW_DATA,ARG
+PRINTL  
+
+PRINTL [0] - 능욕을 본다
+PRINTL [1] - 능욕하지 않는다
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 2
+	GOTO INPUT_LOOP
+ENDIF
+SIF RESULT == 1
+	RETURN 0
+
+;凌辱畏怖記憶があるか
+MON_COUNT = 0
+MON_FEAR = CFLAG:ARG:130
+WHILE MON_COUNT < 300
+	LOCAL = MON_COUNT + 99
+	IF E:LOCAL <= 0
+		LOCAL = MON_COUNT + 7
+		E:LOCAL = 0
+	ENDIF
+	LOCAL = MON_COUNT + 7
+	;IF E:LOCAL > 0
+		;LOCAL:1 = E:MON_COUNT
+		;被凌辱モンスターID記憶を見る
+		;SIF CFLAG:ARG:130 == LOCAL:1
+			;MON_FEAR = E:MON_COUNT
+	;ENDIF
+	MON_COUNT += 100
+WEND
+
+
+TARGET = ARG
+CALL DUNGEON_RYOUZYOKU
+
+MON_COUNT = 0
+WHILE MON_COUNT < 300
+	LOCAL = MON_COUNT + 7
+	LOCAL:1 = E:MON_COUNT
+	IF E:LOCAL > 0 && MON_FEAR == 0
+		CALL MONSTER_NAME,LOCAL:1,0
+		PRINTFORMW 의 능욕이 시작됐다
+		;凌辱畏怖記憶
+		CFLAG:ARG:130 = LOCAL:1
+		MON_FEAR = LOCAL:1
+		CFLAG:ARG:131 = 0
+	ELSEIF E:LOCAL > 0 && MON_FEAR == LOCAL:1
+		CALL MONSTER_NAME,LOCAL:1,0
+		PRINTFORMW 의 능욕이 다시 시작됐다
+		CFLAG:ARG:131++
+		FEAR = 1
+	ELSEIF E:LOCAL > 0 && MON_FEAR != LOCAL:1
+		CALL MONSTER_NAME,LOCAL:1,0
+		PRINTFORMW 의 능욕이 시작됐다
+		FEAR = 0
+	ENDIF
+	B = MON_COUNT
+	IF E:LOCAL == 1
+		;カタコト
+		CALL ORC_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 2
+		;슬라임
+		CALL SLIME_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 3
+		;곤충
+		CALL INSECT_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 4
+		;蔦촉수
+		CALL IVY_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 5
+		;촉수
+		CALL SYOKUSYU_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 6
+		;요정
+		CALL FAILY_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 7
+		;거인
+		CALL GIANT_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 8
+		;남성
+		CALL MAN_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 9
+		;여성
+		CALL GIRL_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 10
+		;짐승
+		CALL BEAST_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 11
+		;뇌간
+		CALL BRAIN_RYOU,ARG,FEAR
+	ELSEIF E:LOCAL == 12
+		;말
+		CALL HORSE_RYOU,ARG,FEAR
+	ENDIF
+	PRINTL  
+	MON_COUNT += 100
+WEND
+
+IF EXP:0 > 0 && TALENT:0 == 1
+	TALENT:0 = 0
+	PRINTL 【처녀상실】
+	CFLAG:15 = 104
+ENDIF
+
+CALL DUNGEON_RYOUZYOKU_AFTER
+
+RETURN 0
+
+;--------------------------------------------
+@ORC_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 『이 녀서글 무꺼올려라…』
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 『우디들의…자지에…딱 맞는군』
+		DATAFORM 『이제…우디들의…여자다！』
+		DATAFORM 『또 왔나…이제、이즐 수 업는건가？』
+		DATAFORM 『우디들의…아이…부타칸다』
+		DATAFORM 『브히힉…냄새 좋아하나？』
+		DATAFORM 『우디들의…가축이다』
+		DATAFORM 『브히힉！기다렸던 거다』
+		DATAFORM 『그렇게、자지、좋아하나？』
+		DATAFORM 『하아하아…놔주지 안케따…』
+		DATAFORM 『브히힉、우디들의 동료다』
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 『조은 누늘 가꼬 있군…』
+		DATAFORM 『또 너인가…』
+		DATAFORM 『용서해주세요、겠지？』
+		DATAFORM 『슬슬이다…』
+		DATAFORM 『히히、그 상태다』
+		DATAFORM 『솔지카게 되어꾼』
+		DATAFORM 『엉덩이를 내라…』
+		DATAFORM 『엉덩이를 돌려라』
+		DATAFORM 『하아하아……적당히 했군……？』
+		DATAFORM 『얼굴이 붉어？』
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 0
+	;弱畏怖状態
+	PRINTDATAW
+		DATAFORM 『또…또인가…』
+		DATAFORM 『너、이전에도…』
+		DATAFORM 『이 녀석…또 오고 싶어？』
+		DATAFORM 『우디들에게、또 지다니』
+		DATAFORM 『히히、약한데』
+		DATAFORM 『이런 것인가……』
+		DATAFORM 『또 졌는지？』
+		DATAFORM 『됐다~！　또 우디들의、승리다！』
+		DATAFORM 『하아하아…또 이길 수 있었다…』
+		DATAFORM 『오옷！　우디들 강해！』
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『여…여자아…우우…』
+		DATAFORM 『조은 여자다…나아…더눈…』
+		DATAFORM 『이녀서으로…맘대루 해더, 괘차나？』
+		DATAFORM 『나으 아이룰, 잉신시킨다. 너눈 분명 튼튼한 아이, 낳는다』
+		DATAFORM 『부히히힛, 여자다아…』
+		DATAFORM 『잘도 애먹이게해써……』
+		DATAFORM 『움지이지마라고……지굼까지으 빚을, 되갑아 준다』
+		DATAFORM 『해내따!  우리두르, 승리다! 』
+		DATAFORM 『하악하악……여, 여자……』
+		DATAFORM 『오옹!  우리드리도, 이겨써! 』
+	ENDDATA
+ENDIF
+
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTW 『젠장, 이 녀석 봉인 데어이따! 』
+	PRINTFORMW %SAVESTR:ARG%의 순결은 성스로운 힘으로 보호되고 있기에, 손을 대려고하면 마비되어 버리는 것이였다
+	PRINTFORMW 『할 수 업다, 얼덩이로 할 수 박에! 』
+	PRINTFORMW %SAVESTR:ARG%의 또 다른 구멍에,  짐승같은 욕망이 내뿜어졌다……
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	PRINTDATAL
+		DATAFORM 『너어, 우리드르 것…』
+		DATAFORM 『독점이다……브히힛』
+		DATAFORM 『아무더 보고있지 안눈다……』
+		DATAFORM 『나아, 이겨따!  사라남았따! 』
+	ENDDATA
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  1마리의 아인에게 덮쳐져 실컷 정액을 부어 넣어질 곤경에 처하자
+	
+	IF TALENT:ARG:12
+		;굳건함
+		PRINT 이를 악물고
+	ELSE 
+		PRINT 고개를 숙이고
+	ENDIF
+	
+	PRINT 양손 양 무릎을 땅에 디딘 채, 
+	
+	IF TALENT:ARG:음모의상태 > 200
+		PRINT 강모가 자라있는
+	ELSEIF TALENT:ARG:음모의상태 > 150
+		PRINT 음모가 들여다보이는
+	ENDIF
+	
+	IF TALENT:ARG:차밍포인트 == 14
+		;ヒップライン
+		PRINT 예쁜 엉덩이를 뒤에서 부터
+	ELSEIF TALENT:ARG:차밍포인트 == 23
+		;大きな尻
+		PRINT 커다란 엉덩이를 뒤에서 부터
+	ELSE
+		PRINT 엉덩이를 뒤에서 부터
+	ENDIF
+	
+	PRINTDATA
+		DATAFORM 강직한 페니스
+		DATAFORM 더러운 페니스
+		DATAFORM 오돌토돌한 페니스
+		DATAFORM 흉악한 페니스
+		DATAFORM 귀두의 날이 솟아있는 페니스
+	ENDDATA
+	
+	PRINTL 로 비틀어 박아넣어져, 
+	
+	PRINT 그 얼굴은
+	IF CFLAG:ARG:131 > 5  & F
+		;隷属状態
+		IF TALENT:ARG:35
+			;수줍음
+			PRINTL 수치와 욕정 투성이가 되어 있었다……
+			PRINTFORML 치정의 구슬+{MON_NUM * 12}
+			JUEL:ARG:8 += MON_NUM * 10
+		ELSE 
+			PRINTL 굴복의 기쁨과 군침으로 더러워져 있었다……
+			PRINTFORML 굴복의 구슬+{MON_NUM * 12}
+			JUEL:ARG:6 += MON_NUM * 10
+		ENDIF
+	ELSEIF CFLAG:ARG:131 > 2 & F
+		;中畏怖状態
+		IF TALENT:ARG:35
+			;수줍음
+			PRINTL 수치와 쾌락의 틈에서 흔들리고 있었다……
+			PRINTFORML 치정의 구슬+{MON_NUM * 12}
+			JUEL:ARG:8 += MON_NUM * 10
+		ELSE 
+			PRINTL 굴복의 기쁨을 숨기지 못하고 있었다……
+			PRINTFORML 굴복의 구슬+{MON_NUM * 12}
+			JUEL:ARG:6 += MON_NUM * 10
+		ENDIF
+	ELSE
+		IF (TALENT:ARG:14 || TALENT:ARG:26 || TALENT:ARG:44) && TALENT:ARG:45 == 0
+			;얌전함・비관적・涙もろいで泣かないが無い
+			PRINTL 눈물로 젖어 있었다……
+			PRINTFORML 공포의 구슬+{MON_NUM * 10}
+			JUEL:ARG:10 += MON_NUM * 10
+		ELSEIF TALENT:ARG:35
+			;수줍음
+			PRINTL 수치로 물들어 있었다……
+			PRINTFORML 치정의 구슬+{MON_NUM * 10}
+			JUEL:ARG:8 += MON_NUM * 10
+		ELSEIF TALENT:ARG:11
+			;반항적
+			PRINTL 분노로 일그러져 있었다……
+		ELSE 
+			PRINTL 절망에 물들어 있었다……
+			PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+			JUEL:ARG:6 += MON_NUM * 10
+		ENDIF
+	ENDIF
+	
+	PRINTL V경험+1
+	PRINTL 정액경험+1
+	EXP:ARG:0 += 1
+	EXP:ARG:20 += 1
+	
+	;처녀
+	SIF TALENT:ARG:0
+		PRINTL 『숫쳐녀브히잇!  첫경험추카해 브히힛……』
+	;젖기쉬움
+	SIF TALENT:ARG:42
+		PRINTL 『이녀석 강간당하눈데 젖고있어 브히히』
+	
+	WAIT
+	RETURN 0
+ENDIF
+
+
+IF RAND:5 == 0
+	
+	;フェラ
+	
+	PRINTDATAW
+		DATAFORM 『어이, 빠라구…우옹, 좀더 햝으라구』
+		DATAFORM 『깨긋하게, 빠으라구』
+		DATAFORM 『싸웠더니 발기햇다 브히힛……』
+	ENDDATA
+	
+	SIF TALENT:ARG:종족 == 4
+		PRINTFORM 듀라한인
+	
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")% 
+	
+	IF TALENT:ARG:종족 == 4
+		PRINTFORM 몸은 구속되고 머리만을 오나홀처럼 사용되어
+	ELSE
+		PRINTFORM 전라로
+	ENDIF
+	PRINTFORMW 아인들의 페니스를 봉사했다. {MON_NUM}명의 정액을 전부 삼키지 않는 한,  그녀의 하반신의 무사는 보장 할 수가 없다………
+	
+	IF CFLAG:ARG:131 > 5  & F
+		;隷属状態
+		IF TALENT:ARG:13
+			;솔직
+			PRINTFORM 주저하지 않고 솔직하게 
+		ELSEIF TALENT:ARG:14
+			;얌전함
+			PRINTFORM 소중한 것처럼 
+		ELSEIF TALENT:ARG:17
+			;프라이드낮음
+			PRINTFORM 땅에 엎드려 조아리며 허리를 흔들면서 
+		ELSEIF TALENT:ARG:35
+			;수줍음
+			PRINTFORM 기대와 수치로 뺨을 붉혔다
+		ELSEIF TALENT:ARG:0
+			;처녀
+			PRINTFORM 처녀를 지키기 위해 
+		ELSE
+			PRINTFORM 오히려 기대에 얼굴을 붉히며 
+		ENDIF
+	ELSEIF CFLAG:ARG:131 > 2 & F
+		;中畏怖状態
+		IF TALENT:ARG:13
+			;솔직
+			PRINTFORM 아인에게 반항하지 못하고 솔직하게 
+		ELSEIF TALENT:ARG:14
+			;얌전함
+			PRINTFORM 신중하게 
+		ELSEIF TALENT:ARG:17
+			;프라이드낮음
+			PRINTFORM 페니스에 아첨하면서 
+		ELSEIF TALENT:ARG:35
+			;수줍음
+			PRINTFORM 페니스를 앞에 두고 얼굴을 붉히며 
+		ELSEIF TALENT:ARG:0
+			;처녀
+			PRINTFORM 처녀를 지키기 위해 
+		ELSE
+			PRINTFORM 이미 거역할 수 없어서 
+		ENDIF
+	ELSE
+		IF TALENT:ARG:11
+			;반항적
+			PRINTFORM 반항적인 눈으로 
+		ELSEIF TALENT:ARG:13
+			;솔직
+			PRINTFORM 아인에게 협박받아 순순히 
+		ELSEIF TALENT:ARG:14
+			;얌전함
+			PRINTFORM 쭈뼛쭈뼛 겁내면서 
+		ELSEIF TALENT:ARG:17
+			;프라이드낮음
+			PRINTFORM 아첨한 웃음을 실실 지으며 
+		ELSEIF TALENT:ARG:35
+			;수줍음
+			PRINTFORM 페니스를 직시하지 못하고 눈을 감은채 
+		ELSEIF TALENT:ARG:0
+			;처녀
+			PRINTFORM 처녀를 지키기 위해 
+		ENDIF
+	ENDIF
+	
+	PRINTFORM %조사선택(SAVESTR:ARG, "는")% 
+	
+	PRINTDATA
+		DATAFORM 강직한 페니스
+		DATAFORM 더러운 페니스
+		DATAFORM 오돌토돌한 페니스
+		DATAFORM 흉악한 페니스
+		DATAFORM 귀두의 날이 솟아있는 페니스
+	ENDDATA
+	
+	PRINT 를 입에 물고, 
+	
+	IF TALENT:ARG:52
+		;혀놀림
+		PRINTFORM 천성적인 혀놀림으로
+		;舌使いボーナス
+		MON_NUM *= 2
+	ELSEIF TALENT:ARG:21
+		;무관심
+		PRINTFORM 사무적으로
+	ELSEIF TALENT:ARG:36
+		;수치심없음
+		PRINTFORM 추잡한 소리를 내며
+	ELSEIF TALENT:ARG:50
+		;습득빠름
+		PRINTFORM 요령을 파악하면서
+	ELSEIF TALENT:ARG:62
+		;악취민감
+		PRINTFORM 악취에 구역질을 하며
+	ELSEIF TALENT:ARG:63
+		;헌신적
+		PRINTFORM 필사적으로 혀를 사용해
+	ENDIF
+	
+	PRINTL 봉사를 계속하였다……
+	
+	PRINTFORML 펠라경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:22 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	;ファーストキス
+	SIF CFLAG:16 == -1
+		CFLAG:16 = 995
+
+ELSEIF RAND:4 == 0
+	
+	;全穴奉仕
+	
+	PRINTDATAW
+		DATAFORM 『박을수 있눈 구멍, 전부 쓴다』
+		DATAFORM 『어이, 샌드위치다』
+		DATAFORM 『귓구멍까지 정액절임으로 해줄거다』
+	ENDDATA
+	
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")% {MON_NUM}명의 아인들에게 둘러쌓여 구멍이라는 모든 구멍에 정액을 부어 넣어지게 되었다……
+	
+	PRINT 아인의
+	
+	PRINTDATA
+		DATAFORM 강직한 페니스
+		DATAFORM 더러운 페니스
+		DATAFORM 오돌토돌한 페니스
+		DATAFORM 흉악한 페니스
+		DATAFORM 귀두의 날이 솟아있는 페니스
+	ENDDATA
+	
+	PRINTFORM 가 목구멍까지 쑤셔 박혀져,  사정과 함께 넘치기 시작한 정액이 %SAVESTR:ARG%의
+	
+	IF CFLAG:ARG:42 == 83
+		PRINT 안경에 들러붙었다……
+	ELSEIF TALENT:ARG:차밍포인트 == 2
+		PRINT 귀여운 눈매에 쏟아졌다……
+	ELSEIF TALENT:ARG:차밍포인트 == 3
+		PRINT 아름다운 코에서 뿜어져 나왔다……
+	ELSEIF TALENT:ARG:차밍포인트 == 22
+		PRINT 윤기나는 머리카락에 들러붙었다……
+	ELSE
+		PRINT 얼굴에 들러붙었다……
+	ENDIF
+	
+	PRINTW   
+	PRINTFORM 아인들은 로션으로 %SAVESTR:ARG%의
+	
+	IF TALENT:ARG:차밍포인트 == 21
+		PRINT 아름다운
+	ELSEIF TALENT:ARG:차밍포인트 == 14
+		PRINT 아름다운 엉덩이애 있는
+	ELSEIF TALENT:ARG:차밍포인트 == 23
+		PRINT 커다란 엉덩이의 사이에 있는
+	ELSEIF TALENT:ARG:125
+		PRINT 민둥산인
+	ELSEIF TALENT:ARG:248
+		PRINT 근육질인 허벅지의 사이에 있는
+	ELSEIF TALENT:ARG:음모의상태 > 200
+		PRINT 엉덩이까지 이어진 빽빽한 음모가 난
+	ELSEIF TALENT:ARG:음모의상태 > 150
+		PRINT 부끄러울 정도로 짙은 음모가 난
+	ENDIF
+	
+	PRINTL 보지와 애널의 준비를 끝마치면, 
+	PRINTFORM %SAVESTR:ARG%의
+	
+	IF TALENT:ARG:99
+		;장신
+		PRINT 커다란 몸을
+	ELSEIF TALENT:ARG:100
+		;작은체형
+		PRINT 작은 몸을
+	ELSEIF TALENT:ARG:115
+		;비만
+		PRINT 포동포동한 몸을
+	ELSEIF TALENT:ARG:248
+		;근육질
+		PRINT 단단한 몸을
+	ELSEIF TALENT:ARG:256
+		;허약
+		PRINT 갸날픈 몸을
+	ELSEIF TALENT:ARG:살집 <= 100
+		PRINT 가느다란 몸을
+	ELSEIF TALENT:ARG:살집 > 200
+		PRINT 육감적인 몸을
+	ELSE
+		PRINT 몸을
+	ENDIF
+	
+	PRINTL 프레스로 찍어누르 듯이 격렬하게 범해갔다……
+	
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 펠라경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:22 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	;ファーストキス
+	SIF CFLAG:16 == -1
+		CFLAG:16 = 995
+
+ELSEIF RAND:3 == 0
+	
+	;屈辱プレイ
+	
+	PRINTDATAW
+		DATAFORM 『너어, 너 오늘부더 가축. 돼지갇이 울부짖으라곳』
+		DATAFORM 『돼지같은, 모습,  보여보라굿』
+		DATAFORM 『너는,  우리둘 이하의,  가축이라곳』
+	ENDDATA
+	
+	PRINTFORM %조사선택(SAVESTR:ARG, "는")%  알몸으로 네발로 엎드려, 
+	
+	IF TALENT:ARG:10 || TALENT:ARG:14
+		;겁쟁이・얌전함
+		PRINT 벌벌 떨면서
+	ELSEIF TALENT:ARG:11
+		;반항적
+		PRINT 분노로 떨리는 눈으로
+	ELSEIF TALENT:ARG:13
+		;솔직
+		PRINT 명령에 따라 필사적으로
+	ELSEIF TALENT:ARG:17
+		;프라이드낮음
+		PRINT 아첨하는 얼굴로 필사적으로
+	ELSEIF TALENT:ARG:35
+		;수줍음
+		PRINT 수치감에 뺨을 븕게 물들이며
+	ENDIF
+	
+	PRINTW 돼지의 울음소리를 흉내 내고 있다……
+	
+	PRINTFORMW {MON_NUM}명의 아인들은 그것을 바라보며 큰소리로 비웃었다,  거기에는 훌륭했던 용사의 모습은 이미 온데간데 없고 비참하게 울음소리를 내는 돼지 한마리만이 있었다. 
+	
+	IF ABL:ARG:17
+		;노출벽
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  어딘가 초조한 듯한 표정으로 그 행위를 반복하고 있다 
+		PRINTFORMW 보여지고 있는 것에 느끼고 있는 것일까……
+		PRINTFORML 치정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:8 += MON_NUM * 10
+	ENDIF
+	
+	IF ABL:ARG:21
+		;마조끼
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  매도 당하는 것으로 쾌감을 기억하는 것 같다
+		PRINTFORMW 『암퇘지뇬잇　용사라구 해서 잘난 척이나 해대굿! 』
+		PRINTFORMW %SAVESTR:ARG%의 눈동자는 왠지 젖어있는 것 같았다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORM 「돼지
+	IF TALENT:ARG:17
+		;프라이드낮음
+		;喜び
+		CALL GOBI_KOUJO, 1
+	ELSE
+		;情けない
+		CALL GOBI_KOUJO, 5
+	ENDIF
+	PRINTFORM 용자라던가 말하라니……바보
+	
+	IF TALENT:ARG:17
+		;프라이드낮음
+		;喜び
+		CALL GOBI_KOUJO, 1
+	ELSE
+		;情けない
+		CALL GOBI_KOUJO, 5
+	ENDIF
+	
+	PRINTFORMW 　꿀꿀, 꾸우울! 」
+	
+	IF TALENT:ARG:17
+		;프라이드낮음
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자존심을 버리고 필사적으로 목숨구걸을 하고 있다
+		PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+		JUEL:ARG:6 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML 치정의 구슬+{MON_NUM * 10}
+	PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+	JUEL:ARG:8 += MON_NUM * 10
+	JUEL:ARG:6 += MON_NUM * 10
+ELSEIF RAND:2 == 0
+	PRINTW 『어느정도까쥐 두꺼운 거가 들어가는짓, 시험해보자곳』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  앞으로 자신에게 닥칠 위기를 느끼고,  필사적으로 애원했다
+	PRINTFORMW 그러나, 야박하게도 그녀의 몸은 다른 오크들에게 구속당해, M자로 다리를 벌리고 무방비한 보지와 항문을 드러내고 있다
+	PRINTFORMW 한 사람의 오크이, 그녀의 애용하는 무기 손잡이를 그녀의 구멍에 비틀어 넣어…………
+	PRINTFORMW %SAVESTR:ARG%의 비명소리가, {MON_NUM}명의 아인들의 귀에 울려 퍼졌다
+	
+	IF TALENT:ARG:40
+		;아픔에약함
+		PRINTFORMW 「아파……그만둬……아아아아앗! 」
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  고통에 참지 못하고 울기 시작했다
+		PRINTFORML 고통의 구슬+{MON_NUM * 10}
+		JUEL:ARG:9 += MON_NUM * 10
+	ENDIF
+	
+	IF ABL:ARG:21
+		;마조끼
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  고통 속에서도 쾌락을 느끼고 있는 것 같다
+		PRINTFORMW 자신의 안에 잠재된 변태성에 %조사선택(SAVESTR:ARG, "는")%  약간의 공포를 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의구슬+{MON_NUM * 10}
+	PRINTFORML 공포의구슬+{MON_NUM * 10}
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+ELSE
+	PRINTW 『엉덩이 내밀고, 부디 버매주세요 라고 말해라』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  엉덩이를 내민 굴욕적인 자세로 던전의 벽을 손으로 짚었다
+	PRINTFORMW 그녀의 들릴락 말락 한 조르는 말을 들은 {MON_NUM}명의 아인들은,  엷은 웃음을 띄우고는 그녀의 질과 항문을 번갈아 범했다
+	PRINTFORMW %SAVESTR:ARG%의 오열은,  아인들의 환성에 묻혀져 던전의 어둠속으로 사라졌다
+	
+	IF TALENT:ARG:70 || TALENT:ARG:73
+		;쾌감에솔직・즉각함락
+		PRINTFORMW 능욕이 계속되면, %SAVESTR:ARG%의 보지에서 조금씩 애액이 흘러넘치게 되었다
+		PRINTFORMW 『느끼게되었구낫, 이모믄 지금까지 닌간 녀자를 면명이고 울려썻지』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  뜨거운 한숨을 내쉬며,  발을 흔들었다
+		PRINTFORML 욕정의구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+		
+	ELSEIF TALENT:ARG:11
+		;반항적
+		PRINTFORMW 『어이, 허리를 드럿! 　아지근 너무 이르다굿! 』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  아인들에게 차갑게 치켜 뜨며 노려보았다
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@SLIME_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 점액이 용사의 다리를 얽어잡아, 움직임을 봉해버렸다
+	RETURN 0
+ENDIF
+
+PRINTDATAW
+	DATAFORM 수상한 점액이 꿈틀대고  있다………
+	DATAFORM 용사는 의사가 느껴지지 않는 점액에 혐오감을 느꼈다
+	DATAFORM 용사는 다가오는 점액에게서 도망 칠 곳이 없다는 것을 깨달았다
+	DATAFORM 용사의 몸을 점액이 손을 대자 그녀는 비명을 질렀다
+	DATAFORM 점액이 용사를 둘러싸고 있다………
+ENDDATA
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 지켜져있기에 점액이 침입하려 하면 튕겨져 나갔다
+	PRINTFORMW 점액은 잠시 헤맸지만, 곧바로 침입구를 찾아내고 꿈틀거리기 시작했다
+	PRINTFORMW %SAVESTR:ARG%의 항문과 입에 점액이 단숨에 흘러 들어왔다
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:5 == 0
+	PRINTW 점액은 용사의 입을 목표로 하여 쇄도했다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  호흡이 곤란하게 되어 발버둥 치면서 괴로워 했다.  곧바로 빠져나왔지만 점액의 일부는 그녀의 소화기관 쪽에 들어가 있어,  그녀를 내부에서부터 유린하고 있었다
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+ELSEIF RAND:4 == 0
+	PRINTW 점액은 용사의 항문을 노리고 쇄도했다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  항문으로부터 역류 하는 대량의 점액에 괴로워 했지만,  온몸이 완전히 점액에 사로 잡혀 저항 할 수 없었다
+	IF CFLAG:ARG:131 > 5 & F
+		;隷属状態
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")% 반대로 허리를 쑥 내밀며、점액의 항학을 즐기고 있는 것 같다……
+	ELSEIF CFLAG:ARG:131 > 3 & F
+		;強畏怖状態
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")% 점액에 열중하고 있다……
+	ELSEIF CFLAG:ARG:131 > 0 & F
+		;弱畏怖状態
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")% 점액의 유입에 익숙해지기 시작했다……
+	ELSE
+		PRINTW 용사는 항문 학대의 고통에 반광란상태가 되어 절규하고 있다
+	ENDIF
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+ELSEIF RAND:3 == 0
+	PRINTW 알몸으로 네발로 엎드린 용사의 항문에 차례차례 점액이 빨아들여져간다
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  아랫배에 힘을 줘 항문으로 정액을 분출 했지만, 
+	PRINTFORMW 이미 대량의 점액이 그녀의 체내로 흘러들어 가 버렸다……
+	PRINTFORML 치정의 구슬+{MON_NUM * 10}
+	PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+	JUEL:ARG:8 += MON_NUM * 10
+	JUEL:ARG:6 += MON_NUM * 10
+ELSEIF RAND:2 == 0
+	PRINTW 점액의 능욕으로, 대량의 점액이 용사의 장에 비집고 들어가 그녀의 배는 약간 부풀어 올라있다
+	IF TALENT:ARG:12
+		;굳건함
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  굳세게 일어서 보려고 했지만
+		PRINTFORMW 곧바로 대량의 점액을 항문으로부터 잔뜩 뿌리며 무릎을 꿇었다
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  배를 붙잡고 엉거주춤 일어섰지만
+		PRINTFORMW 곧바로 대량의 점액을 항문으로부터 잔뜩 뿌리며 무릎을 꿇었다
+	ENDIF
+	
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	EXP:ARG:1 += MON_NUM
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+ELSE
+	PRINTW 점액에의해 온몸을 감싸진 용사는, 머리만 내밀고 투덜투덜 헛소리를 중얼거리고 있다.
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  도움이 오지 않으면 이대로 소화되 버리는 것을 알고 있었지만, 
+	PRINTFORMW 점액에게 체내가 애무되어 이대로 녹아 버려도 괜찮다고 느끼고 있었다
+	PRINTFORMW 점액의 마비성분은 능욕당하는 %SAVESTR:ARG%의 몸을 치유시켰다
+	BASE:ARG:0 += 100
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@INSECT_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 절지동물이 용사의 목덜미에 마비 독을 박아 넣었다……
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 절지동물은 환희의 소리를 높이고、용사는 천천히 갑각을 꼭 껴안았다…
+		DATAFORM 용사는 감정이 느껴지지 않는 절지동물에 욕정을 느끼고 있엇다
+		DATAFORM 용사는 동료나 사명을 잊고、지금은 쾌락에 몸을 맡기고 있었다
+		DATAFORM 눈 앞에 쑥 내밀어진 산란관을 보고、용사는 천천히 애무를 했다
+		DATAFORM 말은 통하지 않아도、절지동물과 용사 사이에는 무언의 사랑이 있었다
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 절지동물은 환희의 소리를 높이고、용사는 주저앉고 말았다…
+		DATAFORM 용사는 감정이 느껴지지 않는 절지동물에 희미한 기대를 부풀렸다
+		DATAFORM 용사는 도움을 부르는 것을 단념하고、허리를 쑥 내밀었다
+		DATAFORM 눈앞에 쑥 내밀어진 산란관을 보며、용사는 뺨을 붉혔다
+		DATAFORM 말은 통하지 않아도、절지동물의 손을 잡고 키스를 할 수 있었다
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 0 & F
+	;弱畏怖状態
+	PRINTDATAW
+		DATAFORM 절지동물의 갑각이 환영하는 듯 삐걱거렸다…
+		DATAFORM 용사는 감정이 느껴지지 않는 절지동물의 능욕에 숨을 삼켰다
+		DATAFORM 용사는 도움을 부르는 것을 단념하고、몸을 맡겼다
+		DATAFORM 눈앞에 쑥 내밀어진 산란관을 보며、용사는 침을 삼켰다
+		DATAFORM 말은 통하지 않아도、절지동물의 환희가 전해져 온다
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 절지동물의 갑각이 삐걱거리고 있다…
+		DATAFORM 용사는 감정이 느껴지지 않는 절지동물의 능욕을 두려워하고 있다
+		DATAFORM 용사는 필사적으로 도움을 구했지만、이 절지동물은 들어줄 기색이 전혀 없다
+		DATAFORM 절지동물은、산란관을 용사의 눈앞에 쑥 내밀었다
+		DATAFORM 용사는 말이 통하지 않는 상대에 절망했다
+	ENDDATA
+ENDIF
+
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTW 『까닥까닥까닥…』
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 지켜져 있어서,  절지동물의 침입을 허락하지 않았다
+	PRINTFORMW 그것은 광분하여, 산란관을 항문에 꽂는다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  격통에 비명을 질렀다……
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	PRINTL 『까닥까닥까닥…』
+	PRINTFORML %SAVESTR:ARG%은 절지동물레게 붙잡혀 산란관을 질에 꽂아 넣어지게 되었다
+	PRINTL 그녀는 비명을 질렀지만 , 절지동물은 전혀 봐주지 않았다
+	PRINTL V경험+1
+	EXP:ARG:0 += 1
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:2 == 0
+	PRINTW 『까닥까닥까닥……』
+	PRINTFORMW %SAVESTR:ARG%의 입에 산란관이 삽입되어 알이 낳아졌다
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+
+ELSE
+	PRINTW 『기익기익시기익』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  항문에 산란관이 삽입되어 알이 낳아졌다
+	PRINTW 회충약을 마시지 않으면, 마계의 곤충이 항문에서 부화하게 될 것이다
+	PRINTFORMW {MON_NUM}마리가 번갈아 그녀를 덮쳐서、엉덩이에서 등까지 알 투성이가 되었다
+	PRINTFORML A경험+{MON_NUM}
+	EXP:ARG:1 += MON_NUM
+	TALENT:ARG:190 = 1
+
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@IVY_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 식물의 덩굴이 용사의 무기를 빼앗았다
+	RETURN 0
+ENDIF
+
+PRINTDATAW
+	DATAFORM 식물의 덩굴이 용사를 얽어맸다.
+	DATAFORM 용사는 덩굴에 꽁꽁 묶여있다
+	DATAFORM 『스륵스륵…』
+	DATAFORM 식물의 조임에、용사는 비명을 질렀다
+	DATAFORM 덩굴이 휘감아서、용사는 초록 덩어리가 되었다
+ENDDATA
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW %SAVESTR:ARG%의 순결은 성스러운 힘으로 지켜지고 있어서, 덩굴이 닻기만 해도  불타버렸다
+	PRINTFORMW 그러나 원래부터 순결에는 흥미가 없는 식물은
+	PRINTFORMW 신경쓰지 않고 %SAVESTR:ARG%의 항문을 목표로 삼았다……
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:2 == 0
+	PRINTW 덩굴은 용사의 목을 졸랐다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  호흡이 곤란해져서 발버둥치며 괴로워했다.  곧 해방되자 그녀는 난폭하게 숨을 내쉬었다
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+ELSE
+	PRINTW 덩굴은 용사의 항문에 뿌리를 내렸다
+	PRINTFORMW %SAVESTR:ARG%의 항문을 유린당하자 목이 터져라 절규소리를 높였다 
+	PRINTW 덩굴은 양분을 흡수하자, 항문으로부터 단번에 뿌리를 뽑아냈다
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@SYOKUSYU_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 용사의 신체를 촉수가 결박했다
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 용사는 준동하는 촉수를 애처로운 듯이 어루만졌다………
+		DATAFORM 용사는 추잡한 형상을 한 촉수에、기대로 눈이 탁해졌다
+		DATAFORM 용사는 촉수가 낸 미약성분에、군침을 늘어뜨리며 코를 슨슨대고 있다
+		DATAFORM 용사의 신체를 촉수가 단단히 묶자、용사는 벌벌떠는 몸을 휘었다……
+		DATAFORM 촉수가 용사를 둘러싸자、용사는 스스로 옷을 벌리며 촉수를 유혹했다
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 용사는 남성기를 닮은 형태의 촉수를 내밀자、얼굴을 붉히고 있다
+		DATAFORM 촉수는 저항이 약해진 용사를 알아차리고、벌벌 떨며 환희했다
+		DATAFORM 용사는 미약성분의 냄새를 맡은 것만으로、가랑이에 습기차는 것을 느끼고 있었다
+		DATAFORM 촉수는 용사를 둘러쌌지만、도망치려고 하지 않는 용사에게 곤혹한 것처럼 꿈틀거렸다
+		DATAFORM 용사의 심체를 촉수가 단단히 묶지만、이전과 같은 저항은 없고、용사는 얼굴을 피할 뿐이었다
+		DATAFORM 용사는 촉수를 앞에 두고、스스로 무기를 버렸다
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 이상하게 촉수는 준동하고 있다………
+		DATAFORM 용사는 추잡한 형상을 한 촉수에、자신의 운명을 저주했다
+		DATAFORM 용사는 촉수가 낸 미약성분에 어질어질 하고 있다
+		DATAFORM 용사의 신체를 촉수가 단단히 묶었다
+		DATAFORM 촉수가 용사를 둘러싸고 있다………
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 지켜지고 있었고,  촉수는 닿기만 해도 마비되었다
+	PRINTFORMW 단념한 촉수는, 다음의 목표를 향해 곧바로 움직이기 시작했다
+	PRINTFORMW %SAVESTR:ARG%의 부정한 구멍으로 비틀어 열었다……
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:5 == 0
+	PRINTW 촉수는 용사의 입을 노려 쇄도했다
+	PRINTFORMW %SAVESTR:ARG%의 목구멍에 대량의 체액을 흘러 넣어 숨막히게 했다.  이윽고 그녀의 의식은 흐리멍텅해져 갔다………
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:5 += MON_NUM * 10
+ELSEIF RAND:4 == 0
+	PRINTW 촉수는 용사의 항문을 노려 쇄도했다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  뒷구멍에 대량의 체액이 흘러 들어와,  직장을 통해 직접적으로 흡수되는 성분으로 인해 몽롱해 졌다
+	PRINTW 이윽고 근육이 이완 해, 야무지지 못하게 항문으로부터 대량의 탁해진 체액을 흘려 보냈다
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:5 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+ELSEIF RAND:3 == 0
+	PRINTW 위로 향해 넘어진 용사의 음부에 굵은 촉수가 비틀어 넣어졌다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  비명을 질렀지만,  얼마 안 있어 대량의 체액이 주입되자 입을 반쯤 열어 놓은채 침을 질질 흘리며 허공을 응시했다
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:5 += MON_NUM * 10
+	EXP:ARG:0 += MON_NUM
+ELSEIF RAND:2 == 0
+	PRINTW 촉수에 묶여 올려져, 용사는 공중에 매달렸다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  입도 질도 항문도,  촉수가 들어갈 수 있는 모든 곳이 범해지고 대량의 체액을 흘러 넣었다
+	PRINTFORMW ……이윽고, 지면에 떨어지는 액체에는 촉수의 체액 이외의 것이 섞이기 시작했다…
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:5 += MON_NUM * 10
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+ELSE
+	PRINTW 용사는 촉수에 유두를 물려 착유당했다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  믿을 수 없다는 얼굴을 했지만,  곧 입에 들어가 있던 촉수에서 흘러드는 체액이 뇌수를 녹여냈다
+	PRINTFORMW 곧 바로 그녀의 유방은 당기기 시작해, 촉수는 착유를 개시했다
+	PRINTFORMW 잠시뒤, %조사선택(SAVESTR:ARG, "는")%  풀려났지만 젖꼭지에서 분출되는 모유는 잠시동안 멈추지 않았다
+	PRINTFORML 분유경험+1
+	EXP:ARG:54 += 1
+ENDIF
+PRINTFORMW 촉수경험+{MON_NUM}
+EXP:ARG:55 += MON_NUM
+RETURN 0
+
+;--------------------------------------------
+@FAILY_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 『좀 더 놀자～』
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 『누나、이제 돌아갈 수 없어』
+		DATAFORM 『이제부터 계속、놀자！』
+		DATAFORM 『와、누나가 와줬어！』
+		DATAFORM 『누나、결혼 하자♪』
+		DATAFORM 『누나、완전히 부서져 버렸네』
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 『누나 무슨 일일까？』
+		DATAFORM 『또 놀러와 주었군요』
+		DATAFORM 『H하게 되었군요、누나♪』
+		DATAFORM 『또 왔네、누나』
+		DATAFORM 『와、또 놀 수 있어！』
+		DATAFORM 『저항해도、괜찮아요？』
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『누나、더 엣찌군요』
+		DATAFORM 『굉장히 장난쳐 줄게！』
+		DATAFORM 『와、새로운 장난감이다！』
+		DATAFORM 『이번에는 누나가、몰리는 측이야♪』
+		DATAFORM 『누나가 망가지는 것、같으은』
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW 『용사님은 지조있구나』
+	PRINTFORMW %SAVESTR:ARG%의 순결은 성스러운 힘으로 보호되고 있어서,  손을 댈수는 없을 것이다
+	PRINTFORMW 요정은 자신의 신장만한 딜도를 꺼내며 말했다
+	PRINTFORMW 『그럼 누나의 이쪽 구멍으로 놀아야지~』
+	PRINTFORMW %SAVESTR:ARG%의 비명이 던전에 울려 퍼졌다
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	PRINTL 『누~나, 내 육변기가 되지 않을래？』
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  1체의 요정에게 음핵을 펠라 당하고 있었다
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  M자로 다리가 벌려진 굴욕을 참고 있었다……
+	PRINTL 쾌C의 구슬+1
+	JUEL:ARG:0 += 10
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:2 == 0
+	PRINTW 『누~나의 안쪽, 어떻게 되어있으려나~』
+	PRINTFORMW %SAVESTR:ARG%의 질 안으로 요정이 기어들어갔다. 그녀의 반응이 재밌었는지,  요정은 질의 주름을 훑으면서 놀고 있었다
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML 快Vの珠+{MON_NUM * 10}
+	EXP:ARG:0 += MON_NUM
+	JUEL:ARG:1 += MON_NUM * 10
+ELSE
+	PRINTW 『핥아 버려ー! 』
+	PRINTFORMW %SAVESTR:ARG%은 클리토리스와 양 유두를 요정들에 의해 펠라 당했다
+	PRINTW 그녀는 요정들의 혀의 기교에 괴로워하고 있다
+	PRINTFORML 快Cの珠+{MON_NUM * 10}
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:0 += MON_NUM * 10
+	JUEL:ARG:5 += MON_NUM * 10
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@GIANT_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 『벌써, 끄친가』
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 『완저니 오나호리 된건가』
+		DATAFORM 『거인 자지 모습 기억해』
+		DATAFORM 『하하　이제 출렁출렁이다』
+		DATAFORM 『이제 거인 자지가 아니면 만족할 수 없나？』
+		DATAFORM 『거인 자지에 딱 맞는 자지 케이스다』
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 『하하 익수케졋네』
+		DATAFORM 『또 왔는지……오나홀녀』
+		DATAFORM 『질리지도 안코　잘 오는구나』
+		DATAFORM 『쓸데업시 거인에게 반항하다니……』
+		DATAFORM 용사는 압도적인 거인의 질량에、거역할 수 없는 왜소한 종족인 것을 깨달았다……
+		DATAFORM 거대한 수컷의 질량에、용사는 무기를 떨어트리고、조용히 무릎 꿇었다
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『조은 오나홀이 될꺼 가따』
+		DATAFORM 『찢어질지도』
+		DATAFORM 『엉덩이와 보지 구멍을 연결해줄까？』
+		DATAFORM 『만족시켜 줘라』
+		DATAFORM 『너무 작아』
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW 『이 녀석, 봉인 되어인나』
+	PRINTFORMW %SAVESTR:ARG%의 순결은 성스러운 힘으로 보호되고 있어서,  아무리 거인이라 한들 봉인을 부수는 것은 불가능했다
+	PRINTFORMW 『새끼손가락이라면, 드러가나』
+	PRINTFORMW %SAVESTR:ARG%의 오므러져있던 항문에 거인의 두꺼운 새끼 손가락이 들어갔다……
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+	EXP:ARG:1 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+IF MON_NUM == 1
+	PRINTL 『핥아라』
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  1명의 거인에게 봉사 했지만 도저히 입에 들어갈수 있는 사이즈가 아니였다
+	PRINTL 절정에 이른 거인의 정액으로, 그녀의 전신은 정액 투성이가 되어버렸다
+	PRINTL 펠라경험+1
+	PRINTL 정액경험+1
+	EXP:ARG:22 += 1
+	EXP:ARG:20 += 1
+	;ファーストキス
+	SIF CFLAG:16 == -1
+		CFLAG:16 = 995
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:4 == 0
+	PRINTFORMW 『마치 오나홀 이구나』
+	PRINTFORMW %SAVESTR:ARG%은  몸통을 한손으로 붙잡힌 채 거인의 페니스를 자극하기 위한 도구,  오나홀이 되고 있었다
+	PRINTFORMW 『이봐 다음 빌려줘』
+	
+	IF TALENT:ARG:41
+		;아픔에강함
+		PRINTFORMW %SAVESTR:ARG%은 잘 훈련 된 탓인지,  의식을 유지할수 있었다
+		PRINTFORMW 『조은 소리가 나오는군, 어이』
+		PRINTFORMW %SAVESTR:ARG%은 두꺼비 같은 소리를 내며,  필사적으로 확장되는 고통을 참고 있었다
+		PRINTFORML 공포의 구슬+{MON_NUM * 10}
+		JUEL:ARG:10 += MON_NUM * 10
+		
+	ELSE
+		;기타
+		PRINTFORMW 최초로 꿰뚫렸을때 실금하고 실신해버린 그녀는, 지금은 몇 번째인지조차 더 이상 알 수 없게 되버렸다
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	PRINTFORML V확장경험+{MON_NUM}
+	PRINTFORML 이상경험+1
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	EXP:ARG:50 += 1
+	EXP:ARG:53 += MON_NUM
+ELSEIF RAND:3 == 0
+	PRINTW 『빨리 해라』
+	PRINTFORMW %SAVESTR:ARG%은 거인들의 페니스를 필사적으로 햝고 있다
+	PRINTW 그녀의 필사적인 애원으로, 성기나 항문의 붕괴만은 용서 해준 것이다
+	PRINTFORMW 빨리 {MON_NUM}명을 가게하지 않으면、언제 기분이 바뀌어도 이상하지 않다………
+	
+	IF TALENT:ARG:52
+		;혀놀림
+		PRINTW 『오오옥, 조그만 거랑 한다는거, 제법 조은 느낌이다』
+		PRINTFORMW %SAVESTR:ARG%은 필사적으로 혀를 봉사하지만,  그 혀기술은 타고난 것이였다
+		PRINTFORMW 거인들은 혀놀림으로 참지 못하고 사정하자 %SAVESTR:ARG%은 양동이를  머리에서부터 쏟아낸 것처럼 정액으로 뒤덮여져 있었다
+		Y *= 2
+	ENDIF
+	
+	PRINTFORML 펠라경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:22 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	;ファーストキス
+	SIF CFLAG:16 == -1
+		CFLAG:16 = 995
+ELSEIF RAND:2 == 0
+	PRINTW 『하하 좋은 목소리로 우는구나』
+	PRINTFORMW %SAVESTR:ARG%의 항문은 거인의 강직한 페니스의 일격으로 찣어져,  처녀처럼 피가 흘러내렸다.  단말마의 비명을 지르고 그녀는 실신했다
+	PRINTFORMW 『또 망가졌다 회복약 가져와 한발 더 가겠다』
+	PRINTFORMW 망가진 항문은、곧바로 회복약으로 재생 당한다。{MON_NUM}명 전부 만족할 때까지………
+	
+	IF TALENT:ARG:34
+		;저항
+		PRINTFORMW %SAVESTR:ARG%은 용기를 쥐어 짜,  도망치기 위해 기어 다녔다
+		PRINTFORMW 『어이, 도망가지맛. 눌러주지』
+		PRINTFORMW %SAVESTR:ARG%은 거인의 거대한 팔로 사지가 붙잡아 무방비한 항문에 다시 한번 거대 페니스를 맞대었다 ……
+		PRINTFORML 공포의 구슬+{MON_NUM * 10}
+		JUEL:ARG:10 += MON_NUM * 10
+		
+	ENDIF
+	
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	PRINTFORML A확장경험+{MON_NUM}
+	PRINTFORML 이상경험+1
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	EXP:ARG:50 += 1
+	EXP:ARG:53 += MON_NUM
+ELSE
+	PRINTW 『조은 생각 났다』
+	PRINTFORMW 거인들은 뭔가 자위를 시작해, 거대한 대야에 정액을 모으기 시작했다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  무슨 일이 일어날지 모르는 채 공포에 떨고 있었다
+	PRINTFORMW 거인은, 큰 대야에 그럭저럭 모인 정액을 그녀에게 보여주고, 말했다
+	PRINTFORMW 『죽기 싫으면 이거 전부 마셔』
+	PRINTFORMW %SAVESTR:ARG%의 얼굴에서 핏기가 사라졌다
+	
+	IF TALENT:ARG:11
+		;반항적
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  차가운 눈으로 거인을 노려봐,  부정의 뜻을 내보였다
+		PRINTFORMW 『잘모르는거 같구나』
+		PRINTFORMW 거인은 %SAVESTR:ARG%의 머리를 커다란 손으로 붙잡고는,  그대로 정액이 모여있는 대야에 쳐 박았다
+		PRINTFORMW 「우붑, 우풉, 우우웁」
+		PRINTFORMW 적당한 때가 되었을쯤 머리를 들어올려보았다. 정액 투성이인 그 얼굴에, 이미 반항의 의사는 찾아볼수 없었다……
+		PRINTFORML 공포의 구슬+{MON_NUM * 10}
+		JUEL:ARG:10 += MON_NUM * 10
+		
+	ENDIF
+	
+	PRINTFORML 정액경험+{MON_NUM * 10}
+	EXP:ARG:20 += MON_NUM * 10
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@MAN_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 『목숨만은 살려주지』
+	RETURN 0
+ENDIF
+
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 『이제、우리들로부터 벗어날 수 없다』
+		DATAFORM 『헤헤、오늘도 좋아하는 걸 해주지』
+		DATAFORM 『어둠의 세계에、완전히 빠진 건가』
+		DATAFORM 『또 범해지러 온 건가』
+		DATAFORM 『또 안기러 왔는지…옛날의 자신이 보면、어떻게 생각할까？』
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 『앗、또 왔나』
+		DATAFORM 『일부러 지는 것 아닌가？』
+		DATAFORM 『그렇게 우리들의 자지가 좋은 건가？』
+		DATAFORM 『입 정도에도네』
+		DATAFORM 용사는 마족의 남자들이 하라는 대로 하고 있다……
+		DATAFORM 마족의 남자들이、허물없이 용사에게 다가가자、용사는 시선을 돌린다
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『좋은 여자 아닌가』
+		DATAFORM 『정말 좋을대로 해도 괜찮은 건가！？』
+		DATAFORM 『아가씨、어둠의 세계에 어서 오세요』
+		DATAFORM 『나쁘게 생각하지 마라、공격해온 것은 너희들이다』
+		DATAFORM 『이런 일이 될거라고 생각한 적 있었나？』
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW 『시시한 여자네. 앞은 지켜도, 뒤가 완전 텅텅 비어버리잖아』
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 보호되어 있었지만,  항문은 막을 수는 없었다
+	PRINTFORMW 『오랏, 구멍으로 삼켜랏』
+	PRINTFORMW %SAVESTR:ARG%의 항문에 단단한 페니스가 비틀어 쑤셔져,  차례차례로 정액이 발사되어 갔다……
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	PRINTL 『육변기가 되어 팔린다면, 매일 밤 안아주지…웃』
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  한명의 남자에게 후배위로 쑤셔지고 있었다
+	PRINTL 그녀는 네발로 엎드린 자세인 채 얼굴을 바닥에 묻고, 뒤로부터 강하게 쑤셔져 울고 있었다
+	PRINTL V경험+1
+	PRINTL 정액경험+1
+	EXP:ARG:0 += 1
+	EXP:ARG:20 += 1
+	WAIT
+	RETURN 0
+ENDIF
+
+
+IF RAND:5 == 0
+	IF TALENT:ARG:109
+		;빈유
+		PRINTFORMW 『한심한 가슴이네! 　엉덩이를 내려, 엉덩이때리기다! 』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  굴욕 투성이가 된 얼굴을 하면서 남자들에게 엉덩이를 내밀었다
+	
+	ELSE
+		PRINTW 『젖도 사용하라구…파이즈리라고 하는거야, 모르는건가？』
+	ENDIF
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")% 알몸으로 남자들의 페니스에 봉했다。{MON_NUM}명 전원의 정액을 삼키지 않는 이상、그녀의 하반신의 무사는 보장할 수 없다………
+	
+	IF TALENT:ARG:110 || TALENT:ARG:114 || TALENT:ARG:119
+		;거유・폭유・超乳
+		PRINTFORMW %SAVESTR:ARG%의 커다란 가슴에 페니스를 끼운 남자들은 차례차례로 절정 해 갔다
+		PRINTFORMW 『오오옷, 이건 좋은 젖이네……페니스 전용 가슴이야』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  가슴의 감각에 뺨을 븕게 물들이며 고개를 숙였다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+		
+	ELSEIF TALENT:ARG:109
+		;빈유
+		PRINTFORMW 『다음은 펠라다! 　너의 엉덩이로 더러워진 페니스를 확실하게 청소해라』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  말한대로 페니스를 봉사 할 수 밖에 없었다……
+	
+	ENDIF
+	PRINTFORML 펠라경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:22 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	;ファーストキス
+	SIF CFLAG:16 == -1
+		CFLAG:16 = 995
+
+ELSEIF RAND:4 == 0
+	
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  육변기 선언을 강요받아, 온몸에 추잡한 단어와 말이 쓰여졌다
+	
+	;落書きの文字
+	PRINTFORM %조사선택(SAVESTR:ARG, "는")% 
+	IF TALENT:ARG:0
+		;처녀
+		PRINT 『처녀구멍 개통 기념』
+	ELSE
+		PRINT 『페니스 너무 좋아』
+	ENDIF
+	
+	IF TALENT:ARG:22 || TALENT:ARG:21
+		;감정부족・무관심
+		PRINT 『고기 변기』
+	ENDIF
+	
+	IF TALENT:ARG:24 || TALENT:ARG:30
+		;보수적・정조관념
+		PRINT 『규중처녀 변기 데뷔』
+	ENDIF
+	
+	IF TALENT:ARG:42
+		;젖기쉬움
+		PRINT 『질척질척 젖어버렸습니다』
+	ENDIF
+	
+	IF TALENT:ARG:70 || TALENT:ARG:73
+		;쾌감에솔직・즉각함락
+		PRINT 『아헤가오 하고있습니다』
+	ENDIF
+	
+	IF TALENT:ARG:110 || TALENT:ARG:114 || TALENT:ARG:119
+		;거유・폭유・超乳
+		PRINT 『암소』
+	ENDIF
+	
+	IF TALENT:ARG:121 || TALENT:ARG:122
+		;후타나리・남자
+		PRINT 『자지노예』
+	ENDIF
+	
+	IF RAND:3 == 0
+		PRINT 『Fuck me』
+	ELSEIF RAND:2 == 0
+		PRINT 『애널 무료』
+	ELSE
+		PRINT 『암퇘지』
+	ENDIF
+	
+	PRINTFORM 라고 몸에 쓰여져 있다
+	
+	PRINTFORMW 번갈아가며 남자들은 질도 입도 항문도 좋아하는 장소를 범해, 정액을 쏟아 넣었다
+	PRINTFORMW 마지막 사람에게 안겨 있을 때에는 이미 %조사선택(SAVESTR:ARG, "는")%  감정이 사라진 얼굴로 온몸의 구멍에서 칠칠치 못하게 정액을 흘리고 있는 변기가 되어 있었다
+	PRINTFORMW {MON_NUM}인분의 바닥에 괸 정액과 애액으로 던전은 이상한 악취에 싸이고、남자들은 변기로 다시 태어난 용사를 환영하고 있다
+	
+	;肌の色で分岐
+	IF TALENT:ARG:244
+		;파란피부
+		PRINTFORMW %SAVESTR:ARG%의 푸른 피부는 정액으로 인해 하얗게 물들었다
+	ELSEIF TALENT:ARG:253
+		;갈색피부
+		PRINTFORMW %SAVESTR:ARG%의 건강한 갈색피부는 정액으로 인해 음란한 색의 대비를 보여줬다
+	ELSEIF TALENT:ARG:255
+		;하얀피부
+		PRINTFORMW %SAVESTR:ARG%의 새하얀 피부는 더러운 정액으로 인해 더럽혀져 갔다
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 펠라경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:22 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	;ファーストキス
+	SIF CFLAG:16 == -1
+		CFLAG:16 = 995
+ELSEIF RAND:3 == 0
+	PRINTW 『용사 주제에, 대변도 참을 수 없는 거냐？』
+	PRINTFORMW %SAVESTR:ARG%의 항문에는 물약으로 관장되어 격렬한 배설감을 견디고 있었다
+	PRINTFORMW 『자위로 가라. 싸기 전에 간다면 화장실에 데려가주지』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  필사적으로 자위를 했지만 이런 비정상적인 상황에서 흥분 할 수가 없었는지, 
+	PRINTFORMW 항문으로부터 오물을 흩뿌리며 쓰러졌다
+	PRINTFORMW 남자들은 그것을 보고 모멸의 말을 내뱉자, %조사선택(SAVESTR:ARG, "는")%  굴욕감에 울어 버렸다
+	
+	IF TALENT:ARG:62
+		;악취민감
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신이 배설한 것의 냄새에 얼굴을 찌푸리며 굴욕감을 느꼈다
+		PRINTFORML 고통의 구슬+{MON_NUM * 10}
+		JUEL:ARG:9 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML 치정의 구슬+{MON_NUM * 10}
+	PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+	PRINTL 자위경험+1
+	PRINTL 조교자위경험+1
+	JUEL:ARG:8 += MON_NUM * 10
+	JUEL:ARG:6 += MON_NUM * 10
+	EXP:ARG:10 += 1
+	EXP:ARG:11 += 1
+ELSEIF RAND:2 == 0
+	PRINTW 『그 용사님이 애널을 빨고 있다니ー』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  목숨 보장에 대한 대가로,  자리에 있는 모든 남자들의 애널을 햝아 청소 할 것을 약속 당하고 말았다
+	PRINTFORMW 『네 녀석 자존심이라고는 없는 건가』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  필사적으로 빨으면서 죽는것 보다는 낫다고 마음 속으로 다짐했지만,  눈에는 눈물이 떠 올라 있었다
+	PRINTFORMW 봉사가 끝나면 굴욕적인 말을 하게 강요받아,  %조사선택(SAVESTR:ARG, "는")%  울면서 자신은 애널을 빠는 것을 정말 좋아합니다라는 선언을 하게 되었다
+	
+	IF TALENT:ARG:17
+		;프라이드낮음
+		PRINTFORMW 자존심이 낮은 %조사선택(SAVESTR:ARG, "는")%  자신이 애널 청소 노예입니다 라고 필사적으로 선언하고 있었다 
+		Y += 10
+	ENDIF
+	
+	IF TALENT:ARG:62
+		;악취민감
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  더러운 남자들의 항문을 너무 빨아서 토할 것 같은 기분이 되었다
+		Y += 10
+	ENDIF
+	
+	PRINTFORML 고통의 구슬+{MON_NUM * 10}
+	PRINTFORML 공포의 구슬+{MON_NUM * 10}
+	JUEL:ARG:9 += MON_NUM * 10
+	JUEL:ARG:10 += MON_NUM * 10
+ELSE
+	PRINTW 『목숨이 아까워 누구에게든 사타구니를 벌리는 창녀같으니』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  엉덩이를 높게 들어 올려서 내민 굴욕적인 자세인 채로,  몇 명의 남자의 페니스를 받아내며 욕설과 정액을 받고 있었다
+	PRINTFORMW 『어서 말해!  사실의 용사의 책무보다 자지쪽이 중요한 음탕한 변태녀라고말야! 』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  격렬하게 삽입되는 페니스의 감촉에 중간중간 말이 끊으면서 굴욕적인 대사를 반복하였다
+	
+	IF TALENT:ARG:17
+		;프라이드낮음
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  필사적으로 음란한 대사를 반복하며 목숨을 구걸 하고 있었다.  그 얼굴은 공포와 아 첨으로 비뚤어져 있었다……
+		PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+		JUEL:ARG:6 += MON_NUM * 10
+	ENDIF
+	
+	IF ABL:ARG:21 > 0
+		;마조끼
+		PRINTFORMW 격렬한 언어폭력에, %조사선택(SAVESTR:ARG, "는")%  마음 속 깊은 곳에서 정욕이 싹 트는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@GIRL_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	IF TALENT:ARG:100
+		;작은체형
+		IF RAND:3 == 0
+			PRINTW 『나, 착한 아이로 해줘』
+		ELSEIF RAND:2 == 0
+			PRINTW 『언니가 좋은 거 가르쳐줄게』
+		ELSE
+			PRINTW 『어라ー？발기하는 거야？』
+		ENDIF
+	ELSE
+		PRINTW 『한심해애, 발기하는 거야？』
+	ENDIF
+	
+	MON_NUM = E:(B + 99)
+	
+	IF MON_NUM == 1
+		;一人
+		PRINTFORMW 『혼자 독차지 해줄게. 혹시, 여자는 처음？』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  마계의 여자에게 펠라 되고 있었다
+		PRINTFORM 보라색의 기다란 혀가 %SAVESTR:ARG%의
+		IF TALENT:ARG:318 == 1
+			PRINT 거근
+		ELSEIF TALENT:ARG:318 == 2
+			PRINT 단소포경자지
+		ELSEIF TALENT:ARG:318 == 3
+			PRINT 포경자지
+		ELSEIF TALENT:ARG:318 == 4
+			;自然発生はしない
+			PRINT 말자지
+		ELSE
+			;0もしくはイレギュラー
+			PRINT 자지
+		ENDIF
+		PRINTFORMW 에 얽혀붙어, 정액을 빨아간다
+		IF TALENT:ARG:318 == 1
+			PRINTW 『턱이 빠질 것 같아♪』
+		ELSEIF TALENT:ARG:318 == 2
+			PRINTW 『용사님의 여기, 아기 자지네♪』
+		ELSEIF TALENT:ARG:318 == 3
+			PRINTW 『껍질을 벗겨서 귀두 벗겨줄게』
+		ELSEIF TALENT:ARG:318 == 4
+			;自然発生はしない
+			PRINTW 『후후, 누군가에게 개조당했어？』
+		ELSE
+			;0もしくはイレギュラー
+			PRINTW 『사정하지 않도록 힘껏 힘내봐♪』
+		ENDIF
+		PRINTFORML 치정의 구슬+{MON_NUM * 10}
+		PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+		PRINTFORML 절정경험+{MON_NUM}
+		PRINTFORML 사정경험+{MON_NUM}
+		
+		JUEL:ARG:8 += MON_NUM * 10
+		JUEL:ARG:6 += MON_NUM * 10
+		EXP:ARG:2 += MON_NUM
+		EXP:ARG:3 += MON_NUM
+		
+	ELSEIF RAND:3 == 0
+		PRINTFORMW 『모두가 펠라해줄게. 사정하면, 벌 줄 거야』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  마계의 여자들에게 펠라 되고 있었다
+		PRINTFORM 보라색의 기다란 혀들이 %SAVESTR:ARG%의
+		IF TALENT:ARG:318 == 1
+			PRINT 거근
+		ELSEIF TALENT:ARG:318 == 2
+			PRINT 단소포경자지
+		ELSEIF TALENT:ARG:318 == 3
+			PRINT 포경자지
+		ELSEIF TALENT:ARG:318 == 4
+			;自然発生はしない
+			PRINT 말자지
+		ELSE
+			;0もしくはイレギュラー
+			PRINT 자지
+		ENDIF
+		PRINTFORMW 에 얽혀붙어, 정액을 빨아간다
+		IF TALENT:ARG:318 == 1
+			PRINTW 『턱이 빠질 것 같아♪』
+		ELSEIF TALENT:ARG:318 == 2
+			PRINTW 『용사님의 여기, 아기 자지네♪』
+		ELSEIF TALENT:ARG:318 == 3
+			PRINTW 『껍질을 벗겨서 귀두 벗겨줄게』
+		ELSEIF TALENT:ARG:318 == 4
+			;自然発生はしない
+			PRINTW 『후후, 누군가에게 개조당했어？』
+		ELSE
+			;0もしくはイレギュラー
+			PRINTW 『사정하지 않도록 힘껏 힘내봐♪』
+		ENDIF
+		
+		PRINTFORML 치정의 구슬+{MON_NUM * 10}
+		PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+		PRINTFORML 절정경험+{MON_NUM}
+		PRINTFORML 사정경험+{MON_NUM}
+		
+		JUEL:ARG:8 += MON_NUM * 10
+		JUEL:ARG:6 += MON_NUM * 10
+		EXP:ARG:2 += MON_NUM
+		EXP:ARG:3 += MON_NUM
+		
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 『마계의 여자의 맛을 알려줄게……두번 다시 인간 여자따위 안을 수 없을 정도로』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  마계의 여자들에게 기승위로 걸쳐져서 착정 당하고 있었다
+		
+		IF TALENT:ARG:318 == 1
+			;巨根
+			PRINTW 『아핫, 커다래♪』
+		ELSEIF TALENT:ARG:318 == 2
+			;短小包茎
+			PRINTW 『너무 작아서 들어와 있는지도 모르겠어……♪』
+		ELSEIF TALENT:ARG:318 == 4
+			;馬ペニス
+			PRINTW 『대, 대단해……커다래애』
+		ELSE
+			;普通・包茎
+			PRINTW 『사정하지 않도록 힘껏 힘내봐♪』
+		ENDIF
+		
+		PRINTFORML 치정의 구슬+{MON_NUM * 15}
+		PRINTFORML 굴복의 구슬+{MON_NUM * 15}
+		PRINTFORML 성교경험+{MON_NUM}
+		PRINTFORML 절정경험+{MON_NUM}
+		PRINTFORML 사정경험+{MON_NUM}
+		
+		JUEL:ARG:8 += MON_NUM * 15
+		JUEL:ARG:6 += MON_NUM * 15
+		EXP:ARG:5 += MON_NUM
+		EXP:ARG:2 += MON_NUM
+		EXP:ARG:3 += MON_NUM
+		
+	ELSE
+		PRINTFORMW 『가슴 맛있어？잔뜩 뽑아 내 줄테니까』
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  마계의 여자들에게 수유 되면서 페니스를 훑어 내지고 있었다
+		PRINTFORM 보라색 손톱의 부드러운 손이 %SAVESTR:ARG%의
+		IF TALENT:ARG:318 == 1
+			PRINT 거근
+		ELSEIF TALENT:ARG:318 == 2
+			PRINT 단소포경자지
+		ELSEIF TALENT:ARG:318 == 3
+			PRINT 포경자지
+		ELSEIF TALENT:ARG:318 == 4
+			;自然発生はしない
+			PRINT 말자지
+		ELSE
+			;0もしくはイレギュラー
+			PRINT 자지
+		ENDIF
+		PRINTFORMW 를 사랑스러운듯 쓰다음어 갔다
+		IF TALENT:ARG:318 == 1
+			PRINTW 『커다랗네……빨리 편해지라구♪』
+		ELSEIF TALENT:ARG:318 == 2
+			PRINTW 『껍질 덮여진 단소자지♪　벌써부터 끈적끈적해』
+		ELSEIF TALENT:ARG:318 == 3
+			PRINTW 『껍질을 벗겨서 귀두 벗겨줄게』
+		ELSEIF TALENT:ARG:318 == 4
+			;自然発生はしない
+			PRINTW 『후후, 누군가에게 개조당했어？』
+		ELSE
+			;0もしくはイレギュラー
+			PRINTW 『사정하지 않도록 힘껏 힘내봐♪』
+		ENDIF
+		
+		PRINTFORML 치정의 구슬+{MON_NUM * 5}
+		PRINTFORML 굴복의 구슬+{MON_NUM * 15}
+		PRINTFORML 절정경험+{MON_NUM}
+		PRINTFORML 사정경험+{MON_NUM}
+		
+		JUEL:ARG:8 += MON_NUM * 5
+		JUEL:ARG:6 += MON_NUM * 15
+		EXP:ARG:2 += MON_NUM
+		EXP:ARG:3 += MON_NUM
+	ENDIF
+	
+	WAIT
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 『완전히 그럴 기분이 들어 버렸어』
+		DATAFORM 『어서오세요……후후、또 왔다』
+		DATAFORM 『이제、잊을 수 없지요』
+		DATAFORM 『쾌락에 중독……된 거구나%UNICODE(0x2661) *1%』
+		DATAFORM 『새끼고양이쨩、여기로 오세요%UNICODE(0x2661) *1%』
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 『어머、또 왔군요』
+		DATAFORM 『일부러 지고 있어ー？　아하핫』
+		DATAFORM 『어묻의 세계、흥미 있는 거야？』
+		DATAFORM 『약하다。진심으로 하고 있어？』
+		DATAFORM 용사는 마족 여자들이 하라는 대로 하고 있다……
+		DATAFORM 마족 여자들이、허물없이 용사에게 다가가자、용사는 시선을 돌린다
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『안아줄게%UNICODE(0x2661) *1%』
+		DATAFORM 『망가질 때까지 안아줄게』
+		DATAFORM 『몰랐어？　어둠의 세계 여자는 남자든 여자든 안아』
+		DATAFORM 『남자따윈 필요없는 몸으로 만들어 줄게요』
+		DATAFORM 『여자끼리니까 기분 좋은 곳은 전부 알고 있는 거야』
+		DATAFORM 『즐거움도 모르는 거야』
+		DATAFORM 『마왕님께 레즈비언 노예로 받을 수 없을까』
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	IF RAND:2 == 0
+		IF RAND:2 == 0
+			PRINTFORML 『성실하네. 이런 아이는 뒷구멍에 눈뜨기가 쉽지』
+		ELSE
+			PRINT 『이쪽의 구멍
+			IF RAND:2 == 0
+				PRINT 의 쪽이
+			ELSE
+				PRINT 이라도
+			ENDIF
+			PRINTW 느낄 수 있도록 해・줄・게』
+		ENDIF
+
+		PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 보호되고 있지만, 항문까지는 막을 수가 없었다
+		IF RAND:2 == 0
+			PRINTW 『풀어줄게. 지금부터 잔뜩 만지작거려줄테니까』
+		ELSE
+			PRINTW 『기분 좋아지면 소리 내도 괜찮다구？』
+		ENDIF
+		PRINTFORMW %SAVESTR:ARG%의 항문 주름 하나 하나까지도 마계의 여자가 정성스럽게 햝아 갔다……
+	ELSE
+		
+	ENDIF
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신의 안에서 무언가가 쑤시는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML A경험+{MON_NUM * 5}
+	EXP:ARG:1 += MON_NUM * 5
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	IF RAND:3 == 0
+		PRINTL 『잘한다면은 보상을 줄게』
+	ELSEIF RAND:3 == 0
+		PRINTL 『그런 것은 전혀 기분 좋지 않아』
+	ELSE
+		PRINTL 『좀더 노력하세요라구』
+	ENDIF
+	PRINTFORML %조사선택(SAVESTR:ARG, "는")%  쿤니를 강요 당하고 있다
+	PRINTL 그녀는 개와 같이 엎드려, 필사적으로 여주인에게 봉사하고 있었다
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신의 안에서 무언가가 쑤시는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTL 레즈경험+1
+	EXP:ARG:40 += 1
+	WAIT
+	RETURN 0
+ENDIF
+
+
+IF RAND:5 == 0
+	PRINTW 『당신의 새직업은 커닐링구스 노예네, 전 용사님♪』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")% 알몸으로 개같이 엎드려 여자들에게 쿠니하고 있다。{MON_NUM}사람 전부 만족시키지 못 하면、목숨의 보장은 없다
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신의 안에서 무언가가 쑤시는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML 레즈경험+{MON_NUM}
+	EXP:ARG:40 += MON_NUM
+ELSEIF RAND:4 == 0
+	PRINTW 『싫어라, 이쪽의 굵은 것도 할 수 있는 거 아니래니？』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  여자들의 심심풀이로써 질과 항문에 딜도가 삽입되고 있었다
+	PRINTFORMW 입이 비면 커닐링구스를 강요받아, 안면에 조수를 분출 당했다
+	PRINTFORMW 어느덧 흥분한 주변 여자들은 서로 몸을 얽히면서 %SAVESTR:ARG%를 중심으로 둘러싸 레즈 난교 파티가 시작 되었다
+	PRINTFORMW {MON_NUM}사람과 %SAVESTR:ARG%의 육체는 서로 쾌락을 탐내며、애액의 웅덩이를 만들고 있다
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신의 안에서 무언가가 쑤시는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 레즈경험+{MON_NUM}
+	EXP:ARG:40 += MON_NUM
+	EXP:ARG:0 += MON_NUM
+	EXP:ARG:1 += MON_NUM
+ELSEIF RAND:3 == 0
+	PRINTW 『오줌 누고 싶어져 버렸네』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  싫은 예감이 들었다
+	PRINTFORMW 『그렇지, 흘리지 않고 마시면 놓쳐줄게. 만약 흘리면…오늘부터 여자 변기로 전직이네♪』
+	PRINTFORMW %SAVESTR:ARG%의 입을 사타구니에 꽉 눌리고 그대로 얼굴에 소변을 누었다
+	PRINTFORMW 야박하게도 입 끝에서 차례차례로 흘러넘친다………
+	PRINTFORMW 여자들은 울면서도 오줌을 먹게된 %SAVESTR:ARG%를 비웃으며, 모멸의 말을 던졌다
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신의 안에서 무언가가 쑤시는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML 치정의 구슬+{MON_NUM * 10}
+	PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+	PRINTFORML 레즈경험+{MON_NUM}
+	EXP:ARG:40 += MON_NUM
+	JUEL:ARG:8 += MON_NUM * 10
+	JUEL:ARG:6 += MON_NUM * 10
+ELSEIF RAND:2 == 0
+	PRINTW 『자, 모두의 앞에서 자위하는 거야』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  여러 사람들이 보는 가운데 자위를 강요 당했다
+	PRINTFORMW 『단 딸감은 여자로 할 것. 머라고 해도 오늘부터 레즈비언 노예인 것이니까요, 전 용사님♪』
+	PRINTFORMW %SAVESTR:ARG%의 주위의 여자들이 추잡하게 목을 뒤섞었다
+	PRINTFORMW 그녀는 자신의 성벽이 일그러져가는 것을 느끼면서, 여자를 딸감으로 절정했다
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  자신의 안에서 무언가가 쑤시는 것을 느꼈다
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML 치정의 구슬+{MON_NUM * 10}
+	PRINTFORML 굴복의 구슬+{MON_NUM * 10}
+	PRINTL 자위경험+1
+	PRINTL 조교자위경험+1
+	PRINTL 절정경험+1
+	PRINTFORML 레즈경험+{MON_NUM}
+	EXP:ARG:40 += MON_NUM
+	JUEL:ARG:8 += MON_NUM * 10
+	JUEL:ARG:6 += MON_NUM * 10
+	EXP:ARG:10 += 1
+	EXP:ARG:11 += 1
+	EXP:ARG:2 += 1
+ELSE
+	PRINTW 『한 번 여자아이를 강간해 보고 싶었던거야ー♪』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  엉덩이를 높이 들어 내민 굴욕적인 자세인 채, 페니스 밴드로 육단지를 격렬하게 찔리고 있었다
+	PRINTFORMW 『아핫, 언니 여자애한테 덥쳐져서 흥분하고 있는거야？』
+	PRINTFORMW %SAVESTR:ARG%은 여자에게 범해진다는 비정상적인 상황에서 자신의 안쪽에서 무언가가  싹트는 것을 느꼈다
+	
+	IF ABL:ARG:22 > 0 || TALENT:ARG:81
+		;레즈끼・바이
+		PRINTFORMW %SAVESTR:ARG%의 안에서 싹튼 감정은 그녀를 흥분시키게 하였다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML V경험+{MON_NUM}
+	EXP:ARG:0 += MON_NUM
+	PRINTFORML 레즈경험+{MON_NUM}
+	EXP:ARG:40 += MON_NUM
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@BEAST_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 『그르르르르』
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 용사는 마수의 악취에 어딘가 사랑스러움을 느끼고 있었다
+		DATAFORM 마수는 천천히 용사에게 다가가、땅에 엎드려 조아린 용사를 덮친다……
+		DATAFORM 용사는 짐승과 교미하는 것에 익숙해진 자신에게 오싹했다
+		DATAFORM 마수의 눈에 응시되자、용사는 단지 낮게 엎드려、허리를 내밀 수 밖에 없었다
+		DATAFORM 용사는 짐승의 난폭한 교미를 이미 피할 수 없다……
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 용사는 마수의 악취에 점차 익숙해져온 것 같다……
+		DATAFORM 마수는 조용히、확인하는 듯 용사를 보고 있었다
+		DATAFORM 용사는 이번에도 마수와 교미를 하는 자신을 상상하며、기묘한 배덕감을 느끼고 있었다
+		DATAFORM 마수의 눈은、어딘가 기다리고 있었던 것 같은、욕정의 색에 비뚤어지고 있었다
+		DATAFORM 용사는 거듭된 수교를 생각해 내고、가랑이를 적시고 있었다……
+		DATAFORM 마수는 용사에게 조용히 가까워져、고개를 숙인 용사를 차갑게 내려다본다
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『그르르르』
+		DATAFORM 용사는 야수의 악취에 익숙해지고 있다
+		DATAFORM 용사는 짐승과 교미하는 자신이 아직 믿기지 않는다
+		DATAFORM 『가오옥』
+		DATAFORM 용사는 짐승의 사나움에 공포를 느꼈다
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW 『그르릉』
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 보호되어 있다고는 하나, 짐승은 뒷구멍으로 성욕을 해소하려고 했다
+	PRINTFORMW 「아읏, 우읏, 싫엇……으아앗」
+	PRINTFORMW %SAVESTR:ARG%의 항문을 짐승의 성기가 유린했다……
+	
+	IF TALENT:ARG:314 == 2
+		;인랑
+		PRINTFORMW 인랑인 %조사선택(SAVESTR:ARG, "는")%  짐승끼리의 짝짓기에 조금 느끼고 있는것 처럼 보인다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	PRINTFORMW 수간경험+{MON_NUM}
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	EXP:ARG:56 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	PRINTW 야수는 용사의 신체에 올라탔다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  보지에 짐승의 페니스가 무리하게 삽입되자 비명을 질렀다
+	PRINTW 이윽고, 그녀의 안에 야수의 정액이 내뿜어졌다…………
+	
+	IF TALENT:ARG:314 == 2
+		;인랑
+		PRINTFORMW 인랑인 %조사선택(SAVESTR:ARG, "는")%  짐승끼리의 짝짓기에 조금 느끼고 있는것 처럼 보인다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTW V경험+1
+	EXP:ARG:0 += 1
+	PRINTFORMW 수간경험+1
+	EXP:ARG:56 += 1
+	WAIT
+	RETURN 0
+ENDIF
+
+PRINTW 야수는 번갈아가며 용사와의 교미를 시작했다
+PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  야수와 교미하고 있다는 현실을 직시 하지 못하고 암캐의 모습인 채 멍하니 있었다
+
+IF TALENT:ARG:314 == 2
+	;인랑
+	PRINTFORMW 인랑인 %조사선택(SAVESTR:ARG, "는")%  짐승끼리의 짝짓기에 조금 느끼고 있는것 처럼 보인다……
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:5 += MON_NUM * 10
+ENDIF
+
+PRINTFORML 고통의 구슬+{MON_NUM * 10}
+PRINTFORML 공포의 구슬+{MON_NUM * 10}
+PRINTFORML V경험+{MON_NUM}
+EXP:ARG:0 += MON_NUM
+JUEL:ARG:9 += MON_NUM * 10
+JUEL:ARG:10 += MON_NUM * 10
+PRINTFORMW 수간경험+{MON_NUM}
+EXP:ARG:56 += MON_NUM
+RETURN 0
+
+;--------------------------------------------
+@BRAIN_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 용사는 필사적으로 목숨을 구걸하고 있다
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 용사는 브레인이터의 뇌개조에、이미 저항은 없고、아양떠는 얼굴로 안겨왔다……
+		DATAFORM 브레인이터는 아양떠는 먹이를 앞에두고、기묘한 웃음 소리를 들려주었다
+		DATAFORM 용사는 뇌가 개조된 다른 차원의 쾌락에、탁해진 눈을 기대로 둔하게 빛내고 있었다……
+		DATAFORM 브레인이터는 입맛을 다신다。아무래도 이 먹이는、포식의 기쁨을 알아버린 것 같다
+		DATAFORM 용사는 이제부터 시잘될 다른 차원의 쾌락에 흥분해、가볍게 실금까지 했다
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 용사는 브레인이터의 뇌개조에、자신이 익숙해졌다는 걸 느끼고 있었다……
+		DATAFORM 브레인이터는 무너지기 시작한 먹이를 앞에 두고、기분 나쁘게 웃었다
+		DATAFORM 용사는 자신의 뇌가、이미 돌이킬 수 없게 된 것을 느끼고 있었다
+		DATAFORM 브레인이터는 특별한 먹이를 앞에 두고、혀를 낼름거렸다。용사는 입 다물고 그것을 보고 있다……
+		DATAFORM 용사는 브레인이터가 가져다준 다른 차원의 쾌락을 생각해내고、이를 악물었다……
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 용사는 브레인이터가 어떤 적인지 알고 있었으므로、두려워했다
+		DATAFORM 용사는 반광란하며 브레인이터로부터 도망치고 있다
+		DATAFORM 용사는 필사적으로 목숨을 구걸하고 있다
+		DATAFORM 용사는 망가졌는지、웃기 시작했다
+		DATAFORM 용사는 、무서운 나머지 실금했다
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW 브레인이터는 용사의 머리를 덥석 물고, 정신을 지배하기 시작했다
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 보호되고 있지만, 브레인이터에게는 관심 없는 일이였다
+	PRINTFORMW 「아읏, 앗, 아읏, 아아, 아……」
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  눈을 뒤집고 칠칠치 못하게 혀를 내뻗으며,  성대하게  대변을 지리고 있었다
+	PRINTFORML A경험+{MON_NUM * 10}
+	EXP:ARG:1 += MON_NUM * 10
+	WAIT
+	RETURN 0
+ENDIF
+
+
+IF MON_NUM == 1
+	PRINTL 「아…아…아ー앗, 아ー앗」
+	PRINTFORML 브레인이터의 단단한 촉수가 %SAVESTR:ARG%의 두개골을 꿰뚫고, 뇌를 들이 마시기 시작했다
+	PRINTL 그녀는 사지를 엉망진창으로 움직이는가 싶더니, 실금하고, 죽었다
+	BASE:ARG:0 = 0
+	PRINTFORML 이상경험+1
+	EXP:ARG:50 += 1
+	WAIT
+	RETURN 0
+ENDIF
+
+IF RAND:40 == 0
+	PRINTL 「아으…옷 오ー옥 아ー으읏」
+	PRINTFORML 브레인이터의 촉수가 %SAVESTR:ARG%의 귀에서 그대로 뇌까지 파고들어 그녀의 뇌를 유린하였다
+	PRINTL 그녀는 온몸의 구멍에서 체액을 쏟아내며 촉수의 움직임에 따라 경련을 일으키다가,  죽었다
+	BASE:ARG:0 = 0
+	PRINTFORML 이상경험+1
+	EXP:ARG:50 += 1
+ELSE
+	PRINTW 브레인이터의 촉수가 용사를 휘감았다. 용사는 필사적으로 몸무림치지만, 도망칠 수 없다
+	PRINTFORMW 브레인이터는 %SAVESTR:ARG%의 뇌에 촉수를 찔러 넣어,  뇌수에 직접 미약을 흘려 넣었다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  강렬한 쾌락으로 인해 실금하다가 폐인이 되었다
+	PRINTFORMW 아무래도 배는 고프지 않았던 모양이다
+	PRINTFORML 이상경험+1
+	EXP:ARG:50 += 1
+ENDIF
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@HORSE_RYOU(ARG,F)
+#DIM MON_NUM
+;--------------------------------------------
+
+;オトコの場合
+IF TALENT:ARG:122
+	PRINTW 『브르르릇』
+	RETURN 0
+ENDIF
+
+IF CFLAG:ARG:131 > 5  & F
+	;隷属状態
+	PRINTDATAW
+		DATAFORM 용사는 말과의 교미에도 이미 저항은 없고、기대하는 눈으로 발기한 말의 음경에 손대었다……
+		DATAFORM 말은 살짝 패배한 용사의 곁으로 다가서、발기한 페니스를 과시해왔다
+		DATAFORM 용사는 저항 없이 말과 어울리게 된 자신을 깨닫고、기분 나쁜 웃는 얼굴을 띄웠다……
+		DATAFORM 말은 몹시 거칠게 용사를 덮치고、용사도 또한 그것을 받아들이고 있다……
+		DATAFORM 용사는 말의 난폭함에、어쩐지 가슴이 설렘을 느끼고 있었다……
+	ENDDATA
+ELSEIF CFLAG:ARG:131 > 3 &  F
+	;強畏怖状態
+	PRINTDATAW
+		DATAFORM 용사는 저항을 체념하고、발기한 말의 페니스에 살그머니 손을 댔다……
+		DATAFORM 말은 저항을 그만 둔 용사를 보고、경멸하는 듯 웃었다
+		DATAFORM 용사는 말과 교미하는 자신을 생각해내고、오싹했다
+		DATAFORM 말이 크게 울자、용사는 무서워하며、무기를 떨어트렸다……
+		DATAFORM 용사는 말의 난폭함이 뇌에 새겨져서、저항할 수 없게 되었다……
+	ENDDATA
+ELSE
+	PRINTDATAW
+		DATAFORM 『브르르르』
+		DATAFORM 용사는 말의 악취에 익숙해지고 있다
+		DATAFORM 용사는 말과 교미하는 자신이 믿기지 않는다
+		DATAFORM 『히이잉！』
+		DATAFORM 용사는 말의 난폭함에 두려워했다
+	ENDDATA
+ENDIF
+
+MON_NUM = E:(B + 99)
+
+IF TALENT:ARG:273
+	;처녀 봉인
+	PRINTFORMW 마구간의 서큐버스가 마법을 걸자, 말의 페니스는 형태 그대로 애널의 크기에 맞취 줄어들었다
+	PRINTFORMW %SAVESTR:ARG%의 순결은 신성한 힘으로 보호되고 있지만, 뒷구멍을 막으면 배설을 할 수가 없기 때문에 항문 봉인은 되어 있지 않았다
+	PRINTFORMW 『당신 소질 있네, 후후. 그런 걸 마법도 없이 삼키다니』
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  항문이 비틀려지는 것 같은 감각을 참을 수 밖에 없었다……
+	
+	IF TALENT:ARG:314 == 2
+		;인랑
+		PRINTFORMW 인랑인 %조사선택(SAVESTR:ARG, "는")%  짐승끼리의 짝짓기에 조금 느끼고 있는것 처럼 보인다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML A경험+{MON_NUM}
+	PRINTFORML 정액경험+{MON_NUM}
+	PRINTFORMW 수간경험+{MON_NUM}
+	EXP:ARG:1 += MON_NUM
+	EXP:ARG:20 += MON_NUM
+	EXP:ARG:56 += MON_NUM
+	WAIT
+	RETURN 0
+ENDIF
+
+IF MON_NUM == 1
+	PRINTW 말은 용사의 신체에 올라탔다
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  보지에 짐승의 페니스가 무리하게 삽입되자 비명을 질렀다
+	PRINTW 이윽고, 그녀의 안에 말의 정액이 내뿜어졌다…………
+	
+	IF TALENT:ARG:314 == 2
+		;인랑
+		PRINTFORMW 인랑인 %조사선택(SAVESTR:ARG, "는")%  짐승끼리의 짝짓기에 조금 느끼고 있는것 처럼 보인다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:ARG:5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTW V경험+1
+	EXP:ARG:0 += 1
+	PRINTFORMW 수간경험+1
+	EXP:ARG:56 += 1
+	RETURN 0
+ENDIF
+
+PRINTW 말은 번갈아가며 용사와의 교미를 시작했다
+PRINTFORMW %SAVESTR:ARG%은 말과 교미하고 있다는 현실을 직시하지 못하고는 네발로 엎드린 모습 그대로 멍하니 있었다
+
+IF TALENT:ARG:314 == 2
+	;인랑
+	PRINTFORMW 인랑인 %조사선택(SAVESTR:ARG, "는")%  짐승끼리의 짝짓기에 조금 느끼고 있는것 처럼 보인다……
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:ARG:5 += MON_NUM * 10
+ENDIF
+
+PRINTFORML 고통의 구슬+{MON_NUM * 10}
+PRINTFORML 공포의 구슬+{MON_NUM * 10}
+PRINTFORML V경험+{MON_NUM}
+EXP:ARG:0 += MON_NUM
+JUEL:ARG:9 += MON_NUM * 10
+JUEL:ARG:10 += MON_NUM * 10
+PRINTFORMW 수간경험+{MON_NUM}
+EXP:ARG:56 += MON_NUM
+RETURN 0
+
+
+
+
+
+
+
+
+
+
+;--------------------------------------------
+@PC_RYOU, ARG:0, ARG:1
+#DIM MON_NUM
+;ARG:0 = 魔王側
+;ARG:1 = 勇者側
+;ＰＣ陵辱
+;--------------------------------------------
+PRINTL  
+DRAWLINE
+PRINTL  
+
+PRINTL [0] - 능욕을 본다
+PRINTL [1] - 능욕하지 않는다
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 2
+	GOTO INPUT_LOOP
+ENDIF
+SIF RESULT == 1
+	RETURN 0
+
+;武器チェック
+W:0 = CFLAG:(ARG:0):550
+;素手の場合ソードを装備
+IF W:0 <= 0
+	W:0 = 40
+	CFLAG:(ARG:0):550 = W:0
+ENDIF
+CALL EQUIP_DATABASE
+
+;武器分岐
+IF W:1 == 49
+	;텐타클
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %조사선택(SAVESTR:(ARG:1), "를")% 촉수로 결박했다
+	
+	IF TALENT:(ARG:1):273
+		;처녀 봉인
+		PRINTFORMW %SAVESTR:(ARG:1)%의 순결은 성스러운 힘으로 지켜지고 있지만, 뒤는 그렇지 않다
+		PRINTFORMW 미끌미끌하게 빛나는 촉수를 조종해 %조사선택(SAVESTR:(ARG:0), "는")% %SAVESTR:(ARG:1)%의 항문을 공략하기 시작했다……
+		
+		IF ABL:(ARG:1):22 > 0 || TALENT:(ARG:1):81
+			;레즈끼・바이
+			PRINTFORMW %SAVESTR:(ARG:1)%의 안에 싹튼 감정은 그녀를 고조시켜나간다……
+			PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+			JUEL:(ARG:1):5 += MON_NUM * 10
+		ENDIF
+		
+		PRINTFORML A경험+10
+		PRINTFORML 고통의 구슬+80
+		PRINTFORML 공포의 구슬+80
+		PRINTFORML 레즈경험+5
+		PRINTFORML 촉수경험+1
+		EXP:(ARG:1):1 += 10
+		JUEL:(ARG:1):9 += 80
+		JUEL:(ARG:1):10 += 80
+		EXP:(ARG:0):40 += 5
+		EXP:(ARG:1):40 += 5
+		EXP:(ARG:1):55 += 1
+		WAIT
+		RETURN 0
+	ENDIF
+	
+	PRINTFORMW 몸을 움직일 수 없는 %조사선택(SAVESTR:(ARG:1), "를")% 공중에 매달아, 
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 흉악한 촉수로 %SAVESTR:(ARG:1)%의 질을 꿰뚫었다……
+	
+	IF ABL:(ARG:1):22 > 0 || TALENT:(ARG:1):81
+		;레즈끼・바이
+		PRINTFORMW %SAVESTR:(ARG:1)%의 안에 싹튼 감정은 그녀를 고조시켜나간다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:(ARG:1):5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML 고통의 구슬+80
+	PRINTFORML 공포의 구슬+80
+	PRINTFORML 레즈경험+1
+	PRINTFORML V경험+10
+	PRINTFORML 촉수경험+1
+	EXP:(ARG:1):0 += 10
+	EXP:(ARG:0):40 += 1
+	EXP:(ARG:1):40 += 1
+	JUEL:(ARG:1):9 += 80
+	JUEL:(ARG:1):10 += 80
+	EXP:(ARG:1):55 += 1
+	IF EXP:(ARG:1):0 > 0 && TALENT:(ARG:1):0 == 1
+		TALENT:(ARG:1):0 = 0
+		PRINTL 【처녀상실】
+		;初体験の相手を記録（初期値が0のため, +1して記録）
+		CFLAG:(ARG:1):15 = NO:(ARG:0) + 1
+		CSTR:(ARG:1):3 = %SAVESTR:(ARG:0)%
+	ENDIF
+	
+	WAIT
+	RETURN 0
+	
+ENDIF
+
+IF RAND:5 == 0
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %SAVESTR:(ARG:1)%의 신체를 핥는 것처럼 응시하고 있다
+ELSEIF RAND:4 == 0
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %조사선택(SAVESTR:(ARG:1), "를")% 어떻게 요리할까 혀로 입술을 핥고 있다
+ELSEIF RAND:3 == 0
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %조사선택(SAVESTR:(ARG:1), "를")% 애무하고 있다
+ELSEIF RAND:2 == 0
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %SAVESTR:(ARG:1)%에게 엎드려 절하도록 시키고 있다
+ELSE
+	PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %SAVESTR:(ARG:1)%에게 암컷 포즈를 시키고 있다
+ENDIF
+CALL MONSTER_DATA
+
+
+
+
+IF TALENT:(ARG:1):273
+	;처녀 봉인
+	PRINTFORMW %SAVESTR:(ARG:1)%의 순결은 성스러운 힘으로 지켜지고 있지만, 뒤는 그렇지 않다
+	PRINTFORMW 딜도를 꺼낸 %조사선택(SAVESTR:(ARG:0), "는")% %SAVESTR:(ARG:1)%의 항문을 공략하기 시작했다……
+	
+	IF ABL:(ARG:1):22 > 0 || TALENT:(ARG:1):81
+		;레즈끼・바이
+		PRINTFORMW %SAVESTR:(ARG:1)%의 안에 싹튼 감정은 그녀를 고조시켜나간다……
+		PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+		JUEL:(ARG:1):5 += MON_NUM * 10
+	ENDIF
+	
+	PRINTFORML A경험+10
+	PRINTFORML 고통의구슬+50
+	PRINTFORML 공포의구슬+50
+	PRINTFORML 레즈경험+5
+	EXP:(ARG:1):1 += 10
+	JUEL:(ARG:1):9 += 50
+	JUEL:(ARG:1):10 += 50
+	EXP:(ARG:0):40 += 5
+	EXP:(ARG:1):40 += 5
+	WAIT
+	RETURN 0
+ENDIF
+
+REPEAT 3
+	IF RAND:7 == 0
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 커널링구스를 강제시켰다
+		PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 알몸으로 개처럼 납작 엎드려 커널링구스 하고 있다
+		PRINTFORMW 혀의 움직임이 나쁘면 %조사선택(SAVESTR:(ARG:0), "는")% 용사의 머리를 붙잡고 얼굴로 성기를 문지르며 즐겼다
+		
+		IF TALENT:(ARG:1):11
+			;반항적
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% %조사선택(SAVESTR:(ARG:0), "를")% 반항적인 눈으로 바라보고 있지만, 목숨이 아쉽기에 명령에 따랐다
+		ELSEIF TALENT:(ARG:1):17
+			;프라이드낮음
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 비굴한 얼굴로 개처럼 %SAVESTR:(ARG:0)%의 비소를 핥고 있다
+		ENDIF
+		
+		PRINTFORML 레즈경험+1
+		EXP:(ARG:0):40 += 1
+		EXP:(ARG:1):40 += 1
+	ELSEIF RAND:6 == 0
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 부하에게 크고 작은 이런 저런 딜도를 가져오게 시켰다
+		PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 질과 항문에 딜도를 삽입당해 %SAVESTR:(ARG:0)%에게 쑤셔 돌려졌다
+		PRINTFORMW 오물과 애액으로 더러워진 딜도는, %조사선택(SAVESTR:(ARG:1), "가")% 혀로 핥아 깨끗하게 하지 않으면 안 된다
+		
+		IF TALENT:(ARG:1):12
+			;굳건함
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 이를 악물고 치욕을 견디고 있다
+		ELSEIF TALENT:(ARG:1):26
+			;비관적
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 눈에 눈물을 머금은 채 사죄의 말을 반복하고 있다
+		ENDIF
+		
+		PRINTFORML V경험+10
+		PRINTFORML A경험+10
+		PRINTFORML 레즈경험+1
+		EXP:(ARG:0):40 += 1
+		EXP:(ARG:1):40 += 1
+		EXP:(ARG:1):0 += 10
+		EXP:(ARG:1):1 += 10
+		IF EXP:(ARG:1):0 > 0 && TALENT:(ARG:1):0 == 1
+			TALENT:(ARG:1):0 = 0
+			PRINTL 【처녀상실】
+			CFLAG:(ARG:1):15 = 101
+		ENDIF
+	ELSEIF RAND:5 == 0
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 잡무를 하던 오크의 몸종들을 불러 일열로 늘어 세워, 
+		PRINTFORMW %SAVESTR:(ARG:1)%에게 펠라로 모두 만족시키라고 명령했다
+		PRINTFORMW 그리고, 알몸으로 네 발로 기면서 봉사하는 %조사선택(SAVESTR:(ARG:1), "를")% 
+		IF TALENT:(ARG:0):121 == 1
+			PRINTFORMW 뒤에서 터질 듯이 발기한 자랑거리인 페니스로 난폭하게 범했다
+		ELSE
+			PRINTFORMW 뒤에서 페니스 밴드로 난폭하게 범했다
+		ENDIF
+		PRINTFORMW %조사선택(SAVESTR:(ARG:1), "가")% 질의 자극으로 봉사를 소홀히 하면, 오크들로부터 가차없이 욕설이 날아들었다
+		PRINTFORMW 『브히힛, %SAVESTR:(ARG:0)%님, 또, 이러거 부타캅니다…어이! 　쉬지마라고! 』
+		
+		IF TALENT:(ARG:1):13
+			;솔직
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 얌전히 명령을 따라 오크의 더러운 자지를 핥고 있었다
+		ELSEIF TALENT:(ARG:1):62
+			;악취민감
+			PRINTFORMW 악취에 민감한 %조사선택(SAVESTR:(ARG:1), "는")%, 오크의 더러운 자지에 몇 번이나 토해내 매도당했다
+		ENDIF
+		
+		PRINTFORML 치정의 구슬+100
+		PRINTFORML 굴복의 구슬+100
+		PRINTFORML 레즈경험+1
+		PRINTFORML 펠라경험+10
+		PRINTFORML 정액경험+10
+		PRINTFORML V경험+10
+		EXP:(ARG:1):0 += 10
+		EXP:(ARG:0):40 += 1
+		EXP:(ARG:1):40 += 1
+		EXP:(ARG:1):20 += 10
+		EXP:(ARG:1):22 += 10
+		JUEL:(ARG:1):8 += 100
+		JUEL:(ARG:1):6 += 100
+		;ファーストキス
+		SIF CFLAG:16 == -1
+			CFLAG:16 = 995
+		IF EXP:(ARG:1):0 > 0 && TALENT:(ARG:1):0 == 1
+			TALENT:(ARG:1):0 = 0
+			PRINTL 【처녀상실】
+			;初体験の相手を記録（初期値が0のため, +1して記録）
+			CFLAG:(ARG:1):15 = NO:(ARG:0) + 1
+			CSTR:(ARG:1):3 = %SAVESTR:(ARG:0)%
+		ENDIF
+
+	ELSEIF RAND:4 == 0
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 부하들을 불러모아 
+		IF TALENT:(ARG:0):121 == 1
+			PRINTFORMW 자랑하는 대물을 불끈불끈 발기시켜 배면좌위로 %SAVESTR:(ARG:1)%의 애널을 범해, 
+		ELSE
+			PRINTFORMW 페니스밴드를 붙이고 배면자위로 %SAVESTR:(ARG:1)%의 애널을 범해, 
+		ENDIF
+		PRINTFORMW 그 상태에서 모인 관객에게 공개자위를 보여줄 것을 명령했다
+		
+		IF TALENT:(ARG:1):35
+			;수줍음
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 끈적한 시선에 얼굴을 새빨갛게 하고 자위를 시작했다
+		ELSEIF TALENT:(ARG:1):60
+			;자위쉬움
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 아무런 저항도 하지 않고 자위를 시작해, 필사적으로 목숨을 구걸하는 걸 반복했다
+		ENDIF
+		
+		PRINTFORML 치정의 구슬+200
+		PRINTFORML 굴복의 구슬+200
+		PRINTL 자위경험+1
+		PRINTL 조교자위경험+1
+		PRINTFORML 레즈경험+1
+		PRINTFORML A경험+10
+		EXP:(ARG:0):40 += 1
+		EXP:(ARG:1):40 += 1
+		EXP:(ARG:1):1 += 10
+		JUEL:(ARG:1):8 += 200
+		JUEL:(ARG:1):6 += 200
+		EXP:(ARG:1):10 += 1
+		EXP:(ARG:1):11 += 1
+	ELSEIF RAND:3 == 0
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% %SAVESTR:(ARG:1)%의 머리카락을 붙잡아 
+		IF TALENT:(ARG:0):121 == 1
+			PRINTFORMW 드높고 딱딱하게 발기한 자신의 페니스를 입안에 쑤셔넣어, 억지로 이라마치오 했다
+		ELSE
+			PRINTFORMW 자신의 보지에 얼굴을 꽉 눌러 억지로 커널링구스 시켰다
+		ENDIF
+		
+		IF TALENT:(ARG:1):11
+			;반항적
+			PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% %조사선택(SAVESTR:(ARG:0), "를")% 반항적인 눈으로 바라보고 있지만, 목숨이 아쉽기에 명령에 따랐다
+		ELSEIF TALENT:(ARG:1):17
+			;프라이드낮음
+			PRINTFORML %조사선택(SAVESTR:(ARG:1), "는")% 비굴한 얼굴로 개처럼 %SAVESTR:(ARG:0)%의 
+			IF TALENT:(ARG:0):121 == 1
+				PRINT 자지
+			ELSE
+				PRINT 비소
+			ENDIF
+			PRINTFORMW 를 핥고 있다
+		ENDIF
+		
+		PRINTFORML 치정의 구슬+150
+		PRINTFORML 굴복의 구슬+150
+		PRINTFORML 레즈경험+1
+		
+		IF TALENT:(ARG:0):121 == 1
+			PRINTFORML 펠라경험+10
+			PRINTFORML 정액경험+10
+			EXP:(ARG:1):20 += 10
+			EXP:(ARG:1):22 += 10
+		ENDIF
+		
+		JUEL:(ARG:1):8 += 150
+		JUEL:(ARG:1):6 += 150
+		EXP:(ARG:0):40 += 1
+		EXP:(ARG:1):40 += 1
+	ELSEIF RAND:2 == 0
+		PRINTFORMW %SAVESTR:(ARG:0)%은 줄로 %SAVESTR:(ARG:1)%을 묶자
+		IF RAND:3 == 0
+			PRINTFORM 네발로 엎드리는 모습이 된 %SAVESTR:(ARG:1)%의 등에
+			IF RAND:2 == 0
+				PRINTFORMW 채찍으로 몇번이고 후려쳐서, 
+				PRINTFORMW 등에 븕은 상흔이 몇번이고 새겨졌다
+			ELSE
+				PRINTFORMW 초를 늘어뜨려
+				PRINTFORMW 지나친 뜨거움에 %SAVESTR:(ARG:1)%의 몸이 튀어 오를때 마다,  더욱 새로운 촛농이 추가 되었다
+			ENDIF
+			PRINTFORML 치정의 구슬+200
+			PRINTFORML 굴복의 구슬+200
+			PRINTFORML 긴박경험+5
+			PRINTFORML 레즈경험+1
+			JUEL:(ARG:1):8 += 200
+			JUEL:(ARG:1):6 += 200
+			EXP:(ARG:1) :51 += 5
+			IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+				EXP:(ARG:0):40 += 1
+				EXP:(ARG:1):40 += 1
+			ENDIF
+		ELSE
+			PRINTFORMW %SAVESTR:(ARG:1)%의 질과 항문에 딜도를 삽입하여 집요하게 %SAVESTR:(ARG:0)%를 몰아세웠다
+			PRINTFORMW 엉덩이 살이 븕게 부어 오를 정도로 얻어 맞고,  %SAVESTR:(ARG:0)%가 질릴때까지 %SAVESTR:(ARG:1)%는 범해졌다
+			PRINTFORML V경험+10
+			PRINTFORML A경험+10
+			PRINTFORML 레즈경험+10
+			PRINTL 긴박경험+5
+			EXP:(ARG:0):40 += 10
+			EXP:(ARG:1):40 += 10
+			EXP:(ARG:1):0 += 10
+			EXP:(ARG:1):1 += 10
+			EXP:(ARG:1) :51 += 5
+			IF EXP:(ARG:1):0 > 0 && TALENT:(ARG:1):0 == 1
+				TALENT:(ARG:1):0 = 0
+				PRINTL 【처녀상실】
+				CFLAG:(ARG:1):15 = 101
+			ENDIF
+		ENDIF
+		IF ABL:(ARG):21 >= 3
+			PRINTFORMW %SAVESTR:(ARG:1)%의 안에 싹튼 감정은 그녀를 고조시켜나간다……
+			PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+			JUEL:(ARG:1):5 += MON_NUM * 10
+		ENDIF
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 서큐버스나 마녀들을 불러모아 레즈난교파티를 열었다
+		PRINTFORMW 각각 애정을 담고서 얽혀있었지만, 
+		PRINTFORMW 온자 네 발로 엎드린 %SAVESTR:(ARG:0)%의 인간의자가 된 %SAVESTR:(ARG:1)%만이 인간 이하의 취급을 받고 있었다
+		PRINTFORMW %조사선택(SAVESTR:(ARG:1), "는")% 후배위로 페니스밴드로 질도 항문도 가차없이 범해져 
+		PRINTFORMW 얼굴 쪽은 끊임없이 커닐링구스가 요구되어지고 있었다
+		PRINTFORMW 그 모습을 등에 앉아 자위하면서 %조사선택(SAVESTR:(ARG:0), "는")% 만족스럽게 보고 있었다………
+		
+		PRINTFORML V경험+10
+		PRINTFORML A경험+10
+		PRINTFORML 레즈경험+10
+		EXP:(ARG:0):40 += 10
+		EXP:(ARG:1):40 += 10
+		EXP:(ARG:1):0 += 10
+		EXP:(ARG:1):1 += 10
+		IF EXP:(ARG:1):0 > 0 && TALENT:(ARG:1):0 == 1
+			TALENT:(ARG:1):0 = 0
+			PRINTL 【처녀상실】
+			CFLAG:(ARG:1):15 = 101
+		ENDIF
+	ENDIF
+	WAIT
+	PRINTL  
+REND
+
+IF ABL:(ARG:1):22 > 0 || TALENT:(ARG:1):81
+	;레즈끼・바이
+	PRINTFORMW %SAVESTR:(ARG:1)%의 안에 싹튼 감정은 그녀를 고조시켜나간다……
+	PRINTFORML 욕정의 구슬+{MON_NUM * 10}
+	JUEL:(ARG:1):5 += MON_NUM * 10
+ENDIF
+
+WAIT
+PRINTL  
+
+RETURN 0
+
+;--------------------------------
+@VICTORY_RYOUZYOKU,ARG
+#DIM MON_COUNT
+;--------------------------------
+;勇者が魔界のなんかにあてられて間違いを起こします
+;인간 타입 한정・낮은 확률
+
+ARG = A
+
+;カルマが低くないとダメ
+SIF CFLAG:ARG:151 > -50
+	RETURN 0
+
+SIF RAND:12 == 0
+	RETURN 0
+
+
+B = RAND:3 * 100
+
+C = B + 7
+IF E:C > 0
+	LOCAL:1 = E:B
+	PRINTFORM 마계의 독기에 쬐이게 된 용사는
+	CALL MONSTER_NAME,LOCAL:1,0
+	PRINTFORMW 를 강요하기 시작했다（카르마:-10）
+	CALL KARMA, ARG, -10
+ENDIF
+
+;まずはペニスを使った凌辱を先行実装
+
+IF E:C == 1
+	;カタコト
+;	CALL ORC_RYOU_YUSYA,ARG
+;ELSEIF E:C == 2
+	;슬라임
+	CALL SLIME_RYOU_YUSYA,ARG
+;ELSEIF E:C == 3
+	;곤충
+;	CALL INSECT_RYOU_YUSYA,ARG
+;ELSEIF E:C == 4
+	;蔦촉수
+;	CALL IVY_RYOU_YUSYA,ARG
+;ELSEIF E:C == 5
+	;촉수
+;	CALL SYOKUSYU_RYOU_YUSYA,ARG
+;ELSEIF E:C == 6
+	;요정
+;	CALL FAILY_RYOU_YUSYA,ARG
+;ELSEIF E:C == 7
+	;거인
+;	CALL GIANT_RYOU_YUSYA,ARG
+ELSEIF E:C == 8
+	;남성
+;	CALL MAN_RYOU_YUSYA,ARG
+ELSEIF E:C == 9
+	;여성
+	CALL GIRL_RYOU_YUSYA,ARG
+;ELSEIF E:C == 10
+	;짐승
+;	CALL BEAST_RYOU_YUSYA,ARG
+;ELSEIF E:C == 11
+	;뇌간
+;	CALL BRAIN_RYOU_YUSYA,ARG
+;ELSEIF E:C == 12
+	;말
+;	CALL HORSE_RYOU_YUSYA,ARG
+ENDIF
+PRINTL  
+
+
+RETURN 0
+
+@ORC_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@SLIME_RYOU_YUSYA(ARG)
+#DIM PLAY
+
+PLAY = RAND:10 + 5
+
+IF TALENT:ARG:121 == 1 || TALENT:ARG:122 == 1 || TALENT:ARG:326 == 1
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  페니스의 욕구에 거역하지 못하고,  점액에 자신의 페니스를 찔러 넣어 능욕을 즐기고 있었다……
+	
+	PRINTFORML 욕정의 구슬+{PLAY * 10}
+	JUEL:ARG:5 += PLAY * 10
+	
+ELSE
+
+ENDIF
+
+RETURN 0
+
+@INSECT_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@IVY_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@SYOKUSYU_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@FAILY_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@GIANT_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@MAN_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@GIRL_RYOU_YUSYA(ARG)
+#DIM PLAY
+
+PLAY = RAND:10 + 5
+
+IF TALENT:ARG:121 == 1 || TALENT:ARG:122 == 1 || TALENT:ARG:326 == 1
+	PRINTFORMW %조사선택(SAVESTR:ARG, "는")%  페니스의 욕구를 거역하지 못하고,  빳빳해진 페니스로 여자 마족의 능욕을 즐기고 있었다……
+	
+	PRINTFORML 욕정의 구슬+{PLAY * 10}
+	JUEL:ARG:5 += PLAY * 10
+	
+ELSE
+
+ENDIF
+
+RETURN 0
+
+@BEAST_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@BRAIN_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+@HORSE_RYOU_YUSYA(ARG)
+
+RETURN 0
+
+

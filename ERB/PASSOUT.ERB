@@ -1,0 +1,602 @@
+﻿;eraIM@Sから流用
+
+;=============================================================================
+;실신 처리 관련
+;=============================================================================
+;失神についての色々--------------------------------
+;실신 판정
+;TFLAG:864～882：실신 중의 상태 보존 및 계산용
+;TFLAG:883～894：실신 중의 UP 보존
+;TFLAG:895는 실신했는지 여부 판별용
+;TFLAG:896で恐怖、TFLAG:897で絶頂、TFLAG:898で苦痛を管理（少なくとも1つのフラグが2になると失神、失神してる間は2を継続）
+;TFLAG:899で失神中のコマンド実行回数管理（失神したコマンドもカウントする、つまり1以上だと失神中）
+;--------------------------------------------------
+@PASSOUT_CHECK
+;システムを許可していない場合は処理しない
+SIF FLAG:70 == 1
+RETURN 0
+
+TFLAG:895 = 0
+
+Z = 0
+Z = NOWEX:0 + NOWEX:1 + NOWEX:2 + NOWEX:3
+
+;2コマンド連続で「2箇所以上強絶頂+αの絶頂」を満たすとランダムで失神
+;（失神中はカウントしない、「強絶頂か2箇所以上絶頂」を続けている限りランダムで外れてもフラグは維持）
+IF Z >= 16 && TFLAG:897 == 0 && TFLAG:899 < 1 && RAND:10 < 8
+	TFLAG:897 = 1
+ELSEIF Z >= 16 && TFLAG:897 == 1 && TFLAG:899 < 1 && RAND:10 < 6
+	TFLAG:895 = 1
+	TFLAG:897 = 2
+	EXP:65 += 1
+	PRINTL 실신
+ELSEIF Z < 16 && TFLAG:897 < 2 && TFLAG:899 < 1
+	TFLAG:897 = 0
+ENDIF
+
+A = PALAM:9
+SIF A >= 15000
+	A -= 15000
+	
+;一度に7500以上の苦痛を受けるか計15000ごとにランダムで失神（既に失神状態の場合はスキップ）
+IF (UP:9 >= 7500 || UP:9 + A >= 15000) && TFLAG:899 < 1 && RAND:10 < 5
+	IF TFLAG:895 == 0
+		TFLAG:895 = 2
+		TFLAG:898 = 2
+		EXP:65 += 1
+		PRINTL 실신
+	ELSEIF TFLAG:895 == 1
+		TFLAG:895 = 4
+		TFLAG:898 = 2
+	ENDIF
+ENDIF
+
+;一度に5000以上の恐怖を受けるとランダムで失神
+IF UP:10 >= 5000 && TFLAG:899 < 1 && RAND:10 < 5
+	IF TFLAG:895 == 0
+		TFLAG:895 = 3
+		TFLAG:896 = 2
+		EXP:65 += 1
+		PRINTL 실신
+	ELSEIF TFLAG:895 == 2
+		TFLAG:895 = 6
+		TFLAG:896 = 2
+	ENDIF
+ENDIF
+
+;失神中にコマンド実行
+IF TFLAG:896 >= 2 || TFLAG:897 >= 2 || TFLAG:898 >= 2
+	IF TFLAG:899 == 0
+		TFLAG:899 = 1
+	ELSEIF TFLAG:899 >= 1
+		TFLAG:899 += 1
+	ENDIF
+ENDIF
+
+;失神中に（失神した次のコマンドから）
+IF TFLAG:899 >= 2
+	;強烈な絶頂、一度に5000以上の苦痛を受ける、失神中に3回コマンドを実行のいずれかでランダムで失神から回復
+	;一度条件を満たした場合回復するか調教を終えるまでコマンド実行毎に判定
+	IF Z >= 16 || (TFLAG:899 >= 2 && UP:9 >= 5000) || TFLAG:899 >= 4
+		TFLAG:896 = 3
+		TFLAG:897 = 3
+		TFLAG:898 = 3
+		PRINTL 실신에서 회복
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;失神中のテキスト処理
+;-------------------------------------------------
+@PASSOUT_TEXT
+;失神した時
+IF TFLAG:895 > 0
+	REPEAT 31
+		TFLAG:(864 + COUNT) = 0
+	REND
+ENDIF
+
+;失神回復時のテキストや口上は以下に羅列した情報を参照します。
+;判定に加えたい調教状況やアイテムを追加したい場合はここに書き加えて下さい。
+;非挿入中且つコンドーム装備中に대량사정するとゴムから溢れる…という個人的設定のため少しややこしくなってます
+;余りにも面倒なためテキストは사정系と装備系に分け、どちらかしか表示されないようになってます（優先度は사정＞装備）。
+;また、ぶっかけ用に使われているCFLAG:74(eraIm@sPでは現在未使用）もここで一旦リセットします。
+
+;それ以降
+IF TFLAG:899 > 1
+	IF TFLAG:0 + TFLAG:6 >= 1
+		IF SELECTCOM == 80 || CFLAG:74 == 1 || CFLAG:74 == 2
+			IF TEQUIP:35 == 0
+				TFLAG:868 += TFLAG:0 + TFLAG:6
+			ELSE
+				TFLAG:868 += (TFLAG:0 + TFLAG:6) - 1
+			ENDIF
+		ELSEIF SELECTCOM == 29 || CFLAG:74 == 3 || CFLAG:74 == 5
+			IF TEQUIP:35 == 0
+				TFLAG:869 += TFLAG:0 + TFLAG:6
+			ELSE
+				TFLAG:869 += (TFLAG:0 + TFLAG:6) - 1
+			ENDIF
+		ENDIF
+	ENDIF
+	IF TFLAG:1 + TFLAG:6 >= 1
+		IF TEQUIP:35 == 0
+			TFLAG:870 += TFLAG:1 + TFLAG:6
+		ELSE
+			TFLAG:870 += (TFLAG:1 + TFLAG:6) - 1
+		ENDIF
+	ENDIF
+	IF TFLAG:2 + TFLAG:6 >= 1
+		IF SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 22 || SELECTCOM == 23 || SELECTCOM == 34 ||SELECTCOM == 64 || SELECTCOM == 120 || SELECTCOM == 121 || SELECTCOM == 128 || SELECTCOM == 129 || SELECTCOM == 130 || SELECTCOM == 131 || SELECTCOM == 132 || SELECTCOM == 133 || SELECTCOM == 134
+			SIF TEQUIP:35 == 0
+				TFLAG:871 += TFLAG:2 + TFLAG:6
+		ELSEIF SELECTCOM == 26 || SELECTCOM == 27 || SELECTCOM == 28 || SELECTCOM == 29 || SELECTCOM == 36
+			SIF TEQUIP:35 == 0
+				TFLAG:872 += TFLAG:2 + TFLAG:6
+		ENDIF
+	ENDIF
+	TFLAG:873 += TFLAG:3
+	IF TFLAG:2 + TFLAG:6 >= 1
+		IF SELECTCOM == 33 || CFLAG:74 == 4 || CFLAG:74 == 6 || CFLAG:74 == 7
+			IF TEQUIP:35 == 0
+				TFLAG:874 += TFLAG:6
+			ELSE
+				TFLAG:874 += TFLAG:6 - 1
+			ENDIF
+		ENDIF
+	ENDIF
+	SIF TFLAG:2 >= 1
+		TFLAG:875 += TFLAG:2
+	IF TFLAG:15 >= 1
+		IF SELECTCOM == 101
+			TFLAG:876 += 100
+		ELSEIF SELECTCOM == 102
+			TFLAG:876 += 1000
+		ELSE
+			TFLAG:876 += TFLAG:15
+		ENDIF
+	ENDIF
+ENDIF
+
+;失神初回
+IF TFLAG:899 == 1
+	;バイブ等挿入系アイテム装備判定
+	TFLAG:867 = 0
+	TFLAG:877 = 0
+	SIF TEQUIP:13 == 1 || TEQUIP:19 == 1
+		TFLAG:867 = 1
+	SIF TEQUIP:11 == 1
+		TFLAG:877 = 1
+	;取り付け系アイテム装備判定
+	TFLAG:866 = 0
+	TFLAG:878 = 0
+	SIF TEQUIP:14 == 1 || TEQUIP:17 == 1
+		TFLAG:866 = 1
+	SIF TEQUIP:15 == 1 || TEQUIP:16 == 1
+		TFLAG:878 = 1
+	;被虐系アイテム装備判定
+	TFLAG:864 = 0
+	TFLAG:865 = 0
+	TFLAG:879 = 0
+	SIF TEQUIP:44
+		TFLAG:864 = TEQUIP:44
+	SIF TEQUIP:45 == 1
+		TFLAG:865 = TEQUIP:45
+	SIF TEQUIP:46 == 1 || TEQUIP:49 == 1
+		TFLAG:879 = 1
+	;미약・利尿剤使用判定
+	TFLAG:880 = 0
+	IF TEQUIP:21
+		TFLAG:880 = 21
+	ELSEIF TEQUIP:22
+		TFLAG:880 = 22
+	ENDIF
+	;シチュエーション(特殊コマンド)系の実行中判定
+	TFLAG:881 = 0
+	IF TEQUIP:53
+		TFLAG:881 = 53
+	ELSEIF TEQUIP:54
+		TFLAG:881 = 54
+	ELSEIF TEQUIP:58
+		TFLAG:881 = 58
+	ENDIF
+	;촉수系コマンド実行中判定
+	TFLAG:882 = TEQUIP:90
+
+	SIF CFLAG:74 != 0
+		CFLAG:74 = 0
+
+;２回目以降
+ELSE
+	;バイブ等挿入系アイテム装備判定
+	SIF TEQUIP:11 == 1 && (TFLAG:877 != 1)
+		TFLAG:877 = (-1)
+	SIF (TEQUIP:13 == 1 || TEQUIP:19 == 1) && (TFLAG:867 != 1)
+		TFLAG:867 = (-1)
+	;取り付け系アイテム装備判定
+	SIF (TEQUIP:14 == 1 || TEQUIP:17 == 1) && (TFLAG:866 != 1)
+		TFLAG:866 = (-1)
+	SIF (TEQUIP:15 == 1 || TEQUIP:16 == 1) && (TFLAG:878 != 1)
+		TFLAG:878 = (-1)
+	;被虐系アイテム装備判定
+	SIF TEQUIP:44 && TFLAG:864 != TEQUIP:44
+		TFLAG:864 = (-1)
+	SIF TEQUIP:45 == 1 && TFLAG:865 != TEQUIP:45
+		TFLAG:865 = (-1)
+	SIF (TEQUIP:46 == 1 || TEQUIP:49 == 1) && (TFLAG:879 != 1)
+		TFLAG:879 = (-1)
+	;미약・利尿剤使用判定
+	SIF (TEQUIP:21 && TFLAG:880 != 21) || (TEQUIP:22 && TFLAG:880 != 22)
+		TFLAG:880 = (-1)
+	;シチュエーション(特殊コマンド)系の実行中判定
+	SIF (TEQUIP:53 && TFLAG:881 != 53)  || (TEQUIP:54 && TFLAG:881 != 54) || (TEQUIP:58 && TFLAG:881 != 58)
+		TFLAG:881 = (-1)
+	;촉수系コマンド実行中判定
+	SIF TEQUIP:90 == 1 && TFLAG:882 != 1
+		TFLAG:882 = (-1)
+ENDIF
+
+IF TFLAG:899 >= 1
+	IF TFLAG:895 == 1
+		;口上テンプレいじるの面倒なんでここに口上っぽいもの載せておきますね(^^)
+		SIF TEQUIP:45 == 0
+		PRINTFORML 「하아아아앙아아아ー！！…앗……하…으…으읏…♪」
+		PRINTFORML 
+		PRINTFORML …%조사선택(SAVESTR:TARGET, "는")% 절정과 함께 전신을 떨며、그 자리에서 쓰러졌다
+		PRINTFORML 너무 강한 자극에 정신을 잃은 모양이다
+	ELSEIF TFLAG:895 == 2
+		SIF TEQUIP:45 == 0
+		PRINTFORML 「히이이이-익！！…요、용서…해줘……으읏…」
+		PRINTFORML 
+		PRINTFORML …%조사선택(SAVESTR:TARGET, "는")% 그 자리에서 쓰러져 버렸다。고통스러웠던 나머지 정신을 잃은 모양이다
+	ELSEIF TFLAG:895 == 3
+		SIF TEQUIP:45 == 0
+		PRINTFORML 「히이이이-익！！…요、용서…해줘……으읏…」
+		PRINTFORML 
+		PRINTFORML …%조사선택(SAVESTR:TARGET, "는")% 그 자리에서 쓰러져 버렸다。무서운 나머지 정신을 잃은 모양이다
+	ELSEIF TFLAG:895 == 4
+		SIF TEQUIP:45 == 0
+		PRINTFORML 「하아아아앙아아아ー！！…요、용서…해줘……으읏…」
+		PRINTFORML 
+		PRINTFORML …%조사선택(SAVESTR:TARGET, "는")% 전신을 떨며、그 자리에서 쓰러져 버렸다
+		PRINTFORML 쾌감과 아픔에 동시에 괴롭혀져 정실을 잃은 모양이다
+	ELSEIF TFLAG:895 == 6
+		SIF TEQUIP:45 == 0
+		PRINTFORML 「히이이이-익！！…요、용서…해줘……으읏…」
+		PRINTFORML 
+		PRINTFORML …%조사선택(SAVESTR:TARGET, "는")% 전신을 떨며、그 자리에서 쓰러져 버렸다
+		PRINTFORML 아픔과 공포에 버티지 못하고 정신을 잃은 모양이다
+	ELSEIF TFLAG:896 == 3 && TFLAG:897 == 3 && TFLAG:898 == 3
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 의식을 되찾았다
+		WAIT
+		;地の文章カット
+		SIF CFLAG:99 == 0
+			CALL PASSOUT_MESSAGE
+		;失神回復時口上の呼び出し TFLAG:200が中身違うのでこれもスルーする
+		;TFLAG:200 = 12
+		;CALL SELF_KOJO
+		;PRINTL 
+	ELSE
+		PRINTFORML 
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 아직 눈을 뜨지 않았다
+	ENDIF
+ENDIF
+
+@PASSOUT_MESSAGE
+;自分でもよく分からないくらいメチャクチャな上、下に進むほど大雑把
+
+IF TFLAG:60 == 1
+	PRINTFORM 눈치채지 못한 사이 
+	SIF SELECTCOM == 101 || SELECTCOM == 102
+		PRINT 촉수에
+	IF SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 22 || SELECTCOM == 23 || SELECTCOM == 34 || SELECTCOM == 101 || SELECTCOM == 120 || SELECTCOM == 121 || SELECTCOM == 128 || SELECTCOM == 129 || SELECTCOM == 130 || SELECTCOM == 131 || SELECTCOM == 132 || SELECTCOM == 133 || SELECTCOM == 134
+		PRINT  질내
+	ELSE
+		PRINT  항문
+	ENDIF
+	PRINTFORM 을 범해지고 있다는 사실에 당황하는 %조사선택(SAVESTR:TARGET, "를")% 뒷전으로、
+	IF SELECTCOM == 101 || SELECTCOM == 102
+		PRINT 촉수
+	ELSE
+		PRINTFORM %SAVESTR:PLAYER%
+	ENDIF
+	PRINTW 는 삽입을 계속하고 있다
+ENDIF
+
+IF TFLAG:873 >= 1
+	IF TFLAG:60 == 1
+		IF SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 22 || SELECTCOM == 23 || SELECTCOM == 34 || SELECTCOM == 120 || SELECTCOM == 121 || SELECTCOM == 128 || SELECTCOM == 129 || SELECTCOM == 130 || SELECTCOM == 131 || SELECTCOM == 132 || SELECTCOM == 133 || SELECTCOM == 134
+			PRINT 페니스를 비집어 넣어지고 있다
+		ELSEIF SELECTCOM == 101
+			PRINT 촉수를 비집어 넣어지고 있다
+		ENDIF
+	ENDIF
+	PRINT 비소에서 늘어지는 피
+	IF TFLAG:871 == 1
+		PRINT 가 섞인 정액
+	ELSEIF TFLAG:871 >= 2
+		PRINT 가 섞인 대량의 정액
+	ELSEIF TFLAG:876 >= 100 && TFLAG:876 < 200
+		PRINT 가 섞인 더러운 액체
+	ELSEIF TFLAG:876 >= 200
+		PRINT 가 섞인 대량의 더러운 액체
+	ENDIF
+	PRINTL 을(를) 알아차리고、
+	PRINTFORMW 모르는 동안에 처녀를 빼앗겼단 사실에 어안이 벙벙해 하고 있다…
+ELSEIF TFLAG:871 >= 1
+	IF TFLAG:60 == 1
+		IF SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 22 || SELECTCOM == 23 || SELECTCOM == 34 || SELECTCOM == 120 || SELECTCOM == 121 || SELECTCOM == 128 || SELECTCOM == 129 || SELECTCOM == 130 || SELECTCOM == 131 || SELECTCOM == 132 || SELECTCOM == 133 || SELECTCOM == 134
+			PRINT 페니스를 비집어 넣어지고 있다
+		ELSEIF SELECTCOM == 101
+			PRINT 촉수를 비집 넣어지고 있다
+	ENDIF
+	ENDIF
+	PRINT 비소
+	IF TFLAG:872 >= 1
+		PRINT と
+		IF SELECTCOM == 26 || SELECTCOM == 27 || SELECTCOM == 28 || SELECTCOM == 29
+			PRINT 페니스를 비집어 넣어지고 있다
+		ELSEIF SELECTCOM == 102
+			PRINT 촉수를 비집어 넣어지고 있다
+		ENDIF
+		PRINT 항문
+	ENDIF
+	PRINT 에서
+	IF TFLAG:871 >= 2 || TFLAG:872 >= 2
+		PRINT 넘쳐 흐르는 대량의 
+	ELSE
+		PRINT 늘어지는 
+	ENDIF
+	PRINT 정액에 눈치
+	IF TALENT:85 == 1
+		PRINTW 채고는 당황하고 있는 모양이다…
+	ELSEIF TALENT:10 == 1
+		PRINTW 채고는 지금이라도 당장 울어버릴 것 같다…
+	ELSE
+		PRINTFORMW 채고는 %조사선택(SAVESTR:PLAYER, "를")% 노려봤다…
+	ENDIF
+ELSEIF TFLAG:872 >= 1
+	IF TFLAG:60 == 1
+		IF SELECTCOM == 26 || SELECTCOM == 27 || SELECTCOM == 28 || SELECTCOM == 29
+			PRINT 페니스를 비집어 넣어지고 있다
+		ELSEIF SELECTCOM == 102
+			PRINT 축수를 비집어 넣어지고 있다
+		ENDIF
+	ENDIF
+	PRINT 尻穴から
+		IF TFLAG:871 >= 2 || TFLAG:872 >= 2
+			PRINT 넘쳐 흐르는 대량의
+		ELSE 
+			PRINT 늘어지는
+		ENDIF
+		PRINT 정액을 눈치
+	IF TALENT:85 == 1
+		PRINTW 채고는 당황하고 있는 모양이다…
+	ELSEIF TALENT:10 == 1
+		PRINTW 채고는 지금이라도 당장 울어버릴 것 같다…
+	ELSE
+		PRINTFORMW 채고는 %조사선택(SAVESTR:PLAYER, "를")% 노려보았다…
+	ENDIF
+ELSEIF TFLAG:876 >= 1
+	PRINT 전신에서 뚝뚝떨어지는
+	SIF TFLAG:868 + TFLAG:869 + TFLAG:870 + TFLAG:871 + TFLAG:872 + TFLAG:873 + TFLAG:874 + TFLAG:875 >= 1
+		PRINT 정액과
+	PRINTW 촉수가 토한 더러운 액체에 、당황스러움을 숨길 수 없는 모양이다…
+ELSEIF TFLAG:868 + TFLAG:869 + TFLAG:870 + TFLAG:874 + TFLAG:875 >= 1
+	PRINT 정신을 잃을 때까지는 없었던 것이 확실한 몸
+	SIF TFLAG:868 + TFLAG:869 + TFLAG:870 + TFLAG:874 + TFLAG:875 >= 3
+		PRINT 中
+	PRINT 에 뿌려진 정액에、당황
+	IF TALENT:85 == 1
+		PRINTW 한 모양이다…
+	ELSE
+		PRINTW 하고 무서워하고 있는 모양이다…
+	ENDIF
+ELSEIF TFLAG:867 < 0 || TFLAG:877 < 0
+	PRINTFORM 어느 틈에
+	IF TEQUIP:11 == 1
+		IF TEQUIP:13 == 1
+			PRINT 양구멍에 바이브레이터
+		ELSEIF TEQUIP:19 == 1
+			PRINT 양구멍에 각각 바이브레이터와 비즈
+		ELSE
+			PRINT 바이브레이터
+		ENDIF
+	ELSEIF TEQUIP:13 == 1
+		PRINT 애널에 바이브레이터
+	ELSEIF TEQUIP:19 == 1
+		PRINT 애널에 비즈
+	ENDIF	
+	PRINT 를 찔러 넣어져 
+	SIF TFLAG:878 < 0 || TFLAG:866 < 0
+		PRINT 이상한 도구가 채워져 
+	SIF TFLAG:879 < 0 || TFLAG:864 < 0 || TFLAG:865 < 0
+		PRINT 도구가 채워져 
+	SIF TEQUIP:53
+		PRINT 、그 모습이 촬영되고 
+	PRINTW 있는 사실에 당황하고 있는 모양이다…
+ELSEIF TFLAG:878 < 0 || TFLAG:866 < 0
+	PRINT 어느 틈에 몸에 도구가 채워져 있는 사실에 당황하고 있는 모양이다…
+ELSEIF TFLAG:879 < 0 || TFLAG:864 < 0 || TFLAG:865 < 0
+	PRINTFORM 어느 틈에
+	IF TEQUIP:44
+		PRINT 속박되어
+		SIF TFLAG:878 < 0 || TFLAG:866 < 0
+			PRINT 진데다가、이상한 도구를 채워져 
+		PRINTFORM 있는 사실에
+	ELSEIF TEQUIP:45 == 1 || TEQUIP:49 == 1 || TEQUIP:46 == 1
+		PRINT 이상한 도구가 채워져 있는 사실에 
+	ENDIF
+	PRINTFORMW 눈치 채 당황하며 무서워하고 있는 모양이다…	
+ELSEIF TFLAG:880 < 0
+	PRINTFORMW 자신의 몸에 일어난 이변을 알아차려 당황스러움을 숨길 수 없는 모양이다
+ELSEIF TFLAG:881 < 0
+	IF TEQUIP:53
+		PRINT 자신을 비추고 있는 수정구
+	ELSEIF TEQUIP:54
+		PRINT 어느 틈엔가 야외로 데리고 나가져 있었던 것
+	ELSEIF TEQUIP:58
+		PRINT 어느 틈엔가 목욕탕에 데려 와져 있었던 것	
+ENDIF
+	PRINTFORMW 을(를) 깨닫고 당황하여 무서워하고 있는 모양이다…
+ELSEIF TFLAG:882 < 0
+	PRINT 어느 틈엔가 몸 안을 휘감기고 있는 촉수에 당황하여 무서워하고 있는 모양이다…
+ENDIF
+IF (TFLAG:867 + TFLAG:877 + TFLAG:878 + TFLAG:866 + TFLAG:879 + TFLAG:864 + TFLAG:865 + TFLAG:881 + TFLAG:882) < 0 || TFLAG:872 >= 1
+	WAIT
+ENDIF
+
+G = TFLAG:868 + TFLAG:869 + TFLAG:870 + TFLAG:874 + TFLAG:875 + TFLAG:876
+X = TFLAG:867 + TFLAG:877 + TFLAG:878 + TFLAG:866 + TFLAG:879 + TFLAG:864 + TFLAG:865 + TFLAG:880 + TFLAG:881
+Y = TFLAG:871 + TFLAG:872
+TIMES X , -1
+
+;-------------------------------------------------
+;실신 중의 파라미터 처리
+;-------------------------------------------------
+@PASSOUT_PALAM_CHECK
+IF TFLAG:895 > 0
+	TFLAG:883 += UP:6
+	TFLAG:884 += UP:8
+	TFLAG:885 += UP:10
+	TFLAG:886 += UP:11
+	TFLAG:887 += UP:12
+	TFLAG:888 += UP:13
+ELSE
+	TFLAG:889 += UP:6
+	TFLAG:890 += UP:8
+	TFLAG:891 += UP:10
+	TFLAG:892 += UP:11
+	TFLAG:893 += UP:12
+	TFLAG:894 += UP:13
+ENDIF
+
+UP:7 = 0
+UP:4 = 0
+UP:6 = 0
+UP:8 = 0
+UP:9 = 0
+UP:10 = 0
+UP:11 = 0
+UP:12 = 0
+UP:13 = 0
+
+;-------------------------------------------------
+;실신 회복할 때의 파라미터 처리
+;-------------------------------------------------
+@PASSOUT_PALAM_UP
+A = TFLAG:883 * (12 - TFLAG:899)
+B = TFLAG:884 * (12 - TFLAG:899)
+C = TFLAG:885 * (12 - TFLAG:899)
+D = TFLAG:886 * (12 - TFLAG:899)
+E = TFLAG:887 * (12 - TFLAG:899)
+F = TFLAG:888 * (12 - TFLAG:899)
+IF TFLAG:899 > 2
+	A += TFLAG:889 * (TFLAG:899 - 2)
+	B += TFLAG:890 * (TFLAG:899 - 2)
+	C += TFLAG:891 * (TFLAG:899 - 2)
+	D += TFLAG:892 * (TFLAG:899 - 2)
+	E += TFLAG:893 * (TFLAG:899 - 2)
+	F += TFLAG:894 * (TFLAG:899 - 2)
+ENDIF
+A /= 600
+B /= 240
+C /= 60
+D /= 10
+E /= 10
+F /= 10
+IF G >= 1
+	A += A * G
+	B += B * G
+	C += C * G
+	D += D * G
+	E += E * G
+	F += F * G
+	IF ABL:32 == 3
+		UP:5 += 1000
+	ELSEIF ABL:32 == 4
+		UP:5 += 1500
+	ELSEIF ABL:32 >= 5
+		UP:5 += 2000
+	ENDIF
+ENDIF
+
+IF X >= 1
+	A += A * X
+	B += B * X
+	C += C * X
+	D += D * X
+	E += E * X
+	F += F * X
+ENDIF
+
+IF Y >= 1
+	A += A * Y
+	B += B * Y
+	C += C * Y
+	D += D * Y
+	E += E * Y
+	F += F * Y
+	IF ABL:32 == 3
+		UP:5 += 1000
+	ELSEIF ABL:32 == 4
+		UP:5 += 1500
+	ELSEIF ABL:32 >= 5
+		UP:5 += 2000
+	ENDIF
+ENDIF
+
+;IF TFLAG:60
+	;TIMES A , 1.50
+	;TIMES B , 1.50 
+	;TIMES C , 1.50
+	;TIMES D , 1.50
+	;TIMES E , 1.50
+	;TIMES F , 1.50
+;ENDIF
+
+IF TFLAG:873 >= 1
+	A *= 2
+	B *= 2
+	C *= 2
+	D *= 2
+	E *= 2
+	F *= 2
+ENDIF
+
+Z = 100
+Z -= MARK:2 * 10
+Z -= ABL:10 * 5
+
+SIF TALENT:85
+	Z /= 2
+
+UP:7 += A * (100 - Z) / 100
+UP:8 += B * (100 - Z) / 100
+UP:10 += C * (100 - Z) / 100
+UP:11 += D * Z / 100
+UP:12 += E * Z / 100
+UP:13 += F * Z / 100
+
+IF TFLAG:896 == 3 || TFLAG:897 == 3 || TFLAG:898 == 3
+	TFLAG:896 = 0
+	TFLAG:897 = 0
+	TFLAG:898 = 0
+	TFLAG:899 = 0
+ENDIF
+
+;-------------------------------------------------
+;야외 플레이 중의 실신 처리
+;-------------------------------------------------
+@PASSOUT_OUTDOOR
+;야외 플레이 해제
+TEQUIP:54 = 0
+PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 실신하여 방에 돌아가기로 했다…
+
+;조교자의 체력・기력이 약간 감소
+BASE:MASTER:0 -= 20
+BASE:MASTER:1 -= 10
+SIF BASE:MASTER:0 < 0
+	BASE:MASTER:0  = 0
+SIF BASE:MASTER:1 < 0
+	BASE:MASTER:1  = 0

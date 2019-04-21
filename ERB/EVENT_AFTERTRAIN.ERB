@@ -1,0 +1,785 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;キャラの死亡確認
+;-------------------------------------------------
+@CHARADEAD_CHECK
+;生きてるなら問題ナシ
+SIF BASE:0 > 0
+	RETURN 0
+
+;瀕死時に調教を自動終了
+IF FLAG:35
+	SIF BASE:0 < 1
+		BASE:0 = 1
+	RETURN 0
+ENDIF
+
+;死亡時口上
+TFLAG:13 = 999
+CALL SELF_KOJO
+DRAWLINE
+PRINTL 
+PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 죽어버렸다……
+PRINTL 
+DRAWLINE
+BASE:0 = -1
+
+;死亡フラグを残す
+T = NO:TARGET + 999
+FLAG:T = -2
+
+;キャラの殺害回数に加算
+FLAG:31 += 1
+
+
+;殺した人数が3人以上で、【위압감】が付く
+IF FLAG:31 >= 3 && TALENT:MASTER:93 == 0
+	PRINTFORMW %NAME:MASTER%은【%TALENTNAME:93%】을 몸에 익혔다
+	TALENT:MASTER:93 = 1
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;調教後行為のチェック
+;-------------------------------------------------
+;>調教後性交渉追加版(2008/04/17 byα)
+;>夜、厳しい条件をクリアすると…？
+;-------------------------------------------------
+@SELF_CHECK
+;調教対象が空ならそのまま終了
+SIF TARGET < 0
+	RETURN 0
+
+;失神中に調教終了したらスルー
+SIF TFLAG:899 >= 1
+	RETURN 0
+
+;調教後の性交渉チェック
+;노예がオトコか、女かつＶ感覚よりＡ感覚の方が高いか、処女でもＡ感覚が3以上ある場合は애널セックス
+IF TALENT:122 || (TALENT:122 == 0 && ABL:2 < ABL:3) || (TALENT:0 && ABL:3 >= 3)
+	CALL AFTERTRAIN_ANALSEX_CHECK
+;それ以外なら通常のセックス
+ELSE
+	CALL AFTERTRAIN_SEX_CHECK
+ENDIF
+;下のレズ中毒の判定用変数
+S = RESULT
+
+;レズ中毒によるレズチェック
+CALL AFTERTRAIN_LESBIANSEX_CHECK
+;下の自慰中毒の判定用変数
+N = RESULT
+
+;自慰中毒による自慰チェック
+CALL AFTERTRAIN_MASTURBATION_CHECK
+
+;獣姦中毒による獣姦チェック
+CALL AFTERTRAIN_BEASTSEX_CHECK
+
+
+RETURN 0
+
+;-------------------------------------------------
+;調教後性交渉チェック
+;-------------------------------------------------
+@AFTERTRAIN_SEX_CHECK
+;調教対象が空だとダメ
+SIF TARGET < 0
+	RETURN 0
+;未熟だとダメ
+SIF TALENT:135
+	RETURN 0
+;愛か淫乱がないとダメ
+SIF TALENT:85 == 0 && TALENT:76 == 0
+	RETURN 0
+;性交経験が30以上ないとダメ
+SIF EXP:5 < 30
+	RETURN 0
+;処女やオトコだとダメ
+SIF TALENT:0 || TALENT:122 == 1
+	RETURN 0
+;貞操帯だとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64)
+	RETURN 0
+;貞操封印だとダメ
+SIF CFLAG:273
+	RETURN 0
+;主人がオトコかフタナリじゃないとダメ
+SIF TALENT:MASTER:122 == 0 && TALENT:MASTER:121 == 0
+	RETURN 0
+;瀕死だとダメ
+SIF BASE:0 < 500
+	RETURN 0
+
+;性交回数
+S = 0
+
+;V感覚
+IF ABL:2 == 4
+	S += 1
+ELSEIF ABL:2 == 5
+	S += 2
+ELSEIF ABL:2 >= 6
+	S += 3
+ENDIF
+
+;性交中毒によるボーナス
+SIF ABL:30
+	S += ABL:30 / 2 + 1
+
+;回数が0以下なら終了
+SIF S <= 0
+	RETURN 0
+
+;PALAM:欲情がLV4以上
+;欲望ＬＶ５以上奉仕精神５以上で+1
+SIF ABL:11 >= 5 && ABL:16 >= 5 && PALAM:5 >= PALAMLV:4
+	S += 2
+;欲望ＬＶ４以上奉仕精神４以上で+1
+SIF ABL:11 == 4 && ABL:16 >= 4 && PALAM:5 >= PALAMLV:4
+	S += 1
+
+;PALAM:欲情がLV3以上
+;欲望ＬＶ７以上Ｖ感覚ＬＶ６以上で+1（下と合わせて+2）
+SIF ABL:11 >= 7 && ABL:5 >= 6 && PALAM:5 >= PALAMLV:3
+	S += 1
+;欲望ＬＶ４以上Ｖ感覚ＬＶ３以上で+1
+SIF ABL:11 >= 4 && ABL:2 >= 3 && PALAM:5 >= PALAMLV:3
+	S += 1
+
+;애정、淫乱によるボーナス
+SIF TALENT:85
+	S += 1
+SIF TALENT:76
+	S += 1
+
+;セックス狂によるボーナス
+SIF TALENT:75
+	S += 2
+
+;쾌감에솔직、쾌감을부정
+IF TALENT:70
+	S += 1
+ELSEIF TALENT:71
+	S -= 2
+ENDIF
+
+;回数が0以下になっていたら終了
+SIF S <= 0
+	RETURN 0
+
+DRAWLINE
+PRINTFORML %조사선택(SAVESTR:MASTER, "와")% %조사선택(SAVESTR:TARGET, "는")% 아직 완전히 식지 않은 흥분을 참지 못하고、
+PRINTFORML {S}번 침대 위에서 섹스했다…
+
+;調教後セックス口上
+TFLAG:13 = 4
+CALL SELF_KOJO
+
+PRINTFORML %EXPNAME:0%＋{S}
+PRINTFORML %EXPNAME:5%＋{S}
+PRINTFORML %PALAMNAME:1%의 구슬＋{S*200}
+PRINTFORML %PALAMNAME:4%의 구슬＋{S*100}
+PRINTFORMW %PALAMNAME:5%의 구슬＋{S*250}
+EXP:0 += S
+EXP:5 += S
+JUEL:1 += S*200
+JUEL:4 += S*100
+JUEL:5 += S*250
+
+IF ABL:10+ABL:2+ABL:16 >= 13
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 서운한 듯이 소매를 잡아 당겼다。
+	PRINTFORMW 그러나 그 손을 흔들어 뿌리치고、%SAVESTR:MASTER%은 방을 뒤로 했다…
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;調教後애널性交渉チェック
+;-------------------------------------------------
+@AFTERTRAIN_ANALSEX_CHECK
+;調教対象が空だとダメ
+SIF TARGET < 0
+	RETURN 0
+;愛か淫乱がないとダメ
+SIF TALENT:85 == 0 && TALENT:76 == 0
+	RETURN 0
+;性交経験が30以上ないとダメ
+SIF EXP:5 < 30
+	RETURN 0
+;主人がオトコかフタナリじゃないとダメ
+SIF TALENT:MASTER:122 == 0 && TALENT:MASTER:121 == 0
+	RETURN 0
+;瀕死だとダメ
+SIF BASE:0 < 500
+	RETURN 0
+
+;性交回数
+S = 0
+
+;Ａ감각
+IF ABL:3 == 4
+	S += 1
+ELSEIF ABL:3 == 5
+	S += 2
+ELSEIF ABL:3 >= 6
+	S += 3
+ENDIF
+
+;性交中毒によるボーナス
+SIF ABL:30
+	S += ABL:30 / 2 + 1
+
+;回数が0以下なら終了
+SIF S <= 0
+	RETURN 0
+
+;PALAM:欲情がLV4以上
+;欲望ＬＶ５以上奉仕精神５以上で+1
+SIF ABL:11 >= 5 && ABL:16 >= 5 && PALAM:5 >= PALAMLV:4
+	S += 2
+;欲望ＬＶ４以上奉仕精神４以上で+1
+SIF ABL:11 == 4 && ABL:16 >= 4 && PALAM:5 >= PALAMLV:4
+	S += 1
+
+;PALAM:欲情がLV3以上
+;欲望ＬＶ７以上Ｖ感覚ＬＶ６以上で+1（下と合わせて+2）
+SIF ABL:11 >= 7 && ABL:5 >= 6 && PALAM:5 >= PALAMLV:3
+	S += 1
+;欲望ＬＶ４以上Ｖ感覚ＬＶ３以上で+1
+SIF ABL:11 >= 4 && ABL:2 >= 3 && PALAM:5 >= PALAMLV:3
+	S += 1
+
+;애정、淫乱によるボーナス
+SIF TALENT:85
+	S += 1
+SIF TALENT:76
+	S += 1
+
+;尻穴狂いによるボーナス
+SIF TALENT:75
+	S += 2
+
+;쾌감에솔직、쾌감을부정
+IF TALENT:70
+	S += 1
+ELSEIF TALENT:71
+	S -= 2
+ENDIF
+
+;回数が0以下になっていたら終了
+SIF S <= 0
+	RETURN 0
+
+DRAWLINE
+PRINTFORML %조사선택(SAVESTR:MASTER, "와")% %조사선택(SAVESTR:TARGET, "는")% 아직 완전히 식지 않은 흥분을 참지 못하고、
+PRINTFORML {S}회 침대 위에서 섹스했다…
+
+PRINTFORML %EXPNAME:1%＋{S}
+PRINTFORML %EXPNAME:5%＋{S}
+PRINTFORML %PALAMNAME:2%의 구슬＋{S*200}
+PRINTFORML %PALAMNAME:4%의 구슬＋{S*100}
+PRINTFORMW %PALAMNAME:5%의 구슬＋{S*250}
+EXP:1 += S
+EXP:5 += S
+JUEL:2 += S*200
+JUEL:4 += S*100
+JUEL:5 += S*250
+
+IF ABL:10+ABL:3+ABL:16 >= 13
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 서운한 듯이 소매를 잡아 당긴다。
+	PRINTFORMW 그러나 그 손을 흔들어 뿌리치고、%SAVESTR:MASTER%은 방을 뒤로 했다…
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;レズ中毒によるレズチェック
+;-------------------------------------------------
+@AFTERTRAIN_LESBIANSEX_CHECK
+;レズ中毒によるレズチェック
+;調教対象が空だとダメ
+SIF TARGET < 0
+	RETURN 0
+;조수がいないとダメ
+SIF ASSI < 0
+	RETURN 0
+;노예と조수がオトコだとだめ
+SIF TALENT:122 || TALENT:ASSI:122
+	RETURN 0
+;レズっ気2以上、C感覚3以上、欲望2以上、技巧2以上が必要
+SIF ABL:22 < 2 || ABL:0 < 3 || ABL:10 < 2 || ABL:11 < 2
+	RETURN 0
+;調教キャラか조수にレズ中毒必要
+SIF ABL:33 == 0 && ABL:ASSI:33 == 0
+	RETURN 0
+;瀕死だとダメ
+SIF BASE:0 < 500
+	RETURN 0
+
+;レズプレイ回数
+N = 0
+
+;레즈중독
+IF ABL:33 == 1
+	N += 1
+ELSEIF ABL:33 == 2
+	N += 2
+ELSEIF ABL:33 == 3
+	N += 3
+ELSEIF ABL:33 == 4
+	N += 5
+ELSEIF ABL:33 == 5
+	N += 7
+ELSEIF ABL:33 >= 6
+	N += 9
+ENDIF
+
+;조수のレズ中毒
+IF ABL:ASSI:33 == 1
+	N += 1
+ELSEIF ABL:ASSI:33 == 2
+	N += 2
+ELSEIF ABL:ASSI:33 == 3
+	N += 5
+ELSEIF ABL:ASSI:33 == 4
+	N += 8
+ELSEIF ABL:ASSI:33 == 5
+	N += 13
+ELSEIF ABL:ASSI:33 >= 6
+	N += 18
+ENDIF
+
+;回数が0以下なら終了
+SIF N <= 0
+	RETURN 0
+
+;レズっ気によるボーナス
+SIF ABL:22 >= 5 && PALAM:5 >= PALAMLV:3
+	N += 1
+
+;조수のレズっ気によるボーナス
+SIF ABL:ASSI:22 >= 3 && PALAM:5 >= PALAMLV:3
+	N += 1
+
+;PALAM:欲情がLV3以上
+;欲望ＬＶ７以上で+1（下と合わせて+2）
+SIF ABL:11 >= 7 && ABL:5 >= 6 && PALAM:5 >= PALAMLV:3
+	N += 1
+;欲望ＬＶ４以上で+1
+SIF ABL:11 >= 4 && ABL:2 >= 3 && PALAM:5 >= PALAMLV:3
+	N += 1
+
+;相性によるボーナス
+R = NO:ASSI
+	IF RELATION:R > 0
+	N *= RELATION:R
+	N /= 100
+ENDIF
+
+;보수적、一線越えないによるペナルティ
+SIF TALENT:24
+	N -= 1
+SIF TALENT:ASSI:24
+	N -= 1
+SIF TALENT:27
+	N -= 1
+SIF TALENT:ASSI:27
+	N -= 1
+
+;바이、淫乱によるボーナス
+SIF TALENT:81
+	N += 2
+SIF TALENT:ASSI:81
+	N += 2
+SIF TALENT:76
+	N += 1
+SIF TALENT:ASSI:76
+	N += 1
+
+;쾌감에솔직、쾌감을부정
+IF TALENT:70
+	N += 1
+ELSEIF TALENT:71
+	N -= 2
+ENDIF
+IF TALENT:ASSI:70
+	N += 1
+ELSEIF TALENT:ASSI:71
+	N -= 2
+ENDIF
+
+;回数が0以下になっていたら終了
+SIF N <= 0
+	RETURN 0
+
+IF S == 1
+	DRAWLINE
+	PRINTFORM %조사선택(SAVESTR:MASTER, "가")% 나간 후、
+ELSE
+	PRINT 조교가 끝난 후에 
+ENDIF
+PRINTFORMW %조사선택(SAVESTR:TARGET, "와")% %조사선택(SAVESTR:ASSI, "는")%、{N}회 레즈 플레이를 한 것 같다。
+
+;調教後レズプレイ口上
+TFLAG:13 = 2
+CALL SELF_KOJO
+
+PRINTFORML %EXPNAME:40%＋{N*20}
+SIF N*100*ABL:10/500 > 0
+	PRINTFORML %EXPNAME:2%＋{N*100*ABL:10/500}
+PRINTFORML %PALAMNAME:0%의 구슬＋{N*100*ABL:10}
+PRINTFORML %PALAMNAME:5%의 구슬＋{N*200}
+
+EXP:40 += N*20
+EXP:2 += N*100*ABL:10/500
+
+JUEL:0 += N*100*ABL:10
+JUEL:5 += N*200
+IF TALENT:ASSI:121
+	PRINTFORML %EXPNAME:20%＋{N}
+	PRINTFORML %PALAMNAME:6%의 구슬＋{N*100*(ABL:12+ABL:16)}
+	PRINTFORML %PALAMNAME:7%의 구슬＋{N*100*(ABL:12+ABL:16)}
+
+	EXP:20 += N
+	JUEL:6 += N*100*(ABL:12+ABL:16)
+	JUEL:7 += N*100*(ABL:12+ABL:16)
+ELSE
+	PRINTFORML %PALAMNAME:6%의 구슬＋{N*50*(ABL:12+ABL:16)}
+	PRINTFORML %PALAMNAME:7%의 구슬＋{N*50*(ABL:12+ABL:16)}
+
+	JUEL:6 += N*50*(ABL:12+ABL:16)
+	JUEL:7 += N*50*(ABL:12+ABL:16)
+ENDIF
+IF TALENT:ASSI:83
+	PRINTFORML %EXPNAME:30%＋{N}
+	SIF N*100*ABL:21 > 0
+		PRINTFORML %PALAMNAME:9%의 구슬＋{N*100*ABL:21}
+	JUEL:9 += N*100*ABL:21
+	EXP:30 += N
+ENDIF
+IF TALENT:121
+	PRINTFORML %EXPNAME:3%＋{N}
+	PRINTFORML %PALAMNAME:8%의 구슬＋{N*100}
+
+	EXP:3 += N
+	JUEL:8 += N*100
+ENDIF
+IF TALENT:121 && TALENT:ASSI:121 && ABL:16 >= 3 && ABL:32 >= 3
+	PRINTFORML %조사선택(SAVESTR:ASSI, "와")% %조사선택(SAVESTR:TARGET, "는")% 
+	IF TIME == 0
+		PRINTFORMW 해가 질 때까지 서로의 페니스를 빨았다。
+	ELSE
+		PRINTFORMW 밤새 서로의 페니스를 빨았다。
+	ENDIF
+	PRINTFORML %EXPNAME:3%＋{N}
+	PRINTFORML %EXPNAME:20%＋{N}
+	PRINTFORML %EXPNAME:21%＋{N}
+	PRINTFORML %EXPNAME:22%＋{N}
+	PRINTFORML %PALAMNAME:5%의 구슬＋{N*100}
+	PRINTFORML %PALAMNAME:6%의 구슬＋{N*100}
+	PRINTFORML %PALAMNAME:8%의 구슬＋{N*100}
+	EXP:3 += N
+	EXP:20 += N
+	EXP:21 += N
+	EXP:22 += N
+	JUEL:5 += N*100
+	JUEL:6 += N*100
+	JUEL:8 += N*100
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;自慰中毒による自慰チェック
+;-------------------------------------------------
+@AFTERTRAIN_MASTURBATION_CHECK
+;調教対象が空だとダメ
+SIF TARGET < 0
+	RETURN 0
+;Ｃ感覚が3以上、欲望が2以上ないとダメ
+SIF ABL:0 < 3 || ABL:11 < 2
+	RETURN 0
+;自慰しないがあるとダメ
+SIF TALENT:150
+	RETURN 0
+;瀕死だとダメ
+SIF BASE:0 < 500
+	RETURN 0
+
+A = 0
+
+;자위중독
+IF ABL:31 == 1
+	A += 1
+ELSEIF ABL:31 == 2
+	A += 2
+ELSEIF ABL:31 == 3
+	A += 4
+ELSEIF ABL:31 == 4
+	A += 6
+ELSEIF ABL:31 == 5
+	A += 9
+ELSEIF ABL:31 >= 6
+	A += 14
+ENDIF
+
+;自慰しやすいで欲望ＬＶ３以上PALAM:欲情がLV3以上
+SIF TALENT:60 && ABL:11 >= 3 && PALAM:5 >= PALAMLV:3
+	A += 1
+
+;조수が鼓舞で欲望ＬＶ４以上PALAM:欲情がLV3以上
+IF ASSI >= 0
+	SIF TALENT:ASSI:118 && ABL:11 >= 4 && PALAM:5 >= PALAMLV:3
+		A += 1
+ENDIF
+
+;PALAM:欲情がLV4以上
+;欲望ＬＶ５以上露出癖４以上で+1（下と合わせて+2）
+SIF ABL:11 >= 5 && ABL:17 >= 4 && PALAM:5 >= PALAMLV:4
+	A += 1
+;欲望ＬＶ４以上露出癖３以上で+1（下と合わせて+2）
+SIF ABL:11 >= 4 && ABL:17 >= 3 && PALAM:5 >= PALAMLV:4
+	A += 1
+
+;回数が0以下なら終了
+SIF A <= 0
+	RETURN 0
+
+;自慰狂いによるボーナス
+SIF TALENT:74
+	TIMES A , 1.50
+
+;조수が鼓舞
+IF ASSI >= 0
+	SIF TALENT:ASSI:118
+		TIMES A , 1.20
+ENDIF
+
+;프라이드낮음、解放によるボーナス
+SIF TALENT:17
+	A += 1
+SIF TALENT:33
+	A += 1
+
+;프라이드높음、자제심、抑圧によるペナルティ
+SIF TALENT:15
+	A -= 1
+SIF TALENT:20
+	A -= 1
+SIF TALENT:32
+	A -= 1
+
+;쾌감에솔직、쾌감을부정
+IF TALENT:70
+	A += 1
+ELSEIF TALENT:71
+	A -= 2
+ENDIF
+
+;淫乱によるボーナス
+SIF TALENT:76
+	A += 1
+
+;回数が0以下になっていたら終了
+SIF A <= 0
+	RETURN 0
+
+DRAWLINE
+PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+IF N == 1
+	PRINTFORM %조사선택(SAVESTR:ASSI, "가")% 나간 후、
+ELSEIF S == 1
+	PRINTFORM %조사선택(SAVESTR:MASTER, "가")% 나간 후、
+ELSE
+	PRINT 조교 종료 후에、
+ENDIF
+
+;調教後オナニーの妄想の相手
+;愛がなくかつ조수とのレズセックス後ならレズっ気×20%で조수
+IF TALENT:85 == 0 && N == 1 && ABL:22 > RAND:5
+	PRINTFORML %조사선택(SAVESTR:ASSI, "를")% 생각 하면서 {A}회 자위를 한 것 같다。
+	Q = 1
+;上に該当せずかつ愛がなくアイテムに野良犬があれば、수간중독×20%で野良犬
+ELSEIF TALENT:85 == 0 && ABL:39 > RAND:5 && ITEM:22
+	PRINTFORML 떠돌이 개와의 교미를 망상하면서 {A}회 자위를 한 것 같다。
+	Q = 2
+;それ以外なら主人
+ELSE
+	PRINTFORML %SAVESTR:MASTER%에 대한것을 생각하면서 {A}회 자위를 한 것 같다。
+	Q = 0
+ENDIF
+
+;調教後自慰口上
+TFLAG:13 = 1
+CALL SELF_KOJO
+
+;자위경험
+PRINTFORML %EXPNAME:10%＋{A}
+EXP:10 += A
+
+;珠経験
+PRINTFORML %PALAMNAME:0%의 구슬＋{A*500}
+PRINTFORML %PALAMNAME:4%의 구슬＋{A*100}
+PRINTFORMW %PALAMNAME:5%의 구슬＋{A*250}
+JUEL:0 += A*500
+JUEL:4 += A*100
+JUEL:5 += A*250
+	
+;순종+露出+マゾっ気が10以上かつ時間が朝なら主人に報告
+IF ABL:10+ABL:17+ABL:21 >= 10 && TIME == 0
+	PRINTFORML 그것을 %조사선택(SAVESTR:TARGET, "는")% 보고했다。
+	PRINTFORML %PALAMNAME:8%의 구슬＋{A*200}
+	JUEL:8 += A*200
+ENDIF
+	
+IF (ABL:10 >= 5 || ABL:11 >= 5) && Q == 0
+	PRINTFORMW 그러나 몇번이고 자위를 해 봐도、%SAVESTR:MASTER%에의 욕망은 채워지지 않는다。
+ELSEIF (ABL:11 >= 5 || ABL:33 >= 3) && Q == 1
+	PRINTFORMW 그러나 몇번이고 자위를 해 봐도、%SAVESTR:ASSI%에의 욕망은 채워지지 않았다。
+ELSEIF (ABL:11 >= 5 || ABL:39 >= 3) && Q == 2
+	PRINTFORMW 그러나 몇번이고 자위를 해 봐도、수간에의 욕망은 채워지지 않았다。
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;獣姦中毒による獣姦チェック
+;-------------------------------------------------
+@AFTERTRAIN_BEASTSEX_CHECK
+;調教対象が空だとダメ
+SIF TARGET < 0
+	RETURN 0
+;未熟だとダメ
+SIF TALENT:135
+	RETURN 0
+;獣姦経験が50以上ないとダメ
+SIF EXP:56 < 50
+	RETURN 0
+;処女やオトコだとダメ
+SIF TALENT:0 || TALENT:122 == 1
+	RETURN 0
+;貞操帯だとダメ
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64)
+	RETURN 0
+;貞操封印だとダメ
+SIF CFLAG:273
+	RETURN 0
+;ITEM:野良犬がないとダメ
+SIF ITEM:22 == 0
+	RETURN 0
+;瀕死だとダメ
+SIF BASE:0 < 500
+	RETURN 0
+
+B = 0
+
+;수간중독
+IF ABL:39 == 0
+	B -= 2
+ELSEIF ABL:39 == 1
+	B -= 1
+ELSEIF ABL:39 == 2
+	B += 0
+ELSEIF ABL:39 == 3
+	B += 1
+ELSEIF ABL:39 == 4
+	B += 2
+ELSEIF ABL:39 == 5
+	B += 3
+ELSEIF ABL:39 >= 6
+	B += 4
+ENDIF
+
+;動物耳で欲望ＬＶ３以上PALAM:欲情がLV3以上
+SIF TALENT:124 && ABL:11 >= 3 && PALAM:5 >= PALAMLV:3
+	B += 1
+
+;PALAM:欲情がLV4以上
+;欲望ＬＶ５以上露出癖４以上で+1（下と合わせて+2）
+SIF ABL:11 >= 5 && ABL:17 >= 4 && PALAM:5 >= PALAMLV:4
+	B += 1
+;欲望ＬＶ４以上露出癖３以上で+1
+SIF ABL:11 >= 4 && ABL:17 >= 3 && PALAM:5 >= PALAMLV:4
+	B += 1
+
+;牝犬によるボーナス
+SIF TALENT:136
+	B += 2
+
+;回数が0以下なら終了
+SIF B <= 0
+	RETURN 0
+
+;프라이드낮음、해방、動物耳によるボーナス
+SIF TALENT:17
+	B += 1
+SIF TALENT:33
+	B += 1
+SIF TALENT:124
+	B += 1
+
+;프라이드높음、자제심、억압、汚臭敏感によるペナルティ
+SIF TALENT:15
+	B -= 1
+SIF TALENT:20
+	B -= 1
+SIF TALENT:32
+	B -= 1
+SIF TALENT:62 && TALENT:64 == 0
+	B -= 2
+
+;쾌감에솔직、쾌감을부정
+IF TALENT:70
+	B += 1
+ELSEIF TALENT:71
+	B -= 2
+ENDIF
+
+;淫乱によるボーナス
+SIF TALENT:76
+	B += 1
+
+;牝犬によるボーナスその２
+SIF TALENT:136
+	TIMES B , 1.50
+
+;回数が0以下になっていたら終了
+SIF B <= 0
+	RETURN 0
+
+DRAWLINE
+PRINTFORM 그 후、%조사선택(SAVESTR:TARGET, "는")% 떠돌이 개를 기르고 있는 축사에 숨어들어、
+PRINTFORML {B}회의 교미를 한 것 같다。
+
+;수간경험
+PRINTFORML %EXPNAME:56%＋{B}
+PRINTFORML %EXPNAME:0%＋{B}
+PRINTFORML %EXPNAME:5%＋{B}
+EXP:56 += B
+EXP:0 += B
+EXP:5 += B
+
+;珠経験
+PRINTFORML %PALAMNAME:1%의 구슬＋{B*200}
+PRINTFORML %PALAMNAME:6%의 구슬＋{B*300}
+PRINTFORMW %PALAMNAME:8%의 구슬＋{B*200}
+JUEL:1 += A*200
+JUEL:6 += A*300
+JUEL:8 += A*200
+
+;순종+露出+マゾっ気が12以上かつ時間が朝なら主人に報告
+IF ABL:10+ABL:17+ABL:21 >= 12 && TIME == 0
+	PRINTFORM 그것을 %조사선택(SAVESTR:TARGET, "는")% 
+	SIF TALENT:124
+		PRINT 꼬리를 흔들면서 
+	PRINTFORML 보고해왔다。
+	PRINTFORML %PALAMNAME:8%의 구슬＋{B*200}
+	JUEL:8 += A*200
+ENDIF
+
+
+
+RETURN 1

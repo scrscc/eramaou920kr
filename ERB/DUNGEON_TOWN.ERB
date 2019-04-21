@@ -1,0 +1,646 @@
+﻿;---------------------------------
+;街で行う行動全般
+;---------------------------------
+;独断で処理を切り刻んだ
+@DUNGEON_TOWN,ARG:0
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM LCOUNT
+#DIM PM, 3
+;---------------------------------
+;ARG:0 = パーティーリーダー
+;SIDEA = 仲間A
+;SIDEB = 仲間B
+;↑FOR-NEXTを回しやすいように変数名をPM（パーティーメンバー）に統一
+;PM:0がリーダー, PM:1が仲間A, PM:2が仲間B
+PM:0 = ARG
+PM:1 = CFLAG:ARG:531
+PM:2 = CFLAG:ARG:532
+
+;リーダー以外の帰還フラグが初期化されてなかったので全員分初期化しておこう
+FOR LCOUNT, 0 ,3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	CFLAG:(PM:LCOUNT):507 = 0
+NEXT
+
+;再起ポイントを消費して回復
+SIF CFLAG:(ARG:0):508 > 0
+	CALL TOWN_PT_REST(PM:0, PM:1, PM:2)
+
+;レベルアップ
+FOR LOCAL, 0, 3
+	SIF PM:LOCAL > 0
+		CALL LVUP, PM:LOCAL
+NEXT
+;-----------------------
+;資金調達フェイズ
+;-----------------------
+CALL TOWN_PT_FUNDING(PM:0, PM:1, PM:2)
+;-----------------------
+;日常フェイズ
+;-----------------------
+CALL TOWN_PT_DAYEVENT(PM:0, PM:1, PM:2)
+;----------------------
+;アイテムの購入
+;----------------------
+CALL TOWN_PT_SHOPPING(PM:0, PM:1, PM:2)
+;----------------------
+;冒険の計画
+;----------------------
+CALL TOWN_PT_PLANNING(PM:0, PM:1, PM:2)
+;----------------------
+;クエスト受注
+;----------------------
+CALL SET_QUEST(PM:0)
+
+IF RAND:5 > 0 
+	A = ARG:0
+	RETURN 0
+ENDIF
+;----------------------
+;宴会
+;----------------------
+CALL TOWN_PT_PARTY(PM:0, PM:1, PM:2)
+;今後宴会以降の処理が実装される可能性があるのでいちおう中断判定
+IF !RESULT
+	A = ARG:0
+	RETURN 0
+ENDIF
+
+A = ARG:0
+RETURN 0
+
+
+
+;宿屋
+@TOWN_PT_REST(PM:0, PM:1, PM:2)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM LCOUNT
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:PM%의 파티는 여인숙에 묵으며, 모험의 피로를 달랬다……（HP기력 전부 회복）
+CFLAG:PM:508 --
+;全回復. 仲間も回復
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	BASE:(PM:LCOUNT):0 = MAXBASE:(PM:LCOUNT):0
+	BASE:(PM:LCOUNT):1 = MAXBASE:(PM:LCOUNT):1
+NEXT
+
+
+
+;-----------------------
+;資金調達フェイズ
+;-----------------------
+@TOWN_PT_FUNDING(PM:0, PM:1, PM:2)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM LCOUNT
+;仕送り
+LOCAL = FI_PT_FUNDING(PM:0, PM:1, PM:2)
+IF FLAG:5 & 32
+	PRINTFORM %SAVESTR:PM%의 파티는 고향이나 스폰서로부터 일인당 
+	SETCOLORBYNAME SkyBlue
+	PRINTV LOCAL
+	RESETCOLOR
+	PRINTFORML 만큼의 자금 지원을 받았다. 
+ENDIF
+
+;各自資金繰りを行う
+;足りない場合は借金等をする
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	CFLAG:(PM:LCOUNT):580 += LOCAL
+	;アイテム売却
+	CALL SELL_EX_ITEM(PM:LCOUNT)
+	;物品売却
+	CALL TOWN_SELL(PM:LCOUNT)
+	;保証人イベント
+	CALL TOWN_HOSHOUNIN(PM:LCOUNT)
+	;借金返済
+	CALL TOWN_HENSAI(PM:LCOUNT)
+	;手持ちが少ないと借金する
+	SIF CFLAG:(PM:LCOUNT):580 < 10000
+		CALL TOWN_LOAN(PM:LCOUNT)
+	;ダンジョン外売春
+	CALL HEROINE_BITCH(PM:LCOUNT)
+NEXT
+
+
+
+;援助金計算（合算）
+@FI_PT_FUNDING(PM:0, PM:1, PM:2)
+#FUNCTION
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM LCOUNT
+VARSET LOCAL
+FOR LCOUNT, 0, 3
+	LOCAL += FI_FUNDING(PM:LCOUNT)
+NEXT
+LOCAL = MAX(LOCAL, 1)
+RETURNF LOCAL
+
+
+
+;援助金計算（個人）
+@FI_FUNDING(ARG)
+#FUNCTION
+#LOCALSIZE 1
+#LOCALSSIZE 1
+SIF ARG <= 0
+	RETURNF 0
+VARSET LOCAL
+;故郷や家族からの補助金
+
+;素質補正
+;人気者ボーナス
+SIF TALENT:ARG:인기인
+	LOCAL += 100
+;物乞い・貧民は援助が少ない
+SIF TALENT:ARG:315 == 7 || TALENT:ARG:315 == 9
+	LOCAL -= 50
+;貴族・聖女・軍人は多い
+SIF TALENT:ARG:315 == 8 || TALENT:ARG:315 == 12 || TALENT:ARG:315 == 19
+	LOCAL += 100
+;金のため・自暴自棄は援助が少ない
+SIF TALENT:ARG:316 == 2 || TALENT:ARG:316 == 11
+	LOCAL -= 50
+;国に命じられて・命令されては多い
+SIF TALENT:ARG:316 == 9 || TALENT:ARG:316 == 13
+	LOCAL += 50
+
+;カルマ補正
+SIF CFLAG:151 > 0
+	LOCAL += CFLAG:151 * 10
+
+;レベル補正
+LOCAL += CFLAG:ARG:9
+
+RETURNF LOCAL
+
+
+
+@TOWN_SELL(ARG)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+SIF ARG <= 0
+	RETURN
+SIF !CFLAG:ARG:581
+	RETURN
+IF FLAG:5 & 32
+	PRINTFORM %SAVESTR:ARG%은(는) 약탈한 금품을 환금하여 
+	SETCOLORBYNAME SkyBlue
+	PRINTV CFLAG:ARG:581
+	RESETCOLOR
+	PRINTFORML 만큼의 자금을 손에 넣었다
+ENDIF
+CFLAG:ARG:580 += CFLAG:ARG:581
+CFLAG:ARG:581 = 0
+
+
+
+@TOWN_HOSHOUNIN(ARG)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+SIF ARG <= 0
+	RETURN
+SIF !TALENT:ARG:보증인
+	RETURN
+LOCAL = (CFLAG:0:9 * 8) + 500
+IF FLAG:5 & 32
+	PRINTFORM 보증인의 %SAVESTR:ARG%은(는) 빚이 
+	SETCOLORBYNAME LightSalmon
+	PRINTV LOCAL
+	RESETCOLOR
+	PRINTFORML 만큼 증가해 버렸다……
+ENDIF
+CFLAG:ARG:582 -= LOCAL
+
+
+
+@TOWN_HENSAI(ARG)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+SIF ARG <= 0
+	RETURN
+;借金があれば500, もしくは2.5割を可能な限り返済する
+IF CFLAG:ARG:582 < -500
+	;返済額をカルマ依存で変動するように
+	;返済金額は負債の1/2～1/9
+	;従来のレートにあたる1/4はカルマが130～81のとき
+	SELECTCASE CFLAG:151
+	CASE IS > 180
+		LOCAL = 2
+	CASE IS > 130
+		LOCAL = 3
+	CASE IS > 80
+		LOCAL = 4
+	CASE IS > 30
+		LOCAL = 5
+	CASE IS > -20
+		LOCAL = 6
+	CASE IS > -70
+		LOCAL = 7
+	CASE IS > -120
+		LOCAL = 8
+	CASEELSE
+		LOCAL = 9
+	ENDSELECT
+	LOCAL = ABS(CFLAG:ARG:582) / LOCAL
+ELSEIF CFLAG:ARG:582 < 0
+	LOCAL = 500
+;借金なし
+ELSE
+	RETURN
+ENDIF
+
+;上限下限処理
+;上限は手持ちの1/2, また返却の意思があるときは最低額100は保証する
+;小銭を出すのもなんかおかしいので100単位での返済にする
+LOCAL = LIMIT(LOCAL, 100, CFLAG:ARG:580 / 2)
+LOCAL /= 100
+LOCAL *= 100
+
+;借金の金額は越えないように
+LOCAL = MIN(LOCAL, ABS(CFLAG:ARG:582), CFLAG:ARG:580 / 2)
+
+IF (FLAG:5 & 32)
+	PRINTFORM %SAVESTR:ARG%은 
+	SETCOLORBYNAME LightSalmon
+	PRINTV CFLAG:ARG:582
+	RESETCOLOR
+	PRINTFORM 의 빚 중에서 
+	SETCOLORBYNAME LightSalmon
+	PRINTV LOCAL
+	RESETCOLOR
+	PRINTFORML 만큼을 반제했다
+ENDIF
+CFLAG:ARG:582 += LOCAL
+CFLAG:ARG:580 -= LOCAL
+
+
+
+@TOWN_LOAN(ARG)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+SIF ARG <= 0
+	RETURN
+IF CFLAG:ARG:582 < -50000
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:ARG%의 부채액이 커서, 더이상 빚을 질수조차 없는것 같다……
+ELSE
+	IF RAND:(260 + CFLAG:ARG:151) < 50
+		IF FLAG:5 & 32
+			PRINTFORM %SAVESTR:ARG%은 
+			SETCOLORBYNAME LightSalmon
+			PRINT 1000
+			RESETCOLOR
+			PRINTFORML 의 빚을 졌다
+		ENDIF
+		CFLAG:ARG:582 -= 1000
+		CFLAG:ARG:580 += 1000
+	ENDIF
+ENDIF
+
+
+
+;----------------------
+;アイテムの購入
+;----------------------
+@TOWN_PT_SHOPPING(PM:0, PM:1, PM:2)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM LCOUNT
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:PM%의 파티는 잡화점에서 공략의 준비를 하였다…
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	CALL TOWN_SHOPPING(PM:LCOUNT)
+NEXT
+WAIT
+
+;個人の購入処理
+@TOWN_SHOPPING(ARG)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+SIF ARG <= 0
+	RETURN 0
+;お金に余裕が無いと買えない
+SIF CFLAG:ARG:580 < 3000
+	RETURN 0
+CALL ADD_EX_ITEM, -3, ARG, 1
+;代金を支払う
+SIF RESULT
+	CFLAG:ARG:580 -= 500
+
+
+;----------------------
+;冒険の計画
+;----------------------
+;ちと変数増えすぎて見にくいだろうか
+;NUM_PMはPT人数
+;KARMAはカルマ, FLOORは前回の到達階層, LOANは借金, BALANCEは手持ち資金を含めた収支
+;X_MINとX_MAXは最小と最大, X_PT系はPTの平均値, LOAN_LIMITは反応する借金の限度額（3段階）
+;GOALは今回の目標階層, COSTは今回の必要資金
+@TOWN_PT_PLANNING(PM:0, PM:1, PM:2)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM LCOUNT
+#DIM DYNAMIC NUM_PM
+#DIM DYNAMIC KARMA, 3
+#DIM DYNAMIC FLOOR, 3
+#DIM DYNAMIC LOAN, 3
+#DIM DYNAMIC BALANCE, 3
+#DIM DYNAMIC FLOOR_MIN
+#DIM DYNAMIC FLOOR_MAX
+#DIM DYNAMIC LOAN_MIN
+#DIM DYNAMIC LOAN_MAX
+#DIM KARMA_PT
+#DIM FLOOR_PT
+#DIM LOAN_PT
+#DIM BALANCE_PT
+#DIM LOAN_LIMIT, 3
+#DIM GOAL
+#DIM COST
+#DIM START_FLOOR
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:PM%의 파티는 모험의 계획을 세웠다
+;VARSET LOCAL
+
+;情報取得
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	;最低予算更新, ここのLOCALとLOCAL:2は使ってない模様
+	;LOCAL = MIN(LOCAL, CFLAG:(PM:LCOUNT):580)
+	;最低レベル更新
+	;LOCAL:2 = MIN(LOCAL:2, CFLAG:(PM:LCOUNT):9)
+	;最低借金更新
+	;LOCAL:3 = MIN(LOCAL:3, CFLAG:(PM:LCOUNT):582)
+	;最低目標階層更新
+	;LOCAL:5 = MIN(LOCAL:5, CFLAG:(PM:LCOUNT):520)
+	
+	NUM_PM ++
+	KARMA:LCOUNT = CFLAG:(PM:LCOUNT):151
+	;LV:LCOUNT = CFLAG:(PM:LCOUNT):9
+	
+	;PMに空きがあるとバグるのでMINとMAXもここで取得する
+	;最大到達深度を参照する
+	FLOOR:LCOUNT = CFLAG:(PM:LCOUNT):521
+	FLOOR_MIN = MIN(FLOOR_MIN, FLOOR:LCOUNT)
+	FLOOR_MAX = MAX(FLOOR_MAX, FLOOR:LCOUNT)
+	;LOANは負数なのでMINが最大借金でMAXが最低借金である点に注意
+	LOAN:LCOUNT = CFLAG:(PM:LCOUNT):582
+	LOAN_MIN = MIN(LOAN_MIN, LOAN:LCOUNT)
+	LOAN_MAX = MAX(LOAN_MAX, LOAN:LCOUNT)
+	;個人予算収支
+	BALANCE:LCOUNT = CFLAG:(PM:LCOUNT):580 + CFLAG:(PM:LCOUNT):582
+NEXT
+
+KARMA_PT = SUMARRAY(KARMA) / NUM_PM
+FLOOR_PT = SUMARRAY(FLOOR) / NUM_PM 
+LOAN_PT = SUMARRAY(LOAN) / NUM_PM
+;ふつー黒字収支を心がけると思う（その場合は単に合計するだけでおｋ）が
+;どうも借金＞収入になるので頭割りしとく
+BALANCE_PT = SUMARRAY(BALANCE) / NUM_PM
+
+;ここらへんは適当に決めた判定
+
+SELECTCASE KARMA_PT
+CASE IS > 180
+	LOAN_LIMIT:0 = -7000
+	LOAN_LIMIT:1 = -5500
+	LOAN_LIMIT:2 = -3000
+CASE IS > 130
+	LOAN_LIMIT:0 = -8000
+	LOAN_LIMIT:1 = -6500
+	LOAN_LIMIT:2 = -4000
+CASE IS > 80
+	LOAN_LIMIT:0 = -9000
+	LOAN_LIMIT:1 = -7500
+	LOAN_LIMIT:2 = -5000
+CASE IS > 30
+	LOAN_LIMIT:0 = -10000
+	LOAN_LIMIT:1 = -8500
+	LOAN_LIMIT:2 = -6000
+CASE IS > -20
+	LOAN_LIMIT:0 = -11000
+	LOAN_LIMIT:1 = -9500
+	LOAN_LIMIT:2 = -7000
+CASE IS > -70
+	LOAN_LIMIT:0 = -12000
+	LOAN_LIMIT:1 = -10500
+	LOAN_LIMIT:2 = -8000
+CASE IS > -120
+	LOAN_LIMIT:0 = -13000
+	LOAN_LIMIT:1 = -11500
+	LOAN_LIMIT:2 = -9000
+CASEELSE
+	LOAN_LIMIT:0 = -14000
+	LOAN_LIMIT:1 = -12500
+	LOAN_LIMIT:2 = -10000
+ENDSELECT
+;PRINTFORMW 0{LOAN_LIMIT:0} 1{LOAN_LIMIT:1} 2{LOAN_LIMIT:2}
+
+
+;GOTO使うのもあんまよろしくないが他に手を思いつかんのだ
+;進行処理の発生率：借金が無い＞ふつう＞借金そこそこ＞借金スゴイ
+;カルマ高いと慎重派になっちゃうね
+
+START_FLOOR = 0
+
+;借金がすごいパーティ
+;返済をするためお金のたくさん手に入る深層を目指すことにしました
+IF (LOAN_MIN <= LOAN_LIMIT:0 || BALANCE_PT <= LOAN_LIMIT:1)
+	SIF RAND:4 == 0
+		GOTO INTO_DEEPER
+	SIF FLAG:5 & 32
+		PRINTFORML 빚이 크게 늘었기 때문에,  일확천금을 꿈꾸며 이전보다 깊은 계층을 목표로 했다
+	;前回到達した階層+1階層を目指す
+	GOAL = FLOOR_MAX + 1
+	;前回到達した階層からスタート
+	START_FLOOR = FLOOR_MAX + 1
+;借金そこそこ
+ELSEIF (LOAN_MIN <= LOAN_LIMIT:1 || BALANCE_PT <= LOAN_LIMIT:2)
+	SIF RAND:3 == 0
+		GOTO INTO_DEEPER
+	SIF FLAG:5 & 32
+		PRINTFORML 얕은 계층을 탐색하기로 결정한 것 같다
+	GOAL = MIN(FLOOR_PT / 2, FLOOR_MIN)
+	SIF !GOAL
+		GOAL = 1
+	START_FLOOR = 1
+;借金がぜんぜん無いか各分岐の一定確率で深く潜る
+ELSEIF LOAN_PT > LOAN_LIMIT:2
+	$INTO_DEEPER
+	SIF FLAG:5 & 32
+		PRINTFORML 저번보다 더 깊은 계층을 목표로 잡은 것 같다
+	;前回到達した階層+1階層を目指す
+	GOAL = FLOOR_MAX + 1
+	;最深到達階層とか記録してたらそこに行かせるんだが
+	;前回到達した階層からスタート, これね! 
+	START_FLOOR = FLOOR_MAX + 1
+;その他
+ELSE
+	SIF RAND:2 == 0
+		GOTO INTO_DEEPER
+	SIF FLAG:5 & 32
+		PRINTFORML 신중하게 탐색을 속행하기로 한 것 같다
+	GOAL = MAX(FLOOR_MAX / 2, FLOOR_PT, 1)
+	START_FLOOR = GOAL
+ENDIF
+
+;9階層までしかないので, 最大値は8, 最小値は0
+GOAL = LIMIT(GOAL, 0, 8)
+START_FLOOR = LIMIT(START_FLOOR, 1, 7)
+
+;階層踏破のための必要資金
+;ダンジョンレベルが高いほど増えていく（最大値900）
+COST = GOAL * MIN(500 + (CFLAG:0:9 * 4), 900)
+
+IF GOAL && (FLAG:5 & 32)
+	PRINTFORM 한 사람당
+	SETCOLORBYNAME LightSalmon
+	PRINTV COST
+	RESETCOLOR
+	PRINTFORM 만큼의 빚을 내어, 
+	SETCOLORBYNAME SkyBlue
+	PRINTV GOAL + 1
+	PRINTFORML 계층을 목표로 할 계획을 세웠다! 
+	RESETCOLOR
+ELSEIF FLAG:5 & 32
+	PRINTFORML 돈을 들이지 않고 1계층을 어슬렁거리기로 하였다
+ENDIF
+
+;支払い
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	;借金する
+	CFLAG:(PM:LCOUNT):582 -= COST
+	CFLAG:(PM:LCOUNT):520 = GOAL
+	CFLAG:(PM:LCOUNT):501 = START_FLOOR
+NEXT
+WAIT
+
+
+;----------------------
+;宴会
+;----------------------
+;ぱーてぃーのぱーてぃー
+;資金を持ちすぎる勇者の制約のためのイベント
+;支払いの判定がおかしいっぽかったのを修正
+@TOWN_PT_PARTY(PM:0, PM:1, PM:2)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM DYNAMIC COST, 3
+#DIM LCOUNT
+#DIM TARGET_POOL
+
+TARGET_POOL = TARGET
+
+;予算を集める
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	;お金が無いとダメ
+	SIF CFLAG:580 < 1000
+		CONTINUE
+	
+	;財布から2割の飲み代
+	COST:LCOUNT = CFLAG:580 / 5
+	
+NEXT
+;おかねがある
+IF SUMARRAY(COST)
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:PM%의 파티는 돈을 걷어 술을 마시며, 모험의 성공을 기원했다……
+	;代金を支払う
+	FOR LCOUNT, 0, 3
+		SIF PM:LCOUNT <= 0
+			CONTINUE
+		CFLAG:(PM:LCOUNT):580 -= COST:LCOUNT
+	NEXT
+	WAIT
+;お流れ
+ELSE
+	A = PM:0
+	RETURN 0
+ENDIF
+
+;お楽しみタイム
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	
+	TARGET = PM:LCOUNT
+	
+	PRINTFORM %SAVESTR:TARGET%は
+	
+	IF CFLAG:151 > 50
+		;カルマが高い場合
+		PRINTL 모험을 대비하여 일찍 잠을 잤다……
+	ELSEIF ABL:22 > 1 || TALENT:121
+		;레즈끼・ふたなりの場合娼婦購入
+		PRINT 밤의 거리에 놀러가, 
+		;로리콘
+		SIF TALENT:142
+			PRINT 어린 소녀인
+		PRINTL 창녀를 산 것 같다……
+		;貝合わせ自動調教
+		CALL BEFORE_AUTOTRAIN
+		CALL COM63_AUTO
+		CALL SOURCE_CHECK_AUTO
+	ELSEIF TALENT:143
+		;ショタコンの場合少年風俗へ
+		PRINT 소년과 음란한 것을 하는 가게에 가서 즐긴것 같다……
+		;愛撫自動調教
+		CALL BEFORE_AUTOTRAIN
+		CALL COM0_AUTO
+		CALL SOURCE_CHECK_AUTO
+	ELSEIF TALENT:315 == 12 || TALENT:202 || TALENT:206
+		;聖女・신관・巫女はお祈りでカルマアップ
+		PRINTL 기도를 올리고 나서 잔 것 같다……
+		CALL KARMA, TARGET, 1
+	ELSE 
+		PRINTL 만취되어 잠들어 버린 것 같다……
+	ENDIF
+	
+NEXT
+
+TARGET = TARGET_POOL
+
+RETURN 1
+
+;-----------------------
+;日常フェイズ
+;-----------------------
+@TOWN_PT_DAYEVENT(PM:0, PM:1, PM:2)
+#LOCALSIZE 1
+#LOCALSSIZE 1
+#DIM PM, 3
+#DIM LCOUNT
+
+;各自日常を送る
+FOR LCOUNT, 0, 3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	TARGET = PM:LCOUNT
+	CALL DUNGEON_TOWN_LOVER,TARGET
+NEXT
+
+RETURN 0
+
+
+

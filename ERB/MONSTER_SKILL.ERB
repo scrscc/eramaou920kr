@@ -1,0 +1,264 @@
+﻿;-----------------------------------------------------
+@MONSTER_SKILL, ARG:0, ARG:1, ARG:2
+#DIM DMG
+#DIM PALAM_DOWN
+;-----------------------------------------------------
+;モンスターの特殊能力. ARG:0=対象 ARG:1=使用能力 ARG:2=使用者 LOCAL:0=使用者ID
+
+LOCAL:0 = E:(ARG:2)
+DMG = E:(ARG:2 + 1) + CFLAG:0:9
+
+;パラメータ変動系効果
+PALAM_DOWN = (DMG / 5) + 1
+
+;発動確率（2/3）
+SIF RAND:3 == 0
+	RETURN 0
+
+;ダメージ強化補正
+DMG += DMG / 2
+
+;ダメージキャップ
+SIF DMG > 400
+	DMG = 400
+;パラメータ変動キャップ
+SIF PALAM_DOWN > 50
+	PALAM_DOWN = 50
+
+;-----------------------------------------------------
+;몬스터 특수 목록
+;-----------------------------------------------------
+;0  없음
+;1  점액포획
+;2  함정포획
+;3  덩굴포획
+;4  갑옷파괴
+;5  투명
+;6  재생
+;7  의해
+;8  가속
+;9  브레스
+;10 마비 가스
+;11 유혹
+;12 혼란
+;13 경험치흡수
+;14 갑옷파괴브레스
+;15 마력흡수
+;16 射撃
+;17 地形能力
+;18 肉鎧
+
+IF ARG:1 == 1
+	;1 점액 포획
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 점액이 사방에 흩날렸다! （기력-{DMG}）
+	ENDIF
+	BASE:(ARG:0):1 -= DMG
+ELSEIF ARG:1 == 2
+	;2 함정 포획
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 함정에 빠졌다! （HP -{DMG}）
+	ENDIF
+	BASE:(ARG:0):0 -= DMG
+ELSEIF ARG:1 == 3
+	;3 덩굴 포획
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 덩굴이 몸의 자유를 빼앗아 간다! （공격-{PALAM_DOWN}）
+	ENDIF
+	CFLAG:(ARG:0):11 -= PALAM_DOWN
+ELSEIF ARG:1 == 4
+	;4 갑옷 파괴
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 갑옷파괴! （방어력 -{PALAM_DOWN}）
+	ENDIF
+	CFLAG:(ARG:0):12 -= PALAM_DOWN
+ELSEIF ARG:1 == 5
+	;5 투명
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은(는) 투명해져간다……（방어+2）
+	ENDIF
+	E:(ARG:2 + 3) += 2
+ELSEIF ARG:1 == 6
+	;6 재생
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은(는) 재생하고있다……（방어+3）
+	ENDIF
+	E:(ARG:2 + 3) += 3
+ELSEIF ARG:1 == 7
+	;7 의태
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은(는) 교묘하게 의태하고있다（방어+5）
+	ENDIF
+	E:(ARG:2 + 3) += 5
+ELSEIF ARG:1 == 8
+	;8 가속
+	IF RAND:3 == 0
+		SIF FLAG:5 & 32
+			PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 헤매고있다! 
+		CFLAG:(ARG:0):509 = 1
+	ENDIF
+ELSEIF ARG:1 == 9
+	;9 브레스
+	LOCAL:2 = DMG * 3
+	LOCAL:2 /= 2
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 는 브레스를 뿜었다! ! （HP-{LOCAL:2}）
+	ENDIF
+	BASE:(ARG:0):0 -= LOCAL:2
+ELSEIF ARG:1 == 10
+	;10 마비 가스
+	LOCAL:2 = PALAM_DOWN * 3
+	LOCAL:2 /= 2
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은 마비 가스를 토해냈다! ! （공격-{LOCAL:2}）
+	ENDIF
+	CFLAG:(ARG:0):11 -= LOCAL:2
+ELSEIF ARG:1 == 11
+	;11 유혹
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은(는) 유혹하고있다……（업보:-2 호감도+4）
+	ENDIF
+	CFLAG:(ARG:0):2 += 4
+	CALL karma, ARG:0, -2
+ELSEIF ARG:1 == 12
+	;12 혼란
+	LOCAL:2 = DMG * 3
+	LOCAL:2 /= 2
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 혼란전파! ! （기력-{LOCAL:2}）
+	ENDIF
+	BASE:(ARG:0):1 -= LOCAL:2
+ELSEIF ARG:1 == 13
+	;13 경험치흡수
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 레벨 드레인! ! （경험치-{DMG}）
+	ENDIF
+	EXP:(ARG:0):80 -= DMG
+	CALL CHARA_LV_CHECK,(ARG:0)
+ELSEIF ARG:1 == 14
+	;14 갑옷파괴브레스
+	LOCAL:2 = DMG * 3
+	LOCAL:2 /= 2
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 는 갑옷을 녹이는 브레스를 토했다! ! （HP-{LOCAL:2} 방어-{PALAM_DOWN}）
+	ENDIF
+	BASE:(ARG:0):0 -= LOCAL:2
+	CFLAG:(ARG:0):12 -= PALAM_DOWN
+ELSEIF ARG:1 == 15
+	;15 마력흡수
+	LOCAL:2 = DMG * 3
+	LOCAL:2 /= 2
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 는 마력을 흡수했다! ! （기력-{LOCAL:2} 방어+4）
+	ENDIF
+	BASE:(ARG:0):1 -= LOCAL:2
+	E:(ARG:2 + 3) += 4
+ELSEIF ARG:1 == 16
+	;16 射撃
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 의 화살 공격! ! （HP-{DMG}）
+	ENDIF
+	BASE:(ARG:0):0 -= DMG
+ELSEIF ARG:1 == 17
+	;16 地形効果
+	CALL MONSTER_ROOM_SKILL, ARG:0, ARG:2
+ELSEIF ARG:1 == 18
+	;18 肉鎧
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은(는) 몸에 동여맨 육변기로부터 체력을 흡수했다……（방어+2）
+	ENDIF
+	E:(ARG:2 + 3) += 2
+ENDIF
+
+RETURN 0
+
+;-----------------------------------------------------
+@MONSTER_ROOM_SKILL, ARG:0, ARG:2
+#DIM ROOM
+#DIM DMG
+#DIM PALAM_DOWN
+;-----------------------------------------------------
+;モンスターの地形適応能力. ARG:0=対象 ARG:2=使用者 LOCAL:0=使用者ID DMG=使用者レベル
+
+LOCAL:0 = E:(ARG:2)
+DMG = E:(ARG:2 + 1) + CFLAG:0:9
+
+ROOM = CFLAG:(ARG:0):501
+
+;強化補正
+DMG *= 2
+
+IF ROOM == 500
+	;상점가
+	SIF FLAG:5 & 32
+		PRINTFORMW 상점가의 괴한이 가세했다! ! （HP-{DMG} 공격+1）
+	BASE:(ARG:0):0 -= DMG
+	E:(ARG:2 + 2) += 1
+ELSEIF ROOM == 501
+	;습지
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW (이)가 독늪에서 기습했다! （기력-{DMG} 공격+2）
+	ENDIF
+	BASE:(ARG:0):1 -= DMG
+	E:(ARG:2 + 2) += 2
+ELSEIF ROOM == 502 && FLAG:83 > 0
+	;인간목장
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW (은)는 육변기를 방패로 삼고 있다……（공격-{DMG}）
+	ENDIF
+	CFLAG:(ARG:0):11 -= DMG
+ELSEIF ROOM == 503
+	;얼음방
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW (은)는 얼음을 몸에 둘렀다! （공격+2 방어+2）
+	ENDIF
+	E:(ARG:2 + 2) += 2
+	E:(ARG:2 + 3) += 2
+ELSEIF ROOM == 504
+	;달군모래
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 이(가) 불길에 휩싸여간다! ! （공격+10 방어-1）
+	ENDIF
+	E:(ARG:2 + 2) += 10
+	SIF E:(ARG:2 + 3) > 2
+		E:(ARG:2 + 3) -= 1
+ELSEIF ROOM == 505
+	;미궁
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 은(는) 미궁에 몸을 숨기고있다（방어+5）
+	ENDIF
+	E:(ARG:2 + 3) += 5
+ELSEIF ROOM == 506 && FLAG:84 > 0
+	;박물관
+	LOCAL:2 = DMG * 3
+	LOCAL:2 /= 2
+	IF FLAG:5 & 32
+		CALL MONSTER_NAME,LOCAL:0,0
+		PRINTFORMW 가 전시물을 조종 추격해간다! ! （기력-{LOCAL:2}）
+	ENDIF
+	BASE:(ARG:0):1 -= LOCAL:2
+ENDIF
+
+RETURN 0
+

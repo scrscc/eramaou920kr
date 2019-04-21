@@ -1,0 +1,494 @@
+﻿;------------------------------------------
+@EXECUTION
+#DIM LV
+#DIM LAST_MEMBER
+#DIM NO_CHECK
+#DIM FAMILY,3
+;ZはTARGETを保存してるため使用禁止
+;------------------------------------------
+;処刑コマンド
+;LAST_MEMBER = 残り処刑待ち人数
+;NO_CHECK    = お気に入りされてない処刑待ち
+
+;FLAG:83  肉便器の数
+
+$EXCUTION_MAIN
+PRINTL  
+PRINTL 처형대상을 선택해 주세요
+SIF FLAG:84 < 20 && DAY < 60
+	PRINTFORML {60 - DAY}일 이내에 용사를 앞으로 {20 - FLAG:84}인을 박물관에 장식하면 실적해제！
+PRINTL  
+
+LAST_MEMBER = 0
+NO_CHECK = 0
+
+REPEAT CHARANUM
+	IF (CFLAG:COUNT:1 == 0 || CFLAG:COUNT:1 == 7) && COUNT != 0
+		PRINTFORM [{LAST_MEMBER}] %SAVESTR:COUNT% {CFLAG:COUNT:9}LV
+		LAST_MEMBER += 1
+		SIF CFLAG:COUNT:0 > 0 && COUNT != 0
+		PRINT [매각가]
+		IF CFLAG:COUNT:700
+			PRINT [☆]
+		ELSE
+			NO_CHECK += 1
+		ENDIF
+		PRINTL  
+	ENDIF
+REND
+
+
+SIF LAST_MEMBER == 0
+	RETURN 0
+
+PRINTL 
+PRINTL [100] 돌아온다
+DRAWLINE
+
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= LAST_MEMBER && RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+SIF RESULT == 100
+	RETURN 0
+
+X = RESULT
+A = 0
+REPEAT CHARANUM
+	IF (CFLAG:COUNT:1 == 0 || CFLAG:COUNT:1 == 7) && COUNT != 0 && A == X
+		A = COUNT
+		BREAK
+	ENDIF
+	SIF (CFLAG:COUNT:1 == 0 || CFLAG:COUNT:1 == 7) && COUNT != 0
+		A += 1
+REND
+
+
+SIF CFLAG:A:700
+	SETCOLOR (GETDEFCOLOR() - 0x444444)
+PRINTL [0] 던전으로부터 추방
+PRINTL [1] 본보기 만든다
+PRINTL [2] 박물관에 장식
+PRINTL [3] 엽기적인 처형을 실시한다
+PRINTL [4] 육변기로한다
+SIF CFLAG:A:700
+		RESETCOLOR
+PRINTL [5] 전투원화
+PRINTL [6] 필러리형
+PRINTL [7] 기억을 지우고 풀어준다
+SIF CSTR:A:6 == ""
+	SETCOLOR (GETDEFCOLOR() - 0x444444)
+SIF CFLAG:A:497 == 0
+	PRINTL [8] 수정구의 영상을 공개 한다
+SIF CFLAG:A:497 == 1
+	PRINTL [8] 수정구의 영상을 비공개 한다
+SIF CSTR:A:6 == ""
+		RESETCOLOR
+PRINTL  
+PRINTL [100] 그만둔다
+
+$INPUT_LOOP_2
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP_2
+ELSEIF RESULT >= 9 && RESULT != 100
+	GOTO INPUT_LOOP_2
+ENDIF
+
+SELECTCASE RESULT
+	CASE 0, 1, 2, 3, 4
+		IF CFLAG:A:700
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 즐겨 찾기 등록이 되어있기 때문에 처형할 수 없습니다. 
+			GOTO INPUT_LOOP_2
+		ENDIF
+ENDSELECT
+
+IF RESULT == 100
+	TARGET = FLAG:1
+	RETURN 0
+ENDIF
+
+TARGET = A
+TFLAG:16 = RESULT
+
+CALL EXUCUTION_KOUJO
+
+
+
+IF TFLAG:16 == 0
+	PRINTFORML %NAME:MASTER%은 %조사선택(SAVESTR:A, "를")% 던전에서 영구히 추방하기로 했다…
+	CALL BANISHMENT
+	TARGET = FLAG:1
+	ASSI = FLAG:2
+	RETURN 0
+
+ELSEIF TFLAG:16 == 1
+	PRINTFORML %NAME:MASTER%は%조사선택(SAVESTR:A, "를")% 본보기로 삼기로 했다…
+	CALL PUBLIC_EXECUTION
+	TARGET = FLAG:1
+	ASSI = FLAG:2
+	RETURN 0
+	
+ELSEIF TFLAG:16 == 2
+	PRINTFORMW %조사선택(SAVESTR:A, "를")% 아틀리에로 데려왔다…
+	CALL MUSEUM
+	TARGET = FLAG:1
+	ASSI = FLAG:2
+	RETURN 0
+
+ELSEIF TFLAG:16 == 3
+	PRINTFORML %NAME:MASTER%은 %SAVESTR:A%에게 고통을 맛보게 했다…
+	PRINTW 　　　　　　　　　　< ※ 주 의 !  ※ >
+	PRINTW （이 앞의 처형 메뉴는, 료나・그로테스크한 요소밖에 없습니다! ）
+	CALL GROTESQUE
+	TARGET = FLAG:1
+	ASSI = FLAG:2
+	RETURN 0
+
+ELSEIF TFLAG:16 == 4
+	FLAG:83 += 1
+	
+	FAMILY = CFLAG:A:605
+	FAMILY:1 = FAMILY % 10
+	CALL SEARCH_FAMILY, A
+	FAMILY:2 = RESULT
+	
+	SIF TALENT:A:85
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 어째서 육변기로 되는지 알지 못한 채, 사랑스러운 당신의 이름을 외치며 몇 번이나 몇 번이나 용서를 구했다. 그러나 %조사선택(SAVESTR:PLAYER, "는")% 
+	PRINTFORML %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍어 
+	PRINTL 흡수한 힘으로 그녀의 신체를 음미로운 고깃덩이로 바꾸고 
+	PRINTL 던전의 몬스터들의 성욕을 해소하기로 했다
+	PRINTW 더 이상 용사로서 복귀는 커녕, 햇빛을 보는 일조차 이루어지지 않겠지……
+	;엘프
+	SIF TALENT:A:원료족 == 1
+		PRINTFORMW 엘프인 %조사선택(SAVESTR:A, "는")% 추악한 오크들에게 호평일색이였다고 한다
+	;정액중독
+	SIF ABL:A:32 > 0 || TALENT:A:혀놀림
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 정액변소로서 백탁액을 매일 즐겁게 들이마시고 있다
+	;레즈중독・레즈끼
+	SIF ABL:A:33 > 0 | ABL:A:22 > 2
+		PRINTFORMW 여자변소로서의 %SAVESTR:A%도 평판이 좋았다. 바지나의 치구나 애널마저도 기쁘게 핥아 먹어 여자를 절정시켰다
+	;마조끼
+	SIF ABL:A:21 > 0
+		PRINTFORMW 욕설이 퍼부어질 때 %조사선택(SAVESTR:A, "는")% 다리 사이를 적시고 황홀한 웃음을 띄우고 있다
+	;노출벽
+	SIF ABL:A:17 > 0
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 언제나 던전의 큰길에서 치태를 보이고 있다. 손님이 없으면 지나가던 몬스터에게 교태를 부리며 애원했다
+	;봉사정신
+	SIF ABL:A:16 > 0
+		PRINTFORMW 완전히 부서진 %조사선택(SAVESTR:A, "는")% 용자의 긍지 한 조각도 없이, 육봉에 봉사하는 것 만을 즐거움으로 하고 있다
+	;V感覚
+	SIF ABL:A:2 > 3
+		PRINTFORMW 수를 셀 수 없을 정도로 페니스를 빨아들인 %SAVESTR:A%의 질은 완전히 확장되어 조임을 잃었다. 최근은 트롤이나 말의 거근을 상대로 하는 경우가 많다
+	;A感覚
+	SIF ABL:A:3 > 3
+		PRINTFORMW 이미 성기가 된 %SAVESTR:A%의 항문은 확장되어 완전히 닫히지 않게 되어 있다. 그런데도 그녀는 육봉을 박아넣고 장내사정을 애원하면서 열락에 미쳐갔다
+	;애정
+	SIF TALENT:A:85
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 모든 페니스가 사랑스러운 당신의 물건으로 보이는 모양이다
+	;V敏感・淫壺
+	SIF TALENT:A:104 || TALENT:A:232
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 바기나에 뭔가 들어가지 않으면 진정하지 못하고, 천박한 단어로 정액을 졸랐다
+	;A敏感・음항
+	SIF TALENT:A:106 || TALENT:A:233
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 애널으로 특히 느끼는 모양인지, 악마에게 애널로 임신 할 수 있도록 개조받은 모양이다
+	;C敏感・음핵
+	SIF TALENT:A:102 || TALENT:A:230
+		PRINTFORMW %SAVESTR:A%의 크리토리스는 거대하게 부어올라, 채찍으로 갈기자 침을 흩뿌리면서 절정했다
+	;B敏感・음유
+	SIF TALENT:A:108 || TALENT:A:231
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 유두를 악마에게 개조받았는지, 유두로 성교 할 수 있게 된 모양이다
+	;마술・저주술
+	SIF TALENT:A:241 || TALENT:A:250
+		PRINTFORMW 마법의 힘을 가진 %조사선택(SAVESTR:A, "는")%, 머리를 푹 덮는 투구를 씌워진 채 강제적으로 마력을 쥐어짜지고 있다
+	;법술
+	SIF TALENT:A:242
+		PRINTFORMW 성스러운 림을 가진 %조사선택(SAVESTR:A, "는")%, 악마와의 항문성교에 의해 완전히 타락하여 악마의 힘이 되고 있다
+	
+	;후타나리＆二人以上の肉便器
+	IF TALENT:A:121 && FLAG:83 >= 2
+		IF TALENT:A:318 == 1
+			;巨根
+			PRINTFORML 후타나리 거근 %조사선택(SAVESTR:A, "는")% 개조받아 한층 더 거대한 페니스가 되어, 
+			PRINTFORMW 다른 육변기를 오나홀처럼 범하고 있다
+		ELSEIF TALENT:A:318 == 2
+			;短小包茎
+			PRINTFORML 후타나리에 짧고 얇은 포경자지를 가진 %조사선택(SAVESTR:A, "는")% 성욕에 몸을 맡기고 다른 육변기를 덮쳐 보아도, 
+			PRINTFORMW 비실비실 허리를 흔들 뿐 전혀 육변기를 만족시킬수 없었다
+		ELSEIF TALENT:A:318 == 3
+			;包茎
+			PRINTFORML 후타나리 포경자지 %조사선택(SAVESTR:A, "는")% 목욕도 못하여 치구가 남은 페니스를 드러내
+			PRINTFORMW 다른 육변기의 입봉사로 깨끗하게 만들었다
+		ELSE
+			;普通
+			PRINTFORML 후타나리 %조사선택(SAVESTR:A, "는")% 적극적으로 다른 육변기를 범하여
+			PRINTFORMW 거대한 음경이 생산하는 대량의 정액을 사정하고 있다
+		ENDIF
+	ENDIF
+	
+	;차밍포인트・美乳
+	SIF TALENT:A:312 == 12
+		PRINTFORMW 매력점이었던 아름다운 젖은, 지금에는 심하게 부어오른 고깃덩이가 되어 있다
+	;차밍포인트・ヒップライン
+	SIF TALENT:A:312 == 14
+		PRINTFORMW 매력점이었던 엉덩이 곡선은, 지금에는 천박하게 부풀어 오른 고깃덩이가 되어 있다
+	;차밍포인트・性器
+	SIF TALENT:A:312 == 21
+		PRINTFORMW 매력점이었던 성기는, 지금에는 그로테스크한 고깃덩이가 되어 있다
+	;차밍포인트・髪の光沢
+	SIF TALENT:A:312 == 22
+		PRINTFORMW 매력점이었던 머리칼의 광택은, 지금에는 완전히 색이 바래있다
+	;차밍포인트・大きな尻
+	SIF TALENT:A:312 == 23
+		PRINTFORMW 매력점이었던 큰 엉덩이는, 지금에는 천박한 성욕이 배어나오는듯한 익어터진 복숭아가 되어 있다
+	
+	;故郷の恋人・憧れの人が好き
+	SIF TALENT:A:317 == 4 || TALENT:317 == 11
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 텅 빈 눈동자로 누군가의 이름을 중얼거리고 있다. 망상 속에서는 사랑하는 사람에게 안겨 있는 것이겠지
+	PRINTFORMW 현재의 육변기 수…{FLAG:83}인
+	
+	FOR LOCAL,1,CHARANUM
+		SIF CFLAG:LOCAL:1 != 11
+			CONTINUE
+		;同じ種族
+		SIF GET_LOOK_INFO(LOCAL, "종족") == GET_LOOK_INFO(A, "종족")
+			CFLAG:LOCAL:800 += 1
+		;同じ性格
+		SIF GET_LOOK_INFO(LOCAL, "성격") == GET_LOOK_INFO(A, "성격")
+			CFLAG:LOCAL:801 += 1
+		;同じ勇者になったきっかけ
+		SIF GET_LOOK_INFO(LOCAL, "용자가된동기") == GET_LOOK_INFO(A, "용자가된동기")
+			CFLAG:LOCAL:802 += 1
+		;同じ勇者になる前の生活
+		SIF GET_LOOK_INFO(LOCAL, "용자가되기이전의생활") == GET_LOOK_INFO(A, "용자가되기이전의생활")
+			CFLAG:LOCAL:803 += 1
+		;同じ髪の色
+		SIF GET_LOOK_INFO(LOCAL, "머리색") == GET_LOOK_INFO(A, "머리색")
+			CFLAG:LOCAL:804 += 1
+		;同じ瞳の色
+		SIF GET_LOOK_INFO(LOCAL, "눈동자색") == GET_LOOK_INFO(A, "눈동자색")
+			CFLAG:LOCAL:805 += 1
+		
+		IF (CFLAG:LOCAL:800 + CFLAG:LOCAL:801 + CFLAG:LOCAL:802 + CFLAG:LOCAL:803 + CFLAG:LOCAL:804 + CFLAG:LOCAL:805) >= 30
+			PRINTFORMW %SAVESTR:LOCAL%의 소환술이 풀린 것 같다……
+			PRINTFORMW %SAVESTR:LOCAL%의 남은 수명…30일
+			CFLAG:LOCAL:1 = 0
+			CFLAG:LOCAL:820 = 30
+		ENDIF
+	NEXT
+	
+	
+	SIF FAMILY:2 >= 0
+		CSTR:(FAMILY:2):5 = 육변기
+	
+
+ELSEIF TFLAG:16 == 5
+	TALENT:A:254 = 1
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 복종 계약의 각인이 신체에 새겨졌다
+	PRINTW 간신히 의식이나 기억은 남아 있지만 
+	PRINTW 명령한다면 지금 바로라도 용자를 죽이러 갈 테지
+	CFLAG:A:13 /= 2
+	CFLAG:A:14 /= 2
+	PRINTW *술식의 부작용으로 약간 전투력이 저하했습니다*
+	RETURN 0
+
+ELSEIF TFLAG:16 == 6
+	CFLAG:A:1 = 8
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 엉덩이를 들이 민 모습인 채 구속구에 채워져
+	PRINTW 몬스터들의 성욕 배출구가 되었다
+	IF TALENT:A:9 == 1
+		PRINTW 부서져버린 노예는, 무엇이 일어나는지도 알지 못하고 웃고 있다
+	ELSEIF  TALENT:A:76 == 1
+		PRINTW 음란한 노예는, 도리어 이 취향을 즐기고 있는 모양이다
+	ELSE
+		PRINTW 불쌍한 노예는 지금부터 일어날 제재에 겁먹고 있다
+	ENDIF
+	PRINTW *부정의 구슬이 한계까지 모일 때 까지 계속됩니다*
+	;前回の助手・調教対象だった場合はフラグを空に
+	SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+	SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+	TARGET = FLAG:1
+	ASSI = FLAG:2
+	RETURN 0
+	
+ELSEIF TFLAG:16 == 7
+	
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 기억이 지워진 채, 던전 밖의 도시에 해방되었다
+	PRINTFORMW %SAVESTR:A%의 모험이 다시 시작된다……
+	
+	;侵入階層・侵攻度・侵攻中・再起ポイント設定
+	CFLAG:A:501 = 1
+	CFLAG:A:502 = 0
+	CFLAG:A:1 = 2
+	CFLAG:A:508 = 3
+	;カルマがいくらか回復
+	SIF CFLAG:A:151 < -50
+		CFLAG:A:151 = -50
+	;好感度も低く
+	CFLAG:A:2 = 20
+	
+	;体力回復
+	BASE:A:0 = MAXBASE:A:0
+	BASE:A:1 = MAXBASE:A:1
+	;前回の助手・調教対象だった場合はフラグを空に
+	SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+	SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+	TARGET = FLAG:1
+	ASSI = FLAG:2
+	RETURN 0
+ELSEIF TFLAG:16 == 8 && CFLAG:A:497 == 0
+	
+	IF CSTR:A:6 == ""
+		PRINTW 영상은 아직 찍지 않았다
+		RETURN 0
+	ENDIF
+	
+	PRINTFORMW %SAVESTR:A%의 조교를 기록한 영상이 던전 밖 도시에 공개 되었다
+	PRINTFORMW 그 「%CSTR:A:6%」영상은 널리 유통 되었다……
+	
+	LOCAL = A
+	SIF CFLAG:A:604 == 0 && CFLAG:A:605 == 0
+		CALL ENTER_ENEMY,A
+	
+	A = LOCAL
+	CFLAG:A:497 = 1
+	
+	RETURN 0
+ELSEIF TFLAG:16 == 8 && CFLAG:A:497 == 1
+	
+	PRINTFORMW %SAVESTR:A%의 조교를 기록한 영상을 철회하였다……
+	
+	CFLAG:A:497 = 0
+	
+	RETURN 0
+ENDIF
+
+
+
+A = TARGET
+
+;武器解除
+W:0 = CFLAG:A:550
+CALL EQUIP_GET
+CFLAG:A:550 = -1
+;指輪解除
+W:0 = CFLAG:A:551
+CALL EQUIP_GET
+CFLAG:A:551 = -1
+;指輪解除
+W:0 = CFLAG:A:552
+CALL EQUIP_GET
+CFLAG:A:552 = -1
+
+LV = CFLAG:A:9
+
+X = NO:A + 199
+FLAG:X = 1
+
+;前回の助手・調教対象だった場合はフラグを空に
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;前回の助手・調教対象より前だった場合はフラグを減算
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+
+CALL PARTY_CHAR_DEL, A
+
+DELCHARA A
+
+CALL NAME_RESET
+
+
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+FLAG:80 += 1
+
+LV += 1
+LV *= 50
+
+EXP:0:80 += LV
+PRINTFORMW 《봉인한 용자의 힘을 흡수한 당신은 {LV}의 경험치를 얻었다! 》
+
+NO_CHECK -= 1
+
+;処刑残りがいる場合, 最初に戻る
+SIF NO_CHECK > 0
+	GOTO EXCUTION_MAIN
+
+RETURN 0
+
+;------------------------------------------
+@EXECUTION_MINI(ARGS = "")
+#DIM LV
+;------------------------------------------
+;簡易処刑コマンド。TARGETがキャラNo
+
+;武器解除
+W:0 = CFLAG:TARGET:550
+CALL EQUIP_GET
+CFLAG:TARGET:550 = -1
+;指輪解除
+W:0 = CFLAG:TARGET:551
+CALL EQUIP_GET
+CFLAG:TARGET:551 = -1
+;指輪解除
+W:0 = CFLAG:TARGET:552
+CALL EQUIP_GET
+CFLAG:TARGET:552 = -1
+
+LV = CFLAG:TARGET:9
+
+DRAWLINE
+IF ARGS == ""
+	PRINTFORML %SAVESTR:TARGET%에게 모든 힘을 봉인하는 낙인을 내리고, 
+	PRINTW 처형수속을 행했다
+ENDIF
+X = NO:TARGET + 199
+FLAG:X = 1
+
+;前回の助手・調教対象だった場合はフラグを空に
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;前回の助手・調教対象より前だった場合はフラグを減算
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+CALL PARTY_CHAR_DEL, TARGET
+DELCHARA TARGET
+CALL NAME_RESET
+FLAG:80 += 1
+
+LV += 1
+LV *= 50
+
+EXP:0:80 += LV
+PRINTL  
+PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+PRINTL 훈장경험+1
+EXP:0:81 += 1
+PRINTFORMW 《봉인한 용자의 힘을 흡수한 당신은 {LV}의 경험치를 얻었다! 》
+
+DRAWLINE
+
+RETURN 0
+

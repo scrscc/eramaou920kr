@@ -1,0 +1,637 @@
+﻿
+;	0	1	2
+; 0	私	わたし	ワタシ
+;10		わたくしワタクシ
+;20		あたし	アタシ
+;30		あたい	アタイ
+;40	僕	ぼく	ボク
+;50	俺	おれ	オレ
+;99	自分の名前
+
+;		0	1	2	3	4	5	6	7	8	9	10	11	12	13	14
+;		자애로움	자신만만	기가약함	고귀함	냉철함	마오	악녀	하트	スペードダイヤ	클럽	リリィ	두뇌명석	비호자	귀공자
+;わたし		2	2	2	1	2		1			1	1	1	1	1
+;わたくし	1			2				1						
+;あたし			1	1		1		2							1
+;あたい							1	1							
+;ぼく			1	1						1					1
+;おれ						1									
+;名前			1		1			1							1
+
+;一人称の決定
+@RANDOM_SELF_CALL, ARG
+;ARG	キャラクターNo.
+
+
+;自分の名前
+IF RAND:13 == 0 && (TALENT:ARG:161 || TALENT:ARG:163 || TALENT:ARG:166 || TALENT:ARG:172)
+	CALL SELF_CALLNAME, SAVESTR:ARG
+	CFLAG:ARG:450 = RESULT
+;おれ
+ELSEIF RAND:12 ==  0 && (TALENT:ARG:164)
+	CFLAG:ARG:450 = 50
+	;カナ
+	IF RAND:3 == 0
+		CFLAG:ARG:450 += 2
+	;かな
+	ELSEIF RAND:2 == 0
+		CFLAG:ARG:450 += 1
+	ENDIF
+;ぼく
+ELSEIF RAND:11 ==  0 && (TALENT:ARG:161 || TALENT:ARG:162 || TALENT:ARG:172)
+	CFLAG:ARG:450 = 40
+	;カナ
+	IF RAND:3 == 0
+		CFLAG:ARG:450 += 2
+	;かな
+	ELSEIF RAND:2 == 0
+		CFLAG:ARG:450 += 1
+	ENDIF
+;あたい
+ELSEIF RAND:10 ==  0 && (TALENT:ARG:166)
+	CFLAG:ARG:450 = 30
+	;カナ
+	IF RAND:4 == 0
+		CFLAG:ARG:450 += 2
+	;かな
+	ELSE
+		CFLAG:ARG:450 += 1
+	ENDIF
+;あたし
+ELSEIF RAND:9 ==  0 && (TALENT:ARG:161 || TALENT:ARG:162 || TALENT:ARG:164 || TALENT:ARG:166)
+	CFLAG:ARG:450 = 20
+	;カナ
+	IF RAND:4 == 0
+		CFLAG:ARG:450 += 2
+	;かな
+	ELSE
+		CFLAG:ARG:450 += 1
+	ENDIF
+;わたくし
+ELSEIF RAND:8 ==  0 && (TALENT:ARG:160 || TALENT:ARG:163)
+	CFLAG:ARG:450 = 10
+	;カナ
+	IF RAND:6 == 0
+		CFLAG:ARG:450 += 2
+	;かな
+	ELSE
+		CFLAG:ARG:450 += 1
+	ENDIF
+;わたし
+ELSE
+	CFLAG:ARG:450 = 0
+	;カナ
+	IF RAND:6 == 0
+		CFLAG:ARG:450 += 2
+	;かな
+	ELSEIF RAND:2 == 0
+		CFLAG:ARG:450 += 1
+	ENDIF
+ENDIF
+
+;各性格のデフォルト一人称は確率高め
+IF RAND:4 == 0
+	;고귀함
+	;わたくし
+	IF TALENT:ARG:163
+		CFLAG:ARG:450 = 10
+		;カナ
+		IF RAND:6 == 0
+			CFLAG:ARG:450 += 2
+		;かな
+		ELSE
+			CFLAG:ARG:450 += 1
+		ENDIF
+	ENDIF
+
+	;악녀
+	;あたし
+	IF TALENT:ARG:166
+		CFLAG:ARG:450 = 20
+		;カナ
+		IF RAND:4 == 0
+			CFLAG:ARG:450 += 2
+		;かな
+		ELSE
+			CFLAG:ARG:450 += 1
+		ENDIF
+	ENDIF
+	
+	;두뇌명석
+	;ぼく
+	IF TALENT:ARG:172
+		CFLAG:ARG:450 = 40
+		;カナ
+		IF RAND:4 == 0
+			CFLAG:ARG:450 += 2
+		;かな
+		ELSE
+			CFLAG:ARG:450 += 1
+		ENDIF
+	ENDIF
+	;귀공자
+	;ぼく
+	IF TALENT:ARG:174
+		CFLAG:ARG:450 = 40
+		;カナ
+		IF RAND:4 == 0
+			CFLAG:ARG:450 += 3
+		;かな
+		ELSE
+			CFLAG:ARG:450 += 2
+		ENDIF
+		
+		;おれ
+		CFLAG:ARG:450 = 50
+		;カナ
+		IF RAND:4 == 0
+			CFLAG:ARG:450 += 2
+		;かな
+		ELSE
+			CFLAG:ARG:450 += 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;ユニークキャラは一人称固定
+;마오
+SIF TALENT:ARG:165
+	CFLAG:ARG:450 = 31
+
+;골드하트
+SIF TALENT:ARG:167
+	CFLAG:ARG:450 = 11
+
+;실버스페이드
+SIF TALENT:ARG:168
+	CFLAG:ARG:450 = 42
+
+;블랙다이아
+SIF TALENT:ARG:169
+	CFLAG:ARG:450 = 0
+
+;클럽
+SIF TALENT:ARG:170
+	CFLAG:ARG:450 = 0
+
+;릴리
+SIF TALENT:ARG:171
+	CFLAG:ARG:450 = 0
+
+
+
+
+
+@SELF_CALL, ARG:0, ARG:1
+;ARG:0	キャラクターNo.
+;ARG:1	伸ばす長さ
+
+;CFLAG:450	一人称指定変数
+;0*	わたし
+;1*	わたくし
+;2*	あたし
+;3*	あたし
+;4*	ぼく
+;5*	おれ
+
+;*0	漢字
+;*1	かな
+;*2	カナ
+
+;99	自分の名前
+
+#FUNCTIONS
+#DIM SELFV
+#DIM LONGV
+#DIM LCOUNT
+#DIMS SELFS
+
+SELFV = CFLAG:(ARG:0):450
+
+IF SELFV == 0
+	SELFS = 나(私)
+	LONGV = 2
+ELSEIF SELFV == 1
+	SELFS = 나(わたし)
+	LONGV = 2
+ELSEIF SELFV == 2
+	SELFS = 나(ワタシ)
+	LONGV = 2
+ELSEIF SELFV == 10
+	SELFS = 
+ELSEIF SELFV == 11
+	SELFS = 저(わたくし)
+	LONGV = 2
+ELSEIF SELFV == 12
+	SELFS = 저(ワタクシ)
+	LONGV = 2
+ELSEIF SELFV == 20
+	SELFS = 
+ELSEIF SELFV == 21
+	SELFS = 나(あたし)
+	LONGV = 2
+ELSEIF SELFV == 22
+	SELFS = 나(アタシ)
+	LONGV = 2
+ELSEIF SELFV == 30
+	SELFS = 
+ELSEIF SELFV == 31
+	SELFS = 나(あたい)
+	LONGV = 2
+ELSEIF SELFV == 32
+	SELFS = 나(アタイ)
+	LONGV = 2
+ELSEIF SELFV == 40
+	SELFS = 나(僕)
+	LONGV = 3
+ELSEIF SELFV == 41
+	SELFS = 나(ぼく)
+	LONGV = 3
+ELSEIF SELFV == 42
+	SELFS = 나(ボク)
+	LONGV = 3
+ELSEIF SELFV == 50
+	SELFS = 이몸(俺)
+	LONGV = 4
+ELSEIF SELFV == 51
+	SELFS = 이몸(おれ)
+	LONGV = 4
+ELSEIF SELFV == 52
+	SELFS = 이몸(オレ)
+	LONGV = 4
+ELSEIF SELFV >= 99
+
+	SELFS = %SAVESTR:(ARG:0)%
+	IF SELFV == 99
+	ELSEIF SELFV < 200
+		SUBSTRINGU SELFS, CFLAG:(ARG:0):450 / 10 % 10, CFLAG:(ARG:0):450 % 10
+		SELFS = %RESULTS%
+	ELSEIF SELFV < 300
+		SUBSTRINGU SELFS, CFLAG:(ARG:0):450 / 10 % 10, CFLAG:(ARG:0):450 % 10
+		SELFS = %RESULTS%
+		STRLENSU SELFS
+		SUBSTRINGU SELFS, RESULT - 1, 1
+		IF RESULTS == "토"
+		SUBSTRINGU SELFS, 0, RESULT - 1
+			SELFS = %RESULTS%티
+		ELSEIF RESULTS == "도"
+		SUBSTRINGU SELFS, 0, RESULT - 1
+			SELFS = %RESULTS%디
+		ELSEIF RESULTS == "루"
+		SUBSTRINGU SELFS, 0, RESULT - 1
+			SELFS = %RESULTS%리이
+		ENDIF
+	ELSEIF SELFV < 1000
+		SIF CFLAG:(ARG:0):450 == 900
+			SELFS = 메구
+		SIF CFLAG:(ARG:0):450 == 901
+			SELFS = 로치
+		SIF CFLAG:(ARG:0):450 == 902
+			SELFS = 에타
+		SIF CFLAG:(ARG:0):450 == 903
+			SELFS = 에바
+		SIF CFLAG:(ARG:0):450 == 904
+			SELFS = 쥬네
+	ENDIF
+
+	STRLENSU SELFS
+	SUBSTRINGU SELFS, RESULT - 1, 1
+
+	SIF RESULTS == "ー"
+		SUBSTRINGU SELFS, RESULT - 2, 1
+
+	LONGV = 0
+	IF RESULTS == "아" || RESULTS == "카" || RESULTS == "사" || RESULTS == "타" || RESULTS == "나" || RESULTS == "하" || RESULTS == "마" || RESULTS == "야" || RESULTS == "라" || RESULTS == "와"
+		LONGV = 1
+	ELSEIF RESULTS == "ァ" || RESULTS == "ガ" || RESULTS == "ザ" || RESULTS == "ダ" || RESULTS == "バ" || RESULTS == "パ" || RESULTS == "ャ"
+		LONGV = 1
+		
+	ELSEIF RESULTS == "イ" || RESULTS == "キ" || RESULTS == "시" || RESULTS == "チ" || RESULTS == "ニ" || RESULTS == "ヒ" || RESULTS == "ミ" || RESULTS == "리"
+		LONGV = 2
+	ELSEIF RESULTS == "ィ" || RESULTS == "ギ" || RESULTS == "ジ" || RESULTS == "ヂ" || RESULTS == "ビ" || RESULTS == "ピ"
+		LONGV = 2
+
+	ELSEIF RESULTS == "ウ" || RESULTS == "ク" || RESULTS == "ス" || RESULTS == "ツ" || RESULTS == "ヌ" || RESULTS == "フ" || RESULTS == "ム" || RESULTS == "ユ" || RESULTS == "루"
+		LONGV = 3
+	ELSEIF RESULTS == "ゥ" || RESULTS == "グ" || RESULTS == "ズ" || RESULTS == "ヅ" || RESULTS == "ブ" || RESULTS == "プ" || RESULTS == "ュ"
+		LONGV = 3
+
+	ELSEIF RESULTS == "エ" || RESULTS == "ケ" || RESULTS == "セ" || RESULTS == "テ" || RESULTS == "ネ" || RESULTS == "ヘ" || RESULTS == "メ" || RESULTS == "레"
+		LONGV = 4
+	ELSEIF RESULTS == "ェ" || RESULTS == "ゲ" || RESULTS == "ゼ" || RESULTS == "デ" || RESULTS == "ベ" || RESULTS == "ペ"
+		LONGV = 4
+
+	ELSEIF RESULTS == "オ" || RESULTS == "コ" || RESULTS == "ソ" || RESULTS == "ト" || RESULTS == "ノ" || RESULTS == "ホ" || RESULTS == "モ" || RESULTS == "ヨ" || RESULTS == "ロ"
+		LONGV = 5
+	ELSEIF RESULTS == "ォ" || RESULTS == "ゴ" || RESULTS == "ゾ" || RESULTS == "ド" || RESULTS == "ボ" || RESULTS == "ポ" || RESULTS == "ョ"
+		LONGV = 5
+
+	ELSEIF RESULTS == "헨"
+		LONGV = 6
+	ENDIF
+ENDIF
+
+IF ARG:1 > 0
+	FOR LCOUNT, 0, ARG:1
+		IF LCOUNT > ARG:1 / 2
+			IF LONGV == 1
+				SELFS = %SELFS%아
+			ELSEIF LONGV == 2
+				SELFS = %SELFS%이
+			ELSEIF LONGV == 3
+				SELFS = %SELFS%우
+			ELSEIF LONGV == 4
+				SELFS = %SELFS%에
+			ELSEIF LONGV == 5
+				SELFS = %SELFS%오
+			ELSEIF LONGV == 6
+				SELFS = %SELFS%응
+			ENDIF
+		ELSE
+			IF LONGV == 1
+				SELFS = %SELFS%ぁ
+			ELSEIF LONGV == 2
+				SELFS = %SELFS%ぃ
+			ELSEIF LONGV == 3
+				SELFS = %SELFS%ぅ
+			ELSEIF LONGV == 4
+				SELFS = %SELFS%ぇ
+			ELSEIF LONGV == 5
+				SELFS = %SELFS%ぉ
+			ELSEIF LONGV == 6
+				SELFS = %SELFS%ん
+			ENDIF
+		ENDIF
+	NEXT
+ENDIF
+
+RETURNF SELFS
+
+;一人称の一文字目
+@SELF_CALL_FIRST, ARG:0
+;ARG:0	キャラクターNo.
+
+;CFLAG:(ARG:0):450	一人称指定変数
+;0*	わたし
+;1*	わたくし
+;2*	あたし
+;3*	あたし
+;4*	ぼく
+;5*	おれ
+
+;*0	漢字
+;*1	かな
+;*2	カナ
+
+;99	名前
+
+#FUNCTIONS
+#DIM SELFV
+#DIMS SELFS
+
+SELFV = CFLAG:(ARG:0):450
+
+IF SELFV < 10
+	SELFS = わ
+ELSEIF SELFV < 20
+	SELFS = わ
+ELSEIF SELFV < 30
+	SELFS = あ
+ELSEIF SELFV < 40
+	SELFS = あ
+ELSEIF SELFV < 50
+	SELFS = ぼ
+ELSEIF SELFV < 60
+	SELFS = お
+ELSE
+	SELFS = %SAVESTR:(ARG:0)%
+	SUBSTRINGU SELFS, 0, 1
+	SELFS = %RESULTS%
+ENDIF
+
+
+RETURNF SELFS
+
+@SELF_CALLNAME, ARGS
+;SYLLABLE	音数（≠文字数）
+;CHARS		文字数
+;NAMEV:0	名前の各文字の段　ア＝1, イ＝2, ウ＝3, エ＝4, オ＝5, 헨＝6
+;NAMEV:1	名前の各文字が単独で1音になるか
+;SUBSTRINV	SUBSTRINGUの開始点と文字数
+;NAME_CLASS	処理方法
+;		1:一部の切り取り　2:一部の切り取り+語尾変化　9:定型
+;LCOUNT		ループ変数
+;NAMES		名前の各文字を一文字ずつ格納
+
+#DIM SYLLABLE
+#DIM CHARS
+#DIM NAMEV, 10, 2
+#DIM SUBSTRINV, 2
+#DIM NAME_CLASS
+#DIM LCOUNT, 2
+#DIMS NAMES, 10
+
+SYLLABLE = 0
+VARSET NAMEV, -1
+VARSET SUBSTRINV, -1
+VARSET NAMES
+
+STRLENSU ARGS
+CHARS = RESULT
+;各文字とその数値を格納
+FOR LCOUNT:1, 0, CHARS
+	SUBSTRINGU ARGS, LCOUNT:1, 1
+	CALL STRING_EV, RESULTS
+	NAMEV:(LCOUNT:1):0 = RESULT:0
+	NAMEV:(LCOUNT:1):1 = RESULT:1
+	NAMES:(LCOUNT:1) = %RESULTS%
+	SYLLABLE += RESULT:1
+NEXT
+
+;名前が5音以上
+IF SYLLABLE > 49
+
+	;定型
+	STRFINDU ARGS, "마가렛"
+	SIF RESULT != -1
+		RETURN 900
+	STRFINDU ARGS, "샤를로트"
+	SIF RESULT != -1
+		RETURN 901
+	STRFINDU ARGS, "헨리에타"
+	SIF RESULT != -1
+		RETURN 903
+	STRFINDU ARGS, "에반젤린"
+	SIF RESULT != -1
+		RETURN 904
+	STRFINDU ARGS, "쥬누비에이브"
+	SIF RESULT != -1
+		RETURN 904
+
+	;語尾変化
+	;「ト」→「티」, 「ド」→「ディ」, 「루」→「리이」
+	IF (NAMES:3 == "ト" || NAMES:3 == "ド" || NAMES:3 == "루") && NAMEV:1:1 == 0
+		RETURN 204
+	ELSEIF (NAMES:3 == "ト" || NAMES:3 == "ド" || NAMES:3 == "루") && NAMEV:2:1 == 0
+		RETURN 204
+	ELSEIF (NAMES:2 == "ト" || NAMES:2 == "ド" || NAMES:2 == "루") && NAMEV:1:1 > 0
+		RETURN 203
+	ENDIF
+
+	;名前に「ー」が含まれる
+	STRFINDU ARGS, "ー"
+
+	;2文字目が「ー」もしくは, 3文字目が「ー」かつ2文字目が小文字
+	IF (RESULT == 1 && (NAMEV:2:0 == 1 || NAMEV:2:0 == 4)) || (RESULT == 2 && NAMEV:1:1 == 0 && (NAMEV:3:0 == 1 || NAMEV:3:0 == 4))
+		SUBSTRINV:0 = 0
+		SUBSTRINV:1 = 2 + RESULT
+
+		;4文字目が小文字
+		SIF NAMEV:3:1 == 0
+			SUBSTRINV:1 += 1
+		NAME_CLASS = 1
+		GOTO RETURN_VAR
+	ENDIF
+
+	;後ろから2文字目が「ー」かつ, 後ろから1文字目が「ア」の段もしくは「エ」の段
+	IF RESULT == CHARS - 2 && (NAMEV:(CHARS - 1):0 == 1 || NAMEV:(CHARS - 1):0 == 4) && NAMES:(CHARS - 3) != "헨"
+		SUBSTRINV:0 = CHARS - 3
+		SUBSTRINV:1 = 3
+
+		;後ろから3文字目が小文字
+		IF NAMEV:(CHARS - 3):1 == 0
+			SUBSTRINV:0 -= 1
+			SUBSTRINV:1 += 1
+		ENDIF
+		NAME_CLASS = 1
+		GOTO RETURN_VAR
+
+	;後ろから3文字目が「ー」かつ後ろから1文字目が小文字, 後ろから1文字目が「ア」の段もしくは「エ」の段
+	ELSEIF RESULT == CHARS - 3 && NAMEV:(CHARS - 1):1 == 0 && (NAMEV:(CHARS - 1):0 == 1 || NAMEV:(CHARS - 1):0 == 4)
+		SUBSTRINV:0 = CHARS - 4
+		SUBSTRINV:1 = 4
+
+		;後ろから3文字目が小文字
+		IF NAMEV:(CHARS - 3):1 == 0
+			SUBSTRINV:0 -= 1
+			SUBSTRINV:1 += 1
+		ENDIF
+		NAME_CLASS = 1
+		GOTO RETURN_VAR
+	ENDIF
+;2文字
+	;2文字目が「ア」, 「ナ」, 「루」
+	IF NAMES:1 == "ア" || NAMES:1 == "ナ" || NAMES:1 == "루"
+		SUBSTRINV:0 = 0
+		SUBSTRINV:1 = 2
+;3文字
+	;3文字目が「ア」, 「ナ」, 「루」
+	ELSEIF NAMES:2 == "ア" || NAMES:1 == "ナ" || NAMES:1 == "루"
+		SUBSTRINV:0 = 0
+		SUBSTRINV:1 = 3
+	;2文字目が「헨」, 3文字目が「ア」ではない, 4文字目が小文字ではない
+	ELSEIF NAMES:1 == "헨" && NAMES:2 != "ア" && NAMEV:3:1 > 0
+		SUBSTRINV:1 = 3
+	;2文字目が小文字ではない, 3文字目が「헨」
+	ELSEIF NAMEV:1:1 > 0 && NAMES:2 == "헨"
+		SUBSTRINV:0 = 0
+		SUBSTRINV:1 = 3
+;4文字
+	;2文字目が「헨」, 4文字目が小文字
+	ELSEIF NAMES:1 == "헨" && NAMEV:3:1 == 0
+		SUBSTRINV:0 = 0
+		SUBSTRINV:1 = 4
+
+;後方4文字
+	;後ろから1文字目が「ア」, 「ナ」, 後ろから2文字目が「－」, 「헨」, 後ろから3文字目が小文字
+	ELSEIF (NAMES:(CHARS - 1) == "ア" || NAMES:(CHARS - 1) == "ナ") && (NAMES:(CHARS - 2) == "ー" || NAMES:(CHARS - 2) == "헨") && NAMEV:(CHARS - 3):1 == 0
+		SUBSTRINV:0 = CHARS - 4
+		SUBSTRINV:1 = 4
+;後方3文字
+	;後ろから1文字目が「ア」, 「ナ」, 後ろから2文字目が小文字もしくは「－」, 「헨」
+	ELSEIF (NAMES:(CHARS - 1) == "ア" || NAMES:(CHARS - 1) == "ナ") && (NAMEV:(CHARS - 2):1 == 0 || NAMES:(CHARS - 2) == "ー" || NAMES:(CHARS - 2) == "헨")
+		SUBSTRINV:0 = CHARS - 3
+		SUBSTRINV:1 = 3
+;後方2文字
+	;後ろから1文字目が「ア」, 「ナ」
+	ELSEIF (NAMES:(CHARS - 1) == "ア" || NAMES:(CHARS - 1) == "ナ")
+		SUBSTRINV:0 = CHARS - 2
+		SUBSTRINV:1 = 2
+	ENDIF
+
+	NAME_CLASS = 1
+	SIF SUBSTRINV:1 > 0
+		GOTO RETURN_VAR
+
+ENDIF
+
+RETURN 99
+
+$RETURN_VAR
+
+RETURN NAME_CLASS * 100 + SUBSTRINV:0 * 10 + SUBSTRINV:1
+
+@STRING_EV, ARGS
+#DIM RESV, 3
+IF ARGS == "ア" || ARGS == "カ" || ARGS == "サ" || ARGS == "タ" || ARGS == "ナ" || ARGS == "ハ" || ARGS == "マ" || ARGS == "ヤ" || ARGS == "ラ" || ARGS == "ワ"
+	RESV:0 = 1
+	RESV:1 = 10
+ELSEIF ARGS == "ガ" || ARGS == "ザ" || ARGS == "ダ" || ARGS == "バ" || ARGS == "パ"
+	RESV:0 = 1
+	RESV:1 = 10
+
+ELSEIF ARGS == "イ" || ARGS == "キ" || ARGS == "시" || ARGS == "チ" || ARGS == "ニ" || ARGS == "ヒ" || ARGS == "ミ" || ARGS == "리"
+	RESV:0 = 2
+	RESV:1 = 10
+ELSEIF ARGS == "ギ" || ARGS == "ジ" || ARGS == "ヂ" || ARGS == "ビ" || ARGS == "ピ"
+	RESV:0 = 2
+	RESV:1 = 10
+
+ELSEIF ARGS == "ウ" || ARGS == "ク" || ARGS == "ス" || ARGS == "ツ" || ARGS == "ヌ" || ARGS == "フ" || ARGS == "ム" || ARGS == "ユ" || ARGS == "루"
+	RESV:0 = 3
+	RESV:1 = 10
+ELSEIF ARGS == "グ" || ARGS == "ズ" || ARGS == "ヅ" || ARGS == "ブ" || ARGS == "プ"
+	RESV:0 = 3
+	RESV:1 = 10
+
+ELSEIF ARGS == "エ" || ARGS == "ケ" || ARGS == "セ" || ARGS == "テ" || ARGS == "ネ" || ARGS == "ヘ" || ARGS == "メ" || ARGS == "레"
+	RESV:0 = 4
+	RESV:1 = 10
+ELSEIF ARGS == "ゲ" || ARGS == "ゼ" || ARGS == "デ" || ARGS == "ベ" || ARGS == "ペ"
+	RESV:0 = 4
+	RESV:1 = 10
+
+ELSEIF ARGS == "オ" || ARGS == "コ" || ARGS == "ソ" || ARGS == "ト" || ARGS == "ノ" || ARGS == "ホ" || ARGS == "モ" || ARGS == "ヨ" || ARGS == "ロ"
+	RESV:0 = 5
+	RESV:1 = 10
+ELSEIF ARGS == "ゴ" || ARGS == "ゾ" || ARGS == "ド" || ARGS == "ボ" || ARGS == "ポ"
+	RESV:0 = 5
+	RESV:1 = 10
+
+ELSEIF ARGS == "헨"
+	RESV:0 = 6
+	RESV:1 = 10
+ELSEIF ARGS == "ァ" || ARGS == "ャ"
+	RESV:0 = 1
+	RESV:1 = 0
+ELSEIF ARGS == "ィ"
+	RESV:0 = 2
+	RESV:1 = 0
+ELSEIF ARGS == "ゥ" || ARGS == "ュ"
+	RESV:0 = 3
+	RESV:1 = 0
+ELSEIF ARGS == "ェ"
+	RESV:0 = 4
+	RESV:1 = 0
+ELSEIF ARGS == "ォ" || ARGS == "ョ"
+	RESV:0 = 5
+	RESV:1 = 0
+ELSEIF ARGS == "ッ" || ARGS == "ー"
+	RESV:0 = 0
+	RESV:1 = 5
+ELSE
+	RESV:0 = -1
+	RESV:1 = -1
+ENDIF
+
+RETURN RESV:0, RESV:1

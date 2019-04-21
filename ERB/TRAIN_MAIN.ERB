@@ -1,0 +1,923 @@
+﻿;eraIM@Sから流用しました
+
+;=================================================
+;조교 처리 및 미주 계산에 관한 함수군
+;=================================================
+;
+;조교 후 사망 판정을 추가(2009/11/14 byPawapokya-
+;능력치의 상승은 메인 화면에서 실시하도록 변경(2009/11/25 byPawapokya-
+;
+;=================================================
+;BEGIN TRAIN이후 처음으로 호출되는 함수
+;=================================================
+@EVENTTRAIN
+#PRI
+;주인공의 사정을 0으로
+BASE:MASTER:2 = 0
+;일단 조교 대상으로 조교도
+BASE:TARGET:2 = 0
+SIF ASSI >= 0
+	BASE:ASSI:2 = 0
+BASE:TARGET:3 = 0
+BASE:MASTER:4 = 0
+
+;사정 플래그, 처녀 상실 플래그 등을 리셋
+REPEAT 200
+	TFLAG:COUNT = 0
+REND
+
+;前回の調教テキストを空に
+;TSTR:90 = 　
+
+;調教者は誰か
+IF ASSIPLAY == 0
+	PLAYER = MASTER
+ELSE
+	PLAYER = ASSI
+ENDIF
+
+;상시 발정 보너스：윤활과 욕정이 3000부터 시작
+IF TALENT:TARGET:271
+	PALAM:TARGET:3 = 3000
+	PALAM:TARGET:5 = 3000
+ENDIF
+
+;콜로세움의 수입 초기화
+TFLAG:402 = 0
+
+CALL PRITRAIN_MESSAGE
+
+;=================================================
+;EVENTTRAIN의 뒤에 매 턴 호출되는 함수
+;=================================================
+@SHOW_STATUS
+DRAWLINE
+PRINTV DAY+1
+PRINT 일월
+IF TIME == 0
+	PRINTL (오전)
+ELSE
+	PRINTL (오후)
+ENDIF
+PRINTFORM %SAVESTR:TARGET% 조교중   조교자:
+IF ASSIPLAY
+	SETCOLOR 0xFF1493
+	PRINTS SAVESTR:ASSI
+	PRINT (조수)
+	resetcolor
+ELSE
+	SETCOLOR 0x87CEFA
+	PRINTS NAME:MASTER
+	RESETCOLOR
+ENDIF
+SIF ASSI  > 0 && ASSIPLAY == 0
+	PRINTFORM   조수:%SAVESTR:ASSI%
+PRINT   
+
+CALL SHOW_EQUIP_2
+CALL LIFE_BAR
+CALL VITAL_BAR
+;調教時ステータス画面に服装表示を捻じ込んでみた
+;同様のやり方で下着を個別指定にすれば捗ると思います（
+PRINT 【
+CALL PRINT_CLOTHTYPE
+PRINT 】
+
+PRINTL 
+
+SIF EX:0 > 0
+	PRINTFORM [Ｃ절정：{EX:0}]  
+SIF EX:1 > 0
+	PRINTFORM [Ｖ절정：{EX:1}]  
+SIF EX:2 > 0
+	PRINTFORM [Ａ절정：{EX:2}]  
+SIF EX:3 > 0
+	PRINTFORM [Ｂ절정：{EX:3}]  
+SIF EX:4 > 0
+	PRINTFORM [%CSTR:7% 절정：{EX:4}]  
+SIF EX:5 > 0
+	PRINTFORM [분유：{EX:5}]  
+SIF EX:0 || EX:1 || EX:2 || EX:3 || EX:4 || EX:5
+	PRINTL  
+
+PRINT_PALAM TARGET
+
+SIF MAXBASE:2 == 0
+	MAXBASE:2 = 10000
+SIF MAXBASE:2 != 5000 && TALENT:133 && (TALENT:121 || TALENT:122)
+	MAXBASE:2 = 5000
+SIF MAXBASE:MASTER:2 == 0
+	MAXBASE:MASTER:2 = 10000
+SIF MAXBASE:MASTER:2 != 5000 && TALENT:MASTER:133 && (TALENT:MASTER:121 || TALENT:MASTER:122)
+	MAXBASE:MASTER:2 = 5000
+IF ASSI >= 0
+	IF MAXBASE:ASSI:2 == 0
+		MAXBASE:ASSI:2 = 10000
+	ELSEIF MAXBASE:ASSI:2 != 0 && TALENT:ASSI:133 && (TALENT:ASSI:121 || TALENT:ASSI:122)
+		MAXBASE:ASSI:2 = 5000
+	ENDIF
+ENDIF
+
+IF (TALENT:MASTER:121 || TALENT:MASTER:122) && TALENT:MASTER:135 == 0
+	PRINT 사정
+	BAR BASE:MASTER:2,MAXBASE:MASTER:2,32
+	PRINTFORM ({BASE:MASTER:2}/{MAXBASE:MASTER:2})
+	SIF TEQUIP:35
+		PRINT 콘돔장착
+	PRINTL 
+ENDIF
+
+IF ASSIPLAY
+	IF (TALENT:ASSI:121 || TALENT:ASSI:122) && TALENT:ASSI:135 == 0
+		PRINT 사정（조수）
+		BAR BASE:ASSI:2,MAXBASE:ASSI:2,32
+		PRINTFORM ({BASE:ASSI:2}/{MAXBASE:ASSI:2})
+		SIF TEQUIP:36
+			PRINT 콘돔장착
+		PRINTL 
+	ENDIF
+ENDIF
+
+IF (TALENT:TARGET:121 || TALENT:TARGET:122) && TALENT:TARGET:135 == 0
+	PRINT 사정（
+	PRINTS SAVESTR:TARGET
+	PRINT ）
+	BAR BASE:2,MAXBASE:2,32
+	PRINTFORM ({BASE:2}/{MAXBASE:2})
+	SIF TEQUIP:37
+		PRINT 콘돔장착
+	PRINTL 
+ENDIF
+
+IF TALENT:TARGET:130
+	SIF MAXBASE:3 == 0
+		MAXBASE:3 = 10000
+	PRINT 모유（
+	PRINTS SAVESTR:TARGET
+	PRINT ）
+	BAR BASE:3,MAXBASE:3,32
+	PRINTFORML ({BASE:3}/{MAXBASE:3})
+ENDIF
+
+IF TEQUIP:89
+	SIF MAXBASE:MASTER:4 == 0
+		MAXBASE:MASTER:4 = 10000
+	PRINT 사정（개）
+	BAR BASE:MASTER:4,MAXBASE:MASTER:4,32
+	PRINTFORML ({BASE:MASTER:4}/{MAXBASE:MASTER:4})
+ENDIF
+
+IF TEQUIP:90
+	SIF MAXBASE:MASTER:4 == 0
+		MAXBASE:MASTER:4 = 10000
+	PRINT 사정（촉수）
+	BAR BASE:MASTER:4,MAXBASE:MASTER:4,32
+	PRINTFORML ({BASE:MASTER:4}/{MAXBASE:MASTER:4})
+ENDIF
+
+IF TEQUIP:55
+	SIF MAXBASE:MASTER:4 == 0
+		MAXBASE:MASTER:4 = 10000
+	PRINT 사정（콜로세움・몬스터ー）
+	BAR BASE:MASTER:4,MAXBASE:MASTER:4,32
+	PRINTFORML ({BASE:MASTER:4}/{MAXBASE:MASTER:4})
+ENDIF
+CALL SHOW_EQUIP_1
+
+;=================================================
+;TRAIN에서 명령 선택 시 가장 먼저 호출될 이벤트 함수
+;=================================================
+@EVENTCOM
+#PRI
+;TFLAG:0～30은 커맨드를 선택할 때에 비움
+REPEAT 30
+	TFLAG:COUNT = 0
+REND
+TFLAG:100 = 0
+
+;=================================================
+;TRAIN에서 명령 선택 종료 후에 호출되는 함수
+;=================================================
+@EVENTCOMEND
+#PRI
+;調教キャラの死亡・衰弱判定
+IF BASE:0 <= 0
+	DRAWLINE
+	;死亡時にビデオを使用していた？
+	SIF TEQUIP:53
+		TFLAG:34 = 1
+	PRINTFORML %조사선택(SAVESTR:TARGET, "가")% 미동도 하지 않게 되었다
+	PRINTFORML 무엇을 해도 반응이 없다……
+	WAIT
+	BEGIN AFTERTRAIN
+;瀕死時に調教を自動終了設定
+ELSEIF BASE:0 < 500 && FLAG:35 == 1
+	DRAWLINE
+	PRINTL （체력이 한계에 달했습니다. 조교를 종료합니다）
+	WAIT
+	BEGIN AFTERTRAIN
+ENDIF
+
+IF ASSI > 0
+	IF BASE:ASSI:0 <= 0
+		DRAWLINE
+		;死亡時にビデオを使用していた？
+		SIF TEQUIP:53
+			TFLAG:34 = 1
+		PRINTFORML %조사선택(SAVESTR:ASSI, "가")% 미동도 하지 않게 되었다
+		PRINTFORML 무엇을 해도 반응이 없다……
+		WAIT
+		BEGIN AFTERTRAIN
+	;瀕死時に調教を自動終了設定
+	ELSEIF BASE:ASSI:0 < 500
+		DRAWLINE
+		PRINTL （조수의 체력이 한계에 달했습니다. 조교를 종료합니다）
+		WAIT
+		BEGIN AFTERTRAIN
+	ENDIF
+ENDIF
+
+;=================================================
+;BEGIN AFTERTRAIN後最初に呼び出される関数
+;=================================================
+@EVENTEND
+#LATER
+PRINTL 조교를 종료했습니다. 
+WAIT
+
+;失神時の口上非表示の回復
+IF TFLAG:860 == 1
+	FLAG:7 = 1
+	TFLAG:860 = 0
+ELSEIF TFLAG:860 == 2
+	FLAG:7 = 2
+	TFLAG:860 = 0
+ENDIF
+
+;今回の調教対象と조수を記録
+FLAG:1 = TARGET
+FLAG:2 = ASSI
+
+;調教後に死んでいる可能性をチェック
+CALL CHARADEAD_CHECK
+
+;生きていれば調教後行為のチェック
+IF RESULT == 0
+	CALL SELF_CHECK
+	DRAWLINE
+ENDIF
+
+;착유한 모유의 매각 
+CALL SELL_MILK
+
+;조교시에 녹화한 비디오를 매각
+CALL SELL_VIDEO
+
+;콜로세움의 관람료
+CALL SELL_FIGHTMONEY
+
+;生きていて着衣モードなら調教後の衣類の処理
+IF FLAG:37 && BASE:0 > 0
+	CALL AFTERTRAIN_CLOTH
+	;衣類の再着衣
+	CALL RE_CLOTHED
+ENDIF
+
+;調教後に死ぬか臨死状態なら珠を獲得せずに, ターゲットを空にしてターン終了
+IF BASE:0 < 1
+	;キャラ削除処理
+	A = TARGET
+
+	X = NO:A + 199
+	FLAG:X = 1
+
+	TARGET = -1
+	FLAG:1 = -1
+	ASSI = -1
+	
+	CALL PARTY_CHAR_DEL, A
+
+	DELCHARA A
+
+	CALL NAME_RESET
+
+	BEGIN TURNEND
+ENDIF
+
+;카르마 증감
+IF EX:1
+	PRINTW (V절정에 의해 카르마가 내려갔습니다:-1)
+	CALL KARMA, TARGET, -1
+ENDIF
+
+IF EX:2
+	PRINTW (A절정에 의해 카르마가 내려갔습니다:-2)
+	CALL KARMA, TARGET, -2
+ENDIF
+
+;상시 발전
+IF FLAG:75 == 0 && TALENT:271 == 0
+	;윤활의 10000분의 1을 축적　윤활이10000을 밑도는 경우는 리셋
+	IF PALAM:3 >= 10000
+		CFLAG:81 += PALAM:3 / 10000
+	ELSE
+		CFLAG:81 = 0
+	ENDIF
+	;욕정의 10000분의 1을 축적　욕정이 10000을 믿도는 경우는 리셋
+	IF PALAM:5 >= 10000
+		CFLAG:82 += PALAM:5 / 10000
+	ELSE
+		CFLAG:82 = 0
+	ENDIF
+ENDIF
+
+LOCAL = 0
+IF FLAG:400 && TALENT:85
+	PRINT *노예의 사랑으로 인해 기력 회복*
+	LOCAL = 700
+ELSEIF FLAG:400
+	PRINT *노예조교로 인해 기력 회복*
+	LOCAL = 500
+ENDIF
+BASE:0:1 += LOCAL
+SIF BASE:0:1 > MAXBASE:0:1
+	BASE:0:1 = MAXBASE:0:1
+
+;何の珠を得られたか
+CALL JUEL_CHECK
+
+;능력치의 상승은 메인 화면에서 실시한다
+BEGIN TURNEND
+;BEGIN ABLUP
+;
+;=================================================
+;획득한 구슬의 계수를 표시
+;=================================================
+@JUEL_CHECK
+
+CALL JUEL_CHECK_MAIN
+
+WAIT
+;
+
+$INPUT_LOOP_1
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+CALL SHOW_INFO_EXP
+CALL SHOW_JUEL
+CALL SHOW_ABLUP_SELECT
+
+INPUT
+
+;Ｃ감각
+IF RESULT == 0
+	CALL ABLUP0
+;Ｂ감각
+ELSEIF RESULT == 1
+	CALL ABLUP1
+;Ｖ감각
+ELSEIF RESULT == 2
+	CALL ABLUP2
+;Ａ감각
+ELSEIF RESULT == 3
+	CALL ABLUP3
+;Ｆ감각
+ELSEIF RESULT == 4
+	CALL ABLUP4
+;순종
+ELSEIF RESULT == 10
+	CALL ABLUP10
+;욕망
+ELSEIF RESULT == 11
+	CALL ABLUP11
+;기교
+ELSEIF RESULT == 12
+	CALL ABLUP12
+;봉사기술
+ELSEIF RESULT == 13
+	CALL ABLUP13
+;성교기술
+ELSEIF RESULT == 14
+	CALL ABLUP14
+;화술
+ELSEIF RESULT == 15
+	CALL ABLUP15
+;봉사정신
+ELSEIF RESULT == 16
+	CALL ABLUP16
+;노출벽
+ELSEIF RESULT == 17
+	CALL ABLUP17
+;새드끼
+ELSEIF RESULT == 20
+	CALL ABLUP20
+;마조끼
+ELSEIF RESULT == 21
+	CALL ABLUP21
+;레즈끼
+ELSEIF RESULT == 22
+	CALL ABLUP22
+;ホモっ気
+ELSEIF RESULT == 23
+	CALL ABLUP23
+;성교중독
+ELSEIF RESULT == 30
+	CALL ABLUP30
+;자위중독
+ELSEIF RESULT == 31
+	CALL ABLUP31
+;정액중독
+ELSEIF RESULT == 32
+	CALL ABLUP32
+;레즈중독
+ELSEIF RESULT == 33
+	CALL ABLUP33
+;매춘중독
+ELSEIF RESULT == 37
+	CALL ABLUP37
+;수간중독
+ELSEIF RESULT == 39
+	CALL ABLUP39
+;Ｆ중독
+ELSEIF RESULT == 40
+	CALL ABLUP40
+;반발각인
+ELSEIF RESULT == 99
+	CALL ABLUP99
+ELSEIF RESULT == 999
+	CALL YOKUBO_UP_CHECK
+	CALL CHECK_SELLASSIABLE
+	CALL CHECK_SPECIALSKIL
+	RETURN 1
+ENDIF
+
+GOTO INPUT_LOOP_1
+
+;-----------------------------------
+@JUEL_CHECK_MAIN
+#DIM JUEL_COUNT
+#DIM GET_JUEL
+#DIM NEW_LINE
+;-----------------------------------
+
+FOR JUEL_COUNT,0,16
+	IF PALAM:JUEL_COUNT < PALAMLV:1
+		GET_JUEL = 0
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:1*3
+		GET_JUEL = 1
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:2
+		GET_JUEL = 2
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:2*3
+		GET_JUEL = 10
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:3
+		GET_JUEL = 20
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:3*2
+		GET_JUEL = 100
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:4
+		GET_JUEL = 200
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:5
+		GET_JUEL = 1000
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:6
+		GET_JUEL = 2000
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:7
+		GET_JUEL = 3000
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:8
+		GET_JUEL = 5000
+	ELSEIF PALAM:JUEL_COUNT < PALAMLV:9
+		GET_JUEL = 8000
+	ELSE
+		GET_JUEL = 12000
+	ENDIF
+
+	IF JUEL_COUNT == 0
+		GOTJUEL:JUEL_COUNT = GET_JUEL + EX:0 * 1000
+	ELSEIF JUEL_COUNT == 1
+		GOTJUEL:JUEL_COUNT = GET_JUEL+ EX:1 * 1000
+	ELSEIF JUEL_COUNT == 2
+		GOTJUEL:JUEL_COUNT = GET_JUEL + EX:2 * 1000
+	ELSEIF JUEL_COUNT == 14
+		GOTJUEL:JUEL_COUNT = GET_JUEL + EX:3 * 1000
+	ELSEIF JUEL_COUNT == 15
+		GOTJUEL:JUEL_COUNT = GET_JUEL + EX:4 * 1000
+	ELSEIF JUEL_COUNT < 11 && JUEL_COUNT != 14 && JUEL_COUNT != 15
+		GOTJUEL:JUEL_COUNT = GET_JUEL
+	ELSE
+		GOTJUEL:100 += GET_JUEL
+	ENDIF
+NEXT
+
+;현재 보유한 수와 이번에 획득한 구슬을 가산
+;3윤활,11반감,12불쾌,13억울은 보유한 구슬로 계산되지 않는 파라미터
+FOR JUEL_COUNT,0,11
+	SIF JUEL_COUNT == 3
+		CONTINUE
+	JUEL:JUEL_COUNT += GOTJUEL:JUEL_COUNT
+NEXT
+JUEL:14 += GOTJUEL:14
+JUEL:15 += GOTJUEL:15
+JUEL:100 += GOTJUEL:100
+
+;부정의 구슬에 의한 상계를 계산
+;TFLAG:51～58에 상쇄 전（변동할 가능성이 있다）구슬을 기록
+FOR JUEL_COUNT,0,7
+	SIF JUEL_COUNT == 3
+		CONTINUE
+	LOCAL:0 = JUEL_COUNT + 51
+	LOCAL:1 = JUEL_COUNT + 4
+	TFLAG:(LOCAL:0) = JUEL:(LOCAL:1)
+NEXT
+TFLAG:58 = JUEL:100
+
+$LABEL_1
+LOCAL:0 = RAND:3 + 4
+LOCAL:1 = JUEL:100 / 2
+SIF LOCAL:1 == 0 && JUEL:100 > 0
+	LOCAL:1 = 1
+SIF JUEL:(LOCAL:0) < LOCAL:1
+	LOCAL:1 = JUEL:(LOCAL:0)
+JUEL:(LOCAL:0) -= LOCAL:1
+JUEL:100 -= LOCAL:1
+
+SIF JUEL:100 > 0 && (JUEL:4 + JUEL:5 + JUEL:6) > 0
+	GOTO LABEL_1
+
+$LABEL_2
+LOCAL:0 = RAND:3 + 8
+LOCAL:1 = JUEL:100 / 2
+SIF LOCAL:1 == 0 && JUEL:100 > 0
+	LOCAL:1 = 1
+SIF JUEL:(LOCAL:0) < LOCAL:1
+	LOCAL:1 = JUEL:(LOCAL:0)
+JUEL:(LOCAL:0) -= LOCAL:1
+JUEL:100 -= LOCAL:1
+SIF JUEL:100 > 0 && (JUEL:8 + JUEL:9 + JUEL:10) > 0
+	GOTO LABEL_2
+
+DRAWLINE
+PRINTFORM 조교의 결과, 
+SIF TFLAG:58 > 0
+	PRINTFORM 부정의 구슬 {TFLAG:58}개와 부정한것까지 포함, 
+PRINTL 
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+NEW_LINE = 0
+FOR JUEL_COUNT,0,13
+	IF JUEL_COUNT <= 3 || JUEL_COUNT == 7 || JUEL_COUNT == 12
+		IF JUEL_COUNT == 3
+			LOCAL:0 = 14
+		ELSEIF JUEL_COUNT == 12
+			LOCAL:0 = 15
+		ELSE
+			LOCAL:0 = JUEL_COUNT
+		ENDIF
+		IF JUEL_COUNT == 12
+			IF CSTR:7 == ""
+				PRINTFORM 쾌Ｆ：(
+			ELSE
+				PRINTFORM 쾌 %CSTR:7%：(
+			ENDIF
+		ELSE
+			PRINTFORM %PALAMNAME:(LOCAL:0)%：(
+		ENDIF
+		N = JUEL:(LOCAL:0) - GOTJUEL:(LOCAL:0)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME SkyBlue
+		PRINTV JUEL:(LOCAL:0) - GOTJUEL:(LOCAL:0)
+		RESETCOLOR
+		PRINT  + 
+		N = GOTJUEL:(LOCAL:0)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME SkyBlue
+		PRINTV GOTJUEL:(LOCAL:0)
+		RESETCOLOR
+		PRINT )            = 
+		N = JUEL:(LOCAL:0)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME SkyBlue
+		PRINTV JUEL:(LOCAL:0)
+		RESETCOLOR
+	ELSE
+		IF JUEL_COUNT == 11
+			LOCAL:0 = 58
+			LOCAL:1 = 100
+		ELSE
+			LOCAL:0 = JUEL_COUNT + 47
+			LOCAL:1 = JUEL_COUNT
+		ENDIF
+		PRINTFORM %PALAMNAME:(LOCAL:1)%：(
+		N = TFLAG:(LOCAL:0) - GOTJUEL:(LOCAL:1)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME SkyBlue
+		PRINTV TFLAG:(LOCAL:0) - GOTJUEL:(LOCAL:1)
+		RESETCOLOR
+		PRINT  + 
+		N = GOTJUEL:(LOCAL:1)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME SkyBlue
+		PRINTV GOTJUEL:(LOCAL:1)
+		RESETCOLOR
+		PRINT ) - 
+		N = TFLAG:(LOCAL:0) - JUEL:(LOCAL:1)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME LightSalmon
+		PRINTV TFLAG:(LOCAL:0) - JUEL:(LOCAL:1)
+		RESETCOLOR
+		PRINT  = 
+		N = JUEL:(LOCAL:1)
+		CALL FIGURE_INDENT
+		SETCOLORBYNAME SkyBlue
+		PRINTV JUEL:(LOCAL:1)
+		RESETCOLOR
+	ENDIF
+	
+	IF NEW_LINE == 1
+		PRINTL |
+		NEW_LINE = 0 
+	ELSE
+		PRINT |
+		NEW_LINE = 1
+	ENDIF
+	
+NEXT
+SIF NEW_LINE == 1
+	PRINTL  
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+PRINTL 이상과 같이 구슬이 변화했습니다. 
+
+
+RETURN 0
+
+
+@FIGURE_INDENT
+SIF N < 10000000
+	PRINT  
+SIF N < 1000000
+	PRINT  
+SIF N < 100000
+	PRINT  
+SIF N < 10000
+	PRINT  
+SIF N < 1000
+	PRINT  
+SIF N < 100
+	PRINT  
+SIF N < 10
+	PRINT  
+RETURN 1
+;
+@FIGURE_INDENT_SLASH
+N = O
+CALL FIGURE_INDENT
+PRINTFORM {O}/
+N = P
+CALL FIGURE_INDENT
+PRINTFORM {P} 
+;
+
+;
+
+@P_C
+LOCAL:0 = PREVCOM
+SELECTCASE LOCAL:0
+	CASE 0
+		TSTR:90 = 애무
+	CASE 1
+		TSTR:90 = 커널링구스
+	CASE 2
+		TSTR:90 = 애널애무
+	CASE 3
+		TSTR:90 = 자위
+	CASE 4
+		TSTR:90 = 펠라한다
+	CASE 5
+		TSTR:90 = 가슴애무
+	CASE 6
+		TSTR:90 = 키스한다
+	CASE 7
+		TSTR:90 = 조개벌리기
+	CASE 8
+		TSTR:90 = 손가락넣기
+	CASE 9
+		TSTR:90 = 애널핥기
+	CASE 10
+		TSTR:90 = 진동하는보석
+	CASE 11
+		TSTR:90 = 꿀단지웜
+	CASE 12
+		TSTR:90 = 진동지팡이
+	CASE 13
+		TSTR:90 = 애널웜
+	CASE 14
+		TSTR:90 = 클리캡
+	CASE 15
+		TSTR:90 = 유두캡
+	CASE 16
+		TSTR:90 = 착유기
+	CASE 17
+		TSTR:90 = 오나홀
+	CASE 18
+		TSTR:90 = 샤워
+	CASE 19
+		TSTR:90 = 애널비즈
+	CASE 20
+		TSTR:90 = 정상위
+	CASE 21
+		TSTR:90 = 후배위
+	CASE 22
+		TSTR:90 = 대면좌위
+	CASE 23
+		TSTR:90 = 배면좌위
+	CASE 24
+		TSTR:90 = 역강간
+	CASE 25
+		TSTR:90 = 역애널강간
+	CASE 26
+		TSTR:90 = 정상위애널
+	CASE 27
+		TSTR:90 = 후배위애널
+	CASE 28
+		TSTR:90 = 대면좌위애널
+	CASE 29
+		TSTR:90 = 배면좌위애널
+	CASE 30
+		TSTR:90 = 수음
+	CASE 31
+		TSTR:90 = 펠라치오
+	CASE 32
+		TSTR:90 = 파이즈리
+	CASE 33
+		TSTR:90 = 가랑이비비기
+	CASE 34
+		TSTR:90 = 기승위
+	CASE 35
+		TSTR:90 = 거품문지르기
+	CASE 36
+		TSTR:90 = 기승위애널
+	CASE 37
+		TSTR:90 = 애널봉사
+	CASE 38
+		TSTR:90 = 풋잡
+	CASE 40
+		TSTR:90 = 스팽킹
+	CASE 41
+		TSTR:90 = 채찍
+	CASE 42
+		TSTR:90 = 바늘
+	CASE 43
+		TSTR:90 = 아이마스크
+	CASE 44
+		TSTR:90 = 밧줄
+	CASE 45
+		TSTR:90 = 볼개그
+	CASE 46
+		TSTR:90 = 관장기＋플러그
+	CASE 47
+		TSTR:90 = 본디지착의
+	CASE 48
+		TSTR:90 = 풋잡한다
+	CASE 49
+		TSTR:90 = 애널전극
+	CASE 50
+		TSTR:90 = 로션
+	CASE 51
+		TSTR:90 = 미약
+	CASE 52
+		TSTR:90 = 이뇨제
+	CASE 53
+		TSTR:90 = 수정구
+	CASE 54
+		TSTR:90 = 야외플레이
+	CASE 55
+		TSTR:90 = 아무것도안한다
+	CASE 56
+		TSTR:90 = 회화한다
+	CASE 57
+		TSTR:90 = 수치플레이
+	CASE 58
+		TSTR:90 = 욕실플레이
+	CASE 59
+		TSTR:90 = 새색시플레이
+	CASE 60
+		TSTR:90 = 조수에게키스
+	CASE 61
+		TSTR:90 = 커널링구스강제
+	CASE 62
+		TSTR:90 = 조수를범한다
+	CASE 63
+		TSTR:90 = 조개맞대기
+	CASE 64
+		TSTR:90 = 3P
+	CASE 65
+		TSTR:90 = 조수를범하게한다
+	CASE 66
+		TSTR:90 = 두개펠라
+	CASE 68
+		TSTR:90 = 더블펠라
+	CASE 69
+		TSTR:90 = 식스나인
+	CASE 70
+		TSTR:90 = 더블스마타
+	CASE 71
+		TSTR:90 = 더블파이즈리
+	CASE 72
+		TSTR:90 = 음모를민다
+	CASE 73
+		TSTR:90 = 머리손질하기
+	CASE 80
+		TSTR:90 = 이라마치오
+	CASE 81
+		TSTR:90 = 피스트퍽
+	CASE 82
+		TSTR:90 = 애널피스트
+	CASE 83
+		TSTR:90 = 양구멍피스트
+	CASE 84
+		TSTR:90 = Ｇ스팟자극
+	CASE 85
+		TSTR:90 = 방뇨
+	CASE 86
+		TSTR:90 = 음뇨
+	CASE 87
+		TSTR:90 = 피어싱
+	CASE 89
+		TSTR:90 = 수간플레이
+	CASE 100
+		TSTR:90 = 촉수생물
+	CASE 101
+		TSTR:90 = 촉수삽입
+	CASE 102
+		TSTR:90 = 애널촉수
+	CASE 103
+		TSTR:90 = 촉수클리괴롭히기
+	CASE 104
+		TSTR:90 = 촉수유두괴롭히기
+	CASE 105
+		TSTR:90 = 촉수착유
+	CASE 106
+		TSTR:90 = 촉수긴박
+	CASE 107
+		TSTR:90 = 촉수관장
+	CASE 108
+		TSTR:90 = 촉수구욕
+	CASE 109
+		TSTR:90 = 촉수페니스괴롭히기
+	CASE 110
+		TSTR:90 = 옷을착탈
+	CASE 111
+		TSTR:90 = 옷을찢는다
+	CASE 120
+		TSTR:90 = 삽입Ｇ스팟자극
+	CASE 121
+		TSTR:90 = 삽입자궁구자극
+	CASE 122
+		TSTR:90 = 투구맞대기
+	CASE 123
+		TSTR:90 = 파이즈리펠라
+	CASE 124
+		TSTR:90 = 딥스로트
+	CASE 125
+		TSTR:90 = 펠라자위
+	CASE 126
+		TSTR:90 = 수음펠라
+	CASE 127
+		TSTR:90 = 바큠펠라
+	CASE 128
+		TSTR:90 = 정상위・키스
+	CASE 129
+		TSTR:90 = 정상위・가슴애무
+	CASE 130
+		TSTR:90 = 정상위SP
+	CASE 131
+		TSTR:90 = 후배위・가슴애무
+	CASE 132
+		TSTR:90 = 후배위・스팽킹
+	CASE 133
+		TSTR:90 = 서서후배위
+	CASE 134
+		TSTR:90 = 후배위SP
+	CASE 135
+		TSTR:90 = 셀프쿤니
+	CASE 150
+		TSTR:90 = %CSTR:7% 조교
+	CASE 200
+		TSTR:90 = 콜로세움
+	CASE 201
+		TSTR:90 = 조수
+	CASE 202
+		TSTR:90 = 최하층민
+	CASE 203
+		TSTR:90 = 곰팡내나는개
+	CASE 204
+		TSTR:90 = 호걸오크
+	CASE 205
+		TSTR:90 = 냄새나는돼지
+	CASE 206
+		TSTR:90 = 트롤
+	CASE 207
+		TSTR:90 = 미약슬라임
+	CASE 208
+		TSTR:90 = 촉수
+	CASEELSE
+		TSTR:90 = 　
+ENDSELECT
+
+
+

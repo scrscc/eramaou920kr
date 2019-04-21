@@ -1,0 +1,167 @@
+﻿;eraIM@Sから流用
+
+;----------------------------------------------------------------
+;정음절정 관련 처리의 시동
+;----------------------------------------------------------------
+@SEIIN_START
+;システムを適応していないと処理しない
+SIF FLAG:72 == 1
+RETURN 0
+
+;입에 사정하지 않않거나 실신 중에는 처리하지 않음
+IF TFLAG:0 == 0 || TFLAG:899 > 0
+	RETURN 0
+;정애미각을 가지고 있는 경우 정음절정 처리로 직행
+ELSEIF TALENT:47 && TFLAG:0 > 0
+	CALL SEIIN_ORGASM
+;정애미각을 가지지 못하고、절정할 경우(부분은 묻지 않음)、강제정음절정의 횟수（통칭：파블로프 카운터）를 체크한다
+ELSEIF TFLAG:0 > 0 && TFLAG:29 > 0
+	CALL SEIIN_CHECK
+ENDIF
+
+;----------------------------------------------------------------
+;강제정음절정의 횟수（파블로프 카운터）체크
+;----------------------------------------------------------------
+@SEIIN_CHECK
+
+;規定の回数
+P = 50
+
+;노예の素質により規定回数を増減する
+;굳건함
+SIF TALENT:13 == 1
+	P += 4
+;보수적
+SIF TALENT:24 == 1
+	P += 4
+;낙관적
+SIF TALENT:25 == 1
+	P -= 2
+;비관적
+SIF TALENT:26 == 1
+	P += 2
+;일선넘지않음
+SIF TALENT:27 == 1
+	P += 5
+;억압
+SIF TALENT:32 == 1
+	P += 4
+;해방
+SIF TALENT:33 == 1
+	P -= 2
+;악취둔감
+SIF TALENT:61 == 1
+	P -= 2
+;악취민감
+SIF TALENT:62 == 1
+	P += 2
+;쾌감에솔직
+SIF TALENT:70 == 1
+	P -= 2
+;쾌감을부정
+SIF TALENT:71 == 1
+	P += 4
+;중독되기쉬움
+SIF TALENT:72 == 1
+	P -= 5
+;도착적
+SIF TALENT:80 == 1
+	P -= 2
+;음란
+SIF TALENT:76 == 1
+	P -= 20
+
+;강제精飲絶頂の処理へ
+CALL SEIIN_COMPULSION_ORGASM
+
+;----------------------------------------------------------------
+;정음절정의 처리
+;----------------------------------------------------------------
+@SEIIN_ORGASM
+
+;정음절정 경험 횟수 추가
+EX:13 += 1
+EXP:8 += 1
+
+;정음절정 경험의 처리
+;경험 횟수에 따라 처리가 변화
+IF TFLAG:0 == 2
+	PRINTFORML %SAVESTR:TARGET% 정음절정
+	PRINTFORML 정음절정경험＋1
+	PRINTL 대량의 정액이 목에 흘려 넣어진 것에 스위치가 들어갔는지、
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 흐느끼는 소리를 높이면서、움찔하고 크게 어깨를 떨어 절정에 도달했다…
+ELSE
+	PRINTFORML %SAVESTR:TARGET% 정음절정
+	PRINTFORML 정음절정경험＋1
+	PRINTFORML 페니스를 물고 있었던 %조사선택(SAVESTR:TARGET, "는")% 흐느끼는 소리를 내고、
+	PRINTL 움찔하며 어깨를 작게 떨어 절정에 도달했다…
+ENDIF
+
+;파라미터 증가
+;기본 소스
+SOURCE:10 = 2000
+SOURCE:11 = 5000
+SOURCE:13 = 10000
+
+IF EXP:8 == 1
+	TIMES SOURCE:13 , 3.00
+ELSEIF ABL:32 == 3
+	TIMES SOURCE:13 , 2.00
+ELSEIF ABL:32 == 4
+	TIMES SOURCE:10 , 1.50
+	TIMES SOURCE:11 , 1.50
+	TIMES SOURCE:13 , 1.50
+ELSEIF ABL:32 == 5
+	TIMES SOURCE:10 , 2.00
+	TIMES SOURCE:11 , 2.00
+ENDIF
+
+
+;----------------------------------------------------------------
+;강제精飲絶頂の処理
+;강제精飲絶頂の経験回数をCFLAG:600に格納
+;----------------------------------------------------------------
+@SEIIN_COMPULSION_ORGASM
+
+CFLAG:600 += 1
+
+;精愛味覚獲得フラグ成立メッセージ
+IF CFLAG:600 >= P
+	PRINTFORML 강제정음절정
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 완전히
+	PRINTFORMW 정액의 맛을 익혀져버린 듯하다…
+	TFLAG:110 = 1
+;강제精飲絶頂初回
+ELSEIF CFLAG:600 == 1
+	PRINTFORML 강제정음절정
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%가 싼 정액을 삼키면서
+	PRINTFORML 계속 주어지는 자극에 의해
+	PRINTFORMW 강제적으로 가게 되어버리고 있다…
+	PRINTFORML 이상경험＋１
+	EXP:50 += 1
+;以降メッセージは出るがウェイトはかからない
+ELSE
+	PRINTFORML 강제정음절정
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%가 싼 정액을 삼키면서
+	PRINTFORML 계속 주어지는 자극에 의해
+	PRINTFORML 강제적으로 가게 되어버리고 있다…
+ENDIF
+
+;정애미각획득 플래그 성립시
+IF CFLAG:600 >= P
+	;정액 중독이 LV3으로 오르다
+	IF ABL:32 < 3
+		PRINTFORMW %SAVESTR:TARGET%의 정액중독이 LV3이 되었다
+		ABL:32 = 3
+	ENDIF
+ENDIF
+
+;파라미터 증감
+;기본 소스
+SOURCE:13 = 1000
+
+IF CFLAG:600 == 1
+	TIMES SOURCE:13 , 1.50
+ELSEIF CFLAG:600 == P
+	SOURCE:5 = 1000
+ENDIF

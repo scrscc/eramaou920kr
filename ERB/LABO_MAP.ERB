@@ -1,0 +1,229 @@
+﻿;LABO에 새롭게 추가된 함수군
+
+
+
+
+@GEO_OUTPUT_2
+
+
+;SETFONT "ＭＳ ゴシック"
+
+;맵을 출력
+FOR LOCAL:1,0,32
+	FOR LOCAL:0,0,32
+		P:0 = LOCAL:0
+		P:1 = LOCAL:1
+		CALL CHIP_DRAW
+	NEXT
+	PRINTL 
+NEXT
+
+;SETFONT
+
+WAIT
+
+;-----------------------------------------------
+@UNIT_CHECK
+;-----------------------------------------------
+;MAP상에 勇者が存在するか
+;いたらキャラNoを、いないなら-1をRETURNする
+;좌표는 P0,1
+
+REPEAT CHARANUM
+	SIF CFLAG:COUNT:1 != 2 && CFLAG:COUNT:1 != 3
+		CONTINUE
+	X = CFLAG:COUNT:510
+	SIF X < 0
+		CONTINUE
+	Y = CFLAG:COUNT:511
+	SIF Y < 0
+		CONTINUE
+	
+	SIF X == P:0 && Y == P:1
+		RETURN COUNT
+	
+REND
+
+RETURN -1
+
+
+;------------------------------------------------
+@MON_CHECK
+;------------------------------------------------
+;MAP上にモンスターが存在するか
+;いたらモンスターLVを、いないなら0をRETURNする
+;좌표는 P0,1
+
+LOCAL:0 = DB:(P:1):(P:0)
+
+SIF LOCAL:0 <= 0 || LOCAL:0 >= 10
+	RETURN 0
+
+
+LOCAL:1 = 0
+
+REPEAT 5
+	LOCAL:2 = LOCAL:0 * 10 + COUNT + 100
+	LOCAL:1 += ITEM:(LOCAL:2)
+REND
+
+
+;十分な兵が存在に必要
+SIF LOCAL:1 > 20
+	RETURN LOCAL:0
+
+DB:(P:1):(P:0) = 0
+
+RETURN 0
+
+;------------------------------------------------
+@VIL_CHECK
+;------------------------------------------------
+;MAP上に村が存在するか
+;いたら発展LVを、ないなら0をRETURNする
+;座標はP,1
+
+X = DC:(P:1):(P:0)
+
+SIF X <= 0
+	RETURN 0
+
+RETURN X
+
+
+;-------------------------------------------------
+@CHIP_DRAW
+;-------------------------------------------------
+;マップチップ描画
+;좌표는 P0,1
+
+IF P:0 == 16 && P:1 == 16
+	PRINT 凸
+	PRINT ,
+	RETURN 0
+ENDIF
+
+CALL UNIT_CHECK
+IF RESULT >= 0
+	IF CFLAG:RESULT:1 == 2
+		SETCOLOR 200, 50, 50
+		PRINT ＠
+		PRINT ,
+		RESETCOLOR
+	ELSE
+		PRINT ＠
+		PRINT ,
+	ENDIF
+	RETURN 0
+ENDIF
+
+
+CALL MON_CHECK
+IF RESULT > 0
+	CALL C_OUT_MON(RESULT)
+	RETURN 0
+ENDIF
+
+CALL VIL_CHECK
+IF RESULT > 0
+	PRINTFORM 凹
+	PRINT ,
+	RETURN 0
+ENDIF
+
+LOCAL:2 = DA:(P:1):(P:0)/32
+CALL C_OUT(LOCAL:2)
+;PRINTFORM {LOCAL:2,2}
+;PRINT ,
+
+RETURN 0
+
+;------------------------------------------
+@SET_VIL
+;------------------------------------------
+
+FOR LOCAL:0,0,50
+	FOR LOCAL:1,0,50
+		DC:(LOCAL:0):(LOCAL:1) = 0
+	NEXT
+NEXT
+
+REPEAT 4
+	LOCAL:0 = RAND:32
+	LOCAL:1 = RAND:32
+	SIF LOCAL:0 == 16 && LOCAL:1 == 16
+		CONTINUE
+	DC:(LOCAL:0):(LOCAL:1) += 1
+REND
+
+RETURN 0
+
+;---------------------------------------------
+@MON_LIMIT
+;---------------------------------------------
+;몬스터 배치 한계
+;수위가 높을수록 리미트 압박
+LOCAL:2 = 0
+FOR LOCAL:1,0,32
+	FOR LOCAL:0,0,32
+		P:0 = LOCAL:0
+		P:1 = LOCAL:1
+		CALL MON_CHECK
+		LOCAL:2 += RESULT
+	NEXT
+NEXT
+
+SIF LOCAL:2 <= 120
+	RETURN 1
+
+PRINTL *괴물들이 한계까지 배치되어 있습니다*
+
+RETURN 0
+;-------------------------------------------------------
+@C_OUT_MON,ARG:0
+;いろ문자 출력(몬스터)
+LOCAL:0 = ARG:0
+
+SELECTCASE LOCAL:0
+	CASE 10
+		SETCOLOR 0xe16745
+		PRINT ⑩
+	CASE 9
+		SETCOLOR 0xe16745
+		PRINT ⑨
+	CASE 8
+		SETCOLOR 0xe16745
+		PRINT ⑧
+	CASE 7
+		SETCOLOR 0xe16745
+		PRINT ⑦
+	CASE 6
+		SETCOLOR 0xf7b357
+		PRINT ⑥
+	CASE 5
+		SETCOLOR 0xb8d26b
+		PRINT ⑤
+	CASE 4
+		SETCOLOR 0x8cc06c
+		PRINT ④
+	CASE 3
+		SETCOLOR 0x5aad6d
+		PRINT ③
+	CASE 2
+		SETCOLOR 0x4cb5e8
+		PRINT ②
+	CASE 1
+		SETCOLOR 0x5984bd
+		PRINT ①
+	CASE 0
+		SETCOLOR 0x5c6aa6
+		PRINT ０
+	CASEELSE
+		RESETCOLOR
+ENDSELECT
+;PRINTFORM {LOCAL:0} 
+PRINT ,
+RESETCOLOR
+
+RETURN 0
+

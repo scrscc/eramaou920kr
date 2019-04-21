@@ -1,0 +1,904 @@
+﻿;아이템 소모품 전반
+
+;----------------------------------------
+@USE_EX_ITEM,ARGS
+#DIM APPRAISE
+;----------------------------------------
+;조건을 만족시키면 아이템 하나를 사용함
+;ARGS = タイミング
+
+LOCAL = 560
+
+REPEAT 5
+	LOCAL:1 = CFLAG:A:LOCAL
+	APPRAISE = 0
+	
+	;未鑑定品チェック
+	IF LOCAL:1 > 1000
+		LOCAL:1 -= 1000
+		APPRAISE = 1
+	ENDIF
+	
+	;RESULTは使用チェック
+	RESULT = 0
+	
+	;HP가 60%이하라면 약초 사용
+	IF BASE:A:0 < (MAXBASE:A:0 * 6) / 10 && LOCAL:1 == 400
+		CALL HARB_ITEM
+	;기력이 60%이하라면 포션 사용
+	ELSEIF BASE:A:1 < (MAXBASE:A:1 * 6) / 10 && LOCAL:1 == 401
+		CALL POTION_ITEM
+	;HP가 80%이하라면 회복의 지팡이 사용
+	ELSEIF BASE:A:0 < (MAXBASE:A:0 * 8) / 10 && LOCAL:1 == 402
+		CALL HEAL_ROD_ITEM
+	;기력이 80%이하라면 정신의 지팡이 사용
+	ELSEIF BASE:A:1 < (MAXBASE:A:1 * 8) / 10 && LOCAL:1 == 403
+		CALL MIND_ROD_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 404
+		CALL POWER_SEED_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 405
+		CALL DEF_SEED_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 406
+		CALL EXP_MEDAL_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 407
+		CALL HP_SEED_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 408
+		CALL MP_SEED_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 409
+		CALL EXP_SILVER_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 410
+		CALL DETOX_WORM_ITEM, APPRAISE
+	;宝石箱はランダム使用. USE HELIX FOSSIL
+	ELSEIF LOCAL:1 == 411 && RAND:5 == 0
+		CALL JUEL_BOX_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 412 && ARGS == "전투중" && GETBIT(CFLAG:A:503,7) == 0
+		;戦闘中かつ透明化状態でない場合
+		CALL INVISIBLE_POTION_ITEM, APPRAISE
+	ELSEIF LOCAL:1 == 413 && ARGS == "전투중" && GETBIT(CFLAG:A:503,8) == 0
+		;戦闘中かつ英雄状態でない場合
+		CALL HERO_POTION_ITEM, APPRAISE
+	ENDIF
+	
+	SIF RESULT != 0
+		CFLAG:A:LOCAL = 0
+	
+	LOCAL += 1
+REND
+
+
+
+
+RETURN 0
+
+;----------------------------------------
+@SELL_EX_ITEM,ARG
+#DIM SELL_FLAG
+#DIM SELL_ALL
+#DIM GET_MONEY
+;----------------------------------------
+;ランダムでアイテムをひとつ売る
+
+LOCAL = 560
+SELL_ALL = 0
+GET_MONEY = 0
+
+REPEAT 5
+	LOCAL:1 = CFLAG:ARG:LOCAL
+	SELL_FLAG = 0
+	
+	;未鑑定品は確定売却
+	IF LOCAL:1 > 1000
+		LOCAL:1 -= 1000
+		SELL_FLAG = 1
+	ENDIF
+	
+	;ランダムで売却
+	SIF RAND:10 == 0
+		SELL_FLAG = 1
+	
+	IF SELL_FLAG == 1
+		CFLAG:ARG:LOCAL = 0
+		SELL_ALL += 1
+		GET_MONEY += 200
+		IF LOCAL:1 == 411
+			;宝石箱は売却額が高い（合計1000）
+			GET_MONEY += 800
+		ENDIF
+		
+		;元商人の売却ボーナス
+		SIF TALENT:ARG:용자가되기이전의생활 == 15
+			GET_MONEY += 100
+		
+	ENDIF
+	
+	
+	LOCAL += 1
+REND
+
+IF SELL_ALL > 0 && GET_MONEY > 0
+	PRINTFORML %SAVESTR:ARG%(은)는 아이템을 {SELL_ALL}개를 팔아, 돈을 {GET_MONEY} 얻었다
+	CFLAG:ARG:580 += GET_MONEY
+ENDIF
+
+
+RETURN 0
+
+;---------------------------------------
+@ADD_EX_ITEM, ARG:0, ARG:1, ARG:2
+#DIM ITEM_MAX
+;---------------------------------------
+;아이템을 입수한다. X는 입수할 아이템ID. A는 케릭터
+;ARG:0 == -1のときはランダム
+;ARG:0 == -2のときは武器限定
+;ARG:0 == -3のときは消耗品限定
+
+;ARG:1 == 入手キャラ
+;ARG:2 == 0=未鑑定品あり 1=구입 2=下賜
+
+;アイテムを増やした時はここを増やす
+ITEM_MAX = 14
+SIF ARG:0 == -1
+	ARG:0 = RAND:ITEM_MAX + 400
+
+;랜덤으로 무기를 입수한다
+IF RAND:9 == 0 || ARG:0 == -2
+	
+	;강도로 보고 갱신의 필요가 있는지 판정
+	LOCAL:0 = CFLAG:A:501
+	LOCAL:1 = CFLAG:A:550 / 1000
+	SIF LOCAL:0 <= LOCAL:1
+		RETURN 0
+	
+	;새로운 무기를 추가할 때는 이 랜덤 값을 손질할 것
+	W:8 = RAND:11 + 340
+	
+	;촉수 장비는 제외
+	SIF W:8 == 349
+		W:8 = 340
+	
+	CALL GET_EQUIP_NUM
+	;입수 계층에 따른 강도가 됨
+	W:0 += CFLAG:A:501 * 1000
+	
+	;접두어 추가
+	;접두어를 확장할 때는 이 값을 손질할 것
+	W:0 += RAND:10 * 100000
+	
+	CFLAG:(ARG:1):550 = W:0
+	
+	RETURN W:8
+ENDIF
+
+SIF ARG:0 == -3
+	ARG:0 = RAND:ITEM_MAX + 400
+
+;侵攻中の勇者の場合, 未鑑定品を入手する可能性がある
+SIF CFLAG:(ARG:1):1 == 2 && RAND:4 == 0
+	ARG:0 += 1000
+
+;購入の場合, 未鑑定品にならない
+SIF ARG:0 > 1000 && ARG:2 >= 1
+	ARG:0 -= 1000
+
+;即座に鑑定を行う. 신관・盗賊は鑑定成功率が高い
+LOCAL:2 = 0
+IF ARG:0 > 1000
+	IF TALENT:(ARG:1):202 || TALENT:(ARG:1):203
+		LOCAL:2 = RAND:2
+	ELSE
+		LOCAL:2 = RAND:5
+	ENDIF
+ENDIF
+
+IF ARG:0 > 1000 && LOCAL:2 == 0
+	PRINT 【감정성공】
+	ARG:0 -= 1000
+ENDIF
+
+LOCAL = 560
+
+REPEAT 5
+	LOCAL:1 = CFLAG:(ARG:1):LOCAL
+	
+	IF LOCAL:1 <= 0
+		CFLAG:(ARG:1):LOCAL = ARG:0
+		PRINTFORM %조사선택(SAVESTR:(ARG:1), "는")% 
+		
+		CALL EX_ITEM_NAME,ARG:0
+		
+		IF ARG:2 == 1
+			PRINTW 를 입수했다
+		ELSE
+			PRINTW 를 손에 넣었다
+		ENDIF
+		
+		RETURN ARG:0
+	ENDIF
+	
+	LOCAL += 1
+REND
+
+RETURN 0
+
+;--------------------------------------
+@HARB_ITEM, ARG:0
+;--------------------------------------
+;HP500回復. ID400
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;欲情の珠
+	JUEL:A:5 += 30
+ELSE
+	BASE:A:0 += 500
+	SIF BASE:A:0 > MAXBASE:A:0
+		BASE:A:0 = MAXBASE:A:0
+ENDIF
+
+	
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 약초를 
+	ELSE
+		PRINT 【？잎】을 
+	ENDIF
+	
+	PRINT 사용했다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 이것은 쾌락초의 잎이다! (욕정의 구슬+30)
+	ELSE
+		PRINTFORML (HP+500)
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;--------------------------------------
+@POTION_ITEM, ARG:0
+;--------------------------------------
+;気力500回復. ID401
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;정액경험
+	EXP:A:20 += 1
+ELSE
+	BASE:A:1 += 500
+	SIF BASE:A:1 > MAXBASE:A:1
+		BASE:A:1 = MAXBASE:A:1
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 포션을 
+	ELSE
+		PRINT 【？액체】를 
+	ENDIF
+	
+	PRINT 사용했다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 으에엑, 이건 정액이다! (정액경험+1)
+	ELSE
+		PRINTFORML (기력+500)
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;--------------------------------------
+@HEAL_ROD_ITEM, ARG:0
+;--------------------------------------
+;HP200回復. たまに壊れる. ID402
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;자위경험
+	EXP:A:10 += 1
+	;快Cの珠
+	JUEL:A:0 += 10
+	;欲情の珠
+	JUEL:A:5 += 20
+ELSE
+	BASE:A:0 += 200
+	SIF BASE:A:0 > MAXBASE:A:0
+		BASE:A:0 = MAXBASE:A:0
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 회복의 지팡이
+	ELSE
+		PRINT 【？지팡이】
+	ENDIF
+	
+	PRINT 를 흔들었다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 이것은 저주받은 진동 지팡이다! 
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 최면상태에서 자위를 시작했다
+		PRINTL 자위경험+1
+		PRINTL 욕정의 구슬+20
+		PRINTL 쾌C의 구슬+10
+	ELSE
+		PRINTFORML (HP+200)
+	ENDIF
+	
+ENDIF
+
+;未鑑定品は確定で破壊
+SIF ARG:0 > 0
+	RETURN 1
+
+;杖は破壊されないことがある
+SIF RAND:3 > 0
+	RETURN 0
+
+RETURN 1
+
+;--------------------------------------
+@MIND_ROD_ITEM, ARG:0
+;--------------------------------------
+;気力200回復. たまに壊れる. ID403
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+;A経験が無い場合無しに
+SIF EXP:A:1 == 0
+	LOCAL = 0
+
+IF LOCAL == 1
+	;자위경험
+	EXP:A:10 += 1
+	;A経験
+	EXP:A:1 += 1
+	;快Aの珠
+	JUEL:A:2 += 10
+	;欲情の珠
+	JUEL:A:5 += 20
+ELSE
+	BASE:A:1 += 200
+	SIF BASE:A:1 > MAXBASE:A:1
+		BASE:A:1 = MAXBASE:A:1
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 정신의 지팡이
+	ELSE
+		PRINT 【？지팡이】
+	ENDIF
+	
+	PRINT 를 흔들었다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 이것은 저주받은 애널 진동 지팡이다! 
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 최면상태에서 자위를 시작했다
+		PRINTL 자위경험+1
+		PRINTL A경험+1
+		PRINTL 욕정의 구슬+20
+		PRINTL 쾌A의 구슬+10
+	ELSE
+		PRINTFORML (기력+200)
+	ENDIF
+	
+ENDIF
+
+;未鑑定品は確定で破壊
+SIF ARG:0 > 0
+	RETURN 1
+
+;杖は破壊されないことがある
+SIF RAND:3 > 0
+	RETURN 0
+
+RETURN 1
+
+;-----------------------------------------
+@POWER_SEED_ITEM, ARG:0
+;-----------------------------------------
+;힘의씨앗. ID404
+
+LOCAL = 0
+
+;未鑑定品は1/4の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:4 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;C感度上昇
+	IF TALENT:A:101 == 1
+		;C鈍感消去
+		TALENT:A:101 = 0
+	ELSEIF TALENT:A:101 == 0 && TALENT:A:102 == 0
+		;C敏感
+		TALENT:A:102 = 1
+	ELSE
+		;快Cの珠
+		JUEL:A:0 += 10
+	ENDIF
+ELSE
+	CFLAG:A:13 += 1
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 힘의 씨앗
+	ELSE
+		PRINT 【？씨앗】
+	ENDIF
+	
+	PRINT 을 먹었다! 
+	
+	IF LOCAL == 1 &&  TALENT:A:남자
+		PRINTFORML 페니스 감도 성장의 씨앗을 먹어버렸다! (C감도 상승)
+	ELSEIF LOCAL == 1 &&  TALENT:A:후타나리
+		PRINTFORML 페니스 감도 성장의 씨앗을 먹어버렸다! (C감도 상승)
+	ELSEIF LOCAL == 1
+		PRINTFORML 음핵성장의 씨앗을 먹어버렸다! (C감도 상승)
+	ELSE
+		PRINTFORML （공격력+1）
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;-----------------------------------------
+@DEF_SEED_ITEM, ARG:0
+;-----------------------------------------
+;수호의씨앗. ID405
+
+LOCAL = 0
+
+;未鑑定品は1/4の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:4 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;B感度上昇
+	IF TALENT:A:107 == 1
+		;B鈍感消去
+		TALENT:A:107 = 0
+	ELSEIF TALENT:A:107 == 0 && TALENT:A:108 == 0
+		;B敏感
+		TALENT:A:108 = 1
+	ELSE
+		;快Bの珠
+		JUEL:A:14 += 10
+	ENDIF
+ELSE
+	CFLAG:A:14 += 1
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 수호의 씨앗
+	ELSE
+		PRINT 【？씨앗】
+	ENDIF
+	
+	PRINT 을 먹었다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 유두성장의 씨앗을 먹어버렸다! (B감도 상승)
+	ELSE
+		PRINTFORML (방어력+1)
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;-----------------------------------------
+@EXP_MEDAL_ITEM, ARG:0
+;-----------------------------------------
+;경험의코인. ID406
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;恭順の珠
+	JUEL:A:4 += 10
+ELSE
+	EXP:A:80 += 50
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 경험의 코인
+	ELSE
+		PRINT 【？코인】
+	ENDIF
+	
+	PRINT 을 사용했다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 이건 악마의 코인이었다! (순종의 구슬+10)
+	ELSE
+		PRINTFORML （경험치+50）
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;-----------------------------------------
+@HP_SEED_ITEM, ARG:0
+;-----------------------------------------
+;생명의씨앗. ID407
+
+LOCAL = 0
+
+;未鑑定品は1/4の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:4 == 0
+	LOCAL = 1
+
+;オトコはV感度上昇しない
+SIF TALENT:A:남자
+	LOCAL = 0
+
+IF LOCAL == 1
+	;V感度上昇
+	IF TALENT:A:103 == 1
+		;V鈍感消去
+		TALENT:A:103 = 0
+	ELSEIF TALENT:A:103 == 0 && TALENT:A:104 == 0
+		;V敏感
+		TALENT:A:104 = 1
+	ELSE
+		;欲情の珠
+		JUEL:A:5 += 10
+	ENDIF
+ELSE
+	MAXBASE:A:0 += 10
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 생명의 씨앗
+	ELSE
+		PRINT 【？씨앗】
+	ENDIF
+	
+	PRINT 을 먹었다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 질성장의 씨앗을 먹어버렸다! (V감도 상승)
+	ELSE
+		PRINTFORML （최대 HP+10）
+	ENDIF
+	
+ENDIF
+
+
+RETURN 1
+
+;-----------------------------------------
+@MP_SEED_ITEM, ARG:0
+;-----------------------------------------
+;마음의씨앗. ID408
+
+LOCAL = 0
+
+;未鑑定品は1/4の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:4 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;A感度上昇
+	IF TALENT:A:105 == 1
+		;A鈍感消去
+		TALENT:A:105 = 0
+	ELSEIF TALENT:A:105 == 0 && TALENT:A:106 == 0
+		;A敏感
+		TALENT:A:106 = 1
+	ELSE
+		;快Aの珠
+		JUEL:A:2 += 10
+	ENDIF
+ELSE
+	MAXBASE:A:1 += 5
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 마음의 씨앗
+	ELSE
+		PRINT 【？씨앗】
+	ENDIF
+	
+	PRINT 을 먹었다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 애널 유화의 씨앗을 먹어버렸다! (A감도 상승)
+	ELSE
+		PRINTFORML （최대 기력+5）
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;-----------------------------------------
+@EXP_SILVER_ITEM, ARG:0
+;-----------------------------------------
+;경험의은화. ID409
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;屈服の珠
+	JUEL:A:6 += 30
+ELSE
+	EXP:A:80 += 150
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 경험의 은화를 
+	ELSE
+		PRINT 【？코인】을 
+	ENDIF
+	
+	PRINT 사용했다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 이것은 어둠의 은화였다! (굴복의 구슬+10)
+	ELSE
+		PRINTFORML （경험치+150）
+	ENDIF
+	
+ENDIF
+
+
+RETURN 1
+
+;-----------------------------------------
+@DETOX_WORM_ITEM,ARG
+;-----------------------------------------
+;성수. ID410
+
+
+LOCAL = 0
+
+;未鑑定品は1/2の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:2 == 0
+	LOCAL = 1
+
+
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 성수
+	ELSE
+		PRINT 【？액체】
+	ENDIF
+	
+	PRINT 를 사용했다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 이것은 음마의 오줌이였다! (욕망의구슬+15)
+	ENDIF
+	
+ENDIF
+
+
+IF LOCAL == 1
+	IF TALENT:A:용자가되기이전의생활 == 12
+		;元聖女はさらに
+		SIF FLAG:5 & 32
+			PRINTFORML 성녀의 힘이 더럽혀졌다……（굴복의 구슬+10）
+		;屈服の珠
+		JUEL:A:6 += 10
+	ENDIF
+	;欲情の珠
+	JUEL:A:5 += 15
+ELSE
+	
+	IF TALENT:A:용자가되기이전의생활 == 12
+		;元聖女は攻撃/防御強化の特殊ボーナス
+		SIF FLAG:5 & 32
+			PRINTFORML 성수가 성녀에게 힘을 주었다……（공격+1/방어+1）
+		CFLAG:A:13 += 1
+		CFLAG:A:14 += 1
+	ENDIF
+	
+	CALL ITEM_DETOX,A
+	PRINTW (카르마가 상승했습니다+1)
+	CALL KARMA, A, 1
+ENDIF
+
+RETURN 1
+
+;-----------------------------------------
+@JUEL_BOX_ITEM,ARG
+;-----------------------------------------
+;타락의보석상자. ID411
+;未鑑定品も鑑定品も効果は同じ
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 타락의보석상자
+	ELSE
+		PRINT 【？예쁜 상자】
+	ENDIF
+	
+	PRINT 를 사용했다! （굴복의 구슬+5）
+	
+ENDIF
+
+
+;屈服の珠
+JUEL:A:6 += 5
+
+;迎撃中の場合, 捨てる
+SIF CFLAG:A:1 == 3
+	RETURN 1
+
+;壊れない
+RETURN 0
+
+;-----------------------------------------
+@INVISIBLE_POTION_ITEM,ARG
+;-----------------------------------------
+;투명화약. ID412
+
+LOCAL = 0
+
+;未鑑定品は1/3の確率でえっちなアイテム
+SIF ARG:0 == 1 && RAND:3 == 0
+	LOCAL = 1
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 투명화약
+	ELSE
+		PRINT 【？액체】
+	ENDIF
+	
+	PRINT 을 사용했다! 
+	
+	IF LOCAL == 1
+		PRINTFORML 옷 투명화의 약이였다!
+		PRINTFORML %SAVESTR:A%의 나신이 노출되어 버렸다……(치정의 구슬+15)
+	ENDIF
+	
+ENDIF
+
+IF LOCAL == 1
+	IF TALENT:A:35
+		;恥じらいはさらに
+		SIF FLAG:5 & 32
+			PRINTFORML 얼굴이 토마토처럼 새빨갛게 되어 있다……（굴복의 구슬+10）
+		;屈服の珠
+		JUEL:A:6 += 10
+	ENDIF
+	;恥情の珠
+	JUEL:A:8 += 15
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORML *투명화 공격을 피할 수 있게 되었습니다*
+	;透明化ON（忍術相当）
+	SETBIT CFLAG:A:503,7
+	
+ENDIF
+
+;消耗品
+RETURN 1
+
+;-----------------------------------------
+@HERO_POTION_ITEM, ARG:0
+#DIM UP_VALUE
+;-----------------------------------------
+;영웅의약. ID413
+
+LOCAL = 0
+UP_VALUE = CFLAG:A:9 / 10 + 10
+
+;未鑑定品は1/3の確率で呪われたアイテム
+SIF ARG:0 == 1 && RAND:3 == 0
+	LOCAL = 1
+
+IF LOCAL == 1
+	;恐怖の珠
+	JUEL:A:10 += 10
+ELSE
+	;攻撃防御UP
+	CFLAG:A:11 += UP_VALUE
+	CFLAG:A:12 += UP_VALUE
+	;英雄ON（回避小UP）
+	SETBIT CFLAG:A:503,8
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 
+	
+	IF ARG:0 == 0
+		PRINT 영웅의 약을 
+	ELSE
+		PRINT 【？액체】를 
+	ENDIF
+	
+	PRINT 마셨다!
+	
+	IF LOCAL == 1
+		PRINTFORML 공포의 약을 마셔 버렸다! (공포의 구슬+10)
+	ELSE
+		PRINTFORML (공격・방어+{UP_VALUE}, 회피UP)
+	ENDIF
+	
+ENDIF
+
+RETURN 1
+
+;----------------------------------------
+@EX_ITEM_NAME,ARG:0
+;----------------------------------------
+;アイテムの名前を表示する
+;ARG:0 がアイテムナンバー
+
+IF ARG:0 > 1000
+	PRINT 【미감정품】
+ELSE
+	PRINTFORM %ITEMNAME:(ARG:0)%
+ENDIF
+
+RETURN 1
+

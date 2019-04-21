@@ -1,0 +1,1561 @@
+﻿;-------------------------------
+@DUNGEON_TRAP
+#DIM TRAP_COUNT
+#DIM TRAP_NUM
+#DIM TRAP_ID
+#DIM TRAP_NOUSE
+#DIM TRAP_MISS
+;------------------------------
+;던전에서 발동하는 함정입니다
+;TRAP_COUNT = 罠試行回数カウンター
+;TRAP_NUM   = 罠のFLAG上のID
+;TRAP_ID    = 罠のアイテム番号
+;TRAP_NOUSE = 罠が作動しなかった時に立てるフラグ
+
+SIF D:4 <= 0
+	D:4 = 1
+
+FOR TRAP_COUNT, 0, D:4
+	;요격중？
+	SIF CFLAG:A:1 == 3
+		CALL SLAVE_TRAP_SET
+	
+	;침공중의 용사？
+	SIF CFLAG:A:1 != 2 && CFLAG:A:1 != 12
+		RETURN 0
+	
+	;FLAG:TRAP_NUMは各階層の罠ABCに何の罠が設置されているかのフラグになる
+	;FLAG:300～FLAG:308 = 계층설치함정A
+	;FLAG:310～FLAG:318 = 계층설치함정B
+	;FLAG:320～FLAG:328 = 계층설치함정C
+	;CFLAG:A:501은 현재의 계층 수
+
+	;함정이 A에 있는가？
+	TRAP_NUM = CFLAG:A:501 + 299
+	TRAP_ID = FLAG:TRAP_NUM
+	IF CFLAG:A:1 == 12
+		CALL CAMPAIGN_TRAP,TRAP_NUM
+		TRAP_ID = RESULT
+	ENDIF
+	
+	;Ａ에 없다면 함정이 B에 있는가？
+	IF TRAP_ID < 0
+		TRAP_NUM = CFLAG:A:501 + 309
+		TRAP_ID = FLAG:TRAP_NUM
+		IF CFLAG:A:1 == 12
+			CALL CAMPAIGN_TRAP,TRAP_NUM
+			TRAP_ID = RESULT
+		ENDIF
+	ENDIF
+
+	$TRAP_LOOP
+	
+	TRAP_ID = FLAG:TRAP_NUM
+	IF CFLAG:A:1 == 12
+		CALL CAMPAIGN_TRAP,TRAP_NUM
+		TRAP_ID = RESULT
+	ENDIF
+
+	;함정이Ｃ에 있는가？
+	IF TRAP_ID < 0
+		TRAP_NUM = CFLAG:A:501 + 319
+		TRAP_ID = FLAG:TRAP_NUM
+		IF CFLAG:A:1 == 12
+			CALL CAMPAIGN_TRAP,TRAP_NUM
+			TRAP_ID = RESULT
+		ENDIF
+		SIF TRAP_ID < 0
+			RETURN 0
+	ENDIF
+	
+	;後にTRAP_NOUSEにRESULTを代入する際, 想定外の結果にならないための保険
+	;（在庫なしやTRAP_IDの値が異常な場合に起こり得る）
+	RESULT = 0
+	
+	;同一罠発動による回避率上昇
+	SIF CFLAG:A:513 == TRAP_ID
+		CFLAG:A:512 += 1
+	;罠回避率の減少
+	SIF CFLAG:A:513 == 0
+		CFLAG:A:512 -= 1
+	
+	;記憶リセット
+	;罠の回避や失敗で連鎖が途切れるように
+	CFLAG:A:513 = 0
+	
+	;回避率は負にはならない
+	SIF CFLAG:A:512 < 0
+		CFLAG:A:512 = 0
+	
+	;同一罠発動失敗判定
+	TRAP_MISS = 20 -  CFLAG:A:512
+	
+	;在庫なしの場合は同一チェック外し
+	IF ITEM:TRAP_ID < 1
+		CFLAG:A:512 -= 1
+	ELSEIF TRAP_MISS < RAND:20
+		PRINT ≪동일 함정 발동 제한≫
+		PRINTL 용사는 함정을 회피했다……
+		;罠回避率の減少
+		CFLAG:A:512 -= 1
+	ELSEIF TRAP_ID == 60
+		CALL PIT_TRAP
+	ELSEIF TRAP_ID == 61
+		CALL ARROW_TRAP
+	ELSEIF TRAP_ID == 62
+		CALL TELEPORT_TRAP
+	ELSEIF TRAP_ID == 63
+		CALL ONE_WAY_TRAP
+	ELSEIF TRAP_ID == 64
+		CALL LOVE_GAS_TRAP
+	ELSEIF TRAP_ID == 65
+		CALL SYOKUSYU_FLOOR_TRAP
+	ELSEIF TRAP_ID == 66
+		CALL LOVE_BATH_TRAP
+	ELSEIF TRAP_ID == 67
+		CALL SELF_SAIMIN_TRAP
+	ELSEIF TRAP_ID == 68
+		CALL IMITATER_TRAP
+	ELSEIF TRAP_ID == 69
+		CALL SUMMON_TRAP
+	ELSEIF TRAP_ID == 70
+		CALL SUCCUBUS_TRAP
+	ELSEIF TRAP_ID == 71
+		CALL SLIME_ROOM_TRAP
+	ELSEIF TRAP_ID == 72
+		CALL NET_TRAP
+	ELSEIF TRAP_ID == 73
+		CALL SHOP_TRAP
+	ELSEIF TRAP_ID == 74
+		CALL BLACKOUT_TRAP
+	ELSEIF TRAP_ID == 75
+		CALL SHOOT_TRAP
+	ELSEIF TRAP_ID == 76
+		CALL DISPELL_TRAP
+	ELSEIF TRAP_ID == 77
+		CALL OIL_TRAP
+	ELSEIF TRAP_ID == 78
+		CALL FIRE_TRAP
+	ELSEIF TRAP_ID == 79
+		CALL A_WORM_TRAP
+	ELSEIF TRAP_ID == 80
+		CALL LOVE_BUG_TRAP
+	ELSEIF TRAP_ID == 81
+		CALL DARK_JUEL_TRAP
+	ELSEIF TRAP_ID == 82
+		CALL DEF_DOWN_TRAP
+	ELSEIF TRAP_ID == 83
+		CALL ATK_DOWN_TRAP
+	ELSEIF TRAP_ID == 84
+		CALL MAG_DOWN_TRAP
+	ELSEIF TRAP_ID == 85
+		CALL ALL_DOWN_TRAP
+	ENDIF
+	
+	;罠が作動したかどうかをRETURNの値をTRAP_NOUSEに格納することで判断
+	;これにより未作動時に下の罠消費と自動補充を素通りするように
+	TRAP_NOUSE = RESULT
+	
+	SIF TRAP_ID >= 60 && TRAP_ID <= 89 && ITEM:TRAP_ID > 0 && TRAP_NOUSE == 0 && CFLAG:A:1 == 2
+		ITEM:TRAP_ID -= 1
+	
+	;罠発動記憶
+	SIF TRAP_NOUSE == 0
+		CFLAG:A:513 = TRAP_ID
+	
+	;함정 자동 보충
+	IF FLAG:5 & 64 && TRAP_NOUSE == 0 && CFLAG:A:1 == 2
+		P = TRAP_ID
+		CALL TRAP_PRICE
+		IF MONEY >= RESULT && ITEM:TRAP_ID < 99 && TRAP_ID >=60 && TRAP_ID <= 89
+			ITEM:TRAP_ID += 1
+			MONEY -= RESULT
+		ENDIF
+	ENDIF
+	
+	TRAP_NUM += 10
+	
+	
+	
+	SIF TRAP_NUM < 330
+		GOTO TRAP_LOOP
+	
+	;ABCのループが終わり, D:4の試行回数が残っているなら
+	;またAから罠を回していく
+	
+NEXT
+
+WAIT
+
+RETURN 0
+
+;------------------------------
+@PIT_TRAP
+#DIM DICE
+;------------------------------
+;추락 함정 
+
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 연속 낙하다! （기력-10） 
+	BASE:A:1 -= 10
+ELSE
+	SIF FLAG:5 & 32
+		PRINT 함정이다!  
+	;落下フラグON
+	CFLAG:A:503 += 64
+ENDIF
+
+DICE = RAND:100
+
+IF TALENT:A:314 == 6
+	;천사
+	SIF FLAG:5 & 32
+		PRINTFORM 천사인 %조사선택(SAVESTR:A, "는")% 하늘을 날아서 함정을 회피했다… 
+	RETURN 1
+ELSEIF TALENT:A:314 == 8
+	;堕天使
+	SIF FLAG:5 & 32
+		PRINTFORM 타천사인 %조사선택(SAVESTR:A, "는")% 하늘을 날아서 함정을 회피했다… 
+	RETURN 1
+ENDIF
+
+IF DICE < 10
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 함정을 회피했다… 
+	RETURN 1
+ELSEIF DICE >= 80
+	DICE = RAND:40 + FLAG:85 * 10 + 1
+	DICE *= 2
+	IF TALENT:0:328
+		;魔蟲知識によってダメージ1.5倍に
+		DICE += DICE / 2
+		SIF FLAG:5 & 32
+			PRINTFORM 구멍의 바닥은 독충 무리가 있다다!  
+	ENDIF
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%는 추락할 때 다리가 꺾여버렸다! {DICE}의 데미지!  
+ELSE
+	DICE = RAND:40 + FLAG:85 * 10 + 1
+	IF TALENT:0:328
+		;魔蟲知識によってダメージ1.5倍に
+		DICE += DICE / 2
+		SIF FLAG:5 & 32
+			PRINTFORM 구멍의 바닥은 독충 무리가 있다다!  
+	ENDIF
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%에게 {DICE}의 데미지! 
+ENDIF
+BASE:A:0 -= DICE
+IF TALENT:A:10 == 1
+	SIF FLAG:5 & 32
+		PRINTFORM 겁 많은 %조사선택(SAVESTR:A, "는")% 죽을정도로 놀라고있다…（기력-10） 
+	BASE:A:1 -= 10
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+RETURN 0
+
+;------------------------------
+@ARROW_TRAP
+#DIM DICE
+;------------------------------
+;화살형함정
+
+SIF FLAG:5 & 32
+	PRINT 화살의 함정이다!  
+
+DICE = RAND:100
+
+IF DICE < 30
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 순간에 화살을 회피했다… 
+	RETURN 1
+ELSEIF DICE >= 80
+	DICE *= 2
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%의 급소에 맞아 {DICE}의 데미지!  
+	DICE += FLAG:85 * 10
+	SIF FLAG:5 & 32 && FLAG:85 > 0
+		PRINTFORM 화살은 더욱 깊게 박혀 %SAVESTR:A%에 {FLAG:85 * 10} 추가 데미지!  
+	BASE:A:0 -= DICE
+	IF TALENT:A:40 == 1
+		SIF FLAG:5 & 32
+			PRINTFORM 아픔에 약한 %조사선택(SAVESTR:A, "는")% 고통에 견디지 못하고 있다…（기력-30） 
+		BASE:A:1 -= 30
+	ENDIF
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%에게 {DICE}의 데미지! 
+	DICE += FLAG:85 * 10
+	SIF FLAG:5 & 32 && FLAG:85 > 0
+		PRINTFORM 화살은 더욱 깊게 박혀 %SAVESTR:A%에 {FLAG:85 * 10} 추가 데미지!  
+	BASE:A:0 -= DICE
+	IF TALENT:A:40 == 1
+		SIF FLAG:5 & 32
+			PRINTFORM 아픔에 약한 %조사선택(SAVESTR:A, "는")% 고통에 견디지 못하고 있다…（기력-30） 
+		BASE:A:1 -= 30
+	ENDIF
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+RETURN 0
+
+;---------------------
+@TELEPORT_TRAP
+;---------------------
+;텔레포트형 함정
+
+
+SIF FLAG:5 & 32
+	PRINT 텔레포트 함정이다!  
+
+Z = RAND:100
+
+IF Z > 70
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 순간에 텔레포트를 회피했다… 
+	RETURN 1
+ELSEIF Z < 20
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 계층 입구까지 날려졌다!  
+	D:20 = 1
+	D:1 = 1
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 날려져 버렸다!  
+	D:20 = RAND:100
+	D:1 = 1
+ENDIF
+
+IF TALENT:A:10 == 1
+	SIF FLAG:5 & 32
+		PRINTFORM 겁 많은 %조사선택(SAVESTR:A, "는")% 죽을정도로 놀라고있다…（기력-10） 
+	BASE:A:1 -= 10
+ENDIF
+
+IF FLAG:85 > 0
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 텔레포트의 충격에 정신을 차리지 못하고 있다…（기력-{FLAG:85 * 5}）
+	BASE:A:1 -= FLAG:85 * 5
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+RETURN 0
+
+;---------------------
+@ONE_WAY_TRAP
+;---------------------
+;일방통행형 함정
+
+IF D:20 < 40
+	;個数増加による帳尻合わせではなくRETURNの戻り値を変えることで, そもそもの個数を減少させないように
+	;ITEM:63 += 1
+	RETURN 1
+ENDIF
+
+;落下フラグ
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 낙하 시설은 새로운 통로이다……기어 오르는 것은 불가능하다（기력-20） 
+	BASE:A:1 -= 20
+ELSE
+	SIF FLAG:5 & 32
+		PRINT 문을 빠져 나가면 뒤에서 열쇠가 걸리는 소리가 들렸다!  
+ENDIF
+
+
+Z = RAND:3
+
+IF Z > 1
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 곧바로 돌아가는 길을 찾아 냈다… 
+	RETURN 1
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 고민했다… 
+	CFLAG:A:509 = 1
+	D:1 = 1
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 초조해하다 （기력-{20 + FLAG:85 * 5}） 
+	BASE:A:1 -= (20 + FLAG:85 * 5)
+ENDIF
+
+IF TALENT:A:10 == 1
+	SIF FLAG:5 & 32
+		PRINTFORM 겁 많은 %조사선택(SAVESTR:A, "는")% 죽을정도로 놀라고있다…（기력-10） 
+	BASE:A:1 -= 10
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+RETURN 0
+
+;---------------------
+@LOVE_GAS_TRAP
+;---------------------
+;최음가스형함정
+
+
+SIF FLAG:5 & 32
+	PRINT 갑자기 벽의 틈새에서 달콤한 가스가 분출 해왔다…… 
+
+Z = RAND:100
+
+IF Z > 60
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%코와 입을 막고 탈출했다… 
+	RETURN 1
+ELSEIF Z < 10
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 대량의 가스를 마시곤 음란한 기분에 젖어들었다…
+		PRINTFORML 욕정의 구슬+{40 + FLAG:85}
+	ENDIF
+	JUEL:A:5 += (40 + FLAG:85)
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 숨이 거칠어졌다（기력-{40 + FLAG:85 * 2}）
+	BASE:A:1 -= (40 + FLAG:85 * 2)
+ELSE
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 음란한 기분에 젖어들었다…
+		PRINTFORML 욕정의 구슬+{20 + FLAG:85}
+	ENDIF
+	JUEL:A:5 += (20 + FLAG:85)
+	SIF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 숨이 거칠어졌다（기력-{20 + FLAG:85 * 2}）
+	BASE:A:1 -= (20 + FLAG:85 * 2)
+ENDIF
+
+IF TALENT:A:60 == 1
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 무심코 자위를 하기 시작했다
+		PRINTL 자위경험+1
+		PRINTL 욕정의 구슬+20
+		PRINTL 쾌C의 구슬+10
+	ENDIF
+	EXP:A:10 += 1
+	JUEL:A:0 += 20
+	BASE:A:1 -= 10
+	JUEL:A:5 += 20
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+;欲情フラグ
+SETBIT CFLAG:A:503, 9
+
+RETURN 0
+
+;----------------------------
+@SYOKUSYU_FLOOR_TRAP
+;----------------------------
+;촉수바닥형함정
+
+
+;落下フラグ
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 낙하 시설은 촉수의 둥지이다! ! （기력-20） 
+	BASE:A:1 -= 20
+ELSE
+	SIF FLAG:5 & 32
+		PRINT 갑자기 바닥에서 촉수가 습격했다! !  
+ENDIF
+
+
+Z = RAND:100
+
+IF Z > 70
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 무기로 촉수를 베어 넘기며 탈출했다…
+	RETURN 1
+ELSEIF Z < 15
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 촉수에게 붙잡혀, 입 안 구석구석까지 최음 효과의 체액이 발려졌다…
+		PRINTL 촉수경험+1
+		PRINTFORML 욕정의 구슬+{100 + FLAG:85 * 2}
+	ENDIF
+	EXP:A:55 += 1
+	JUEL:A:5 += 120 + FLAG:85 * 2
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 필사적으로 몸부림치느라, 상당한 기력을 소모했다（기력-200）
+	BASE:A:1 -= 200
+ELSE
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 촉수에게 붙잡혀 최음 효과가 있는 체액이 전신에 발려졌다…
+		PRINTL 촉수경험+1
+		PRINTFORML 욕정의 구슬+{60 + FLAG:85 * 2}
+	ENDIF
+	EXP:A:55 += 1
+	JUEL:A:5 += 60 + FLAG:85 * 2
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 필사적으로 몸부림치느라, 많은 기력을 소모했다（기력-100）
+	BASE:A:1 -= 100
+ENDIF
+
+IF TALENT:A:60 == 1
+	IF FLAG:5 & 32
+		PRINTFORML 미약체액에 취해버린 %조사선택(SAVESTR:A, "는")% 무심코 자위를 하기 시작했다
+		PRINTL 자위경험+1
+		PRINTL 욕정의 구슬+10
+		PRINTL 쾌C의 구슬+10
+	ENDIF
+	EXP:A:10 += 1
+	JUEL:A:0 += 20
+	BASE:A:1 -= 10
+	JUEL:A:5 += 20
+ENDIF
+
+RETURN 0
+
+
+;----------------------------
+@LOVE_BATH_TRAP
+;----------------------------
+;미약늪형함정
+
+;落下フラグ
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 낙하 시설는 미약 채워진 수영장이다! ! （기력-20） 
+	BASE:A:1 -= 20
+ELSE
+	SIF FLAG:5 & 32
+		PRINT 갑자기 바닥이 함몰되어 미약 채워진 수영장에 떨어진다!  
+ENDIF
+
+
+IF RAND:10 < 2
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 미약 수영장에 완전히 빠져들었다! 
+		PRINTL 약물경험+1
+		PRINTFORML 욕정의 구슬+{200 + FLAG:85 * 5}
+	ENDIF
+	EXP:A:57 += 1
+	JUEL:A:5 += 200 + FLAG:85 * 5
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 필사적으로 허우적거리며 상당한 체력과 기력을 소모하고 말았다（체력-200 기력-200）
+	BASE:A:0 -= 200
+	BASE:A:1 -= 200
+ELSE
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 대량의 미약에 취해 비틀비틀거리고 있다
+		PRINTL 약물경험+1
+		PRINTFORML 욕정의 구슬+{100 + FLAG:85 * 5}
+	ENDIF
+	EXP:A:57 += 1
+	JUEL:A:5 += 100 + FLAG:85 * 5
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 필사적으로 몸부림치느라, 많은 기력을 소모했다（기력-100）
+	BASE:A:1 -= 100
+ENDIF
+
+IF TALENT:A:60 == 1
+	IF FLAG:5 & 32
+		PRINTFORML 미약의 영향으로 야릇한 기분에 빠져든 %조사선택(SAVESTR:A, "는")% 무심코 자위하기 시작했다
+		PRINTL 자위경험+1
+		PRINTL 욕정의 구슬+10
+		PRINTL 쾌C의 구슬+10
+	ENDIF
+	EXP:A:10 += 1
+	JUEL:A:0 += 20
+	BASE:A:1 -= 10
+	JUEL:A:5 += 20
+ENDIF
+
+;欲情フラグ
+SETBIT CFLAG:A:503, 9
+
+RETURN 0
+
+
+;----------------------------
+@SELF_SAIMIN_TRAP
+#DIM DICE
+;----------------------------
+;자위최면형함정
+
+SIF FLAG:5 & 32
+	PRINT 갑자기 현기증이나서 신체의 자유가 없어진다… 
+
+DICE = RAND:100
+TARGET = A
+
+;欲情フラグ
+SIF GETBIT(CFLAG:A:503, 9)
+	TIMES DICE, 0.80
+
+IF DICE > 60
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 뺨을 꼬집으며 최면의 속임수를 단칼에 잘라냈다
+	RETURN 1
+ELSEIF DICE < 10
+	IF FLAG:5 & 32
+		SIF GETBIT(CFLAG:A:503, 9)
+			PRINT 盛りのついた
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 최면 상태에서 장비를 아예 벗어 던지곤 주위를 신경쓰지 않고 자위에 열중하기 시작했다
+	ENDIF
+	CALL BEFORE_AUTOTRAIN
+	CALL COM3_AUTO
+	CALL SOURCE_CHECK_AUTO
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 다가오는 몬스터의 기척조차 느끼지 못하는 것 같다（공격력과 방어력이 ０이 됨! ）
+	CFLAG:A:11 = 0
+	CFLAG:A:12 = 0
+ELSE
+	IF FLAG:5 & 32
+		SIF GETBIT(CFLAG:A:503, 9)
+			PRINT 盛りのついた
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 최면 상태에서 장비를 밀어내고 주위를 신경쓰지 않고 자위에 열중하기 시작했다	
+	ENDIF
+	CALL BEFORE_AUTOTRAIN
+	CALL COM3_AUTO
+	CALL SOURCE_CHECK_AUTO
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 다가오는 몬스터의 기척조차 느끼지 못하는 것 같다（공격력과 방어력이 반토막이 났다! ）
+	CFLAG:A:11 /= 2
+	CFLAG:A:12 /= 2
+ENDIF
+
+RETURN 0
+
+;------------------------------
+@IMITATER_TRAP
+;------------------------------
+;시설의태형함정
+
+Z = RAND:100
+
+;落下フラグ
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 낙하 시설는 생물의 체내이다! ! 
+	Z -= 10
+ELSE
+	IF FLAG:5 & 32
+		PRINTL 갑자기 방의 벽이 사방에서 덮쳐왔다! 
+		PRINTL 아무래도 의태를 한 생물의 체내에 들어가 버리고 있었다
+	ENDIF
+ENDIF
+
+IF Z > 60
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 서둘러 탈출했다
+	RETURN 1
+ELSEIF Z < 10
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 통째로 삼켜진 다음 사지가 고정되어
+		PRINTFORML 약삭빠른 촉수에 의해 장비가 벗겨진 뒤, 온 몸이 미약 투성이가 되고 말았다
+		PRINTFORML 심한 흥분상태의 %조사선택(SAVESTR:A, "는")% 다가오는 몬스터의 기척조차 느끼지 못했다
+		PRINTFORML 욕정의 구슬+{50 + FLAG:85 * 10}
+		PRINTFORML 굴복의 구슬+{50 + FLAG:85 * 10}
+		PRINTFORML 치정의 구슬+{50 + FLAG:85 * 10}
+		PRINTFORML 쾌B의 구슬+{50 + FLAG:85 * 10}
+		PRINTFORML 쾌C의 구슬+{50 + FLAG:85 * 10}
+	ENDIF
+	JUEL:A:6 += 50 + FLAG:85 * 10
+	JUEL:A:8 += 50 + FLAG:85 * 10
+	JUEL:A:14 += 50 + FLAG:85 * 10
+	JUEL:A:0 += 50 + FLAG:85 * 10
+	BASE:A:1 -= 50 + FLAG:85 * 10
+	JUEL:A:5 += 50 + FLAG:85 * 10
+	IF FLAG:5 & 32
+		PRINTFORML 알몸의 %조사선택(SAVESTR:A, "는")% 곧 일어날 전투도 잊어버리고 절정의 여운에 빠져들었다（공격력과 방어력이 ０이 됨! ）
+		PRINTL 절정 경험+1
+	ENDIF
+	EXP:A:2 += 1
+	CFLAG:A:11 = 0
+	CFLAG:A:12 = 0
+ELSE
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 통째로 삼켜진 다음 사지가 고정되어
+		PRINTFORML 장비 사이를 파고들어 온 약삭빠른 촉수에 의해 온 몸이 미약 투성이가 되고 되었다
+		PRINTFORML 심한 흥분상태의 %조사선택(SAVESTR:A, "는")% 다가오는 몬스터의 기척조차 느끼지 못했다
+		PRINTFORML 욕정의 구슬+{30 + FLAG:85 * 6}
+		PRINTFORML 굴복의 구슬+{30 + FLAG:85 * 6}
+		PRINTFORML 치정의 구슬+{30 + FLAG:85 * 6}
+		PRINTFORML 쾌B의 구슬+{30 + FLAG:85 * 6}
+		PRINTFORML 쾌C의 구슬+{30 + FLAG:85 * 6}
+	ENDIF
+	JUEL:A:6 += 30 + FLAG:85 * 6
+	JUEL:A:8 += 30 + FLAG:85 * 6
+	JUEL:A:14 += 30 + FLAG:85 * 6
+	JUEL:A:0 += 30 + FLAG:85 * 6
+	BASE:A:1 -= 30 + FLAG:85 * 6
+	JUEL:A:5 += 30 + FLAG:85 * 6
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 곧 일어날 전투도 잊어버리고 절정의 여운에 빠져들었다（공격력과 방어력이 반토막이 났다! ）
+		PRINTL 절정 경험+1
+	ENDIF
+	EXP:A:2 += 1
+	CFLAG:A:11 /= 2
+	CFLAG:A:12 /= 2
+ENDIF
+
+
+RETURN 0
+
+;------------------------------
+@SUMMON_TRAP
+;------------------------------
+;소환형함정
+
+SIF FLAG:5 & 32
+	PRINTFORM %조사선택(SAVESTR:A, "는")% 소환의 마법진을 밟아 버렸다
+
+Z = RAND:2
+
+IF Z > 0
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 마법진이 발동하기 전, 재빠르게 마법진을 파괴하고 지나갔다
+	RETURN 1
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORML 던젼에 몬스터가 소환되었다! 
+ENDIF
+
+CALL SUMMON_MONSTER, -1
+
+IF FLAG:85 > 0
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 마법진의 마력을 뒤집어쓰고 말았다（체력-{FLAG:85 * 10}）
+	BASE:A:0 -= FLAG:85 * 10
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@SUCCUBUS_TRAP
+#DIM DICE
+;--------------------------------------------
+;몽마형함정
+
+IF FLAG:5 & 32
+	PRINTL 능욕당한 용자로 보이는 듯한 소녀가 있었다…
+	PRINTL 돕지 않으면…
+ENDIF
+
+DICE = RAND:100
+
+;欲情フラグ
+SIF GETBIT(CFLAG:A:503, 9)
+	TIMES DICE, 0.80
+
+IF DICE > 60
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 함정이라고 생각해 무시했다
+	RETURN 1
+ELSEIF DICE < 10
+	IF FLAG:5 & 32
+		SIF GETBIT(CFLAG:A:503, 9)
+			PRINT 불끈불끈한 정욕에 자극을 받아
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 구해 낸 소녀에게 입술을 빼앗기고 만다
+		PRINTFORML 격렬하게 서로 안기면서 %조사선택(SAVESTR:A, "는")% 어느새 이성은 완전히 날아가버리고 욕망만이 점차 커져가는 것을 느꼈다
+		PRINTFORML 고간 쪽으로 손이 뻗어감에도… %조사선택(SAVESTR:A, "는")% 아무런 의문도 느끼지 못할 정도로 욕망에 지배되고 있었다
+		SIF TALENT:A:남자 == 0
+			PRINTL 레즈경험+6
+		PRINTFORML 욕정의 구슬+{100 + FLAG:85 * 10}
+		PRINTFORML 굴복의 구슬+{100 + FLAG:85 * 10}
+		PRINTFORML 치정의 구슬+{100 + FLAG:85 * 10}
+		PRINTFORML 쾌B의 구슬+{100 + FLAG:85 * 10}
+		PRINTFORML 쾌C의 구슬+{100 + FLAG:85 * 10}
+	ENDIF
+	SIF TALENT:A:남자 == 0
+		EXP:A:40 += 6
+	JUEL:A:6 += 100 + FLAG:85 * 10
+	JUEL:A:8 += 100 + FLAG:85 * 10
+	JUEL:A:14 += 100 + FLAG:85 * 10
+	JUEL:A:0 += 100 + FLAG:85 * 10
+	BASE:A:1 -= 100 + FLAG:85 * 10
+	JUEL:A:5 += 100 + FLAG:85 * 10
+	IF FLAG:5 & 32
+		PRINTFORML 알몸의 %조사선택(SAVESTR:A, "는")% 곧 일어날 전투도 잊어버리고 절정의 여운에 빠져들었다（공격력과 방어력이 ０이 됨! ）
+		PRINTL 절정 경험+1
+	ENDIF
+	EXP:A:2 += 1
+	CFLAG:A:11 = 0
+	CFLAG:A:12 = 0
+ELSE
+	IF FLAG:5 & 32
+		SIF GETBIT(CFLAG:A:503, 9)
+			PRINT 불끈불끈한 정욕에 자극을 받아
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 기뻐하며 달려온 소녀에게 입술을 빼앗기고 만다
+		PRINTFORML 격렬하게 서로 안기면서, %조사선택(SAVESTR:A, "는")% 어느덧 욕망만이 점점 커져가는 것을 느꼈다 
+		PRINTFORML 고간 쪽으로 손이 뻗어감에도…%SAVESTR:A%의 이성의 일부가 저항해보지만 곧 욕망에 무너져내렸다
+		SIF TALENT:A:남자 == 0
+			PRINTL 레즈경험+4
+		PRINTFORML 욕정의 구슬+{60 + FLAG:85 * 6}
+		PRINTFORML 굴복의 구슬+{60 + FLAG:85 * 6}
+		PRINTFORML 치정의 구슬+{60 + FLAG:85 * 6}
+		PRINTFORML 쾌B의 구슬+{60 + FLAG:85 * 6}
+		PRINTFORML 쾌C의 구슬+{60 + FLAG:85 * 6}
+	ENDIF
+	SIF TALENT:A:남자 == 0
+		EXP:A:40 += 4
+	JUEL:A:6 += 60 + FLAG:85 * 6
+	JUEL:A:8 += 60 + FLAG:85 * 6
+	JUEL:A:14 += 60 + FLAG:85 * 6
+	JUEL:A:0 += 60 + FLAG:85 * 6
+	BASE:A:1 -= 60 + FLAG:85 * 6
+	JUEL:A:5 += 60 + FLAG:85 * 6
+	IF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 곧 일어날 전투도 잊어버리고 절정의 여운에 빠져들었다（공격력과 방어력이 반토막이 났다! ）
+		PRINTL 절정 경험+1
+	ENDIF
+	EXP:A:2 += 1
+	CFLAG:A:11 /= 2
+	CFLAG:A:12 /= 2
+ENDIF
+
+RETURN 0
+
+;----------------------------
+@SLIME_ROOM_TRAP
+#DIM DICE
+;----------------------------
+;슬라임방형함정
+
+DICE = RAND:100
+TARGET = A
+
+
+;落下フラグ
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 낙하 시설은 점액의 둥지이다! !  
+	DICE -= 20
+ELSE
+	SIF FLAG:5 & 32
+	PRINT 갑자기 사방의 벽과 천장에서 점액이 묻어 나왔다왔다!  
+ENDIF
+
+IF DICE > 80
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 간신히 탈출했다…
+	RETURN 1
+ELSEIF DICE < 10
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:A%는 온몸을 슬라임에게 감싸여 장비가 모두 녹아서 전라가 되어버렸다（공격력과 방어력이 1/2로! ）
+	BASE:A:1 -= 25 + FLAG:85 * 5
+	CFLAG:A:11 /= 2
+	CFLAG:A:12 /= 2
+
+	IF FLAG:5 & 32
+		PRINTFORML %SAVESTR:A%의 입과 항문에 대량의 점액이 흘러들어간다…（기력-{10 + FLAG:85 * 5}）
+		PRINTL A경험+1
+	ENDIF
+	EXP:A:1 += 1
+	BASE:A:1 -= 10 + FLAG:85 * 5
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:A%는 온몸을 슬라임에게 감싸여 장비가 반쯤 녹아내려버렸다（공격력과 방어력이 2/3로! ）
+	BASE:A:1 -= 25 + FLAG:85 * 5
+	CFLAG:A:11 -= CFLAG:A:11 / 3
+	CFLAG:A:12 -= CFLAG:A:12 / 3
+
+	IF RAND:3 == 0
+		IF FLAG:5 & 32
+			PRINTFORML %SAVESTR:A%의 입과 항문에 대량의 점액이 흘러들어간다…（기력-{10 + FLAG:85 * 5}）
+			PRINTL A경험+1
+		ENDIF
+		EXP:A:1 += 1
+		BASE:A:1 -= 10 + FLAG:85 * 5
+	ENDIF
+ENDIF
+
+;ローション自動調教
+CALL BEFORE_AUTOTRAIN
+CALL COM50_AUTO
+CALL SOURCE_CHECK_AUTO
+;ヌルヌル付与
+SETBIT CFLAG:A:503, 3
+
+RETURN 0
+
+;------------------------------
+@NET_TRAP
+;------------------------------
+;거미줄
+
+LOCAL = 10 + FLAG:85 * 10
+
+;기력最大値によるキャップ
+SIF LOCAL > MAXBASE:A:1 / 10
+	LOCAL = MAXBASE:A:1 / 10
+
+SIF FLAG:5 & 32
+	PRINTFORM %SAVESTR:A%에서 거미줄을 빠져나오는데 힘을 썼다（기력-{LOCAL}） 
+BASE:A:1 -= LOCAL
+
+IF TALENT:0:328
+	;魔蟲知識によって기력ダメージの1.5倍のHPダメージ
+	LOCAL += LOCAL / 2
+	;HP最大値によるキャップ
+	SIF LOCAL > MAXBASE:A:0 / 10
+		LOCAL = MAXBASE:A:0 / 10
+	SIF FLAG:5 & 32
+		PRINTFORM 독 거미가 차례 차례로 습격한다! （HP-{LOCAL}）  
+	BASE:A:0 -= LOCAL
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+RETURN 0
+
+;--------------------------------
+@SHOP_TRAP
+#DIM COST
+;--------------------------------
+;행상인
+;COST = 代金
+
+SIF FLAG:5 & 32
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 고가의 아이템을 강매당했다
+
+COST = RAND:5 * 50
+
+IF COST == 0
+	SIF FLAG:5 & 32
+		PRINTL 결국 용자는 아무 것도 구입하지 않았다
+	RETURN 1
+ENDIF
+
+COST += FLAG:85 * 10
+COST = COST * (99 + POWER(CFLAG:A:501, 3)) / 100
+
+;IF CFLAG:A:580 < COST
+;	IF FLAG:5 & 32
+;		printformw %SAVESTR:A%は手持ちの金がないようだ…
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+SIF FLAG:5 & 32
+	PRINTFORML 전부 해서 {COST}포인트의 매출이 생겼다! 
+
+MONEY += COST
+;CFLAG:A:580 -= COST
+CFLAG:A:582 -= COST
+
+
+BASE:A:0 += COST
+SIF BASE:A:0 > MAXBASE:A:0
+	BASE:A:0 = MAXBASE:A:0
+;기력の回復
+BASE:A:1 = MAXBASE:A:1
+SIF FLAG:5 & 32
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 회복되었다
+
+RETURN 0
+
+
+;--------------------------------
+@BLACKOUT_TRAP
+#DIM DICE
+;--------------------------------
+;어둠형함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 갑작스럽게 어두워져 주위 시야를 빼앗기고 말았다
+
+DICE = RAND:3
+
+IF DICE == 2
+	SIF FLAG:5 & 32
+		PRINTL 용자는 어둠 속에서 탈출했다
+	RETURN 1
+ELSEIF DICE == 1
+	SIF FLAG:5 & 32
+		PRINTFORML 어둠 속에서 아무 것도 보이지 않는다! （공격력이 반토막이 났다! ）
+	CFLAG:A:11 /= 2
+	SIF FLAG:5 & 32
+		PRINTFORML 어둠 속 저편에서 알 수 없는 무서운 소리가 들린다! （기력-100）
+	BASE:A:1 -= 100
+	IF FLAG:85 > 0
+		SIF FLAG:5 & 32
+			PRINTFORML %조사선택(SAVESTR:A, "는")% 어둠 속에서 날아온 독화살을 맞고 말았다! （체력-{FLAG:85 * 10}）
+		BASE:A:0 -= FLAG:85 * 10
+	ENDIF
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORML 어둠 속에서 아무 것도 보이지 않는다! （공격력이 반토막이 났다! ）
+	CFLAG:A:11 /= 2
+
+	IF FLAG:85 > 0
+		SIF FLAG:5 & 32
+			PRINTFORML %조사선택(SAVESTR:A, "는")% 어둠 속에서 날아온 독화살을 맞고 말았다! （체력-{FLAG:85 * 10}）
+		BASE:A:0 -= FLAG:85 * 10
+	ENDIF
+ENDIF
+
+RETURN 0
+
+
+;--------------------------------
+@SHOOT_TRAP
+;--------------------------------
+;슛
+
+IF D:20 < 40
+	;個数増加による帳尻合わせではなくRETURNの戻り値を変えることで, そもそもの個数を減少させないように
+	;ITEM:75 += 1
+	RETURN 1
+ENDIF
+
+;落下フラグ
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORML 낙하처는 또 다른 낙하의 사슬이다!!(기력-20)
+	BASE:A:1 -= 20
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 갑자기 낙하했다!
+	;落下フラグON
+	CFLAG:A:503 += 64
+ENDIF
+
+
+Z = RAND:3
+
+IF Z > 0
+	SIF FLAG:5 & 32
+		PRINTL 용자는 손을 뻗어 겨우 떨어지지 않았다
+	RETURN 1
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTFORML *슛! *
+IF CFLAG:A:501 == 9
+	Z = RAND:300
+	BASE:A:0 -= Z
+	IF FLAG:5 & 32
+		PRINTFORML 최하층의 것에 더 아래까지 떨어져 버려!이상한 부유감이 든다고 전송진에 의해 제9계층의 천장에서%조사선택(SAVESTR:A, "는")% 마루에 내팽개쳐 졌다(체력-{z})
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 길을 잃어버렸다…
+	ENDIF
+	CFLAG:A:509 = 1
+	D:1 = 1
+ELSEIF CFLAG:A:501 == 8
+	CFLAG:A:501 += 1
+	Z = RAND:300
+	BASE:A:0 -= Z
+	SIF FLAG:5 & 32
+		PRINTFORML 여기가 가장 최하층 인 것 같다. %조사선택(SAVESTR:A, "는")% 엉덩방아를 크게 찧었다（체력-{z})
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 길을 잃어버렸다…
+	CFLAG:A:509 = 1
+	;パーティが分断される
+	CALL PARTY_DEL, A
+	D:1 = 1
+ELSE
+	CFLAG:A:501 += 1
+	SIF FLAG:5 & 32
+		PRINTFORML 아래 층에 떨어지는 바람에%조사선택(SAVESTR:A, "는")% 잃어버렸다…
+	CFLAG:A:509 = 1
+	;パーティが分断される
+	CALL PARTY_DEL, A
+	D:1 = 1
+ENDIF
+
+IF FLAG:85 > 0
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 낙하 충격에 신음하고 있다…（체력-{FLAG:85 * 10}）
+	BASE:A:0 -= FLAG:85 * 10
+ENDIF
+
+RETURN 0
+
+
+;--------------------------------
+@DISPELL_TRAP
+;--------------------------------
+;마력확산형함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 저주의 마법진에 닿았다! 
+
+Z = RAND:2
+
+IF Z > 0
+	SIF FLAG:5 & 32
+		PRINTL 용자는 저주에 저항했다
+	RETURN 1
+ENDIF
+
+SIF FLAG:5 & 32
+	PRINTFORML 마력의 소용돌이가 작렬한다! 
+
+IF CFLAG:A:503 & 2
+	SIF FLAG:5 & 32
+		PRINTFORML 이미 저주에 걸린듯 하다
+ELSE
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 저주받았다…
+	CFLAG:A:503 += 2
+ENDIF
+
+IF FLAG:85 > 0
+	SIF FLAG:5 & 32
+		PRINTFORML 마력의 소용돌이가 %SAVESTR:A%의 정신을 침식했다（기력-{FLAG:85 * 10}）
+	BASE:A:1 -= FLAG:85 * 10
+ENDIF
+
+RETURN 0
+
+;------------------------------
+@OIL_TRAP
+;------------------------------
+;기름단지형함정
+
+SIF FLAG:5 & 32
+	PRINTL 기름단지 함정이다! 
+
+Z = RAND:100
+
+IF Z < 30
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 순간적으로 굴러 회피했다…
+	RETURN 1
+ELSE
+	Z += FLAG:85 * 10
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 기름을 정면으로 뒤집어쓰고 기력에 {Z}의 데미지를 입었다! 
+	BASE:A:1 -= Z
+	IF CFLAG:A:503 & 8
+		SIF FLAG:5 & 32
+			PRINTFORML 미끌미끌하다…
+	ELSE
+		CFLAG:A:503 += 8
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;------------------------------
+@FIRE_TRAP
+#DIM DICE
+;------------------------------
+;화염방사형함정
+
+SIF FLAG:5 & 32
+	PRINTL 화염방사 함정이다! 
+
+DICE = RAND:200
+
+IF DICE < 100
+	SIF FLAG:5 & 32
+		PRINTFORML %조사선택(SAVESTR:A, "는")% 순간적으로 몸을 낮춰 불을 회피했다…
+	RETURN 1
+ELSE
+	DICE += FLAG:85 * 10
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:A%에게 {DICE}의 데미지! 
+	BASE:A:0 -= DICE
+	IF CFLAG:A:503 & 8
+		SIF FLAG:5 & 32
+			PRINTFORML 몸에 뒤덮힌 기름으로 인해 불이 붙어 추가 데미지! （{30 + FLAG:85 * 5}）
+		BASE:A:0 -= 30 + FLAG:85 * 5
+	ENDIF
+ENDIF
+
+
+
+RETURN 0
+
+;------------------------------
+@A_WORM_TRAP
+#DIM DICE
+;------------------------------
+;애널웜의함정
+
+SIF FLAG:5 & 32
+	PRINTL 애널윔의 함정이다! 
+
+DICE  = RAND:100
+
+;ヌルヌル状態で威力アップ
+SIF GETBIT(CFLAG:A:503, 3)
+	TIMES DICE, 1.30
+
+IF DICE < 35
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:A%은 애널웜을 알아차리고, 일격으로 죽였다
+	RETURN 1
+ENDIF
+
+SIF GETBIT(CFLAG:A:503, 3) && FLAG:5 & 32
+	PRINTFORM 매끄럽게 애널 안으로 들어왔다! 
+
+DICE += FLAG:85 * 7 + 30
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%의 애널에 애널윔이 먹혀 들어가 기력에 {DICE}의 데미지! 
+BASE:A:1 -= DICE
+
+;A経験が多いと, 中に入られてしまう
+IF TALENT:A:A웜 == 0 && EXP:A:1 > 30
+	SETCOLORBYNAME LightSalmon
+	SIF FLAG:5 & 32
+		PRINTFORML %SAVESTR:A%의 장속에서 애널웜이 꿈틀거리고 있다……
+	RESETCOLOR
+	TALENT:A:193 = 1
+ELSEIF TALENT:A:A웜
+	PLAYER = 0
+	TARGET = A
+	;アナルワーム自動調教
+	CALL BEFORE_AUTOTRAIN
+	CALL COM13_AUTO
+	CALL SOURCE_CHECK_AUTO
+ENDIF
+
+EXP:A:1 += 1
+SIF FLAG:5 & 32
+	PRINTFORML Ａ경험+1
+
+RETURN 0
+
+;------------------------------
+@LOVE_BUG_TRAP
+#DIM DICE
+;------------------------------
+;음충의함정
+
+IF CFLAG:A:503 & 64
+	SIF FLAG:5 & 32
+		PRINTFORM 추락하는 곳은 음충의 둥지다! （기력-10） 
+	BASE:A:1 -= 10
+ELSE
+	SIF FLAG:5 & 32
+		PRINT 음충의 둥지에 발을 디뎌버렸다!  
+ENDIF
+
+DICE = RAND:100
+
+IF TALENT:A:314 == 6
+	;천사
+	SIF FLAG:5 & 32
+		PRINTFORM 천사인 %SAVESTR:A%는 공중으로 날아 지면의 둥지를 회피했다… 
+	RETURN 1
+ELSEIF TALENT:A:314 == 8
+	;堕天使
+	SIF FLAG:5 & 32
+		PRINTFORM 타천사인 %SAVESTR:A%는 공중으로 날아 지면의 둥지를 회피했다… 
+	RETURN 1
+ENDIF
+
+IF DICE < 5
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%은 달려서 도망쳤다 
+	RETURN 1
+ELSEIF DICE >= 80
+	DICE = RAND:40 + FLAG:85 * 3 + 1
+	DICE *= 2
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%는 추락할때 다리가 꺾여버렸다! {DICE}의 데미지!  
+ELSE
+	DICE = RAND:40 + FLAG:85 * 3 + 1
+	SIF FLAG:5 & 32
+		PRINTFORM %SAVESTR:A%에게 {DICE}의 데미지! 
+ENDIF
+BASE:A:0 -= DICE
+
+SIF FLAG:5 & 32
+	PRINTL  
+
+PLAYER = 0
+TARGET = A
+;愛撫自動調教
+CALL BEFORE_AUTOTRAIN
+CALL COM0_AUTO
+CALL SOURCE_CHECK_AUTO
+
+IF TALENT:A:10 == 1
+	SIF FLAG:5 & 32
+		PRINTFORML 겁쟁이인 %SAVESTR:A%는 죽을정도로 놀라버렸다…（기력-10） 
+	BASE:A:1 -= 10
+ENDIF
+
+RETURN 0
+
+;------------------------------
+@DARK_JUEL_TRAP
+#DIM DICE
+;------------------------------
+;보석의함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%는 비싼 보석을 줍게 되었다……
+
+DICE = RAND:5 * 50
+
+;カルマが高いと誘惑に打ち勝つ判定
+SIF CFLAG:A:151 > 150 && RAND:4 == 0
+	DICE = 0
+
+IF DICE == 0
+	SIF FLAG:5 & 32
+		PRINTL 용자는 유혹을 이긴 것 같다
+	RETURN 1
+ENDIF
+
+DICE += FLAG:85 * 10
+DICE = DICE * (99 + POWER(CFLAG:A:501, 3)) / 100
+
+;好奇心ボーナス
+SIF TALENT:A:호기심
+	DICE += 5
+;金のためボーナス
+SIF TALENT:A:용자가된동기 == 2
+	DICE += 10
+;ホビットボーナス
+SIF TALENT:A:종족 == 10
+	DICE += 15
+;ドワーフボーナス
+SIF TALENT:A:종족 == 11
+	DICE += 15
+;盗賊は収入が多い（1.2倍）
+SIF TALENT:A:도적
+	DICE += DICE / 5
+
+SIF FLAG:5 & 32
+	PRINTFORML 총 {DICE}개의 가치가 있는 보석이 용사의 호주머니 속으로 들어갔다……
+
+CFLAG:A:581 += DICE
+
+JUEL:A:6 += 5
+SIF FLAG:5 & 32
+	PRINTFORML 굴복의 구슬+5
+
+;そしてカルマが下がる
+CALL KARMA, A, -1
+
+RETURN 0
+
+;------------------------------
+@DEF_DOWN_TRAP
+#DIM DICE
+;------------------------------
+;공격진지함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%에게 효과적으로 공격을 할수 있는 진을 쳤다……
+
+DICE = RAND:(FLAG:85 + 1) + RAND:20 + 1
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%의 방어력이 {DICE}％ 약화 되었다……
+
+CFLAG:A:680 += DICE
+
+RETURN 0
+
+;------------------------------
+@ATK_DOWN_TRAP
+#DIM DICE
+;------------------------------
+;방어진지함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%에게 효과적으로 방어를 할 수 있는 진을 쳤다……
+
+DICE = RAND:(FLAG:85 + 1) + RAND:20 + 1
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%의 공격력이 {DICE}％ 약화 되었다……
+
+CFLAG:A:681 += DICE
+
+RETURN 0
+
+;------------------------------
+@MAG_DOWN_TRAP
+#DIM DICE
+;------------------------------
+;마법진지함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%에게 효과적으로 마법 공격을 할 수 있는 진을 쳤다……
+
+DICE = RAND:(FLAG:85 + 1) + RAND:20 + 1
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%에게 줄 수있는 마법 데미지가 {DICE}％ 강화 되었다……
+
+CFLAG:A:682 += DICE
+
+RETURN 0
+
+;------------------------------
+@ALL_DOWN_TRAP
+#DIM DICE
+;------------------------------
+;팔함정
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%에게 새하얀 팔이 휘감겨,  저주를 걸었다……
+
+DICE = (RAND:(FLAG:85 + 1) + RAND:20) / 2 + 1
+
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:A%느 {DICE}％ 약화 되었다……
+
+CFLAG:A:680 += DICE
+CFLAG:A:681 += DICE
+CFLAG:A:682 += DICE
+
+RETURN 0
+
+;-------------------------------------------
+@SLAVE_TRAP_SET
+;-------------------------------------------
+;요격 중에 함정을 보충하다
+
+;보충행동과
+SIF CFLAG:A:500 != 2
+	RETURN 0
+
+LOCAL = CFLAG:A:501 + 299
+	
+$TRAP_LOOP_2
+	
+LOCAL:1 = FLAG:LOCAL
+
+IF LOCAL:1 > 0
+	
+	;보충
+	SIF ITEM:(LOCAL:1) > 0 && ITEM:(LOCAL:1) < 99
+		ITEM:(LOCAL:1) += 1
+	;余りを換金
+	IF ITEM:(LOCAL:1) >= 99
+		P = LOCAL:1
+		CALL TRAP_PRICE
+		MONEY += RESULT
+		SIF FLAG:5 & 32
+			PRINTFORML 함정의 나머지를 매각하고 {RESULT}의 수익을 얻었다
+	ENDIF
+ENDIF
+
+LOCAL += 10
+
+SIF LOCAL < 330
+	GOTO TRAP_LOOP_2
+
+RETURN 0
+
+;---------------------------------------------
+@TRAP_PRICE
+;---------------------------------------------
+;함정의 값을 RETURN에서 반환하는 함수
+;인수 값은P
+
+SIF P == 60
+	RETURN 10
+SIF P == 61
+	RETURN 50
+SIF P == 62
+	RETURN 80
+SIF P == 63
+	RETURN 100
+SIF P == 64
+	RETURN 120
+SIF P == 65
+	RETURN 150
+SIF P == 66
+	RETURN 170
+SIF P == 67
+	RETURN 180
+SIF P == 68
+	RETURN 190
+SIF P == 69
+	RETURN 1000
+SIF P == 70
+	RETURN 180
+SIF P == 71
+	RETURN 90
+SIF P == 72
+	RETURN 10
+SIF P == 73
+	RETURN 70
+SIF P == 74
+	RETURN 200
+SIF P == 75
+	RETURN 180
+SIF P == 76
+	RETURN 300
+SIF P == 77
+	RETURN 50
+SIF P == 78
+	RETURN 110
+SIF P == 79
+	RETURN 80
+SIF P == 80
+	RETURN 60
+SIF P == 81
+	RETURN 20
+SIF P == 82
+	RETURN 40
+SIF P == 83
+	RETURN 40
+SIF P == 84
+	RETURN 40
+SIF P == 85
+	RETURN 100
+
+RETURN 100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,5937 @@
+﻿;=================================================
+;eramaou専用口上テンプレート
+;=================================================
+;まずX1とX2をキャラ番号に置換し、Y1を助手のキャラ番号に置換してください
+;ただし、キャラ番号が一桁のキャラの場合、X1,Y1は1、X2は01のように変える必要があります
+;コマンド内の各条件の下にあるPRINTFORMWの後ろに、半角スペースを置いてセリフを追加してください。
+;口上を追加しないコマンドには行頭に『;』をつけたほうが、
+;予期せぬ不具合などが起こるのをある程度防げるかもしれません
+;最後になりますが、read meもできるかぎり読んで下さい
+;eratohoU専用口上テンプレートを改造して流用
+;erapoke専用口上テンプレート（簡略版）をさらに改造
+;【음란】追加
+;CFLAG:372以降に着脱フラグ
+;꿀단지웜 CFLAG:312　CFLAG:372
+;애널웜 CFLAG:314　CFLAG:374
+;클리캡 CFLAG:315　CFLAG:375
+;ニプルキャップ CFLAG:316　CFLAG:376
+;착유기(母乳体質のみ) CFLAG:317　CFLAG:377
+;오나홀(후타나리/オトコのみ) CFLAG:318　CFLAG:378
+;애널비즈 CFLAG:320　CFLAG:379
+;아이마스크 CFLAG:344　CFLAG:380
+;밧줄 CFLAG:345　CFLAG:385
+;볼개그 CFLAG:346　CFLAG:386
+;피어싱　CFLAG:348
+;-------------------------------------------------
+
+;-------------------------------------------------
+;貴公子口上（キャラクターの名前を入れる）
+;（コンセプトなどがあればここに書いておくと、加筆する際の目安になるでしょう）
+;オトコ口上。ショタっ子～若者くらいのイメージ
+;育ちがよく、礼儀正しい
+;愛だと、忠実な僕となり執事っぽくなる
+;手探りなので加筆修正歓迎
+;-------------------------------------------------
+
+;--------------------------------------------------
+;口上ファイルの存在判定（X2をキャラ番号に置換）
+;--------------------------------------------------
+@EVENTTRAIN
+#PRI
+FLAG:114 = 1
+SIF FLAG:7 == 0
+	FLAG:7 = 2
+
+@EVENTEND
+#LATER
+FLAG:114 = 0
+
+;--------------------------------------------------
+;EVENTTRAIN関係（X1をキャラ番号に置換）
+;調教開始時のセリフ CFLAG 201～219を使用
+;-------------------------------------------------
+@EVENTTRAIN
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF TALENT:174 != 1
+	RETURN 0
+
+;-------------------------------------------------
+;初調教時 CFLAG:201
+;-------------------------------------------------
+IF CFLAG:201 == 0
+	DRAWLINE
+	;남자마족
+	IF TALENT:TARGET:122 && TALENT:TARGET:314 == 9
+		PRINTFORMW 度重なる改造の末、%SAVESTR:TARGET%は魔族として転生した。
+		PRINTFORMW %NAME:MASTER%が様子を見に向かうと、思いつめた表情で自身について悩んでいたようだった。
+		PRINTFORMW （この形容しがたい感覚…こ、これは…闇の魔力…なのか？）
+		PRINTFORMW 「あっ…ま、魔王さま…っ！？……ま、魔王め！%SELF_CALL(TARGET)%は、당신…いや、お前には、決して…！」
+		PRINTFORMW 魔族になった%SAVESTR:TARGET%は、魔族に転生させられた憎しみを訴えようとしている。
+		PRINTFORMW しかし魔族の王であるあなたへの忠誠が深く刻み込まれ、抗ってはいけないと感じているようだ………
+	CFLAG:201 = 1
+	;魔族スイッチ１
+	CFLAG:370 = 1
+	
+	;魔族
+	ELSEIF TALENT:TARGET:314 == 9
+		PRINTFORMW %SAVESTR:TARGET%は度重なる改造の過程で女性にされ、その後魔族として転生した。
+		PRINTFORMW %NAME:MASTER%が様子を見に向かうと、思いつめた表情で自身について悩んでいたようだった。
+		PRINTFORMW （この心地良い感覚…それに何だか…身体が、疼いて…%UNICODE(0x2661) *1%）
+		PRINTFORMW 「…魔王の魔力のせいなのか…？それとも…」
+		PRINTFORMW 「あっ…ま、魔王さま…っ！？……ま、魔王め！%SELF_CALL(TARGET)%は、あなたに…っ！？いや、お前には、決して…！」
+		PRINTFORMW 魔族になった%SAVESTR:TARGET%は、全く異質のモノへ転生させられた憎しみを訴えようとしている。
+		PRINTFORMW しかし魔族の王であるあなたへの忠誠と従うことへの悦びが、抗う意思よりも勝っているようだ………
+	CFLAG:201 = 1
+	;魔族スイッチ１
+	CFLAG:370 = 1
+	
+	;通常
+	ELSEIF TALENT:TARGET:122
+		PRINTFORMW 「네 놈、마왕！　%SELF_CALL(TARGET)%는 결코、네녀석에게 굴하지 않겠다……」
+		PRINTFORMW 분노에 떨리는 눈의 안쪽에는、약간 두려움이 엿보였다……
+	CFLAG:201 = 1
+	
+	;性転換した
+	ELSE
+		PRINTFORMW %NAME:MASTER%の戯れで、%SAVESTR:TARGET%は女性の肉体へと改造された。
+		PRINTFORMW 「魔王め！　%SELF_CALL(TARGET)%を元の姿に戻せっ！」
+		PRINTFORMW %NAME:MASTER%が部屋に向かうと、こちらを睨みながら大声で抗議してきた。
+		PRINTFORMW 「%SELF_CALL(TARGET)%は男だ！女なんかじゃない！おい、聞いているのか！」
+		PRINTFORMW そう言って喚く%SAVESTR:TARGET%を、%NAME:MASTER%はベッドに押し倒した。
+		PRINTFORMW 彼、いや彼女が今まで体験したことのない快楽と服従を心と体に刻み込んでやろう……
+	CFLAG:201 = 1
+	RETURN 1
+	ENDIF
+;-------------------------------------------------
+;魔族化（１回のみ）初回調教後魔族化、陥落前 CFLAG:370
+;-------------------------------------------------
+ELSEIF CFLAG:201 < 5 && CFLAG:370 == 0 && TALENT:TARGET:314 == 9 && TALENT:TARGET:85 == 0 && TALENT:TARGET:76 == 0
+	PRINTFORMW 度重なる改造で完全に魔族となった%SAVESTR:TARGET%は自分の姿に絶望している…
+	PRINTFORMW 部屋に来たあなたに気がつくと、少し戸惑いつつもあなたを睨み付けた。
+	PRINTFORMW 「くそっ…魔王め！　%SELF_CALL(TARGET)%を、元に戻せ…！」
+	PRINTFORMW 魔族になった%SELF_CALL(TARGET)%は、魔族の王であるあなたに従わなければならないことを本能で感じ始めている………
+	;魔族スイッチ２
+	CFLAG:370 = 2
+	RETURN 1
+;-------------------------------------------------
+;NTR再捕獲 CFLAG:650～660
+;-------------------------------------------------
+ELSEIF CFLAG:201 >= 1 && CFLAG:650 == 1
+	IF TALENT:85 || TALENT:76
+		;애정・음란
+		DRAWLINE
+		PRINTFORMW 「미안해、%SELF_CALL(TARGET)% 하지만……유혹되면、패배해버린다고」
+		;NTRスイッチ解除
+		CFLAG:650 = 0
+	ELSE
+		DRAWLINE
+		PRINTFORMW 「큭……또 너인가……」
+		;NTRスイッチ解除
+		CFLAG:650 = 0
+	ENDIF
+	RETURN 1
+;-------------------------------------------------
+;굴복각인（各Lv一回のみ） CFLAG:201
+;-------------------------------------------------
+;屈服刻印Lv1
+ELSEIF CFLAG:201 < 2 && MARK:2 == 1
+	DRAWLINE
+	PRINTFORMW 「마왕녀석……%SELF_CALL(TARGET)%는、지지않아……」
+	CFLAG:201 = 2
+	RETURN 1
+
+;屈服刻印Lv2
+ELSEIF CFLAG:201 < 3 && MARK:2 == 2
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「큭……오늘도 하는건가……」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「こ、この快楽は…凄い…しかし…」
+	ENDIF
+	CFLAG:201 = 3
+	RETURN 1
+
+;屈服刻印Lv3
+ELSEIF CFLAG:201 < 4 && MARK:2 == 3 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「미안……모두들……%SELF_CALL(TARGET)%는 더는……」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「この快楽…もう…%SELF_CALL(TARGET)%は、男に戻れない…」
+	ENDIF
+	CFLAG:201 = 4
+	RETURN 1
+
+;음란
+ELSEIF CFLAG:201 < 5 && TALENT:TARGET:76 == 1 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	;通常
+	IF TALENT:TARGET:122
+		PRINTFORMW 「마왕니임、%SELF_CALL(TARGET)%、계속 기다렸어요오」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「마왕니임、%SELF_CALL(TARGET)%、계속 기다렸어요오」
+	ENDIF
+	CFLAG:201 = 5
+	RETURN 1
+
+;음란+魔族化
+;ELSEIF TALENT:TARGET:314 == 9 && CFLAG:201 < 6 && TALENT:TARGET:85 == 0 && TALENT:TARGET:76 == 1
+;	DRAWLINE
+;	IF TALENT:TARGET:122
+;		;調教前から魔族
+;		IF CFLAG:370 == 1
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			CFLAG:201 = 6
+;			RETURN 1
+;		;調教後に魔族
+;		ELSEIF CFLAG:370 == 2
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			CFLAG:201 = 6
+;			RETURN 1
+;		;陥落後に魔族化
+;		ELSE
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			CFLAG:201 = 6
+;			RETURN 1
+;		ENDIF
+;	ELSE
+;		;調教前から魔族
+;		IF CFLAG:370 == 1
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			CFLAG:201 = 6
+;			RETURN 1
+;		;調教後に魔族
+;		ELSEIF CFLAG:370 == 2
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			CFLAG:201 = 6
+;			RETURN 1
+;		;陥落後に魔族化
+;		ELSE
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			PRINTFORMW 
+;			CFLAG:201 = 6
+;			RETURN 1
+;		ENDIF
+;	ENDIF
+
+;애정
+ELSEIF CFLAG:201 < 6 && TALENT:TARGET:85 == 1
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「魔王、様…%SELF_CALL(TARGET)%は…もう抵抗したりしない。…だから」
+		PRINTFORMW 「%SELF_CALL(TARGET)%、魔王様のお役に立ちたい…尊敬する魔王様を、傍で支えたいんだ…ダメかな？」
+		PRINTFORMW %SAVESTR:TARGET%の願いを聞いたあなたはそれを聞き入れ、それならば今後も奉仕し続けてもらうと伝えた
+		PRINTFORMW 「네…魔王様の仰せのままに」
+		PRINTFORMW 既に勃起している%SAVESTR:TARGET%のペニスを撫でまわしながら、あなたは歪んだ笑みを浮かべた…
+	;性転換済み
+	ELSE
+		PRINTFORMW 「魔王、様…%SELF_CALL(TARGET)%は…もう抵抗したりしないよ。…だから」
+		PRINTFORMW 「%SELF_CALL(TARGET)%、魔王様のお役に立ちたい…尊敬する魔王様の為なら、どんなことでもする！」
+		PRINTFORMW 「こ、この身体だって好きにして…あ、でも…%SELF_CALL(TARGET)%みたいな元男の女じゃ…ダメ？」
+		PRINTFORMW %SAVESTR:TARGET%の願いを聞いたあなたはそれを聞き入れ、それならば今後も奉仕し続けてもらうと伝えた…
+		PRINTFORMW 「네…魔王様の仰せのままに%UNICODE(0x2661) *1%」
+		SIF TALENT:TARGET:0 == 1
+			PRINTFORMW 「%SAVESTR:TARGET%の『初めて』は、ちゃんと魔王様の為にとってありますから…ね%UNICODE(0x2661) *1%」
+		PRINTFORMW 心なしか嬉しそうな%SAVESTR:TARGET%の雌の身体を愛撫しながら、あなたは歪んだ笑みを浮かべた…
+	ENDIF
+	CFLAG:201 = 6
+	RETURN 1
+
+;애정+魔族化
+ELSEIF TALENT:TARGET:314 == 9 && CFLAG:201 < 8 && TALENT:TARGET:85 == 1 && TALENT:TARGET:76 == 0
+	DRAWLINE
+	IF TALENT:TARGET:122
+		;調教前から魔族
+		IF CFLAG:370 == 1
+			PRINTFORMW 「あぁ…魔王様…%SELF_CALL(TARGET)%を魔族にしたのは、この為だったのですね…」
+			PRINTFORMW あなたが部屋に入ると、%SAVESTR:TARGET%は穏やかな表情で跪いてあなたを迎えた。
+			PRINTFORMW 「偉大なる魔王様…%SELF_CALL(TARGET)%は、魔の全てを受け容れます…そして、いつまでも…貴方の傍に」
+			PRINTFORMW 「何なりとご命令を…%SAVESTR:TARGET%の全ては、魔王様の望むがままに…」
+			SIF TALENT:TARGET:77 == 1
+				PRINTFORMW 「%SAVESTR:TARGET%の開発済みアナルも、魔王様の好きなように使って下さい%UNICODE(0x2661) *1%」
+			PRINTFORMW 少し前まであなたを討とうとしていた男勇者は、あなたに忠誠を誓う魔族として生まれ変わった。
+			PRINTFORMW あなたは歪んだ笑みを浮かべながら、%SAVESTR:TARGET%の身体を抱き寄せた…
+			CFLAG:201 = 8
+			RETURN 1
+		;調教後に魔族
+		ELSEIF CFLAG:370 == 2
+			PRINTFORMW 「あ…ま、魔王様…%SELF_CALL_FIRST(TARGET)%、%SELF_CALL(TARGET)%は…」
+			PRINTFORMW あなたが部屋に入ると、%SAVESTR:TARGET%は少し戸惑った様子だったが、跪いてあなたを迎えた。
+			PRINTFORMW 「偉大なる魔王様…%SELF_CALL(TARGET)%はもう迷いません…魔の全てを受け容れ、貴方にどこまでもついてゆきます」
+			PRINTFORMW 「だから…%SELF_CALL_FIRST(TARGET)%、%SELF_CALL(TARGET)%を…もっと、もっと愛して…！」
+			SIF TALENT:TARGET:77 == 1
+				PRINTFORMW 「%SAVESTR:TARGET%の開発済みアナルも、魔王様にもっと使ってもらいたい…！」
+			PRINTFORMW あなたは、泣きそうな顔をしている%SAVESTR:TARGET%を抱きしめながら宥めた。
+			PRINTFORMW 調教の結果、%SAVESTR:TARGET%はあなたに対して愛情を感じているようだ…
+			CFLAG:201 = 8
+			RETURN 1
+		;陥落後に魔族
+		ELSE
+			PRINTFORMW 「あぁ…魔王様…%SELF_CALL(TARGET)%を魔族に改造して頂き、ありがとうございます」
+			PRINTFORMW あなたが部屋に入ると、%SAVESTR:TARGET%は穏やかな表情で跪いてあなたを迎えた。
+			PRINTFORMW 「これで%SELF_CALL(TARGET)%も、貴方と同じ魔族なんですね…♪」
+			PRINTFORMW %SAVESTR:TARGET%は魔族となった身体を確かめながら、再度跪いた。
+			PRINTFORMW 「…これからも魔王様の僕、%SAVESTR:TARGET%に何なりとご命令を…」
+			SIF TALENT:TARGET:77 == 1
+				PRINTFORMW 「%SAVESTR:TARGET%の開発済みアナルも、魔王様の好きなように使って下さい%UNICODE(0x2661) *1%」
+			CFLAG:201 = 8
+			RETURN 1
+		ENDIF
+	ELSE
+		;調教前から魔族
+		IF CFLAG:370 == 1
+			PRINTFORMW 「あぁ…魔王様…%SELF_CALL(TARGET)%を魔族にしたのは、この為だったのですね…」
+			PRINTFORMW あなたが部屋に入ると、%SAVESTR:TARGET%は穏やかな表情で跪いてあなたを迎えた。
+			PRINTFORMW 「偉大なる魔王様…%SELF_CALL(TARGET)%は、闇の全てを受け容れます…そして、いつまでも…貴方の傍に」
+			PRINTFORMW 「何なりとご命令を…%SAVESTR:TARGET%の全ては、魔王様の望むがままに…」
+			SIF TALENT:TARGET:0 == 1
+				PRINTFORMW 「%SAVESTR:TARGET%の『初めて』だって、魔王様に捧げたくてたまらないんです…%UNICODE(0x2661) *1%」
+			PRINTFORMW あなたの目の前でうっとりとした表情で跪く女性が、少し前まであなたに刃を向けようとしていた男勇者とは誰も思わないだろう。
+			PRINTFORMW あなたは歪んだ笑みを浮かべながら、%SAVESTR:TARGET%の身体を抱き寄せた…
+			CFLAG:201 = 8
+			RETURN 1
+		;調教後に魔族
+		ELSEIF CFLAG:370 == 2
+			PRINTFORMW 「あ…ま、魔王様…%SELF_CALL_FIRST(TARGET)%、%SELF_CALL(TARGET)%は…」
+			PRINTFORMW あなたが部屋に入ると、%SAVESTR:TARGET%は少し戸惑った様子だったが、跪いてあなたを迎えた。
+			PRINTFORMW 「偉大なる魔王様…%SELF_CALL(TARGET)%はもう迷いません…闇の全てを受け容れ、貴方にどこまでもついてゆきます」
+			PRINTFORMW 「だから…%SELF_CALL_FIRST(TARGET)%、%SELF_CALL(TARGET)%を…もっと、もっと愛して…！」
+			SIF TALENT:TARGET:0 == 1
+				PRINTFORMW 「%SAVESTR:TARGET%の『初めて』は、魔王様じゃないとイヤなんです…！」
+			PRINTFORMW あなたは、泣きそうな顔をしている%SAVESTR:TARGET%を抱きしめながら宥めた。
+			PRINTFORMW 調教の結果、%SAVESTR:TARGET%はあなたに対して愛情を感じているようだ…
+			CFLAG:201 = 8
+			RETURN 1
+		;陥落後に魔族
+		ELSE
+			PRINTFORMW 「あぁ…魔王様…%SELF_CALL(TARGET)%を魔族に改造して頂き、ありがとうございます」
+			PRINTFORMW あなたが部屋に入ると、%SAVESTR:TARGET%は穏やかな表情で跪いてあなたを迎えた。
+			PRINTFORMW 「これで%SELF_CALL(TARGET)%も、貴方と同じ魔族なんですね…♪」
+			PRINTFORMW %SAVESTR:TARGET%は魔族となった身体を確かめながら、再度跪いた。
+			PRINTFORMW 「…これからも魔王様の僕、%SAVESTR:TARGET%に何なりとご命令を…」
+			SIF TALENT:TARGET:0 == 1
+				PRINTFORMW 「%SAVESTR:TARGET%の『初めて』は、魔王様の為にとってありますから…%UNICODE(0x2661) *1%」
+			CFLAG:201 = 8
+			RETURN 1
+		ENDIF
+	ENDIF
+
+;붕괴
+;ELSEIF TALENT:TARGET:9 == 1 && CFLAG:201 < 9
+;	DRAWLINE
+;	PRINTFORMW 
+;	PRINTFORMW 
+;	PRINTFORMW 
+;	CFLAG:201 = 9
+;	RETURN 1
+
+;助手の有無をチェック（いない場合は二回目以降へ飛ぶ）
+ELSEIF ASSI < 0 
+	CALL K14_KOJO2
+	
+
+;-------------------------------------------------
+;簡易助手口上 CFLAG:202～210
+;Ynを調教対象X1との会話が発生する助手のキャラ番号に変更する
+;会話が発生する助手を2人以上に増やす場合は、
+;コピー＆ペーストをしてCFLAGの数を203、204と増やす（210が上限）
+;-------------------------------------------------
+;조수○○（○○にY1のキャラ名を入れる）
+;ELSEIF NO:ASSI == Y1
+;	DRAWLINE
+;	;初めて
+;	IF CFLAG:202 == 0
+;		;既に愛持ちで愛取得時初口上（陥落イベント）が発生済み
+;		IF TALENT:TARGET:85 == 1 && CFLAG:201 >= 5
+;			PRINTFORMW 
+;		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:202 = 1
+;		RETURN 1
+;	;二回目以降
+;	ELSE CFLAG:202 == 1 && FLAG:7 ==2
+;		;애정
+;		IF TALENT:TARGET:85 == 1
+;			PRINTFORMW 
+;		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		RETURN 1
+;	ENDIF
+;조수○○（○○にY2のキャラ名を入れる）
+;ELSEIF NO:ASSI == Y2
+;	DRAWLINE
+;	;初めて
+;	IF CFLAG:203 == 0
+;		;既に愛持ちで愛取得時初口上（陥落イベント）が発生済み
+;		IF TALENT:TARGET:85 == 1 && CFLAG:201 >= 5
+;			PRINTFORMW 
+;		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:203 = 1
+;		RETURN 1
+;	;二回目以降
+;	ELSE CFLAG:203 == 1 && FLAG:7 ==2
+;		;애정
+;		IF TALENT:TARGET:85 == 1
+;			PRINTFORMW 
+;		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		RETURN 1
+;	ENDIF
+;口上のある助手が居ない場合は、通常の二回目以降の口上へ飛ぶ
+ELSE
+	CALL K14_KOJO2
+ENDIF
+
+
+;-------------------------------------------------
+;調教開始時（2回目以降、X1をキャラ番号に変更する） CFLAGなし 
+;-------------------------------------------------
+@K14_KOJO2
+;反発刻印Lv3
+IF MARK:3 == 3 && FLAG:7 == 2
+	DRAWLINE
+	PRINTFORMW 「죽어、마왕녀석」
+	RETURN 1
+
+;屈服刻印Lv0
+ELSEIF MARK:2 == 0 && FLAG:7 == 2
+	DRAWLINE
+	PRINTFORMW 「그만둬、가까이오지마！」
+	RETURN 1
+
+;屈服刻印Lv1
+ELSEIF MARK:2 == 1 && FLAG:7 == 2
+	DRAWLINE
+	PRINTFORMW 「마왕녀석……%SELF_CALL(TARGET)%는、지지않아……」
+	RETURN 1
+
+;屈服刻印Lv2
+ELSEIF MARK:2 == 2 && FLAG:7 == 2
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「큭……오늘도 하는건가……」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「ぐっ……この快楽に負けては…でも…」
+	ENDIF
+	RETURN 1
+
+;屈服刻印Lv3＋애정/淫乱無し
+ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 0 && TALENT:TARGET:76 == 0 && FLAG:7 == 2
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「알겠다……하고싶은 대로 해도 좋아」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「もう…男には戻れないなら…ま、魔王様…%SELF_CALL(TARGET)%に、もっと快楽を…」
+	ENDIF
+	RETURN 1
+
+;음란
+ELSEIF TALENT:TARGET:76 == 1 && FLAG:7 == 2
+	DRAWLINE
+	;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+	IF RAND:3 == 0
+		PRINTFORMW 「마왕니임、%SELF_CALL(TARGET)%、계속 기다리고 있었어요오」
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 「마왕니임、오늘은 무엇을 하는거야？」
+	ELSE
+		PRINTFORMW 「기다리고 있었어요오♪」
+	ENDIF
+	RETURN 1
+
+;애정
+ELSEIF TALENT:TARGET:85 == 1 && FLAG:7 == 2
+	DRAWLINE
+	;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+	IF RAND:3 == 0
+		PRINTFORMW 「はい魔王様…仰せのままに」
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 「마왕님、좋아하는대로」
+	ELSE
+		PRINTFORMW 「마왕님、무엇을 해도 좋아요……」
+	ENDIF
+	RETURN 1
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;EVENTEND関係（X1をキャラ番号に置換） CFLAG 211～220を使用
+;調教終了時のセリフ
+;-------------------------------------------------
+@EVENTEND
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF TALENT:174 != 1
+	RETURN 0
+
+;キャラ死亡時は口上をスキップ
+SIF BASE:0 <= 0
+	RETURN 0
+
+;--------------------------------------------------
+;調教終了時のセリフ
+;--------------------------------------------------
+;反発刻印Lv3+愛なし
+IF MARK:3 == 3 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「……죽어」
+	RETURN 1
+
+;屈服刻印Lv1以下+愛なし
+ELSEIF MARK:2 <= 1 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「끝난거지……」
+	RETURN 1
+
+;屈服刻印Lv2+愛なし
+ELSEIF MARK:2 == 2 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「하아하아……끄、끝인가……」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「あぁ…この快楽、癖になりそうだ…っ！？%SELF_CALL(TARGET)%は、何を言って…」
+	ENDIF
+	RETURN 1
+
+;屈服刻印Lv3+愛なし
+ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	IF TALENT:TARGET:122
+		PRINTFORMW 「이제、용서해주세요……」
+	;性転換済み
+	ELSE
+		PRINTFORMW 「…あぁ…す、凄かった…」
+	ENDIF
+	RETURN 1
+
+;음란(体力500以上)
+ELSEIF TALENT:TARGET:76 == 1 && BASE:0 >= 500
+	DRAWLINE
+	;魔族
+	IF TALENT:TARGET:314 == 9
+		PRINTFORMW 「벌써 끝？　마왕니임、그럴 수는 없어~」
+	ELSE
+		PRINTFORMW 「벌써 끝？　마왕니임、그럴 수는 없어~」
+	ENDIF
+	RETURN 1
+;음란(体力500未満)
+ELSEIF TALENT:TARGET:76 == 1 && BASE:0 <= 500
+	DRAWLINE
+	IF TALENT:TARGET:314 == 9
+		PRINTFORMW 「%SELF_CALL(TARGET)%、대만족이야……」
+	ELSE
+		PRINTFORMW 「%SELF_CALL(TARGET)%、대만족이야……」
+	ENDIF
+	RETURN 1
+
+;애정(体力500以上)
+ELSEIF TALENT:TARGET:85 == 1 && BASE:0 >= 500
+	DRAWLINE	
+	IF TALENT:TARGET:314 == 9 && TALENT:TARGET:122 == 1
+		PRINTFORMW 「마지막이네、알겠어」
+	ELSEIF TALENT:TARGET:122 == 1
+		PRINTFORMW 「마지막이네、알겠어」
+	ELSEIF TALENT:TARGET:314 == 9
+		PRINTFORMW 「終わりなの？もっと愛し合いたいのに…」
+	ELSE
+		PRINTFORMW 「もう終わりにするの？もっと愛してほしいよ…」
+	ENDIF
+	RETURN 1
+;애정(体力500未満)
+ELSEIF TALENT:TARGET:85 == 1 && BASE:0 <= 500
+	DRAWLINE
+	IF TALENT:TARGET:314 == 9 && TALENT:TARGET:122 == 1
+		PRINTFORMW 「오늘은、지쳤어……고마워」
+	ELSEIF TALENT:TARGET:122 == 1
+		PRINTFORMW 「오늘은、지쳤어……고마워」
+	ELSEIF TALENT:TARGET:314 == 9
+		PRINTFORMW 「あぁ…こんなに愛してくれてありがとう…また明日も、ね%UNICODE(0x2661) *1%」
+	ELSE
+		PRINTFORMW 「今日もありがとう、でもちょっと疲れたね…だから休ませて……起きたらまた、愛してね」
+	ENDIF
+	RETURN 1
+ENDIF
+RETURN 0
+
+;--------------------------------------------------
+;@KOJO_MESSAGE_COM関係（X1をキャラ番号に置換）
+;コマンド実行時に出力されます
+;--------------------------------------------------
+@KOJO_MESSAGE_COM_14
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI > 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には口上をスキップする
+SIF TEQUIP:45 && SELECTCOM != 45
+	RETURN 0
+;失神時には口上をスキップする
+SIF TFLAG:899
+	RETURN 0
+;獣姦プレイ中は専用口上
+IF TEQUIP:89
+	CALL DOG_KOJO_14
+	RETURN 0
+ENDIF
+;コロシアム中は専用口上
+IF TEQUIP:55
+	CALL COLOSSEUM_KOJO_14
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;コマンド実行時のセリフ CFLAG 301～400を使用
+;-------------------------------------------------
+;-------------------------------------------------
+;애무 CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;初めて
+	IF CFLAG:301 == 0
+		;屈服刻印Lv2以上
+		IF MARK:2 >= 2
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:301 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:301 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:301 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 5
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:301 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 4
+		;屈服刻印Lv2
+		ELSEIF MARK:2 == 2 && (CFLAG:301 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 3
+		;それ以外
+		ELSEIF MARK:2 <= 1 && (CFLAG:301 <= 1 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;커널링구스 CFLAG:302
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 1
+	;初めて
+	IF CFLAG:302 == 0
+		;처녀
+		IF TALENT:TARGET:0 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:302 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:302 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:302 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:302 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 3
+		;それ以外（屈服刻印Lv3未満）
+		ELSEIF CFLAG:302 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:302 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널애무 CFLAG:303
+;-------------------------------------------------
+IF SELECTCOM == 2
+	;初めて
+	IF CFLAG:303 == 0
+		PRINTFORMW 
+		CFLAG:TARGET:303 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		P = PALAM:3 + UP:3
+		;음란+潤滑Lv2以上
+		IF TALENT:TARGET:76 == 1 && P >= PALAMLV:2 && (CFLAG:303 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:303 = 7
+		;음란+潤滑Lv2未満
+		ELSEIF TALENT:TARGET:76 == 1 && P < PALAMLV:2 && (CFLAG:303 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:303 = 6
+		;애정+潤滑Lv2以上
+		ELSEIF TALENT:TARGET:85 == 1 && P >= PALAMLV:2 && (CFLAG:303 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:303 = 5
+		;애정+潤滑Lv2未満
+		ELSEIF TALENT:TARGET:85 == 1 && P < PALAMLV:2 && (CFLAG:303 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:303 = 4
+		;潤滑Lv2以上＋A感覚Lv3以上
+		ELSEIF P >= PALAMLV:2 && ABL:3 >= 3 && (CFLAG:303 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:303 = 3
+		;それ以外（愛無し、潤滑Lv2未満、A感覚Lv3未満）
+		ELSEIF CFLAG:223 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:303 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;자위 CFLAG304
+;-------------------------------------------------
+IF SELECTCOM == 3
+	;初めて
+	IF CFLAG:304 == 0
+			PRINTFORMW 
+		CFLAG:TARGET:304 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋처녀
+		IF TALENT:TARGET:76 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:304 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:304 = 9
+		;음란＋自慰中毒Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:31 >= 3 && (CFLAG:304 <= 7 || FLAG:7 == 2)
+			;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 8
+		;음란＋自慰中毒Lv3未満
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:31 < 3 && (CFLAG:304 <= 6 || FLAG:7 == 2)
+			;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 7
+		;애정＋처녀
+		ELSEIF TALENT:TARGET:85 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:304 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:304 = 6
+		;애정＋自慰中毒Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:31 >= 3 && (CFLAG:304 <= 4 || FLAG:7 == 2)
+			;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 5
+		;애정＋自慰中毒Lv3未満
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:31 < 3 && (CFLAG:304 <= 3 || FLAG:7 == 2)
+			;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 4
+		;屈服刻印Lv3+自慰中毒Lv1以上
+		ELSEIF MARK:2 == 3 &&ABL:31 >= 1 && (CFLAG:304 <= 2 || FLAG:7 == 2)
+			;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 3
+		;それ以外（愛無し、自慰中毒Lv1未満）
+		ELSEIF CFLAG:304 <= 1 || FLAG:7 == 2
+			;ランダムで口上が変化する（使わない場合はすべて同じにすればよい）
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:304 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;가슴애무 CFLAG:306
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 5
+	;初めて
+	IF CFLAG:306 == 0
+		;애정
+		IF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:306 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:306 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:306 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 4
+		;B感覚Lv3以上
+		ELSEIF ABL:1 >= 3 && (CFLAG:306 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 3
+		;それ以外（愛無し、B感覚Lv3未満）
+		ELSEIF CFLAG:306 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:306 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;키스한다 CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 6
+	;ファーストキス
+	IF CFLAG:307 == 0 && TFLAG:13
+		;淫乱かつ主人
+		IF TALENT:TARGET:76 == 1 && ASSIPLAY == 0 && TEQUIP:89 == 0 && TEQUIP:90 == 0
+			PRINTFORMW 
+		;愛かつ主人
+		ELSEIF TALENT:TARGET:85 == 1 && ASSIPLAY == 0 && TEQUIP:89 == 0 && TEQUIP:90 == 0
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;（調教では）初めて
+	ELSEIF CFLAG:307 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:307 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:307 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 4
+		;従順Lv2以上
+		ELSEIF ABL:10 >=2 && (CFLAG:307 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 3
+		;それ以外
+		ELSEIF CFLAG:307 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:307 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;조개벌리기 CFLAG:308
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 7
+	;初めて
+	IF CFLAG:308 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+			CFLAG:TARGET:308 = 1
+			RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:308 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:308 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 4
+		;露出癖Lv3以上
+		ELSEIF ABL:17 >= 3 && (CFLAG:308 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 3
+		;それ以外（愛無し、露出癖Lv3未満）
+		ELSEIF CFLAG:306 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:306 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;손가락넣기 CFLAG:309
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 8
+	;初めて
+	IF CFLAG:TARGET:309 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;屈服刻印Lv3+애정
+		ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:309 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:309 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:309 = 5
+		;애정＋屈服刻印Lv3
+		ELSEIF TALENT:TARGET:85 == 1 && MARK:2 == 3 && (CFLAG:309 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:309 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:309 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:309 = 3
+		;それ以外
+		ELSEIF CFLAG:309 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:309 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널핥기 CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 9
+	;初めて
+	IF CFLAG:310 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:310 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:310 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:310 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:310 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 3
+		;それ以外（屈服刻印Lv3未満）
+		ELSEIF CFLAG:310 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:310 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;ローター CFLAG:311
+;-------------------------------------------------
+IF SELECTCOM == 10
+	;初めて
+	IF CFLAG:TARGET:311 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;屈服刻印Lv3+애정
+		ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:311 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:311 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:311 = 5
+		;애정＋屈服刻印Lv3
+		ELSEIF TALENT:TARGET:85 == 1 && MARK:2 == 3 && (CFLAG:311 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:311 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:311 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:311 = 3
+		;それ以外
+		ELSEIF CFLAG:311 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:311 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;꿀단지웜 CFLAG:312　CFLAG:372
+;-------------------------------------------------
+;オトコ無し
+;開始時
+IF SELECTCOM == 11 && TEQUIP:11
+	;初めて
+	IF CFLAG:TARGET:312 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:312 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:312 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:312 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:312 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:312 = 4
+		;V感覚Lv3以上
+		ELSEIF ABL:2 >= 3 && (CFLAG:312 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:312 = 3
+		;それ以外
+		ELSEIF CFLAG:312 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:312 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;脱着時
+ELSEIF SELECTCOM == 11 && TEQUIP:11 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:372 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:372 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:372 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:372 = 2
+	;それ以外
+	ELSEIF CFLAG:372 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:372 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;진동지팡이 CFLAG:313
+;-------------------------------------------------
+IF SELECTCOM == 12
+	;初めて
+	IF CFLAG:313 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:313 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:76 == 1 && (CFLAG:313 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:313 = 5
+		;애정
+		ELSEIF TALENT:85 == 1 && (CFLAG:313 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:313 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:313 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:313 = 3
+		;それ以外
+		ELSEIF CFLAG:313 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:313 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널웜 CFLAG:314　CFLAG:374
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 13 && TEQUIP:13
+	;初めて
+	IF CFLAG:TARGET:314 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:314 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:314 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:314 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:314 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:314 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:314 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:314 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:314 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:314 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:314 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:314 = 3
+		;それ以外
+		ELSEIF  CFLAG:314 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:314 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;脱着時
+ELSEIF SELECTCOM == 13 && TEQUIP:13 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:374 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:374 = 4
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:374 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:374 = 3
+	;A感覚Lv3以上
+	ELSEIF ABL:3 >= 3 && (CFLAG:374 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:374 = 2
+	;それ以外
+	ELSEIF CFLAG:374 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:374 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;클리캡 CFLAG:315　CFLAG:375
+;-------------------------------------------------
+;オトコ無し
+;開始時
+;IF SELECTCOM == 14 && TEQUIP:14
+	;初めて
+;	IF CFLAG:315 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:315 = 1
+;		RETURN 0
+	;二回目以降
+;	ELSE
+		;음란
+;		IF TALENT:76 == 1 && (CFLAG:315 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:315 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:315 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:315 = 3
+		;それ以外
+;		ELSEIF CFLAG:315 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:315 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;脱着時
+;ELSEIF SELECTCOM == 14 && TEQUIP:14 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:375 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:375 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:375 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:375 = 2
+	;それ以外
+;	ELSEIF CFLAG:375 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:375 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;ニプルキャップ CFLAG:316　CFLAG:376
+;-------------------------------------------------
+;開始時
+;IF SELECTCOM == 15 && TEQUIP:15
+	;初めて
+;	IF CFLAG:316 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:316 = 1
+;		RETURN 0
+	;二回目以降
+;	ELSE
+;		;음란
+;		IF TALENT:76 == 1 && (CFLAG:316 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:316 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:316 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:316 = 3
+		;それ以外
+;		ELSEIF CFLAG:316 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:316 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;脱着時
+;ELSEIF SELECTCOM == 15 && TEQUIP:15 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:376 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:376 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:376 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:376 = 2
+	;それ以外
+;	ELSEIF CFLAG:376 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:376 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;착유기(母乳体質のみ) CFLAG:317　CFLAG:377
+;-------------------------------------------------
+;オトコ無し
+;開始時
+;IF SELECTCOM == 16 && TEQUIP:16
+	;初めて
+;	IF CFLAG:317 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;それ以外
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:317 = 1
+;		RETURN 0
+	;二回目以降
+;	ELSE
+		;음란
+;		IF TALENT:76 == 1 && (CFLAG:317 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:317 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:317 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:317 = 3
+		;それ以外
+;		ELSEIF CFLAG:317 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:317 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;脱着時
+;ELSEIF SELECTCOM == 16 && TEQUIP:16 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:377 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:377 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:377 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:377 = 2
+	;それ以外
+;	ELSEIF CFLAG:377 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:377 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;오나홀(후타나리/オトコのみ) CFLAG:318　CFLAG:378
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 17 && TEQUIP:17
+	;初めて
+	IF CFLAG:318 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:318 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:76 == 1 && (CFLAG:318 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:318 = 4
+		;애정
+		ELSEIF TALENT:85 == 1 && (CFLAG:318 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:318 = 3
+		;それ以外
+		ELSEIF CFLAG:318 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:318 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 17 && TEQUIP:17 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:378 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:378 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:378 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:378 = 2
+	;それ以外
+	ELSEIF CFLAG:378 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:378 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;애널비즈 CFLAG:320　CFLAG:379
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 19 && TEQUIP:19
+	;初めて
+	IF CFLAG:TARGET:320 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:320 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:320 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:320 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:320 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:320 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:320 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:320 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:320 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:320 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:320 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:320 = 3
+		;それ以外
+		ELSEIF  CFLAG:320 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:320 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;脱着時
+ELSEIF SELECTCOM == 19 && TEQUIP:19 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:379 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:379 = 4
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:379 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:379 = 3
+	;A感覚Lv3以上
+	ELSEIF ABL:3 >= 3 && (CFLAG:379 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:379 = 2
+	;それ以外
+	ELSEIF CFLAG:379 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:379 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;정상위 CFLAG:321
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 20
+	;初めて
+	IF CFLAG:TARGET:321 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정＋従順Lv5
+			ELSEIF TALENT:85 == 1 && ABL:10 >= 5
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:321 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:321 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:321 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:321 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:321 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:321 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:321 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:321 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:321 = 3
+		;それ以外
+		ELSEIF CFLAG:321 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:321 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;후배위 CFLAG:322
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 21
+	;初めて
+	IF CFLAG:TARGET:322 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:322 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:322 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:322 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:322 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:322 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:322 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:322 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:322 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:322 = 3
+		;それ以外
+		ELSEIF CFLAG:322 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+
+			CFLAG:322 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;대면좌위 CFLAG:323
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 22
+	IF CFLAG:TARGET:323 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:323 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:323 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:323 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:323 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:323 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:323 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:323 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:323 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:323 = 3
+		;それ以外
+		ELSEIF CFLAG:323 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:323 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;배면좌위 CFLAG:324
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 23
+	IF CFLAG:TARGET:324 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:324 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:324 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:324 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:324 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:324 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:324 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:324 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:324 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:324 = 3
+		;それ以外
+		ELSEIF CFLAG:324 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:324 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;정상위애널 CFLAG:327
+;-------------------------------------------------
+IF SELECTCOM == 26
+	;初めて
+	IF CFLAG:TARGET:327 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:327 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:327 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:327 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:327 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:327 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:327 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:327 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:327 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:327 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:327 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:327 = 3
+		;それ以外（愛無し、A感覚Lv3未満）
+		ELSEIF  CFLAG:327 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:327 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;후배위애널 CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 27
+	;初めて
+	IF CFLAG:TARGET:328 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:328 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;애정＋A感覚Lv3以上
+		IF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:328 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:328 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:328 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:328 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:328 = 3
+		;それ以外（愛無し、A感覚Lv3未満）
+		ELSEIF  CFLAG:328 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:328 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;대면좌위애널 CFLAG:329
+;-------------------------------------------------
+IF SELECTCOM == 28
+	;初めて
+	IF CFLAG:TARGET:329 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:329 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:329 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:329 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:329 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:329 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:329 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:329 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:329 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:329 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:329 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:329 = 3
+		;それ以外（愛無し、A感覚Lv3未満）
+		ELSEIF  CFLAG:329 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:329 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;배면좌위애널 CFLAG:330
+;-------------------------------------------------
+IF SELECTCOM == 29
+	;初めて
+	IF CFLAG:TARGET:330 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:330 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:330 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:330 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:330 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:330 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:330 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:330 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:330 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:330 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:330 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:330 = 3
+		;それ以外（愛無し、A感覚Lv3未満）
+		ELSEIF  CFLAG:330 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:330 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수음 CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;初めて
+	IF CFLAG:TARGET:331 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:331 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋奉仕精神Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 5 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:331 = 6
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:331 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:331 = 5
+		;애정＋奉仕精神Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:331 = 4
+		;奉仕精神Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:331 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:331 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:331 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;펠라치오 CFLAG:332
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;初めて
+	IF CFLAG:TARGET:332 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:332 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋奉仕精神Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:332 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:332 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORML 
+				PRINTFORMW 
+			CFLAG:332 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:332 <= 2 || FLAG:7 == 2)
+			PRINTFORML 
+			PRINTFORMW 
+			CFLAG:332 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:332 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:332 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;파이즈리 CFLAG:333
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 32
+	;初めて
+	IF CFLAG:TARGET:333 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:333 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋奉仕精神Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 5 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:333 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:332 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:333 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:333 <= 3 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:333 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:333 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:333 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF  CFLAG:333 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:333 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;가랑이비비기 CFLAG:334
+;-------------------------------------------------
+IF SELECTCOM == 33
+	;初めて
+	IF CFLAG:TARGET:334 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;愛有り
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:334 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란+처녀
+		IF TALENT:TARGET:76 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:334 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:334 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:334 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:334 = 5
+		;愛有り+처녀
+		ELSEIF TALENT:TARGET:85 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:334 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			PRINTFORMW 
+			CFLAG:334 = 4
+		;愛有り
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:334 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			PRINTFORMW 
+			CFLAG:334 = 3
+		;それ以外（愛無し）
+		ELSEIF CFLAG:334 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:334 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;기승위 CFLAG:335
+;-------------------------------------------------
+;オトコ無し
+IF SELECTCOM == 34
+	;初めて
+	IF CFLAG:TARGET:335 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;それ以外（愛無し）
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:TARGET:335 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:335 <= 5 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW 
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:335 <= 4 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORML 
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:335 <= 3 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:335 <= 2 || FLAG:7 == 2)
+			PRINTFORML 
+			PRINTFORMW 
+			CFLAG:335 = 3
+		;それ以外（愛無し、従順Lv5未満）
+		ELSEIF CFLAG:335 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:335 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;거품문지르기 CFLAG:336
+;-------------------------------------------------
+IF SELECTCOM == 35
+	;初めて
+	IF CFLAG:TARGET:336 == 0
+		;奉仕精神Lv3以上
+		IF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:336 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋奉仕精神Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 == 5 && (CFLAG:336 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:336 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:336 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:336 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:336 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:336 = 3
+		;それ以外
+		ELSEIF  CFLAG:336 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:336 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;기승위애널 CFLAG:337
+;-------------------------------------------------
+IF SELECTCOM == 36
+	;初めて
+	IF CFLAG:TARGET:337 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:337 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:337 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:337 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:337 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:337 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:337 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		CFLAG:337 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:337 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:337 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:337 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:337 = 3
+		;それ以外（愛無し、A感覚Lv3未満）
+		ELSEIF  CFLAG:337 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:337 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널봉사 CFLAG:338
+;-------------------------------------------------
+IF SELECTCOM == 37
+	;初めて
+	IF CFLAG:TARGET:338 == 0
+		;奉仕精神Lv3以上
+		IF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:338 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋奉仕精神Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:338 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 3 || FLAG:7 == 2)
+				PRINTFORML 
+			CFLAG:338 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:338 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:338 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:338 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:338 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;스팽킹 CFLAG:341
+;-------------------------------------------------
+IF SELECTCOM == 40
+	;初めて
+	IF CFLAG:TARGET:341 == 0
+		PRINTFORMW 
+		CFLAG:TARGET:341 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋マゾっ気Lv3
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:341 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:341 = 5
+		;애정＋マゾっ気Lv3
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:341 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:341 = 4
+			RETURN 0
+		;苦痛刻印Lv3+屈服刻印Lv3
+		ELSEIF MARK:0 == 3 && MARK:2 == 3 && (CFLAG:341 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:341 = 3
+			RETURN 0
+		;それ以外
+		ELSEIF CFLAG:341 <= 1 && FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:341 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;채찍 CFLAG:342
+;-------------------------------------------------
+IF SELECTCOM == 41
+	;初めて
+	IF CFLAG:TARGET:342 == 0
+	;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:342 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:342 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:342 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:342 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:342 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:342 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:342 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:342 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 3
+		;それ以外
+		ELSEIF CFLAG:335 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:342 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;바늘 CFLAG:343
+;-------------------------------------------------
+IF SELECTCOM == 42
+	;初めて
+	IF CFLAG:TARGET:343 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:343 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:343 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:343 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:343 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:343 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:343 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:343 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:343 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 3
+		;それ以外
+		ELSEIF CFLAG:343 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;아이마스크 CFLAG:344　CFLAG:380
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 43 && TEQUIP:43
+	;初めて
+	IF CFLAG:TARGET:344 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:344 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:344 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:344 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:344 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 3
+		;それ以外
+		ELSEIF CFLAG:344 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 43 && TEQUIP:43 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:380 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:380 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:380 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:380 = 2
+	;それ以外 
+	ELSEIF CFLAG:380 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:380 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;밧줄 CFLAG345　CFLAG:385
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 44 && TEQUIP:44
+	;初めて
+	IF CFLAG:TARGET:345 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:345 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:345 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:345 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:345 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:345 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:345 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:345 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:345 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 3
+		;それ以外
+		ELSEIF CFLAG:345 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:345 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 44 && TEQUIP:44 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:385 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:385 = 2
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:385 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:385 = 2
+	;それ以外
+	ELSEIF CFLAG:385 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:385 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;볼개그 CFLAG346　CFLAG:386
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 45 && TEQUIP:45
+	;初めて
+	IF CFLAG:TARGET:346 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:346 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:346 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:346 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:346 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:346 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:346 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:346 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:346 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 3
+		;それ以外
+		ELSEIF CFLAG:346 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 45 && TEQUIP:45 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:386 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:386 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:386 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:386 = 2
+	;それ以外
+	ELSEIF CFLAG:386 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:386 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;관장기＋플러그 CFLAG:347
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 46 && TEQUIP:46
+	;初めて
+	IF CFLAG:TARGET:347 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:347 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란＋A感覚Lv3以上＋マゾっ気Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && ABL:21 >= 3 && (CFLAG:347 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:347 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:347 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:347 = 6
+		;애정＋A感覚Lv3以上＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && ABL:21 >= 3 && (CFLAG:347 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:347 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:347 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:347 = 4
+		;A感覚Lv3以上＋マゾっ気Lv3以上
+		ELSEIF ABL:3 >= 3 && ABL:21 >= 3 && (CFLAG:347 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:347 = 3
+		;それ以外
+		ELSEIF  CFLAG:347 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:347 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;아무것도안한다 CFLAG:356
+;-------------------------------------------------
+IF SELECTCOM == 55
+	;初めて
+	IF CFLAG:356 == 0
+		;애정
+		IF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:356 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;애정＋欲情Lv3以上
+		IF TALENT:85 == 1 && PALAM:5 >= PALAMLV:3 && (CFLAG:356 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:356 = 4
+		;애정
+		ELSEIF TALENT:85 == 1 && (CFLAG:356 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:356 = 3
+		;それ以外
+		ELSEIF CFLAG:356 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:356 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;회화한다 CFLAG:357
+;「会話」はある意味最も口上が生きるコマンドかも
+;-------------------------------------------------
+IF SELECTCOM == 56
+	;初めて
+	IF CFLAG:357 == 0
+		IF TEQUIP:53
+			;ビデオ自己紹介
+			;음란
+			IF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			;음란
+			IF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:357 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		IF TEQUIP:53
+			;ビデオ自己紹介
+			;음란
+			IF TALENT:TARGET:76 == 1 && (CFLAG:357 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 4
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 2 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 3
+			;それ以外
+			ELSEIF CFLAG:357 <= 1 || FLAG:7 == 2
+				PRINTFORMW 
+				CFLAG:357 = 2
+			ENDIF
+		ELSE
+			;음란
+			IF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 4
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 2 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 3
+			;それ以外
+			ELSEIF CFLAG:357 <= 1 || FLAG:7 == 2
+				PRINTFORMW 
+				CFLAG:357 = 2
+			ENDIF
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;파이즈리펠라 CFLAG:360
+;-------------------------------------------------
+IF SELECTCOM == 123
+;初めて
+	IF CFLAG:TARGET:360 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:360 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:360 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:360 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:360 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:360 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:360 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:360 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:360 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:360 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;펠라자위 CFLAG:361
+;-------------------------------------------------
+IF SELECTCOM == 114
+;初めて
+	IF CFLAG:TARGET:361 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:361 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:361 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:361 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:361 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:361 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:361 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:361 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:361 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:361 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수음펠라 CFLAG:362
+;-------------------------------------------------
+IF SELECTCOM == 126
+;初めて
+	IF CFLAG:TARGET:362 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:362 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:362 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:362 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:362 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:362 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:362 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:362 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:362 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:362 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;바큠펠라 CFLAG:363
+;-------------------------------------------------
+IF SELECTCOM == 127
+;初めて
+	IF CFLAG:TARGET:363 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:363 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:363 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:363 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:363 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:363 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:363 <= 2 || FLAG:7 == 2)
+			CFLAG:363 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:363 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:363 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;식스나인 CFLAG:364
+;-------------------------------------------------
+IF SELECTCOM == 69
+;初めて
+	IF CFLAG:TARGET:364 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:364 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:364 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:364 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:364 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:364 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:364 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:364 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:364 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:364 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;딥스로트 CFLAG:365
+;-------------------------------------------------
+IF SELECTCOM == 124
+;初めて
+	IF CFLAG:TARGET:365 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:365 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:363 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:365 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:363 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:365 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:363 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:365 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:363 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:365 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;이라마치오 CFLAG:381
+;-------------------------------------------------
+IF SELECTCOM == 80
+	;初めて
+	IF CFLAG:TARGET:381 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:381 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:381 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:381 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:381 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:381 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:381 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:381 = 3
+		;それ以外
+		ELSEIF CFLAG:381 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:381 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;--------------------------------------------------------
+;피어싱　CFLAG:348
+;ピアスをしていたかという記憶は参照しない
+;処理の問題でEVENT_TRAIN_MESSAGE_B.ERBとは着脱のフラグが逆
+;--------------------------------------------------------
+IF SELECTCOM == 87
+	;初めて
+	;ピアスが初めてという設定だけど念のために外した場合の分岐も有り。
+	IF CFLAG:TARGET:348 == 0
+		;조수
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			;装着する
+			IF CFLAG:7 & P
+				PRINTFORMW 
+				;両乳首
+				IF P == 1
+					PRINTFORMW 
+				;おへそ
+				ELSEIF P == 2
+					PRINTFORMW 
+				;ラビア
+				ELSEIF P == 4
+					PRINTFORMW 
+				;ペニスorクリトリス
+				ELSEIF P == 8
+					;ペニス
+					IF TALENT:121 || TALENT:122
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				;舌先
+				ELSEIF P == 16
+					PRINTFORMW 
+				;입술
+				ELSEIF P == 32
+					PRINTFORMW 
+				;鼻穴
+				ELSEIF P == 64
+					PRINTFORMW 
+				ENDIF
+			;取り外し
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			;装着する
+			IF CFLAG:7 & P
+				PRINTFORMW 
+				;両乳首
+				IF P == 1
+					PRINTFORMW 
+				;おへそ
+				ELSEIF P == 2
+					PRINTFORMW 
+				;ラビア
+				ELSEIF P == 4
+					PRINTFORMW 
+				;ペニスorクリトリス
+				ELSEIF P == 8
+					;ペニス
+					IF TALENT:121 || TALENT:122
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				;舌先
+				ELSEIF P == 16
+					PRINTFORMW 
+				;입술
+				ELSEIF P == 32
+					PRINTFORMW 
+				;鼻穴
+				ELSEIF P == 64
+					PRINTFORMW 
+				ENDIF
+			;取り外し
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;それ以外
+		ELSE
+			;装着する
+			IF CFLAG:7 & P
+				PRINTFORMW 
+				;両乳首
+				IF P == 1
+					PRINTFORMW 
+				;おへそ
+				ELSEIF P == 2
+					PRINTFORMW 
+				;ラビア
+				ELSEIF P == 4
+					PRINTFORMW 
+				;ペニスorクリトリス
+				ELSEIF P == 8
+					;ペニス
+					IF TALENT:121 || TALENT:122
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				;舌先
+				ELSEIF P == 16
+					PRINTFORMW 
+				;입술
+				ELSEIF P == 32
+					PRINTFORMW 
+				;鼻穴
+				ELSEIF P == 64
+					PRINTFORMW 
+				ENDIF
+			;取り外し
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:TARGET:348 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;조수
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:348 <= 3 || FLAG:7 == 2)
+			;装着する
+			IF CFLAG:7 & P
+				;両乳首
+				IF P == 1
+					PRINTFORMW 
+				;おへそ
+				ELSEIF P == 2
+					PRINTFORMW 
+				;ラビア
+				ELSEIF P == 4
+					PRINTFORMW 
+				;ペニスorクリトリス
+				ELSEIF P == 8
+					;ペニス
+					IF TALENT:121 || TALENT:122
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				;舌先
+				ELSEIF P == 16
+					PRINTFORMW 
+				;입술
+				ELSEIF P == 32
+					PRINTFORMW 
+				;鼻穴
+				ELSEIF P == 64
+					PRINTFORMW 
+				ENDIF
+			;取り外し
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:348 = 4
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:348 <= 2 || FLAG:7 == 2)
+			;装着する
+			IF CFLAG:7 & P
+				;両乳首
+				IF P == 1
+					PRINTFORMW 
+				;おへそ
+				ELSEIF P == 2
+					PRINTFORMW 
+				;ラビア
+				ELSEIF P == 4
+					PRINTFORMW 
+				;ペニスorクリトリス
+				ELSEIF P == 8
+					IF TALENT:121 || TALENT:122
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				;舌先
+				ELSEIF P == 16
+					PRINTFORMW 
+				;입술
+				ELSEIF P == 32
+					PRINTFORMW 
+				;鼻穴
+				ELSEIF P == 64
+					PRINTFORMW 
+				ENDIF
+			;取り外し
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:348 = 3
+		;それ以外
+		ELSEIF CFLAG:348 <= 1 || FLAG:7 == 2
+			;装着する
+			IF CFLAG:7 & P
+				;両乳首
+				IF P == 1
+					PRINTFORMW 
+				;おへそ
+				ELSEIF P == 2
+					PRINTFORMW 
+				;ラビア
+				ELSEIF P == 4
+					PRINTFORMW 
+				;ペニスorクリトリス
+				ELSEIF P == 8
+					;ペニス
+					IF TALENT:121 || TALENT:122
+						PRINTFORMW 
+					ELSE
+						PRINTFORMW 
+					ENDIF
+				;舌先
+				ELSEIF P == 16
+					PRINTFORMW 
+				;입술
+				ELSEIF P == 32
+					PRINTFORMW 
+				;鼻穴
+				ELSEIF P == 64
+					PRINTFORMW 
+				ENDIF
+			;取り外し
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:348 = 2
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+
+
+;-------------------------------------------------
+;@DOG_KOJO関係（X1をキャラ番号に置換）
+;獣姦プレイ用口上を独立させました
+;-------------------------------------------------
+@DOG_KOJO_14
+
+;-------------------------------------------------
+;獣姦愛撫 CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;初めて
+	IF CFLAG:301 == 0
+		;屈服刻印Lv2以上
+		IF MARK:2 >= 2
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:301 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:301 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:301 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:301 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 5
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:301 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 4
+		;屈服刻印Lv2
+		ELSEIF MARK:2 == 2 && (CFLAG:301 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 3
+		;それ以外
+		ELSEIF MARK:2 <= 1 && (CFLAG:301 <= 1 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:301 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦クンニ CFLAG:302
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;初めて
+	IF CFLAG:302 == 0
+		;처녀
+		IF TALENT:TARGET:0 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:302 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:302 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:302 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:302 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:302 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:302 = 3
+		;それ以外（屈服刻印Lv3未満）
+		ELSEIF CFLAG:302 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:302 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;獣姦胸愛撫 CFLAG:306
+;-------------------------------------------------
+IF SELECTCOM == 5
+	;初めて
+	IF CFLAG:306 == 0
+		;애정
+		IF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:306 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:306 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:306 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:306 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 4
+		;B感覚Lv3以上
+		ELSEIF ABL:1 >= 3 && (CFLAG:306 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:306 = 3
+		;それ以外（愛無し、B感覚Lv3未満）
+		ELSEIF CFLAG:306 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:306 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦キス CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 6
+	;ファーストキス
+	IF CFLAG:307 == 0 && TFLAG:13
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;（調教では）初めて
+	ELSEIF CFLAG:307 == 0
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:307 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:307 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:307 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 4
+		;従順Lv2以上
+		ELSEIF ABL:10 >=2 && (CFLAG:307 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:307 = 3
+		;それ以外
+		ELSEIF CFLAG:307 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:307 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦アナル舐め CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 9
+	;初めて
+	IF CFLAG:310 == 0
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:310 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:310 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:310 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:310 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:310 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:310 = 3
+		;それ以外（屈服刻印Lv3未満）
+		ELSEIF CFLAG:310 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:310 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦後背位 CFLAG:322
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;初めて
+	IF CFLAG:TARGET:322 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;암캐
+			IF TALENT:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;암캐
+			IF TALENT:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:322 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:322 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:322 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:322 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:322 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:322 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:322 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:322 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:322 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:322 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:322 = 3
+		;それ以外
+		ELSEIF CFLAG:322 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+
+			CFLAG:322 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦後背位アナル CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 27
+	;初めて
+	IF CFLAG:TARGET:328 == 0
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外（愛無し）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:328 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐＋A感覚Lv3以上
+		IF TALENT:TARGET:136 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:328 = 7
+		;음란＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 5 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:328 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:328 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:328 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:328 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:328 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:328 = 3
+		;それ以外（愛無し、A感覚Lv3未満）
+		ELSEIF  CFLAG:328 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:328 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦手淫 CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;初めて
+	IF CFLAG:TARGET:331 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:331 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐＋奉仕精神Lv3以上
+		IF TALENT:TARGET:136 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:331 = 7
+		;음란＋奉仕精神Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 5 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:331 = 6
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:331 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:331 = 5
+		;애정＋奉仕精神Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:331 = 4
+		;奉仕精神Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:331 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:331 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:331 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦フェラチオ CFLAG:332
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;初めて
+	IF CFLAG:TARGET:332 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:332 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐＋奉仕精神Lv5
+		IF TALENT:TARGET:136 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 6 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:332 = 7
+		;음란＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 5 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:332 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:332 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:332 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORML 
+				PRINTFORMW 
+			CFLAG:332 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:332 <= 2 || FLAG:7 == 2)
+			PRINTFORML 
+			PRINTFORMW 
+			CFLAG:332 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:332 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:332 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦騎乗位 CFLAG:335
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;初めて
+	IF CFLAG:TARGET:335 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;암캐
+			IF TALENT:TARGET:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;それ以外（愛無し）
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;非処女
+		ELSE
+			;암캐
+			IF TALENT:TARGET:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:TARGET:335 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:335 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:335 <= 5 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW 
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:335 <= 4 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORML 
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 5
+		;屈服刻印Lv3＋V感覚Lv3以上
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:335 <= 3 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 4
+		;屈服刻印Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:335 <= 2 || FLAG:7 == 2)
+			PRINTFORML 
+			PRINTFORMW 
+			CFLAG:335 = 3
+		;それ以外（愛無し、従順Lv5未満）
+		ELSEIF CFLAG:335 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:335 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦アナル奉仕 CFLAG:338
+;-------------------------------------------------
+IF SELECTCOM == 37
+	;初めて
+	IF CFLAG:TARGET:338 == 0
+		;奉仕精神Lv3以上
+		IF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;それ以外（奉仕精神Lv3未満）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:338 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐＋奉仕精神Lv5
+		IF TALENT:TARGET:136 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 5 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:338 = 6
+		;음란＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:338 = 5
+		;애정＋奉仕精神Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 3 || FLAG:7 == 2)
+				PRINTFORML 
+			CFLAG:338 = 4
+		;奉仕精神Lv3以上
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:338 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:338 = 3
+		;それ以外（奉仕精神Lv3未満）
+		ELSEIF CFLAG:338 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:338 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦アイマスク CFLAG:344　CFLAG:444
+;-------------------------------------------------
+;開始時
+IF SELECTCOM == 43 && TEQUIP:43
+	;初めて
+	IF CFLAG:TARGET:344 == 0
+		;암캐
+		IF TALENT:136 == 1
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:344 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:344 <= 9 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 10
+		;음란＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:344 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:344 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:344 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 3
+		;それ以外
+		ELSEIF CFLAG:344 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 43 && TEQUIP:43 == 0
+	;암캐
+	IF TALENT:TARGET:136 == 1 && (CFLAG:338 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:444 = 4
+	;음란
+	ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:338 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:444 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:338 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:444 = 2
+	;それ以外 
+	ELSEIF CFLAG:444 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:444 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;獣姦会話 CFLAG:357
+;いぬと会話は出来ないので自己紹介のみ
+;-------------------------------------------------
+IF SELECTCOM == 56
+	;初めて
+	IF CFLAG:357 == 0
+		IF TEQUIP:53
+			;ビデオ自己紹介
+			;암캐
+			IF TALENT:TARGET:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;それ以外
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:357 = 1
+		RETURN 0
+	;二回目以降
+	ELSE
+		IF TEQUIP:53
+			;ビデオ自己紹介
+			;암캐
+			IF TALENT:TARGET:136 == 1 && (CFLAG:357 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 5
+			;음란
+			ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:357 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 4
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 2 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 3
+			;それ以外
+			ELSEIF CFLAG:357 <= 1 || FLAG:7 == 2
+				PRINTFORMW 
+				CFLAG:357 = 2
+			ENDIF
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+RETURN 0
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG関係（X1をキャラ番号に置換）
+;パラメータ変動をトリガーにした口上
+;パラメータ変動後に口上を発動します
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_14
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI > 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には口上をスキップする
+SIF TEQUIP:45
+	RETURN 0
+
+;-------------------------------------------------
+;パラメータ変動時のセリフ CFLAG 221～260を使用
+;-------------------------------------------------
+;-------------------------------------------------
+;初めて潤滑がLV2超えた CFLAG:221
+;-------------------------------------------------
+P = PALAM:3 + UP:3
+IF P > PALAMLV:2 && CFLAG:TARGET:221 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		;ローションを使った場合
+		IF SELECTCOM == 50
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;それ以外
+	ELSE
+		;ローションを使った場合
+		IF SELECTCOM == 50
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:TARGET:221 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて欲情がLV2超えた CFLAG:222
+;-------------------------------------------------
+P = PALAM:5 + UP:5
+IF P > PALAMLV:2 && CFLAG:222 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		;しあわせ草を使った場合
+		IF SELECTCOM == 51
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;それ以外
+	ELSE
+		;しあわせ草を使った場合
+		IF SELECTCOM == 51
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:222 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて恥情がLV2超えた CFLAG:223
+;-------------------------------------------------
+P = PALAM:8 + UP:8
+IF P > PALAMLV:2 && CFLAG:223 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:223 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めて恐怖がLV2超えた CFLAG:224
+;-------------------------------------------------
+P = PALAM:10 + UP:10
+IF P > PALAMLV:2 && CFLAG:224 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:224 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてC絶頂 CFLAG:214
+;-------------------------------------------------
+IF NOWEX:0 > 0 && CFLAG:214 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:214 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてV絶頂 CFLAG:226
+;-------------------------------------------------
+IF NOWEX:1 > 0 && CFLAG:226 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:TARGET:226 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてA絶頂 CFLAG:227
+;-------------------------------------------------
+IF NOWEX:2 > 0 && CFLAG:227 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 「큭……아앗」
+	ENDIF
+	CFLAG:227 = 1
+ENDIF
+
+;-------------------------------------------------
+;初めてB絶頂 CFLAG:228
+;-------------------------------------------------
+IF NOWEX:3 > 0 && CFLAG:228 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:TARGET:228 = 1
+ENDIF
+
+;-------------------------------------------------
+;処女喪失(処女のみ) CFLAG:229
+;-------------------------------------------------
+A = UP:11 + UP:12
+IF TFLAG:3 == 1 && CFLAG:229 == 0
+	;主人による処女喪失
+	IF TFLAG:20 == 1
+		;淫乱かつ反発刻印取得せず
+		IF TALENT:TARGET:76 == 1 && (A < 500 || TFLAG:150 == 1)
+			PRINTFORMW 
+		;愛かつ反発刻印取得せず
+		ELSEIF TALENT:TARGET:85 == 1 && (A < 500 || TFLAG:150 == 1)
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;主人以外による処女喪失（再生処女含む）
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;それ以外
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:TARGET:229 = 1
+ENDIF
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_MARKCNG関係（X1をキャラ番号に置換）
+;刻印変動をトリガーにした口上
+;刻印変動後に口上を発動します
+;-------------------------------------------------
+@KOJO_MESSAGE_MARKCNG_14
+;助手が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI > 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には口上をスキップする（OFFだと口を塞いでるのに喋りまくる）
+SIF TEQUIP:45
+	RETURN 0
+;-------------------------------------------------
+;苦痛刻印Lv3取得 CFLAG:297
+;-------------------------------------------------
+IF TFLAG:22 == 3 && CFLAG:297 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:297 = 1
+ENDIF
+
+;-------------------------------------------------
+;快楽刻印Lv3取得 CFLAG:298
+;-------------------------------------------------
+IF TFLAG:23 == 3 && CFLAG:298 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:298 = 1
+ENDIF
+
+;-------------------------------------------------
+;屈服刻印Lv3取得 CFLAG:299
+;-------------------------------------------------
+IF TFLAG:24 == 3 && CFLAG:299 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:299 = 1
+ENDIF
+
+;-------------------------------------------------
+;反発刻印Lv3取得 CFLAG:300
+;-------------------------------------------------
+IF TFLAG:21 == 3 && CFLAG:300 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:300 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;イベント口上集（X1、X2をキャラ番号に置換する） CFLAG 261～296
+;-------------------------------------------------
+@SELF_KOJO_K14
+;-------------------------------------------------
+;調教後自慰 CFLAG:261
+;-------------------------------------------------
+IF TFLAG:13 == 1
+	;崩壊してしまった場合
+	IF TALENT:9 == 1
+		PRINTFORMW 
+	;愛がなくかつ助手とのレズセックス後ならレズっ気×20%で助手
+	ELSEIF Q == 1
+		PRINTFORMW 
+	;上に該当せずかつ愛がなくアイテムに野良犬があれば、수간중독×20%で野良犬
+	ELSEIF Q == 2
+		PRINTFORMW 
+	;その他
+	ELSE
+		;음란
+		IF TALENT:76 && (CFLAG:261 < 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:261 = 4
+		;애정
+		ELSEIF TALENT:85 && (CFLAG:261 < 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:261 = 3
+		;自慰中毒Lv3以上
+		ELSEIF ABL:31 >= 3 && (CFLAG:261 < 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:261 = 2
+		;それ以外
+		ELSEIF CFLAG:261 < 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:261 = 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;レズプレイ CFLAG:262
+;-------------------------------------------------
+IF TFLAG:13 == 2
+	;음란
+	IF TALENT:76 && (CFLAG:262 < 5 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:262 = 5
+	;애정
+	ELSEIF TALENT:85 && (CFLAG:262 < 4 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:262 = 4
+	;レズ中毒Lv3以上
+	ELSEIF ABL:33 >= 3 && (CFLAG:262 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:262 = 3
+	;レズっ気Lv3以上
+	ELSEIF ABL:22 >= 3 && (CFLAG:262 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:262 = 2
+	;それ以外
+	ELSEIF CFLAG:262 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:262 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;朝フェラ CFLAG:263
+;-------------------------------------------------
+IF TFLAG:13 == 3
+	;음란
+	IF TALENT:76 == 1 && (CFLAG:263 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:263 = 3
+	;애정
+	ELSEIF TALENT:85 && (CFLAG:263 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:263 = 3
+	;奉仕精神Lv5以上
+	ELSEIF ABL:16 >= 5 && (CFLAG:263 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:263 = 2
+	;それ以外
+	ELSEIF CFLAG:263 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:263 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;調教後セックス CFLAG:264
+;-------------------------------------------------
+IF TFLAG:13 == 4
+	;V感覚Lv4以上
+	IF ABL:2 >= 4 && (CFLAG:264 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:264 = 2
+	;それ以外
+	ELSEIF CFLAG:264 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:264 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;夜這い CFLAG:265
+;-------------------------------------------------
+IF TFLAG:13 == 5
+	IF CFLAG:265 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:265 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;売却
+;-------------------------------------------------
+IF TFLAG:13 == 6
+	;애정+反発刻印Lv3未満
+	IF TALENT:85 && MARK:3 < 3
+		PRINTFORMW 
+	;反発刻印Lv3
+	ELSEIF MARK:3 == 3
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:76
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	PRINTFORML 
+		SIF TALENT:122 != 1
+		CALL SELL_MATURO_K0
+ENDIF
+
+
+;-------------------------------------------------
+;妊娠発覚 CFLAG:271
+;CFLAG:102→誰によって妊娠させられたか（マスター = 1, 조수 = 2, 奴隷 = 3, 客 = 4, 犬 = 5, モンスター・촉수 = 6, 狂王 = 7）
+;-------------------------------------------------
+IF TFLAG:13 == 11
+	SIF CFLAG:271 >= 1
+		RETURN 0
+	;崩壊してしまった場合
+	IF TALENT:9 == 1
+		PRINTFORMW 
+	;父親が主人で母親が愛持ち
+	ELSEIF TALENT:85 && CFLAG:102 == 1
+		PRINTFORMW 
+	;その他
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:271 = 1
+ENDIF
+
+;-------------------------------------------------
+;出産 CFLAG:272
+;CFLAG:102→誰によって妊娠させられたか（マスター = 1, 조수 = 2, 奴隷 = 3, 客 = 4, 犬 = 5, モンスター・촉수 = 6, 狂王 = 7）
+;-------------------------------------------------
+IF TFLAG:13 == 12
+	SIF CFLAG:272 >= 1
+		RETURN 0
+	;崩壊している場合
+	IF TALENT:9 == 1
+		PRINTFORMW 
+	;父親が主人で母親が愛持ち
+	ELSEIF TALENT:85 && CFLAG:102 == 1
+		PRINTFORMW 
+	;その他
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:272 = 1
+ENDIF
+
+;-------------------------------------------------
+;育児室 CFLAG:273
+;-------------------------------------------------
+IF TFLAG:13 == 13
+	;妊娠中
+	IF TALENT:153
+		PRINTFORMW 
+	;육아중
+	ELSEIF TALENT:154
+		PRINTFORMW 
+	ENDIF
+	CFLAG:273 = 1
+ENDIF
+
+;-------------------------------------------------
+;親離れ時 CFLAG:274
+;-------------------------------------------------
+IF TFLAG:13 == 14
+	PRINTFORMW 
+	CFLAG:274 = 1
+ENDIF
+
+;-------------------------------------------------
+;死亡
+;-------------------------------------------------
+IF TFLAG:13 == 999
+	;애정
+	IF TALENT:85
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;寿命による消滅
+;-------------------------------------------------
+IF TFLAG:13 == 998
+	;애정
+	IF TALENT:85
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;--------------------------------------------------
+;フラグ初期化
+;--------------------------------------------------
+TFLAG:13 = 0
+
+RETURN 0
+
+;-------------------------------------------------
+;@単体エンディング関係(X1、X2をキャラ番号に置換する)
+;まだ未実装です
+;-------------------------------------------------
+;@SINGLE_ENDING_K14
+;DRAWLINE
+;PRINTFORMW ―――単体エンド条件達成―――
+;PRINTFORMW …………
+;PRINTFORMW ………
+;PRINTFORMW ……
+;PRINTFORMW 
+
+
+;PRINTFORMW 
+;PRINTFORMW 　　　　　　　　―― Ending No.114 (○○エンド)
+
+;CALL GAME_CONTINUE
+;RETURN 0
+
+
+;------------------------------------------------------------------------------------------------------------------------------
+;ここからeramaou追加口上
+;------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+;-------------------------------------------------------
+@DUNGEON_RYOUZYOKU_K14
+;-------------------------------------------------------
+;ダンジョンで陵辱される前の一言
+
+
+IF TALENT:0 == 1
+	;처녀
+	PRINTFORMW 
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+	
+		;무관심・感情乏しいなら何か言って終了
+		PRINTFORMW 
+		
+		RETURN 0
+	ELSEIF TALENT:17 ==1 || TALENT:31 == 1 || TALENT:36 == 1
+		
+		;프라이드낮음・정조관부실・恥薄いなら身体を売って命乞いをする
+		PRINTFORMW 
+		
+		;A敏感もしくはA経験有りならならアナルを使うことを提案する
+		SIF TALENT:106 == 1 || EXP:1 > 0
+			PRINTFORMW 
+		
+		;フェラ経験有りならなら口での奉仕をアピールする
+		SIF EXP:22 > 0
+			PRINTFORMW 
+		
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・抵抗なら
+		;チ○ポになんか絶対負けない！系の精神的抵抗をする
+		PRINTFORMW 
+		
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・悲観的なら自分の運命に絶望する
+		PRINTFORMW 
+		
+	ELSE
+		
+		;その他何か適当に性格によって
+		PRINTFORMW 
+		
+	ENDIF
+ELSE
+	;非処女
+	PRINTFORMW 
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・感情乏しいなら何か言って終了
+		PRINTFORMW 
+		
+		RETURN 0
+	ELSEIF TALENT:17 ==1 || TALENT:31 == 1 || TALENT:36 == 1
+		
+		;프라이드낮음・정조관부실・恥薄いなら身体を売って命乞いをする
+		PRINTFORMW 
+		
+		;A敏感もしくはA経験有りならならアナルを使うことを提案する
+		SIF TALENT:106 == 1 || EXP:1 > 0
+			PRINTFORMW 
+		
+		;フェラ経験有りならなら口での奉仕をアピールする
+		SIF EXP:22 > 0
+			PRINTFORMW 
+		
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・抵抗なら
+		;チ○ポになんか絶対負けない！系の精神的抵抗をする
+		PRINTFORMW 
+		
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・悲観的なら自分の運命に絶望する
+		PRINTFORMW 
+		
+	ELSE
+		
+		;その他何か適当に性格によって
+		PRINTFORMW 
+		
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;-------------------------------------------------------
+@DUNGEON_RYOUZYOKU_AFTER_K14
+;-------------------------------------------------------
+;ダンジョンで陵辱された後の一言
+
+
+IF TALENT:0 == 1
+	;처녀
+	PRINTFORMW 
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・感情乏しいなら何か言って終了
+		PRINTFORMW 
+		
+		RETURN 0
+	ENDIF
+	
+	;アナルを弄られすぎた感想
+	IF EXP:1 > 20
+		PRINTFORMW 
+		PRINTFORMW 
+	ENDIF
+	
+	;フェラしすぎた感想
+	SIF EXP:22 > 20
+		PRINTFORMW 
+	
+	;精液の味
+	SIF EXP:20 > 20
+		PRINTFORMW 
+ELSE
+	;非処女
+	PRINTFORMW 
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・感情乏しいなら何か言って終了
+		PRINTFORMW 
+		
+		RETURN 0
+	ENDIF
+	
+	;膣を苛められすぎた感想
+	IF EXP:0 > 20
+		PRINTFORMW 
+		PRINTFORMW 
+	ENDIF
+	
+	;アナルを弄られすぎた感想
+	IF EXP:1 > 20
+		PRINTFORMW 
+		PRINTFORMW 
+	ENDIF
+	
+	;フェラしすぎた感想
+	SIF EXP:22 > 20
+		PRINTFORMW 
+	
+	;精液の味
+	SIF EXP:20 > 20
+		PRINTFORMW 
+ENDIF
+
+RETURN 0
+;-----------------------------------
+@BENKI_KOUJO_K14
+;-----------------------------------
+;肉便器口上。キャラはA
+;FLAG:62を使用。行動の詳細はBENKI.ERBで
+;FLAG:62 = 0 最下層モンスター奉仕
+;FLAG:62 = 1 レズ便器
+;FLAG:62 = 2 獣姦便器
+;FLAG:62 = 3 両穴便器
+;FLAG:62 = 4 膣便器
+;FLAG:62 = 5 アナル便器
+;FLAG:62 =  6 フェラ便器
+
+;FLAG:62 =  7 獣姦配信
+;FLAG:62 =  8 娼婦購入配信
+;FLAG:62 =  9 野外露出配信
+;FLAG:62 = 10 公衆便所配信
+;FLAG:62 = 11 アナル拡張配信
+;FLAG:62 = 12 自慰配信
+
+IF FLAG:62 == 0
+	;最下層民凌辱
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF FLAG:62 == 1
+	;レズ便器
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF FLAG:62 == 2
+	;獣姦
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 3
+	;A+Vプレイ
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 4
+	;Vプレイ
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 5
+	;Aプレイ
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 6
+	;フェラプレイ
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORM 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 7
+	;獣姦配信
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 9
+	;野外露出配信
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 「あ、あの…元勇者の%SAVESTR:TARGET%、です」
+		PRINTFORMW 「%SELF_CALL(A)%は偉大なる魔王様に敗北して…心も身体も徹底的に弄られたけど、まだ屈してはいないよ！」
+		PRINTFORMW 「それで、今日は…皆に『生まれたままの%SELF_CALL(A)%を見てもらいたい』んだ…」
+		PRINTFORMW 「『男の身体』なんか見たって面白くないかもしれないけど…精一杯頑張るから、しっかり見ててね♪」
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ELSEIF  FLAG:62 == 12
+	;自慰配信
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 
+	;상식변경(남자)
+	ELSEIF TALENT:TARGET:122 && FLAG:63 == 1
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 
+	;奉仕精神Lv5以上
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 
+	;それ以外
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;-----------------------------------
+@DUNGEON_VICTORY_K14
+;-----------------------------------
+;戦闘勝利時
+
+;決め台詞
+PRINTFORMW 
+	
+IF TALENT:21 == 1 || TALENT:22 == 1
+	
+	;무관심・感情乏しいなら何か言って終了
+	PRINTFORMW 「……훗」
+	
+	RETURN 0
+ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+	
+	;반항적・굳건함・프라이드높음・정조관념・抵抗なら勝利宣言
+	IF RAND:3 == 0 
+		PRINTFORMW 「……더러운」
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 「어둠의 힘 따위、필요없다」
+	ELSE
+		PRINTFORMW 「멸망했는가」
+	ENDIF
+	
+ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+	
+	;겁쟁이・悲観的なら命からがら的な弱気セリフで終了
+	PRINTFORMW 「어둠의힘、이정도일줄은……」
+	
+	RETURN 0
+ELSE
+	
+	;その他何か適当に性格によって
+	IF RAND:3 == 0 
+		PRINTFORMW 「빛은 승리다！」
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 「빛은 불멸이다！」
+	ELSE
+		PRINTFORMW 「부정한 놈에게는 지지않아……」
+	ENDIF
+	
+ENDIF
+
+IF (BASE:A:0 * 100 / MAXBASE:A:0 < 50) || (BASE:A:1 * 100 / MAXBASE:A:1 < 50)
+	;ピンチかも
+	PRINTFORMW （역시、강하네……）
+ELSE
+	;余裕余裕
+	PRINTFORMW 「부정의힘、없애버릴 때까지」
+ENDIF
+
+RETURN 0
+
+;-----------------------------------
+@DUNGEON_ATTACK_K14
+;-----------------------------------
+;攻撃時のセリフ
+
+;最初に一言
+IF CFLAG:1 == 2
+	;侵攻中
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・感情乏しいなら何か言って終了
+		PRINTFORMW 「……갑니다」
+		
+		RETURN 0
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・抵抗なら威勢のいいセリフ
+		IF RAND:3 == 0 
+			PRINTFORMW 「괴물 녀석！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「부정한 녀석！」
+		ELSE
+			PRINTFORMW 「……사라져라！」
+		ENDIF
+	
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・悲観的なら命からがら的な弱気セリフ
+		PRINTFORMW 「큭、부정한 놈……」
+		
+		RETURN 0
+	ELSE
+		
+		;その他何か適当に性格によって
+		IF RAND:3 == 0 
+			PRINTFORMW 「멸망해라！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「지지않아！」
+		ELSE
+			PRINTFORMW 「빛이여！」
+		ENDIF
+		
+	ENDIF
+ELSE
+	;その他・迎撃中
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・感情乏しいなら何か言って終了
+		PRINTFORMW 「……갑니다♪」
+		
+		RETURN 0
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・抵抗なら威勢のいいセリフ
+		IF RAND:3 == 0 
+			PRINTFORMW 「이것이 어둠의 힘이다！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「아름다운 힘이다……」
+		ELSE
+			PRINTFORMW 「강하다……이렇게까지、어둠의 힘이……」
+		ENDIF
+		
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・悲観的なら命からがら的な弱気セリフ
+		PRINTFORMW 「큭、어둠에 침식되어버려……」
+		
+		RETURN 0
+	ELSE
+		
+		;その他何か適当に性格によって
+		IF RAND:3 == 0 
+			PRINTFORMW 「사라져라！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「어둠이여！」
+		ELSE
+			PRINTFORMW 「어둠에 떨어져라……」
+		ENDIF
+		
+	ENDIF
+ENDIF
+	
+
+
+RETURN 0
+
+;-------------------------------------------------
+;@COLOSSEUM_KOJO関係（X1をキャラ番号に置換）
+;コロシアム用口上を独立させました
+;-------------------------------------------------
+@COLOSSEUM_KOJO_14
+;-------------------------------------------------
+;아무것도안한다
+;-------------------------------------------------
+IF SELECTCOM == 55
+	;気力０以下
+	IF BASE:1 <= 0
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;회화한다
+;-------------------------------------------------
+IF SELECTCOM == 56
+	;気力０以下
+	IF BASE:1 <= 0
+		;助手が調教中の場合
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ELSE
+		;助手が調教中の場合
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;펠라치오
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;助手が調教中の場合
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;가슴애무
+;-------------------------------------------------
+IF SELECTCOM == 5
+	;助手が調教中の場合
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;후배위
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;助手が調教中の場合
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 
+	;트롤
+	ELSEIF TFLAG:400 == 206
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;후배위애널
+;-------------------------------------------------
+IF SELECTCOM == 27
+	;助手が調教中の場合
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 
+	;트롤
+	ELSEIF TFLAG:400 == 206
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;미약슬라임（しあわせ草）
+;-------------------------------------------------
+IF SELECTCOM == 51
+	PRINTFORMW 
+	RETURN 0
+ENDIF
+
+
+RETURN 0
+
+
+;-----------------------------------
+@NTR_KOUJO_K14
+;プレイ内容はNTR.ERBを参照してください。
+;-----------------------------------
+;NTRフラグ
+SIF CFLAG:650 == 0
+	CFLAG:650 = 1
+
+;処女喪失
+IF P == 1
+	;陥落済
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:651 = 1
+;処女アナルプレイ
+ELSEIF P == 2
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:652 = 1
+;獣姦ショー
+ELSEIF P == 3
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:653 = 1
+;Vプレイ
+ELSEIF P == 4
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:654 = 1
+;VA乱交プレイ
+ELSEIF P == 5
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:655 = 1
+;公衆便女
+ELSEIF P == 6
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:656 = 1
+;狂王性欲処理
+ELSEIF P == 7
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:657 = 1
+;NTR公開出産
+ELSEIF P == 20
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+
+ENDIF
+
+RETURN 0
+
+;-----------------------------------
+@EXUCUTION_KOUJO_K14
+;処刑内容はEXUCUTION.ERBを参照してください。
+;-----------------------------------
+;肉便器刑
+IF TFLAG:16 == 2
+	PRINTFORMW 
+;戦闘員化
+ELSEIF TFLAG:16 == 5
+	PRINTFORMW 
+;晒し台刑
+ELSEIF TFLAG:16 == 6
+	PRINTFORMW 
+;記憶を消して解放する
+ELSEIF TFLAG:16 == 7
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@MUSEUM_KOUJO_K14
+;内容はMUSEUM.ERBを参照してください。
+;-----------------------------------
+;石化
+IF TFLAG:500 == 0
+	PRINTFORMW 
+;剥製化
+ELSEIF TFLAG:500 == 1
+	PRINTFORMW 
+;蝋人形化
+ELSEIF TFLAG:500 == 2
+	PRINTFORMW 
+;人形化(マネキン)
+ELSEIF TFLAG:500 == 3
+	PRINTFORMW 
+;人形化(球体間接)
+ELSEIF TFLAG:500 == 4
+	PRINTFORMW 
+;金属化
+ELSEIF TFLAG:500 == 5
+	PRINTFORMW 
+;氷像化
+ELSEIF TFLAG:500 == 6
+	PRINTFORMW 
+;宝石化
+ELSEIF TFLAG:500 == 7
+	PRINTFORMW 
+;家具化
+ELSEIF TFLAG:500 == 8
+	PRINTFORMW 
+;絵画封印
+ELSEIF TFLAG:500 == 9
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@BANISHMENT_KOUJO_K14
+;処刑内容はBANISHMENT.ERBを参照してください。
+;-----------------------------------
+;追放
+IF TFLAG:510 == 0
+	PRINTFORMW 
+;男体化
+ELSEIF TFLAG:510 == 1
+	PRINTFORMW 
+;記憶消去
+ELSEIF TFLAG:510 == 2
+	PRINTFORMW 
+;小動物化
+ELSEIF TFLAG:510 == 3
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@PUBLIC_EXUCUTION_KOUJO_K14
+;処刑内容はPUBLIC_EXUCUTION.ERBを参照してください。
+;-----------------------------------
+;陵辱処刑
+IF TFLAG:520 == 0
+	PRINTFORMW 
+;絞首刑
+ELSEIF TFLAG:520 == 1
+	PRINTFORMW 
+;魂粉砕
+ELSEIF TFLAG:520 == 2
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@GROTESQUE_KOUJO_K14
+;内容はGROTESQUE.ERBを参照してください。
+;-----------------------------------
+;四肢切断刑
+IF TFLAG:530 == 0
+	PRINTFORMW 
+;内臓陵辱刑
+ELSEIF TFLAG:530 == 1
+	PRINTFORMW 
+;ギロチン刑
+ELSEIF TFLAG:530 == 2
+	PRINTFORMW 
+;火あぶりの刑
+ELSEIF TFLAG:530 == 3
+	PRINTFORMW 
+;食肉刑
+ELSEIF TFLAG:530 == 4
+	PRINTFORMW 
+;死霊化
+ELSEIF TFLAG:530 == 5
+	PRINTFORMW 
+;ゾンビ化
+ELSEIF TFLAG:530 == 6
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@ENTERENEMY_KOUJO_K14
+;-----------------------------------
+;ダンジョン攻略開始時
+IF TALENT:A:21 == 1 || TALENT:A:22 == 1
+	;무관심・感情乏しいなら何か言って終了
+	PRINTFORMW 「마왕녀석……」
+ELSEIF TALENT:A:11 == 1 || TALENT:A:12 == 1 || TALENT:A:15 == 1 || TALENT:A:30 == 1 || TALENT:A:34 == 1
+	;반항적・굳건함・프라이드높음・정조관념・저항
+	PRINTFORMW 「마왕녀석！　용서하지않아！」
+ELSEIF TALENT:A:10 == 1 || TALENT:A:26 == 1
+	;겁쟁이・비관적
+	PRINTFORMW 「용서하지않아、마왕……」
+ELSE
+	;その他何か適当に性格によって
+	PRINTFORMW 「마왕을 죽여 보이겠어！」
+ENDIF
+
+;-----------------------------------
+@GOHOUBI_REQUEST_KOUJO_K14
+;-----------------------------------
+;迎撃時のご褒美要求
+IF CFLAG:A:504 == 0
+	;お金
+	PRINTFORMW %SAVESTR:A%는 금을 요구한것 같다
+ELSEIF CFLAG:A:504 == 1 || CFLAG:A:504 == 2 || CFLAG:A:504 == 3
+	;獣姦要求
+	PRINTFORM %SAVESTR:A%는
+	IF CFLAG:A:504 == 1
+		PRINT 개
+	ELSEIF CFLAG:A:504 == 2
+		PRINT 돼지
+	ELSEIF CFLAG:A:504 == 3
+		PRINT 말
+	ENDIF
+	PRINTFORMW 와(과) 교미를 요구했다
+ELSEIF CFLAG:A:504 == 4
+	;키스
+	PRINTFORMW %SAVESTR:A%은 엉덩이에 키스를 요구했다
+ELSEIF CFLAG:A:504 == 5
+	;セックス
+	PRINTFORMW %SAVESTR:A%은 섹스를 요구했다
+ELSEIF CFLAG:A:504 == 6
+	;ザーメン
+	PRINTFORMW %SAVESTR:A%는 정액을 요구했다
+ELSEIF CFLAG:A:504 == 7
+	;乱交
+	PRINTFORMW %SAVESTR:A%는 난교파티 를 요구했다
+ELSEIF CFLAG:A:504 == 8
+	;小水
+	PRINTFORMW %SAVESTR:A%는 보상에 소변을 요구했다
+ELSEIF CFLAG:A:504 == 9
+	;童貞狩り
+	PRINTFORMW %SAVESTR:A%는 보상에 동정사냥을 요구했다
+ENDIF
+
+;-----------------------------------
+@GOHOUBI_AFTER_KOUJO_K14
+;-----------------------------------
+;迎撃成功時
+;DUNGEON_AFTER.ERBを参照
+
+;아무것도안한다
+IF TFLAG:18 == 0
+	PRINTFORMW 
+	RETURN 0
+;勲章授与
+ELSEIF TFLAG:18 == 1
+	PRINTFORMW 
+	RETURN 0
+ELSEIF TFLAG:18 == 2
+	;お金を渡す
+	IF CFLAG:A:504 == 0
+		PRINTFORMW 
+	;犬と獣姦
+	ELSEIF CFLAG:A:504 == 1
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;豚と獣姦
+	ELSEIF CFLAG:A:504 == 2
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;馬と獣姦
+	ELSEIF CFLAG:A:504 == 3
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;키스
+	ELSEIF CFLAG:A:504 == 4
+		PRINTFORMW 
+	;セックス
+	ELSEIF CFLAG:A:504 == 5
+		;膣とペニス
+		IF ABL:A:2 > ABL:A:3
+			PRINTFORMW 
+		;アナルとペニス
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;ザーメン
+	ELSEIF CFLAG:A:504 == 6
+		PRINTFORMW 
+	;乱交
+	ELSEIF CFLAG:A:504 == 7
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;おしっこ
+	ELSEIF CFLAG:A:504 == 8
+		PRINTFORMW 
+	;童貞狩り
+	ELSEIF CFLAG:A:504 == 9
+		;膣
+		IF ABL:A:2 > ABL:A:3
+			PRINTFORMW 
+		;アナル
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ELSE
+	ENDIF
+ENDIF
+;------------------------------
+@OSIOKI_KOUJO_K14
+;-----------------------------
+;迎撃失敗時のおしおき
+;DUNGEON_AFTER.ERBを参照
+
+;아무것도안한다
+IF TFLAG:18 == 0
+	PRINTFORMW 
+;弱電気椅子刑
+ELSEIF TFLAG:18 == 1
+	;マゾっ気Lv3以上
+	IF ABL:A:21 >= 3
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+;路上自慰刑
+ELSEIF TFLAG:18 == 2
+	;露出癖Lv4以上
+	IF ABL:A:17 >= 4
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+;路上脱糞刑
+ELSEIF TFLAG:18 == 3
+	;露出癖Lv6以上
+	IF ABL:A:17 >= 6
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+;鞭打ち刑
+ELSEIF TFLAG:18 == 4
+	;マゾっ気Lv3以上
+	IF ABL:A:21 >= 3
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF 
+;人間小便器刑
+ELSEIF TFLAG:18 == 5
+	;マゾor淫乱
+	IF TALENT:A:88 == 1 || TALENT:A:76 == 1
+		PRINTFORMW 
+	ELSE
+		PRINTFORMW 
+	ENDIF
+;トイレ掃除刑
+ELSEIF TFLAG:18 == 6
+	PRINT
+;ご飯抜き刑
+ELSEIF TFLAG:18 == 7
+	PRINT
+;媚薬放置刑
+ELSEIF TFLAG:18 == 8
+	PRINTFORMW 
+;未定
+ELSEIF TFLAG:18 == 9
+	PRINTFORMW 
+ENDIF
+
+;------------------------------
+@GOBI_KOUJO_K14, ARG:0
+;-----------------------------
+
+IF ARG:0 == 1
+	;喜んで誇らしげに
+	PRINTFORM だよ♪
+ELSEIF ARG:0 == 2
+	;怒って
+	PRINTFORM だッ！
+ELSEIF ARG:0 == 3
+	;悲しんで
+	PRINTFORM だよ……。
+ELSEIF ARG:0 == 4
+	;恥ずかしそうに
+	PRINTFORM なんだ……。
+ELSEIF ARG:0 == 5
+	;情けなさそうに
+	PRINTFORM なんだよ……。
+ELSE
+	;デフォルト
+	;ARG:0==0を含む
+	IF RAND:3 == 0
+		PRINTFORM だ。
+	ELSEIF RAND:2 == 0
+		PRINTFORM だよ。
+	ELSE
+		PRINTFORM なのさ。
+	ENDIF
+ENDIF
+
+RETURN 0
+
+

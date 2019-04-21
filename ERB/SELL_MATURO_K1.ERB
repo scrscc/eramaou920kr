@@ -1,0 +1,1378 @@
+﻿;-------------------------------------------------
+;売却末路口上
+;Sは売却値
+;最初に反発刻印３, 음란, 애정, その他で分岐, 次に値段（100万以上, 50万以上, 10万以上, 10万未満）によって分岐
+;そして売られる先は職業によって４分岐
+;売られた先によって要求TALENT, PALAMが違って最終的な末路が表示される. 
+;基本パターンは売却値段*4, 売却先*4, 正否判定で*2の32パターン
+;反発3は売却値段と売却先を２つにまで減らして8パターン
+;通常売却は売却値段を３つにまで減らして12パターン
+;最後に魔族とその他の*2で…64（애정）+64（음란）+8（反発３）+24（通常）で160パターン…え, そんなに
+;以下メモ
+;基本的に魔族以外の扱いは悪い
+;200,전사,;物理戦闘が得意な職業
+;201,마술사,;魔法によって敵を一掃する火力型
+;202,신관,;生贄
+;203,도적,;パワーではなく技で物理戦闘を有利に進める
+;204,육변기,;勇者함락の象徴
+;205,기사,;ピンチに強い
+;206,무녀,;火力のもう一つの形
+;207,닌자,;マルチスキルで真価を発揮…のはずが地味
+;-------------------------------------------------
+;売却先加筆. @SELL_MATURO_K1を追加
+;異種姦メイン末路を追加
+;-------------------------------------------------
+@SELL_MATURO_K1
+#DIMS MATURO
+#DIM FAMILY,3
+
+
+FAMILY = CFLAG:TARGET:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, TARGET
+FAMILY:2 = RESULT
+
+
+	;反発刻印Lv3
+	IF MARK:3 == 3
+		;魔族
+		IF TALENT:TARGET:314 == 9
+			;魔族売値10万以上
+			IF S >= 100000
+				IF rand:2 == 0
+					LOCALS = 브레인 이터의 제후
+					LOCAL = 1
+				ELSE
+					LOCALS = 브레인 이터의 대신관
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 매각된 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;
+					IF LOCAL == 1
+						;レベル50以上
+						IF CFLAG:9 >= 50
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")% 그럼에도 사랑받고 있는 것 같다
+							PRINTFORMW 뇌를 개조당해,순종적인 노예가 된 %조사선택(SAVESTR:TARGET, "는")% 우수한 지휘관이 되어
+							PRINTFORMW 애액과 침을 질질 흘리면서 직무를 수행하고 있는 모양이다
+							MATURO = 뇌개조 지휘관
+						ELSE
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")% 호사가들에게 뇌를 개조당했지만
+							PRINTFORMW 수술은 실패해 완전히 폐인이 되어 유아퇴행화 되어버린 모양이다
+							PRINTFORMW 그 이후 분노를 흘리면서 구경거리가 된 것 같다……
+							MATURO = 구경거리
+						ENDIF
+					;
+					ELSEIF LOCAL == 0
+						;신관＆무녀
+						IF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")% 수상한 교단 간부에게 받아들여져
+							PRINTFORMW 지금은 순종적인 신성 창녀로서 세뇌되어버린 것 같다
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 신자들에게 가랑이를 벌리고,암흑신의 총애를 전하고 있다는 모양이다
+							MATURO = 타락신의 신성 창녀
+						ELSE
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")%,수상한 교단의 제물로 선정된 것 같다
+							PRINTFORMW 뇌의 일부를 암흑신에게 바쳐져,지금은 완전히 순종적인 신성 창녀가 되었다
+							PRINTFORMW 침과 애액을 흘리면서도, 그래도 그녀는 행복해보였다……
+							MATURO = 타락신의 신성 창녀
+						ENDIF
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				IF RAND:2 == 0
+					LOCALS = 악마의 제후
+					LOCAL = 1
+				ELSE
+					LOCALS = 악마 백만장자
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 구입당한 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					IF LOCAL == 1
+						IF RAND:2 == 0
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")% 악마의 장난감이 되어버린 것 같다
+							PRINTFORMW 페니스나 여성기를 엉망진창으로 생겨나게 하거나 개조당하거나 하며
+							PRINTFORMW 악마들의 구경거리가 되었다
+							MATURO = 악마의 완구
+						ELSE
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")% 비료를 만드는 장치가 되어버렸다
+							PRINTFORMW 무리하게 가축용 사료를 입에 채워넣어져,한 시간 정도면 좋은 비료가 된다
+							PRINTFORMW 탈분할 때마다 비명 같은 교성을 지르며 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 전망 좋은 밭에 설치되어 구경거리로도 유명해졌다
+							MATURO = 탈분 비료장치
+						ENDIF
+					ELSEIF LOCAL == 0
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 반항적인 %조사선택(SAVESTR:TARGET, "는")% 축사에 연결되어 밀크 탱크가 되어버렸다
+							PRINTFORMW 원래부터 거대했던 유방은 마법과 약으로 더욱 거대화되어,마치 슬라임과 같다
+							PRINTFORMW 모유를 내기 위해 강제적으로 교배되어,%조사선택(SAVESTR:TARGET, "는")% 침과 애액을 계속해서 흘리고 있었다
+							MATURO = 밀크탱크
+						ELSE
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")% 마법으로 인간의 말을 빼앗겨 사고를 분쇄당했다
+							PRINTFORMW 지금은,네 발로 걷는 개 그 자체다.목걸이와 쇠사슬로 연결되어,손님을 맞이했다
+							PRINTFORMW 오늘밤도 애완견끼리의 교배쇼가 이루어지겠지
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 너무나 행복하다는 듯 허리를 흔들고 있었다
+							MATURO = 사고분쇄된 암캐
+						ENDIF
+					ENDIF
+			ENDIF
+		;それ以外の種族
+		ELSE
+			;それ以外の種族売値10万以上
+			IF S >= 100000
+				;種族ドラゴン
+				IF TALENT:TARGET:314 == 5
+					LOCALS = 고위 마법 연구소로
+					LOCAL = 2
+				;전사＆도적
+				ELSEIF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오우거 용병단으로
+					LOCAL = 1
+				ELSE
+					LOCALS = 흡혈귀의 암흑 신전으로
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 이송된 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;種族ドラゴン
+					IF LOCAL == 2
+						PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")%,드문 종족이었기 때문에 우리에 갇히게 되었다
+						PRINTFORMW 마법사나 마녀가 마법실험을 행하는 연구동 안에서 %조사선택(SAVESTR:TARGET, "는")% 길러지고 있다
+						PRINTFORMW 매일 정시에,그녀의 혈액이나 배설물이 채취되었다
+						PRINTFORMW 관장을 듬뿍 넣어져,양동이에 배변하는 %SAVESTR:TARGET%의 눈에는 눈물이 떠올라 있었다
+						MATURO = 배설실험소재
+					ELSEIF LOCAL == 1
+						;전사＆도적
+						PRINTFORMW 호위용의 검객으로서 고용되어 있는 모양이다
+								;レベル１００以上
+								IF CFLAG:9 >= 100
+									PRINTFORMW 비상하게 실력은 있지만,건방진 소리를 하는 %조사선택(SAVESTR:TARGET, "는")% 오우거들의 누님 역할이다
+									PRINTFORMW 오우거들을 발길질하며,때로는 훈련에 어울리고 있다
+									PRINTFORMW 이제는 어느 쪽이 노예인지 모르겠다며,오우거들은 쓴웃음을 지었다
+								ELSE
+									PRINTFORMW 반항적이고 약한 %조사선택(SAVESTR:TARGET, "는")%,오우거 용병들에게 호되게 당하고 있다
+									PRINTFORMW 건방진 말을 들으며 철권제재를 받아,연습에서는 목검으로 두들겨 맞을 뿐이다
+									PRINTFORMW 연습이 끝나면,오우거들과 단체로 벌거벗고 목욕탕에 들어간다
+									PRINTFORMW 이윽고 그녀도 둘도 없는 동료의 한 사람이 되어가는 걸까
+								ENDIF
+						MATURO = 호위검객
+					ELSEIF LOCAL == 0
+						;신관＆무녀
+						IF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")%,흡혈귀의 세례를 받아 암흑신의 신도가 되었다
+							PRINTFORMW 지금에 와서는 사악한 의식에서 몇 번이나 세뇌되어,충실하게 직무를 해낼 수 있게 되었다
+							PRINTFORMW 다만,강력한 약물이 사용된 탓에,그녀는 때때로 무의식적으로 배설하며 절정해버리는 것 같다……
+							MATURO = 암흑신의 신도
+						ELSE
+							PRINTFORMW 반항적이었던 %조사선택(SAVESTR:TARGET, "는")%,이제는 흡혈귀의 드링크 서버가 되어 혈액을 제공하고 있다
+							PRINTFORMW 전신이 강하게 구속되어,채혈 튜브가 그녀의 팔에서 뻗어 있다.식사도 배설도 모두 관리되고 있다
+							PRINTFORMW 그녀의 유일한 즐거움은,매일 한 번 잠들기 전의 애무에 의한 절정 뿐이었다……
+							MATURO = 흡혈귀의 드링크 서버
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				IF RAND:2 == 0
+					LOCALS = 트롤 용병단
+					LOCAL = 1
+				ELSE
+					LOCALS = 악마의 인간목장
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%으로 이송된 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					IF LOCAL == 1
+						IF RAND:2 == 0
+							PRINTFORMW 반항적이었던 %SAVESTR:TARGET%(은)는, 트롤의 용병 단장의 페니스 케이스로 개조되어 버렸다
+							PRINTFORMW 손발을 잘라내져, 질은 한계까지 확장되어 쇠사슬로 트롤의 동체에 묶여있다
+							PRINTFORMW 자궁까지 완전히 고기구멍화한 그녀는 이제 아무것도 임신하는 일은 없다……
+							MATURO = 트롤의 페니스 케이스
+						ELSE
+							PRINTFORMW 반항적이었던 %SAVESTR:TARGET%(은)는, 트롤의 번식용 변기가 되어 버렸다
+							PRINTFORMW 풍선과 같이 부풀어 오른 %SAVESTR:TARGET%의 자궁에는, 지금도 트롤의 아이가 쑥쑥 자라고 있다
+							PRINTFORMW 이미 몇명이나 낳았는지 조차 %SAVESTR:TARGET%에게는 알 수 없었다……
+							MATURO = 트롤의 번식 변기
+						ENDIF
+					ELSEIF LOCAL == 0
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 반항적이었던 %SAVESTR:TARGET%(은)는 축사에 보내져 밀크 탱크가 되어 버렸다
+							PRINTFORMW 근처에는 몇 사람의 알몸의 여자들이 줄 서있으며, 그녀들은 모두 한계까지 유방을 비대화 당하고 있다
+							PRINTFORMW 군침을 늘어뜨리는 %SAVESTR:TARGET%의 절정에 달하는 얼굴에는, 쇠 코뚜레가 잘 어울리고 있었다
+							MATURO = 밀크탱크
+						ELSE
+							PRINTFORMW 반항적이었던 %SAVESTR:TARGET%(은)는 축사로 보내져서 번식가축이 되어 버렸다
+							PRINTFORMW 같은 어디에선가 사져 온 남자노예가, 쇠사슬을 짤랑짤랑 울리면서 필사적으로 허리를 흔든다
+							PRINTFORMW %SAVESTR:TARGET%(은)는 자유와 인권을 빼앗겨 단지 성교의 쾌락만을 탐내고 있었다……
+							MATURO = 번식용 가축 노예
+						ENDIF
+					ENDIF
+			ENDIF
+		ENDIF
+	;애정・음란
+	ELSEIF TALENT:85 || TALENT:76
+		;魔族
+		IF TALENT:TARGET:314 == 9
+			;魔族売値100万以上
+			IF S >= 1000000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 암흑 드래곤에게
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 상급 악마에게
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 이형의 신의 신전에
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마수 연구 시설에
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 암흑용의 신부가 되어 용의 동굴에서 살고 있다
+							PRINTFORMW 용의 거대한 자지와 아기씨를 받아들여, 멸종 직전의 용을 살리기 위해서 몇번이나 임신해 낳고 있는 것 같다
+							PRINTFORMW 최근에는 암흑용이 아기씨를 너무 짜내져서 앓는 소리를 하고 있는 것 같다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 암흑용의 신부가 되어 용의 동굴에서 살고 있다
+							PRINTFORMW 마족의 육체가 된 것으로 용의 거근과 아기씨를 받아들여, 지금에 와서는 용의 아이를 몇 마리 기르고 있는 것 같다
+							PRINTFORMW %SAVESTR:TARGET%(은)는 한 층더 육체개조를 계속해 완전히 용이 되어 가는 것이 꿈인것 같다
+						ENDIF
+						MATURO = 암흑룡의 신부
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 거유의%SAVESTR:TARGET%(은)는 상급 악마의 메이드로서 일하고 있는 것 같다
+							PRINTFORMW 가슴을 노출한 채로 일을 실시해, 흥분하면 유두가 발기해 버린다
+							PRINTFORMW 유두가 섰던 것이 발견되면 음탕한 엄벌을 받지만,
+							PRINTFORMW 주인은 심술궃게도 최음의 주문을 그녀에게 몰래 걸면서 즐기고 있는 것 같다……
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 상급 악마의 메이드로서 일하고 있는 것 같다
+							PRINTFORMW 실수를 하면 그 자리에서 자위 해 버리는 저주를 받아,
+							PRINTFORMW 긴장감이 넘치는 일을 하고 있는 것 같다
+							PRINTFORMW 최근에는 일부러 실수를 해서 노출 자위를 즐기고 있는 것 같아서 주인을 곤란하게 하고 있는 것 같다……
+						ENDIF
+						MATURO = 상급 악마의 메이드
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 이형의 신의 신전에서, 인외로 변이한 신의 신도를 돌보고 있다
+							PRINTFORMW 신의 신도들은 걷는 것 이나 식사 조차도, 신의 무녀의 도움을 필요로 한다
+							PRINTFORMW 그리고 그들의 무서운 페니스가 발기하면,애널그리고 정화하지 않으면 안 된다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 이형의 신의 신전에서, 인외로 변이한 신의 신도를 돌보고 있다
+							PRINTFORMW 신의 신부가 되었던 %SAVESTR:TARGET%의 자궁은 신의 신도들의 공공의 것이 됬다
+							PRINTFORMW 오늘도 정자를 받아들여, 이형의 아이를 임신하고 있는 것 같다……
+						ENDIF
+						MATURO = 이형의 신의 신도 돌보미
+					;その他
+					ELSEIF LOCAL == 0
+						;話術LV5以上
+						IF ABL:15 >= 5
+							PRINTFORMW %SAVESTR:TARGET%의 교묘한 화술에 주목한 마수 연구원은,
+							PRINTFORMW %SAVESTR:TARGET%(을)를 실험대의 매입역으로 기용한 것 같다
+							PRINTFORMW 마수나, 이종 교배용 노예를 각지에서 사 모아, 그들의 비명을 들으며 자위하고 있는 것 같다
+							MATURO = 실험체 매입역
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%는 마수 교배용 노예로서 사져 오늘도 이형의 괴물과 교미를 강제되고 있다
+							PRINTFORMW 최근에는 마수들에게 사랑을 느껴 온 모양으로, 실험체 마수의 이름을 사랑스럽다는 듯이 부르면서
+							PRINTFORMW 허리를 흔들며 키스를 나누고 있는 것 같다……
+							MATURO = 마수 교배 노예
+						ENDIF
+					ENDIF
+			;魔族売値50万以上
+			ELSEIF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오우거 용병단에
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 켄타우로스 기사단에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 미노타우르스 사제에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS =오크 거상에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;도적
+						IF TALENT:TARGET:203 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오우거의 용병단의 일원이 되어, 용병단의 서포트역으로서 도움이 되고 있는 것 같다
+							PRINTFORMW 자산관리나, 장비나 물자의 구입 같은, 머리를 사용하는 일에 전념하고 있는 것 같다
+							PRINTFORMW 그 배는 크게 부풀어 오르고 있었다. 단장의 아이를 품어, 차기 단장이 될 하프 오거를 낳는다.
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 용병단의 전사로서 활약하고 있는 것 같다
+							PRINTFORMW 노예시대보다 한층 더 근육은 씩씩해져, 골태가 되었다
+							PRINTFORMW 오우거의 단원은 그런 %SAVESTR:TARGET%(을)를 축축하게 응시한다
+							PRINTFORMW 강한 암컷이야말로, 그들에게 있어선 최고의 성적 매력이 된다
+						ENDIF
+						MATURO = 오우거 용병단의 일원
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 켄타우로스의 아이의 양육 당담으로서 살고 있다
+							PRINTFORMW 그 풍부한 가슴으로 모유를 주는 모습은 인자한 어머니 그 자체다
+							PRINTFORMW 켄타우로스는 아이라고 해도, 훌륭한 페니스를 가지고 있다
+							PRINTFORMW 푸르게 여무는 과실을 보고, %SAVESTR:TARGET%(은)는 입술을 핥았다
+							PRINTFORMW 오늘 밤도 금단의 성교육을 한다……
+							MATURO = 켄타우로스 양육 당담
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 기사단의 수행원이 되어, 잡무를 하고 있는 것 같다
+							PRINTFORMW 켄타우로스는 성욕이 강하다. 하반신을 드러낸채 일을 하는 %SAVESTR:TARGET%(은)는,
+							PRINTFORMW 요구되면 당장이라도 엉덩이를 내미지 않으면 안 된다……
+							MATURO = 켄타우로스 기사단의 시종
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %SAVESTR:TARGET%는 미노타우로스의 신관들에게 숭배되는 존재가 되었다.
+							PRINTFORMW 암흑신의 사도로서 의식 시에는애널자위를 과시해 음란하게 춤춘다.
+							PRINTFORMW 그애널는 한계까지 확장되어 이상하게 한창 피고 있었다…….
+							MATURO = 미노타우르스의 성녀
+						ELSE
+							PRINTFORMW 미노타우로스의 신전의 성모가 되었던 %SAVESTR:TARGET%(은)는, 미노타우로스의 아이를 계속 임신하고 있다
+							PRINTFORMW 혼혈에 의해 한층 더 강한 미노타우로스를 낳는다고 하는 의식이라고 한다
+							PRINTFORMW 오늘도 성스러운 어머니로부터 소머리인 신의 아이가 낳아진다……
+							MATURO = 미노타우르스의 성모
+							
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 손님용 육변기로서 사졌던 %SAVESTR:TARGET%(은)는, 오크의 저택에서 특별한 지위를 얻었다.
+							PRINTFORMW 고귀한 마족의 변기라고 하는 존재는, 오크의 졸부의 욕망을 채우는데 충분했다.
+							PRINTFORMW 서재의 구석에 고정 되어 있는 변기는, 손님이나 주인의 눈에도 개의치 않고 미친 것처럼 자위를 반복한다.
+							PRINTFORMW 그것을 보는 것만으로도, 오크의 주인은 모든것을 손에 넣은 것 같은 만능감에 만취하는 것이었다.
+							MATURO = 손님용 육변기
+						ELSE
+							PRINTFORMW 애인으로서 사졌던 %SAVESTR:TARGET%(은)는, 오크의 저택에서 특별한 지위를 얻었다.
+							PRINTFORMW 오크 상인은 %SAVESTR:TARGET%에게 심취해, 매일 호화로운 옷이나 보석을 헌상했다.
+							PRINTFORMW %SAVESTR:TARGET%는 그다지도 싫지 않은 듯한 얼굴로, 호화롭게 몸치장 되고 있었다.
+							MATURO = 오크의 애인
+						ENDIF
+					ENDIF
+			;魔族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 스킬라 자경단에
+					LOCAL = 3
+				;기사＆마술사
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:201 == 1
+					LOCALS = 다크엘프 학교에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 대규모 골렘 농장에
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 인랑의 카지노에
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 스킬라 자경단은 용병 전사로서 %SAVESTR:TARGET%(을)를 고용한 것 같다
+							PRINTFORMW 잘 조교되었던 %SAVESTR:TARGET%(은)는, 명령에 온순해 자경단의 활약에 공헌했다
+							PRINTFORMW 그런데, 성욕의 너무 강한 %SAVESTR:TARGET%(은)는 훈련을 게을리 하며 스킬라들과 섹스만 하고 있는 것 같다
+							PRINTFORMW 최근에는 규율이 흐트러지게 했다는 것으로, 정조대가 붙여져 섹스 금지령을 선고받았다고 한다
+						ELSE
+							PRINTFORMW 스킬라 자경단은 용병 전사로서 %SAVESTR:TARGET%를 고용한 것 같다
+							PRINTFORMW 잘 조교되었던 %SAVESTR:TARGET%(은)는, 명령에 온순해 자경단의 활약에 공헌한 것 같다
+							PRINTFORMW 함께 솜씨를 연마해, 싸우는 가운데 스킬라들과 신뢰를 쌓아 올린 것 같다
+							PRINTFORMW 최근에는 자경단의 젊은 스킬라와 결혼 했다고 하는 통지가 도착했다
+						ENDIF
+						MATURO = 스킬라 자경단의 용병 전사
+					;기사＆마술사
+					ELSEIF LOCAL == 2
+						;巨乳or爆乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 소년 소녀가 다니는 학교의 강사로서 일하고 있다고 한다
+							PRINTFORMW 가슴이 부풀어 터질 것 같을 정도 큰 %SAVESTR:TARGET%(은)는 소년들의 선망의 대상이 되었다
+							PRINTFORMW 최근에는 다크엘프 소년과 음행 하고 있는 것이 발각되어,
+							PRINTFORMW 벌로서 음행교사라는 문신이 새겨 넣어지는 걸로 끝났다고 한다
+							MATURO = 다크엘프 학교의 음란강사
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 소년 소녀가 다니는 학교의 강사로서 일하고 있다고 한다
+							PRINTFORMW 경험 풍부한 %SAVESTR:TARGET%는 소년들의 선망의 대상이 되었다
+							PRINTFORMW 클래스 전원의 남자아이들과 관계를 가진 %SAVESTR:TARGET%(은)는, 여자아이들에게도 손을 대고 있다고 한다
+							PRINTFORMW 소문에서는 보건의 수업으로서 공개 섹스 실습까지 하고 있는 것 같다
+							MATURO = 다크엘프 학교의 음란강사
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 골렘이 일하는 농장에서 %SAVESTR:TARGET%(은)는 비료를 생산하는 일에 종사했다
+							PRINTFORMW 대량의 잔반이나 사료가 입에 흘려 넣어져 임산부와 같이 부풀어 오른 개조를 끝마친 내장으로 발효 시킨다
+							PRINTFORMW 그리고 교성을 올리면서 양질인 비료를 배설하고 있다고 한다
+							MATURO = 농장의 비료 생산 노예
+						ELSE
+							PRINTFORMW 골렘이 일하는 농장에서 %SAVESTR:TARGET%(은)는 골렘의 생체 유닛으로서 사졌다
+							PRINTFORMW %SAVESTR:TARGET%(은)는 골렘의 동체에 파묻혀져, 뇌가 비어 있는 영역에서 골렘의 제어를 실시한다
+							PRINTFORMW 아무것도 생각할 필요도 없이 그저 가만히 붙어있는 채, 다리 사이와 유두에 장착된 위안 장치의 쾌락을 맛볼 뿐인 생활을 하는 것 같다
+							MATURO = 골렘 생체 유닛
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 인랑이 운영하는 카지노에 사졌던 %SAVESTR:TARGET%(은)는, 육변기로서의 일을 계속하고 있다고 한다
+							PRINTFORMW 개의 아이를 임신할 수 있도록 개조된 %SAVESTR:TARGET%(은)는, 이리에게 범해지는 쇼에 출연하고 있었다
+							PRINTFORMW 즉석에서 임신이 판별되어 몇 회째로 임신할지가 내기의 대상이 되고 있다고 한다
+							MATURO = 카지노 수간쇼 여배우
+						ELSE
+							PRINTFORMW 인랑이 운영하는 카지노에 사졌던 %SAVESTR:TARGET%(은)는, 육변기로서의 일을 계속하고 있다고 한다
+							PRINTFORMW 후타나리로 개조되었던 %SAVESTR:TARGET%(은)는, 인랑 아가씨에게 펠라되며 절정을 참지 않으면 안 된다
+							PRINTFORMW 얼마나 견딜 수 있을지가, 내기의 대상이 라고 한다
+							MATURO = 카지노 후타나리 장난감
+						ENDIF
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오크 용병단에
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 트롤 노예 주인에게
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 다크엘프 학자에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 길거리의 프릭크 쇼에
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오크의 용병단의 일원으로서 초대되었다
+							PRINTFORMW 섹스를 좋아하는 %SAVESTR:TARGET%(은)는 훈련을 게을리 하며 오크의 페니스를 빨고 있다고 한다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오크의 용병단의 일원으로서 초대되었다
+							PRINTFORMW 단장의 마음에 들었던 %SAVESTR:TARGET%(은)는 강한 아이를 낳으면 좋겠다며 매일밤 교배되고 있는 것 같다
+						ENDIF
+						MATURO = 오크 용병단의 일원
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 트롤 육체 노동자를 달래는 위안 당담로서 일하고 있다
+							PRINTFORMW 트롤은 오로지 레바를 돌리며, 기계를 작동시키는 일에 전념한다. 그 페니스 케이스가 된 것이다
+							PRINTFORMW 큰 가슴은 튜브로 착유되어 트롤의 목을 적시게 되었다고 한다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 트롤 육체 노동자를 달래는 위안 당담로서 일하고 있다
+							PRINTFORMW 트롤은 오로지 레바를 돌리며, 기계를 작동시키는 일에 전념한다. 그 페니스 케이스가 된 것이다
+							PRINTFORMW 트롤의 정액만으로 살 수 있도록 개조된 그 얼굴은 음탕하게 비뚤어지고 있다
+						ENDIF
+						MATURO = 트롤 노동자의 위안 당담
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 새로운 쾌락 고문 연구용의 실험체가 되었다
+							PRINTFORMW 애널에 특수한 딜도가 삽입되어 스윗치가 들어간다
+							PRINTFORMW 그렇게 되면, 질로 조차 얻을 수 없는 쾌락이 피험자를 덮친다고 한다……
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 새로운 쾌락 고문 연구용의 실험체가 되었다
+							PRINTFORMW 새로운 미약을 차례차례로 주사되어 폐인이 되기 직전까지 절정 한다
+							PRINTFORMW 최근에는 바람이 부는 것만으로 절정 하기 때문에, 쾌락에 참는 약의 실험을 시작한 것 같다……
+						ENDIF
+						MATURO = 다크엘프 학자의 실험체
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 음란하게 개조된 육체를 프릭크 쇼에서 보여지는 생활을 하고 있다
+							PRINTFORMW 그로테스크하게 개조된 성기나, 음란하게 부풀어 오른 유방 등은 도시의 인간들의 호기심 대상이 되었다
+							PRINTFORMW 최근에는 추악한 페니스를 길러진 양성노예(와)과 공개 섹스를 하고 있는 것 같다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 음란하게 개조된 육체를 프릭크 쇼에서 보여지는 생활을 하고 있다
+							PRINTFORMW 그로테스크한 페니스를 자라게 해 그것을 훑는 공개 자위 쇼를 실시하고 있는 것 같다
+							PRINTFORMW 너무나도사정너무 해 성적 불능이 되었기 때문에, 최근에는 질의 (분)편으로 자위하고 있다고 한다
+						ENDIF
+						MATURO = 프릭크 쇼의 후타나리 변기
+					ENDIF
+			ENDIF
+		;それ以外の種族
+		ELSE
+			;それ以外の種族売値100万以上
+			IF S >= 1000000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 타천사 귀족에게
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 그리폰 택배 가게에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 라미아 고급 창관에
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 고블린 대극장에
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 타천사의 귀족의 것이 되어, 타천사의 소년의 교육 당담이 되었다
+							PRINTFORMW 타락 하면 할수록 강대한 존재로 되는 타천사에게, 성의 실습을 실시한다
+							PRINTFORMW 성욕이 왕성한 타천사 소년이 비명을 지를 정도로, %SAVESTR:TARGET%(을)는 매일밤 정액을 짜내고 있는 것 같다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 타천사의 귀족의 것이 되어, 타천사의 소년의 교육 당담이 되었다
+							PRINTFORMW 타락 하면 할수록 강대한 존재로 되는 타천사에게, 성의 실습을 실시한다
+							PRINTFORMW 성욕이 왕성해 필사적으로 허리를 흔드는 타천사 소년을, %SAVESTR:TARGET%(은)는 상냥하게 껴안았다
+						ENDIF
+						MATURO = 타천사 소년의 교육당담
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 그리폰의 기수로서 활약하기 시작했다
+							PRINTFORMW 겉으로는 택배 우편 일을 하지만. 뒤에서는 매춘부를 딜리버리 하는 일로 돈을 벌고 있다
+							PRINTFORMW 유방의 큰 %SAVESTR:TARGET%(은)는 종종 지명되는 간판녀가 되고 있었다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 그리폰의 기수로서 활약하기 시작했다
+							PRINTFORMW 겉으로는 택배 우편 일을 하지만. 뒤에서는 매춘부를 딜리버리 하는 일로 돈을 벌고 있다
+							PRINTFORMW 능숙함이 빠른 %SAVESTR:TARGET%(은)는, 누구보다도 빨리 자지를 빨아 마시러 오는 아가씨로서 유명하게 되어 있었다
+						ENDIF
+						MATURO = 그리폰의 기수
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %SAVESTR:TARGET%하애널전용의 양으로서 창관에서 기능(활약) 시작했다
+							PRINTFORMW 여러 이종족의 부유층들이 다니는 라미아의 창관에서, %SAVESTR:TARGET%의 인기는 높아지고 있는 것 같다
+							PRINTFORMW 보통의 창관이라면 문전박대 되는 이형의 손님들이, 오늘도 %SAVESTR:TARGET%(을)를 요구하며 창관의 문을 열었다
+							MATURO = 애널 전용 창녀
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 이종족이 다니는 라미아의 창관에서 활약하기 시작했다
+							PRINTFORMW 이종족의 아이를 몸에 밴 %SAVESTR:TARGET%(은)는, 임산부 매니아를 위해서 아직도 가랑이를 열고 있는 것 같다
+							PRINTFORMW 보통의 창관이라면 문전박대 되는 이형의 손님들이, 오늘도 %SAVESTR:TARGET%(을)를 요구하며 창관의 문을 열었다
+							MATURO = 이종간 전용 창녀
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;話術LV5以上
+						IF ABL:15 >= 5
+							PRINTFORMW %SAVESTR:TARGET%(은)는 고블린들의 아이돌로서 오늘도 대극장에서 노래하며 춤춘다
+							PRINTFORMW 알몸이라고 생각 될 정도의 추잡한 천 조각을 입고, 무대 위에서 추잡한 토크를 하는 %SAVESTR:TARGET%
+							PRINTFORMW 그 음탕한 모습에, 고블린의 팬이 만원 사례가 연 이어 지고 한다
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 고블린들의 아이돌로서 오늘도 대극장에서 노래하며 춤춘다
+							PRINTFORMW 알몸이라고 생각 될 정도의 추잡한 천 조각을 입고, 무대 위에서 허리를 흔드는 %SAVESTR:TARGET%
+							PRINTFORMW 그 음탕한 모습에, 고블린의 팬이 많아지고 있다고 한다
+						ENDIF
+						MATURO = 고블린들의 아이돌
+					ENDIF
+			;それ以外の種族売値50万以上
+			ELSEIF S >= 500000
+				;닌자＆도적
+				IF TALENT:TARGET:207 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 다크엘프 암살 길드에
+					LOCAL = 3
+				;기사＆전사
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:200 == 1
+					LOCALS = 스킬라의 해적선에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 대부호 라미아에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 오우거 암흑 전사에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;닌자＆도적
+					IF LOCAL == 3
+						;도적
+						IF TALENT:TARGET:203 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 암살 길드의 첩보원으로서 일하고 있는 것 같다
+							PRINTFORMW 배경은 수수께끼로 싸여 있지만, %SAVESTR:TARGET%(와)과 잔 남자의 정보는 눈 깜짝할 사이에 뒷세계에 흐른다고 한다
+							PRINTFORMW 일이 없는 날에는, 쾌락 고문에 대한 훈련으로 밤까지 애태워 지는 것 같다고 한다
+							MATURO = 암살 길드의 첩보원
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 암살 길드의 암살자로서 일하고 있는 것 같다
+							PRINTFORMW 배경은 수수께끼로 싸여 있지만, %SAVESTR:TARGET%(와)과 잔 남자는 다음날 시체가 되어 발견되었다고 한다
+							PRINTFORMW 일이 없는 날에는, 쾌락 고문에 대한 훈련으로 밤까지 애태워 지는 것 같다고 한다
+							MATURO = 암살 길드의 암살자
+						ENDIF
+					;기사＆전사
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 스킬라 여성 해적단의 선장을 하고 있다고 한다
+							PRINTFORMW 아무래도, 그 큰 가슴에 매료된 스킬라들에게 선장으로 추대 된 것 같다
+							PRINTFORMW 선실의 높은 곳에 앉아서 맛사지 받고 있는 것만으로, 일은 측근이 다 해 주는 것 같다
+							MATURO = 여성 해적단의 선장
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 스킬라 여성 해적단의 선원을 하고 있다고 한다
+							PRINTFORMW 갤리배의 저어 손들은, 모두 스큐라들에게 랭탈 되어 왔다노예들이다
+							PRINTFORMW %SAVESTR:TARGET%는 노 젖는 선원들에게 가랑이를 열며, 피로와 불만을 완화시키고 있다고 한다
+							MATURO = 여성 해적단의 선원
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 레즈끼가 있는 라미아에 사졌기 때문에, %SAVESTR:TARGET%는 매일 같이 밤에 안기는 것이 되었다
+							PRINTFORMW 애널취미가 있는 라미아의 부자 주인은, 그 길게 요령있게 움직이는 혀로애널를 후빈다.
+							PRINTFORMW 그때 마다, %SAVESTR:TARGET%(은)는 괴로운 신음 소리를 내며 항문을 녹게 되는 것이었다.
+							MATURO = 라미아의 레즈 노예
+						ELSE
+							PRINTFORMW 레즈끼가 있는 라미아에 사졌기 때문에, %SAVESTR:TARGET%는 매일 같이 밤에 안기는 것이 되었다
+							PRINTFORMW 라미아 갑누는, 그 긴 뱀의 몸으로 %SAVESTR:TARGET%(을)를 조여댄다
+							PRINTFORMW 그때 마다, %SAVESTR:TARGET%는 괴로운 신음 소리를 내며 몸을 비트는 것이었다.
+							MATURO = 라미아의 레즈 노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 전신에 오우거 주술의 문신이 새겨져, 미개의 부족과 같이 되어 버렸다.
+							PRINTFORMW 유두나 음순, 코에 피어스가 꿰어져, 완전히 인간을 버리고 오거의 동료가 된 것을 생각하게 했다.
+							PRINTFORMW %SAVESTR:TARGET%의 등뒤에는 오거의 이름이 새겨졌지만 그럼에도 그의 소유물이 된 것에 기쁨을 느끼고 있었다.
+							MATURO = 야만 오우거의 일원
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 전신에 오우거 주술의 문신이 새겨져, 미개의 부족과 같이 되어 버렸다.
+							PRINTFORMW 유두나 음순, 코에 피어스가 꿰어져, 완전히 인간을 버리고 오거의 동료가 된 것을 생각하게 했다.
+							PRINTFORMW 그런데도 %SAVESTR:TARGET%(은)는, 그것을 기뻐하며 무거운 오거의 두꺼운 앞가슴에 안기는 것이었다.
+							MATURO = 야만 오우거의 일원
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계 식물 농장에
+					LOCAL = 3
+				;기사＆마술사
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:201 == 1
+					LOCALS = 오우거 기사단에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 하피의 노예 알선소에
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 알라우네 연금술사에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 마계의 식물을 기르게 된 %SAVESTR:TARGET%(은)는, 식물에게 특수한 양분을 주는 역할이 주어졌다
+							PRINTFORMW 식물의 뿌리를 스스로의애널에 삽입해, 직접 양분을 준다
+							PRINTFORMW 섹스를 좋아하는 %SAVESTR:TARGET%(은)는 그 삽입감을 참을 수 없는 것 같아, 몇번이나 비료를 주러 가고 있다고 한다
+							MATURO = 마계 식물 보육사
+						ELSE
+							PRINTFORMW 마계의 식물을 기르게 된 %SAVESTR:TARGET%(은)는, 식물에게 특수한 양분을 주는 역할이 주어졌다
+							PRINTFORMW 식물의 뿌리를 스스로의애널에 삽입해, 직접 양분을 준다
+							PRINTFORMW %SAVESTR:TARGET%(이)가 기른 식물은 발육이 잘 되어, 품평회에서 상을 받은 것 같다
+							MATURO = 마계 식물 보육사
+						ENDIF
+					;기사＆마술사
+					ELSEIF LOCAL == 2
+						;巨乳or爆乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오우거 기사단에게 고용되어 오우거 아이의 육아 담당이 되었다.
+							PRINTFORMW 타고난 거유를 살려, 하프 오우거들의 교육이나 전투훈련까지 맡겨지고 있다.
+							PRINTFORMW 마을의 안쪽에서는, 모체가 되는 여자들의 허덕이는 소리가 들린다.
+							PRINTFORMW 또 한사람 태어난 하프 오우거의 아이를 손에 드는 것도, 그녀의 일이었다.
+							MATURO = 오우거 아이들의 육아당담
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오우거의 기사단의 일원으로서 싸우고 있다.
+							PRINTFORMW 인간의 마을을 덮쳐, 금품이나 여자를 약탈하는 도적 기사단이다.
+							PRINTFORMW %SAVESTR:TARGET%도 또한, 저항하는 전사의 목을 치고 안쪽에 숨겨진 여자를 끌어낸다.
+							PRINTFORMW 필사적으로 목숨구걸 하는 여자를 끌고 간 %SAVESTR:TARGET%(은)는 사랑하는 오우거 남편의 승리 보고를 했다.
+							MATURO = 오우거 기사단의 일원
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 하피의 신변을 돌본다노예로서 사졌다%SAVESTR:TARGET%하,
+							PRINTFORMW 알몸에 목걸이라고 하는 모습으로 하피의 갑부의 아가씨를 돌보고 있었다
+							PRINTFORMW 갑부의 아가씨는 유명한 새디스트로, %SAVESTR:TARGET%에게 애널 마개를 해 배설 관리를 즐기고 있다고 한다
+							MATURO = 하피 갑부의 노예
+						ELSE
+							PRINTFORMW 하피의 신변을 돌본다노예로서 사졌다%SAVESTR:TARGET%하,
+							PRINTFORMW 알몸에 목걸이라고 하는 모습으로 하피들을 돌보고 있었다
+							PRINTFORMW %SAVESTR:TARGET%에게 새로운 노예를 낳게 하기 위해, 일하는 도중에 남자노예와 교배 당하고 있다고 한다……
+							MATURO = 하피의 노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 육변기인 %SAVESTR:TARGET%(은)는 실험용 정액을 모으기 위해, 거리의 공중 변소가 되어 있었다.
+							PRINTFORMW 육체 개조를 받은 %SAVESTR:TARGET%(은)는 요상하게 꾸불대는 질과 풍선과 같은 자궁으로 정액을 짜낸다.
+							PRINTFORMW 대량으로 모은 정액은 호문쿨루스를 만들기 위해 활용된다고 한다…….
+							MATURO = 공공 육변기
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 마법의 소재를 모으기 위해 육체 개조를 받는 것이 되었다.
+							PRINTFORMW 거대한 음낭을 자라나 대량의 정액을 생산하는 %SAVESTR:TARGET%.
+							PRINTFORMW 발기조차 할 수 없게된 흐물흐물한 커다란 페니스에는 관을 연결되어, 정액이 차례차례로 착취당해 간다.
+							PRINTFORMW 「오늘의 할당량 반정도 왔다구, 앞으로 5000회정도, 힘차게 똥구멍절정하라구」
+							PRINTFORMW 애널를 범해져%SAVESTR:TARGET%는 움찔움찔 신체를 진동시키고 이키 계속했다.
+							MATURO = 정액생산 후타나리 노예
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 상급 오크 전사에게
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 리자드맨 기사에게
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 다크엘프 여신관에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 길거리 공중변소로
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 상급 오크 전사와 결혼 하게 되었다고 한다.
+							PRINTFORMW 씩씩한 오크의 육체에 매료되어 깊게 서로 사랑하고 있는 것 같다.
+							PRINTFORMW 최근에는 남편인 오크가 %SAVESTR:TARGET%의 성욕에 지고 있는 것 같다.
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 상급 오크 전사와 결혼 하게 되었다고 한다.
+							PRINTFORMW 씩씩한 오크의 육체에 매료되어 깊게 서로 사랑하고 있는 것 같다.
+							PRINTFORMW 이제 곧 다섯번째 아이가 태어난다고 하는 소식이 들어왔다.
+						ENDIF
+						MATURO = 상급 오크 전사의 아내
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 리자드맨 기사와 결혼 하게 되었다고 한다.
+							PRINTFORMW 낯선 비늘 피부도, 사랑에는 장해가 되지 않았다.
+							PRINTFORMW 거유인 %SAVESTR:TARGET%(은)는 남편인 리자드맨의 자랑이 되어, 일이 있을 때 마다 칭찬 되고 있는 것 같다.
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 리자드맨 기사와 결혼 하게 되었다고 한다.
+							PRINTFORMW 낯선 비늘 피부도, 사랑에는 장해가 되지 않았다.
+							PRINTFORMW 단련했던 %SAVESTR:TARGET%(은)는 리자드맨 남편에게 몹시 사랑받게 되어, 일이 있을 때 마다 자랑되고 있는 것 같다.
+						ENDIF
+						MATURO = 리자드맨 기사의 아내
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 여신관의 것으로 수행하고 있는 것 같다.
+							PRINTFORMW 자매의 인연을 주고 받아, 매일을 암흑신을 위해 헌신하고 있는 것 같다.
+							PRINTFORMW 그 큰 가슴을 드러내게 되어, 유두에는 계약의 피어스가 빛나고 있었다…….
+							MATURO = 사교의 자매 신도
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 여신관의 것으로 수행하고 있는 것 같다.
+							PRINTFORMW 자매의 인연을 주고 받아, 매일을 암흑신을 위해 헌신하고 있는 것 같다.
+							PRINTFORMW 그녀의 성기는 피어스로 닫혀져, 두 번 다시 남근을 받아들이는 일은 없겠지.
+							MATURO = 사교의 자매 신도
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 이종족이 왕래하는 마을의 공공설비로서 공중변소가 되었다고 한다.
+							PRINTFORMW %SAVESTR:TARGET%(은)는 모든 종족의 페니스를 받아들여, 쉬는 시간도 없이 임신했다.
+							PRINTFORMW 낳은 아이는 고아원에서 훌륭하게 교육을 받아, 마을의 발전에 도움이 될 것이다.
+							MATURO = 공공 육변기
+						ELSE
+							PRINTFORMW 이종족이 왕래하는 마을의 공공설비로서 공중변소가 되었다고 한다.
+							PRINTFORMW %SAVESTR:TARGET%(은)는 모든 종족의 페니스를 빨며, 정액을 계속 마셨다.
+							PRINTFORMW 변태녀로서 유명하게 된 %SAVESTR:TARGET%(은)는, 어느 날 단골손님에게 구매되어 그대로 결혼을 했다고 한다.
+							MATURO = 공공 육변기
+						ENDIF
+					ENDIF
+			ENDIF
+		ENDIF
+	;それ以外
+	ELSE
+		;魔族
+		IF TALENT:TARGET:314 == 9
+			;魔族売値50万以上
+			IF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오우거 용병단에
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 켄타우로스 기사단에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 미노타우르스 사제에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 오크 거상에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;도적
+						IF TALENT:TARGET:203 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오우거 용병단의, 마족의 어드바이저로서 맞아들이게 됬다.
+							PRINTFORMW 오우거들은 %SAVESTR:TARGET%에게 복종 해, 용병단의 운영을 완전히 맡기고 있었다.
+							PRINTFORMW 전 단장이었던 오우거 전사는, 은밀하게 계획을 꾸미고 있었다.
+							PRINTFORMW %SAVESTR:TARGET%(을)를 자신의 왕자지로 복종시켜, 용병단에서의 권력을 한층 더 강하게 한다.
+							MATURO = 오거들의 어드바이저
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 용병단에서 마족의 경호원으로서 맞아 들이게 되었다.
+							PRINTFORMW 약탈이나 용병단끼리의 소규모 전투에서, %SAVESTR:TARGET%(은)는 자신이 자랑하는 무기를 휘둘렀다.
+							PRINTFORMW 마족의 힘을 가지고 있으면, 여기사 따윈 한 손으로 닭목 비트는 것처럼 손쉽게 쓰러트려 버렸다.
+							PRINTFORMW 손에 넣은 여자는, 용병단의 공유재산으로서 성 처리에 혹사 되어졌다.
+							MATURO = 오우거 용병단의 경호원
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 켄타우로스 기사단에서, 교육 당담으로서 맞아들이게 되었다.
+							PRINTFORMW 켄타우로스의 아이들에게 마족의 힘을 가르쳤다.
+							PRINTFORMW 마의 모유를 마신 켄타우로스의 아이는, 음기에 닿아 발기해 버렸다
+							PRINTFORMW 그런 때에는, %SAVESTR:TARGET%(은)는 상냥하게 손으로 처리 해 주었다고 한다.
+							MATURO = 켄타우로스 자녀 교육 당담
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 켄타우로스 기사단에서, 교육 당담으로서 맞아들이게 되었다.
+							PRINTFORMW 켄타우로스의 아이들에게 마족의 힘을 가르쳤다.
+							PRINTFORMW 마의 힘을 받은 켄타우로스의 아이는, 음기에 닿아 발기해 버렸다
+							PRINTFORMW 그런 때에는, %SAVESTR:TARGET%(은)는 허리를 흔들어 사정를 도와 주었다고 한다.	
+							MATURO = 켄타우로스 자녀 교육 당담
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %SAVESTR:TARGET%는 미노타우로스의 신관들에게 의식 으로 칭해 매일밤애널를 바쳐지고 있는 것 같다
+							PRINTFORMW 미노타우로스의 왕자지를 받아들이는 항문은 이미 한계까지 확장되어,
+							PRINTFORMW 애널스톱퍼 없이는 일상생활도 보낼 수 없게 되어 있는 것 같다……
+							MATURO = 미노타우르스 신전의 제물
+						ELSE
+							PRINTFORMW 미노타우로스의 신전의 성모가 된 %SAVESTR:TARGET%(은)는, 미노타우로스에게 신앙 되고 있었다.
+							PRINTFORMW 오늘도 성욕이 높아진 수컷 미노타우로스의 신도가 신전을 방문한다.
+							PRINTFORMW %SAVESTR:TARGET%(은)는, 그렇게 고뇌하는 어린 송아지에게 손과 입으로 위로해 주었다…….
+							MATURO = 미노타우르스 신전의 성모
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 손님용의 육변기로서 사졌던 %SAVESTR:TARGET%(은)는, 오크의 저택에서 가축으로서 길러지고 있다
+							PRINTFORMW 전신에 추잡한 말이 쓰여져 구경거리로서 후타나리 노예에 범해지는 매일이다
+							PRINTFORMW 후타나리 노예는 사고까지 완전히 성욕에 의해 덧쓰기되어 추잡한 육체에 개조되어 미친 것처럼%SAVESTR:TARGET%(을)를 범한다
+							PRINTFORMW 질려져 버리지면, 이번은 %SAVESTR:TARGET%(이)가 후타나리 노예로서 개조될 것이다…….
+							MATURO = 손님용 육변기
+						ELSE
+							PRINTFORMW 애인으로서 사졌던 %SAVESTR:TARGET%(은)는 주인에게 얌전하게 따르고 있는 것 같다.
+							PRINTFORMW 오크 상인은, 매일 깨끗한 옷을 사 와서 %SAVESTR:TARGET%에게 입혔다
+							PRINTFORMW 이윽고 사랑이 싹 터, 그녀의 자궁에 하프 오크의 아이를 품는 것이 될 것이다…….
+							MATURO = 오크 상인의 애인
+						ENDIF
+					ENDIF
+			;魔族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 스킬라 자경단
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 다크엘프 학교
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 골렘 대농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 거대 감옥
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 스킬라 자경단은 용병 전사로서 %SAVESTR:TARGET%(을)를 고용한 것 같다
+							PRINTFORMW 일이 끝나면, %SAVESTR:TARGET%(은)는 선배인 스킬라에게 불려 가 성 처리를 명령 받았다
+							PRINTFORMW 섹스광인 %SAVESTR:TARGET%(은)는 싫지 않은 것 같다
+							PRINTFORMW 대기소에서 오늘도 요란법석을 떨고 있다고 하는 소문이다
+							MATURO = 스킬라 자경단의 용병 전사
+						ELSE
+							PRINTFORMW 스킬라 자경단은 용병 전사로서 %SAVESTR:TARGET%(을)를 고용한 것 같다
+							PRINTFORMW 일이 끝나면, %SAVESTR:TARGET%(은)는 선배인 스킬라에게 불려 가 성 처리를 명령 받았다
+							PRINTFORMW 스킬라의 남근을 빨며 정액을 삼키는 일도, 지금은 완전히 익숙해진 것 같다
+							MATURO = 스킬라 자경단의 용병 전사
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;巨乳or爆乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 소년 소녀가 다니는 학교의 양호교사로서 일하고 있다고 한다
+							PRINTFORMW 부풀어 터질 것 같이 큰 가슴을 가진 %SAVESTR:TARGET%(은)는 소년들의 선망의 대상이 되었다
+							PRINTFORMW 고민을 가진 어린 다크엘프의 상담역으로서 신뢰 받고 있는 것 같다
+							PRINTFORMW 성욕을 발산시키면 고민이 바람에 날아 간다는 것으로, 양호실은 마치 창관 같다고 한다
+							MATURO = 다크엘프 학교의 양호교사
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 소년 소녀가 다니는 학교의 양호교사로서 일하고 있다고 한다
+							PRINTFORMW 경험이 풍부한 %SAVESTR:TARGET%(은)는 소년 소녀들의 좋은 이해자가 되었다
+							PRINTFORMW 사랑으로 고민하는 다크엘프 소년과 소녀를 커플로 만들어 성의 지도를 실시하고 있다고 한다
+							PRINTFORMW 양호실은 그야말로 새파랗게 젊은 성욕을 서로 부딪치는 러브호텔이 되었다고 한다
+							MATURO = 다크엘프 학교의 양호교사
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 골렘이 일하는 농장에서 %SAVESTR:TARGET%(은)는 골렘을 정비 하는 일에 종사했다
+							PRINTFORMW %SAVESTR:TARGET%(은)는 육체가 개조되어 먹은 것을 골렘의 연료로서 장내에 축적하는 용도가 되어 있었다
+							PRINTFORMW 그리고애널에 튜브를 찔러넣어, 골렘으로 공급한다 한다
+							MATURO = 골렘 정비사
+						ELSE
+							PRINTFORMW 골렘이 일하는 농장에서 %SAVESTR:TARGET%(은)는 작물을 지키는 경비원이 되었다
+							PRINTFORMW %SAVESTR:TARGET%(은)는 빛의 마법으로 농장을 비추며, 야생 동물이나 도적이 침입 하지 않도록 지켰다
+							PRINTFORMW 휴식시간은 대기소의 수면실에서 쉬는 것으로 되어 있었지만, 오락은 거의 없었기에
+							PRINTFORMW 지금에는 동료 노예와 섹스를 하며 시간을 때우고 있는 것 같다
+							MATURO = 농장 경비원
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 감옥의 죄수들의 오락용으로 사졌던 %SAVESTR:TARGET%(은)는, 육변기로서의 일을 계속하고 있다고 한다
+							PRINTFORMW 미노타우로스나 켄타우로스 같은, 막되먹게 성욕이 강한 종족이 반란을 하지 않도록하기 위해서다
+							PRINTFORMW 다종의 다양한 이종족의 페니스를 받아들여, %SAVESTR:TARGET%(이)가 안은 적이 없는 종족은 없다고 한다
+							MATURO = 죄수 오락용 변기
+						ELSE
+							PRINTFORMW 감옥의 죄수들의 오락용으로 사졌던 %SAVESTR:TARGET%(은)는, 죄수들의 위안을 하고 있다고 한다
+							PRINTFORMW 성욕이 모인 죄수들 한사람 한사람씩 자위와 펠라를 실시해 정액을 내게 해 줬다
+							PRINTFORMW 외설죄로 잡힌 오크의 변태 성욕자와 사랑을 키우게 되어, 이번에 옥중 결혼식을 실시한다고 하는 통지가 왔다
+							MATURO = 오크 죄수의 아내
+						ENDIF
+						
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오크 용병단에
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 트롤 노예 주인에게
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 다크엘프 학생에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 길거리 프릭크 쇼에
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW 어떤 %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ감각ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오크 용병단의 비품이 되었다
+							PRINTFORMW 용병단의 마차안에 배속되어, 쉴 여유도 없이 범해지고 있다고 한다
+							MATURO = 오크 용병단의 비품
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 오크 용병단의 성욕 처리 담당이 되었다
+							PRINTFORMW 매일 용병단 전원의 페니스를 빨며 청소 펠라를 하지 않으면 안 된다
+							MATURO = 오크 용병단의 성욕 처리 당담
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 트롤 노예가 일하는 공장에서%SAVESTR:TARGET%는 일하고 있다
+							PRINTFORMW %SAVESTR:TARGET%(은)는 그 거유로 인해 트롤의 왕자지를 다루며 위안을 했다
+							PRINTFORMW 오늘도 나날의 일을 끝낸 트롤들이 %SAVESTR:TARGET%의 앞에 긴 줄을 만들고 있었다
+							MATURO = 트롤 노동자 위안당담
+						ELSE
+							PRINTFORMW 트롤 노예가 일하는 공장에서%SAVESTR:TARGET%는 일하고 있다
+							PRINTFORMW 거대한 음낭을 가진 트롤의 성욕은 엄청나서, 냅두게 되면 날뛰기 시작한다
+							PRINTFORMW 벽에 끼어 넣어져 엉덩이만을 내밀고 있는 %SAVESTR:TARGET%. 그 엉덩이에, 오늘도 몇개의 왕자지가 대어졌다……
+							MATURO = 트롤 노동자 위안당담
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;A감각3以上
+						IF ABL:Ａ감각 >= 3
+							PRINTFORMW %SAVESTR:TARGET%(은)는 새로운 미약 연구용의 실험체가 되었다
+							PRINTFORMW 애널에 미약을 쳐바른 것만으로 미칠 듯할 만큼의 쾌락에 습격당하고 조수를 흩뜨린다고 한다
+							MATURO = 최음약 실험체
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 새로운 미약 연구용의 실험체가 되었다
+							PRINTFORMW 음핵에 직접 미약을 투여해 넣으면, 하루 종일 절정이 멈추지 않게 된다고 한다
+							MATURO = 최음약 실험체
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW %SAVESTR:TARGET%는 마족의 노예로서 프릭크 쇼에서 몸을 보이는 생활을 하고 있다
+							PRINTFORMW 꾀죄죄한 오크와의 공개 섹스가 적당하게 인기인 것 같다
+							MATURO = 프릭크 쇼 육변기
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%는 마족의 노예로서 프릭크 쇼에서 몸을 보이는 생활을 하고 있다
+							PRINTFORMW 피어스나 문신으로 개조된 몸은 적당하게 호평된 것같다
+							MATURO = 프릭크 쇼 육변기
+						ENDIF
+						
+					ENDIF
+			ENDIF
+		;それ以外の種族
+		ELSE
+			;それ以外の種族売値50万以上
+			IF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오우거 용병단에
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 켄타우로스 기사단에
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 미노타우로스 사제에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 오크 거상에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%는 오거의 용병단에, 고급성노예로서 맞아들일 수 있었다.
+							PRINTFORMW 오우거들은 %SAVESTR:TARGET%에게 홀딱 반해, 마치 성모와 같이 대해지고 있다.
+							PRINTFORMW 전 단장이었던 오거 전사는, 은밀하게 계획을 꾸미고 있었다.
+							PRINTFORMW %SAVESTR:TARGET%(을)를 자신의 왕자지로 복종시켜, 용병단의 카리스마를 자신의 것으로 한다.
+							MATURO = 오우거 용병단의 고급 성노예
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 용병단의 경호원으로서 맞아들이게 되었다.
+							PRINTFORMW 경험을 쌓았던 %SAVESTR:TARGET%(은)는, 오거의 검이 되어 전선에서 싸웠다.
+							PRINTFORMW 그녀 자신에게도 성적 매력이 없을 것은 아니다. 그러나 성노예(이)가 될 생각도 없다.
+							PRINTFORMW 그러한 때에 여자를 약탈 해서, 변기 대역으로 내밀었다.
+							MATURO = 오우거 용병단의 경호원
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 켄타우로스 기사단에서, 교육당담으로서 맞아 들이게 되었다.
+							PRINTFORMW 켄타우로스 아이들에게 전사로서의 교육을 베푼다.
+							PRINTFORMW 가슴이 큰 %SAVESTR:TARGET%(은)는 아이들에게 인기로, 자주 모유를 달라고 졸라지고 있었다.
+							MATURO = 켄타우로스 자녀 교육담당 
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 켄타우로스 기사단에서, 교육당담으로서 맞아 들이게 되었다.
+							PRINTFORMW 켄타우로스 아이들에게 전사로서의 교육을 베푼다.
+							PRINTFORMW 이종족인 %SAVESTR:TARGET%(은)는 일찌감치 얕보여져서, 클래스의 공유변기가 되어 있다고 한다.
+							MATURO = 켄타우로스 자녀 교육담당 
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %SAVESTR:TARGET%(은)는 미노타우로스 신관들에게 산 제물로서 구매 되었다.
+							PRINTFORMW 생명을 빼앗기는 일은 없지만, 매일 제단에서애널섹스를 바치지 않으면 안 된다.
+							PRINTFORMW 노예의 천한 살찐 중년과 한 쌍으로 되어 목걸이로 연결될 수 있는 매일밤애널그리고 연결되고 있다고 한다……
+							MATURO = 섹스를 바치는 제물
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 미노타우로스 신관들에게 산 제물로서 구매 되었다.
+							PRINTFORMW 목숨을 빼앗기는 일은 없지만, 매일 제단에서 섹스를 바치지 않으면 안 된다.
+							PRINTFORMW 푸른 성욕이 넘치는 소년과 한 쌍으로 되어 임신하면 아이는노예로서 팔린다고 한다……
+							MATURO = 섹스를 바치는 제물
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 손님용 육변기로 사졌던 %SAVESTR:TARGET%(은)는, 오크의 저택에서 가축으로서 길러지고 있다
+							IF TALENT:후타나리
+								PRINTFORMW 양성이었다%SAVESTR:TARGET%하, 한층 더 왕자지에 개조되어 다른노예를 범하는 구경거리를 하고 있다
+							ELSE
+								PRINTFORMW 양성에 개조된 %SAVESTR:TARGET%(은)는, 다른노예를 범하는 구경거리가 되고 있다
+							ENDIF
+							PRINTFORMW 사고는 세뇌로 완전히 성욕에 덧쓰기되어 이미사정밖에 머리에 없었다
+							MATURO = 후타나리 변기
+						ELSE
+							PRINTFORMW 애인으로서 사졌던 %SAVESTR:TARGET%(은)는 주인에게 홀딱 반해 버린 것 같다.
+							PRINTFORMW 오크의 상인도 %SAVESTR:TARGET%(을)를 몹시 사랑해, 두 명은 행복하게 살았다.
+							PRINTFORMW 언젠가는 그녀의 자궁에 하프 오크 아이를 품게 될 것이다…….
+							MATURO = 오크의 애인
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 스킬라 자경단
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 다크엘프 학교
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 골렘 대농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 고블린 도박장
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ감각ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW 스킬라 자경단은 용병 전사로서 %SAVESTR:TARGET%(을)를 고용한 것 같다
+							PRINTFORMW 일이 끝나면, %SAVESTR:TARGET%는 전투로 마음이 고양된 스킬라에게 안기는 것 같다
+							MATURO = 스킬라 자경단의 용병 전사
+						ELSE
+							PRINTFORMW 스킬라 자경단은 잡무 당담으로서 %SAVESTR:TARGET%(을)를 고용한 것 같다
+							PRINTFORMW 갑옷 연마를 명령 받은 %SAVESTR:TARGET%(은)는, 일이 늦어지게 되면 엉덩이에 채찍을 맞게 되었다고 한다
+							MATURO = 스킬라 자경단의 잡무당담
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유, 폭유, 超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 소년 소녀가 다니는 학교의 비품으로서 일하고 있다고 한다
+							PRINTFORMW 커다란 %SAVESTR:TARGET%의 가슴은 수업으로서 육체 개조 실험의 실험체가 되고 있다고 한다
+							MATURO = 다크엘프 학교 비품
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 다크엘프 소년 소녀가 다니는 학교의 비품으로서 일하고 있다고 한다
+							PRINTFORMW 수업으로 육체 개조 실험의 실험체가 되어, 다음에는 이종교배 실험이 앞두고 있다고 한다
+							MATURO = 다크엘프 학교 비품
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;동물귀
+						IF TALENT:TARGET:124
+							PRINTFORMW %SAVESTR:TARGET%(은)는 짐승에게 가까워 졌기 때문인지, 가축 번식용으로서 마굿간에게 놓여지게 되었다
+							PRINTFORMW 자궁이 개조되어 3일에 한번 가축을 출산할 수 있게 된 몸이 되어 버렸다고 한다
+							PRINTFORMW 출산할 때에 보통 사람에게는 견딜 수 없는 쾌락을 느끼는 부작용으로, %SAVESTR:TARGET%의 사고는 붕괴 직전이었다
+							MATURO = 번식용 가축 노예
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 농장에서 가축을 돌보는 일이 되었다
+							PRINTFORMW 가축이라고느 해도 개조된 육변기다. 비대화 한 젖으로부터 모유를 착취당하고 있다
+							PRINTFORMW 건강진단을 위해서(때문에)애널에 팔꿈치까지 팔을 돌진하면, 육변기는 교성을 주고 기뻐했다
+							MATURO = 가축 변기 관리인
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 육변기인 %SAVESTR:TARGET%(은)는 도박장의 내기의 대상으로서 인기가 있었다
+							PRINTFORMW 고블린의 정액을 유리잔에 채워 일렬로 늘어 놓아, %SAVESTR:TARGET%(은)는 정액 주인 맞추기를 하는것이다
+							PRINTFORMW 정액이 싼 고블린을 맞힐 수 있을까, 없을까 나름대로 큰 돈이 움직인다고 한다
+							MATURO = 도박장의 장난감
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 도박장에서 바니걸 차림으로 카드 게임을 하고 있었다
+							PRINTFORMW %SAVESTR:TARGET%에게 이기는 것이 가능하다면, 펠라치오의 서비스를 받게 된다고 한다
+							PRINTFORMW 그 때문인지, 언제나 긴 행렬이 생길 정도로 인기가 있다고 한다
+							MATURO = 도박장의 바니걸
+						ENDIF
+						
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 오크용 공중 목욕탕에
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 트롤 노예 주인에게
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 다크엘프 대학생에게
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 고블린 마을에
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ감각ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW %SAVESTR:TARGET%(은)는 공중 목욕탕에서 오크들에게 맛사지를 하고 있는 것 같다
+							PRINTFORMW %SAVESTR:TARGET%의 손놀림으로 발기해 버린 오크는, 추가 요금으로 %SAVESTR:TARGET%(을)를 안을 수 있다고 한다
+							MATURO = 공중 목욕탕 마사지사
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 공중 목욕탕에서 오크들에게 맛사지를 하고 있는 것 같다
+							PRINTFORMW 어깨의 응어리가 잘 풀린다며 좋은 평판을 받고 있는것 같다
+							MATURO = 공중 목욕탕 마사지사
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;악취민감・鈍感
+						IF TALENT:TARGET:악취둔감 == 1 || TALENT:TARGET:악취민감 == 1
+							PRINTFORMW %SAVESTR:TARGET%는 트롤의노예의 위안용으로 사져 버렸다
+							PRINTFORMW 엉덩이를 닦을 수 없는 트롤의노예를,%SAVESTR:TARGET%는 예쁘게 닦아 주지 않으면 안 된다
+							MATURO = 트롤 노예 위안 당담
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%는 트롤 노예의 위안용으로 사져 버렸다
+							PRINTFORMW 목욕탕에 들어가는 것을 싫어하는 트롤의노예를, %SAVESTR:TARGET%(은)는 찐 수건으로 닦아 준다
+							MATURO = 트롤 노예 위안 당담
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;元学生
+						IF TALENT:TARGET:용자가되기이전의생활 == 1
+							PRINTFORMW 다크엘프 대학생은, %SAVESTR:TARGET%의 예전 동급생이었던 것 같다
+							PRINTFORMW 두 명은 그대로 이어져서 행복하게 되었다고 한다……
+							MATURO = 다크엘프 학생의 아내
+						ELSE
+							PRINTFORMW 다크엘프 대학생들은 %SAVESTR:TARGET%(을)를 동아리 공유 변기로 하였다
+							PRINTFORMW 섹스 동아리에는 매일 많은 사람들이 방문하고 있다고 한다……
+							MATURO = 다크엘프의 섹스동아리 공유 변기
+						ENDIF
+						
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW %SAVESTR:TARGET%(은)는 임신하는 변기로서 고블린들에게 사랑 받았다
+							PRINTFORMW 지금은 고블린의 말도 배워서, 행복하게 아이를 낳고 있다고 한다
+							MATURO = 고블린 임신 변기
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%(은)는 잡무당담으로서 고블린들에게 사랑 받았다
+							PRINTFORMW 지금은 고블린의 말도 배워서, 행복하게 살고 있다고 한다
+							MATURO = 고블린 잡무 당담
+						ENDIF
+					ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	SIF FAMILY:2 >= 0
+		CSTR:(FAMILY:2):5 = %MATURO%
+	
+	;結びの文, 特殊な文を入れたくなったら後で分岐を入れよう
+	PRINTFORML
+	PRINTFORMW 이렇게 해서 %NAME:MASTER%(와)과 %SAVESTR:TARGET%(은)는 두 번 다시 만나는 일은 없었다………
+	PRINTFORML
+RETURN 0
+
+
+

@@ -1,0 +1,5448 @@
+﻿;=================================================
+;eramaou전용 구상 템플릿
+;=================================================
+;-------------------------------------------------------------------------------
+;【ライセンス詳細】
+;	・基本項目(許可する項目を"○"に、許可しない項目を"×"に変更してください。)
+;	+----+----+-------------------------------+
+;	|番号|許可|ライセンス内容                 |
+;	+----+----+-------------------------------+
+;	|   1| ○ | 処理上のバグ修正              |
+;	+----+----+-------------------------------+
+;	|   2| ○ | 口上の誤字・脱字の修正        |
+;	+----+----+-------------------------------+
+;	|   3| ○ | 口上まとめへの収録            |
+;	+----+----+-------------------------------+
+;	|   4| ○ | 口上の新規追加                |
+;	+----+----+-------------------------------+
+;	|   5| ○ | 既存口上の改変                |
+;	+----+----+-------------------------------+
+;	|   6| ○ | 改変した口上の自由な再配布    |
+;	+----+----+-------------------------------+
+;	|   7| ○ | 口上内容の移植・転載          |
+;	+----+----+-------------------------------+
+;
+;【ライセンス特記】
+;特になし。ライセンスフリー。加筆・改変・流用・再配布等も可（許可不要）
+;-------------------------------------------------------------------------------
+;우선 X1와 X2를 케릭터 번호로 치환해、Y1을 조수의 케릭터로 치환해주세요
+;다만、케릭터 번호가 한 자리 케릭터의 경우、X1,Y1은 1、X2는 01로 바꿀 필요가 있습니다
+;명령 내 각 조건 하에 있는 PRINTFORMW의 뒤에、반각 스페이스를 두고 대사를 추가해 주세요。
+;구상을 추가하지 않는 명령에는 행 첫머리에『;』을 넣어두는 것이 좋습니다
+;예기치 못한 오류 등이 일어나는 것을 어느 정도 막을 수 있을 지 모릅니다
+;마지막으로、read me도 되도록이면 한번 읽어주세요
+;eratohoU전용 구상 템플릿을 개조해 유용
+;erapoke専用口上テンプレート（簡略版）をさらに改造
+;【음란】추가
+;-------------------------------------------------
+;-------------------------------------------------
+;冷徹口上（キャラクターの名前を入れる）+末路口上+コロシアム口上+ご褒美口上追記
+;（컨셉 등이 있어 여기에 적어 두면、가필할 때에 기준이 됩니다）
+;오만한 전투 기계
+;여왕님으로 해도 좋고 두들겨서 마조로 만들어도 된다
+;CFLAG:372이후에 착탈 플래그
+;꿀단지웜 CFLAG:312　CFLAG:372
+;애널웜 CFLAG:314　CFLAG:374
+;클리캡 CFLAG:315　CFLAG:375
+;유두캡 CFLAG:316　CFLAG:376
+;착유기(모유체질만) CFLAG:317　CFLAG:377
+;오나홀(후타나리/남자만) CFLAG:318　CFLAG:378
+;애널비즈 CFLAG:320　CFLAG:379
+;아이마스크 CFLAG:344　CFLAG:380
+;밧줄 CFLAG:345　CFLAG:385
+;볼개그 CFLAG:346　CFLAG:386
+;일인칭＝私
+;여성기＝あそこ・おまんこ、애널＝お尻・クソ穴、페니스＝おちんちん・チンポ
+;-------------------------------------------------
+
+;--------------------------------------------------
+;구상 파일의 존재 판정（X2를 케릭터 번호로 치환）
+;--------------------------------------------------
+@EVENTTRAIN
+#PRI
+FLAG:104 = 1
+SIF FLAG:7 == 0
+	FLAG:7 = 2
+
+@EVENTEND
+#LATER
+FLAG:104 = 0
+
+;--------------------------------------------------
+;EVENTTRAIN관계（X1을 케릭터 번호로 치환）
+;조교 개시 시의 대사 CFLAG 201～219를 사용
+;-------------------------------------------------
+@EVENTTRAIN
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF TALENT:164 != 1
+	RETURN 0
+
+;-------------------------------------------------
+;첫 조교시 CFLAG:201
+;-------------------------------------------------
+IF CFLAG:201 == 0
+	DRAWLINE
+	IF TALENT:TARGET:314 == 3
+		;흡혈귀
+		PRINTFORMW 「마계에서 타락한 내 동포처럼 말을 들을 생각이라면 큰 오산이다」
+		PRINTFORMW 「고귀한 피는， 결코 너 따위에게 더럽혀지지 않는다……」
+	ELSEIF TALENT:TARGET:314 == 4
+		;듀라한
+		PRINTFORMW 「정령의 기사인 나는， 어둠에 타락하는 것 따위 있을수 없다」
+		PRINTFORMW 「어둠에 떨어진 동료와 같이 되지 않아……나는 꺽이지 않는다」
+	ELSE
+		PRINTFORMW 「…과연． 이 감옥은 내 힘을 봉하는 거군…」
+		PRINTFORMW 「흥， 비열한 놈. 고작 쓸데없는 장난질을 하는구나. 나는 굴하지 않는다」
+	ENDIF
+	;眼鏡
+	SIF CFLAG:42 == 83
+		PRINTFORMW 그렇게 말하고는 %조사선택(SAVESTR:TARGET, "는")% 안경을 고쳐 썼다…
+	CFLAG:201 = 1
+	RETURN 1
+;-------------------------------------------------
+;NTR재포획 CFLAG:650～660
+;-------------------------------------------------
+ELSEIF CFLAG:201 >= 1 && CFLAG:650 == 1
+	IF TALENT:85 || TALENT:76
+		DRAWLINE
+		PRINTFORMW 그 수정구슬을 보고 있었음을 알려 주어도 %조사선택(SAVESTR:TARGET, "는")% 태연한 표정이다.
+		PRINTFORMW 「………네토라레 당한 녀석은 그런 모습을 하는군, 당장 울 것 같지 않은가? 응?」
+		PRINTFORMW 「그래, 나는 광왕에 안겨 그 이상 없는 쾌락을 맛보았… 그와 같은… 한심한… 한심한 모습으로… 우우웃…」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% %조사선택(SAVESTR:PLAYER, "를")% 배신한 꺼림칙함 때문인건지 광왕과의 행위로 느껴버린 분함 때문인지, 아니면 둘 다 때문인지 한 줄기 눈물을 흘렸다………
+		;NTR스위치 해제
+		CFLAG:650 = 0
+	ELSE
+		DRAWLINE
+		PRINTFORMW 「흐응…한번 배신한 상대인데도 불구하고 마왕 네 놈은 상당히 무르구나………」
+		PRINTFORMW 「어쨌든 나는 진 몸이다. 삶든 굽든 원하는 대로 해라.」
+		;NTR스위치 해제
+		CFLAG:650 = 0
+	ENDIF
+	RETURN 1
+;-------------------------------------------------
+;굴복각인（각 Lv에서 한 번만） CFLAG:201
+;-------------------------------------------------
+;굴복각인Lv1
+ELSEIF CFLAG:201 < 2 && MARK:2 == 1
+	DRAWLINE
+	PRINTFORMW 「흥…기껏 그런 쓸데없는 발버둥질이라니.」
+	CFLAG:201 = 2
+	RETURN 1
+
+;굴복각인Lv2
+ELSEIF CFLAG:201 < 3 && MARK:2 == 2
+	DRAWLINE
+	PRINTFORMW 「크읏…어째서냐…이…내가…아직이다, 아직 나는 쓰러지지 않는다!」
+	CFLAG:201 = 3
+	RETURN 1
+
+;굴복각인Lv3
+ELSEIF CFLAG:201 < 4 && MARK:2 == 3 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「더, 더는 안된다…내, 내가 진 건지도 모르겠군…굴욕이다…」
+	CFLAG:201 = 4
+	RETURN 1
+
+;음란
+ELSEIF CFLAG:201 < 5 && TALENT:TARGET:76 == 1 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 갖춘 냉철함은 거의 사라지고,
+	PRINTFORMW 지금은 완전히 쾌락의 포로가 된 한 마리의 암컷이 되었다
+	PRINTFORMW 네 발로 엎드려 허리를 흔들면서 열정적인 시선으로 %CALLNAME:MASTER%을 올려본다
+	PRINTFORMW 「나는 이제 틀렸다…자지의 종이 되어 버렸어…크흑, 주십시오…자지를!」
+	CFLAG:201 = 5
+	RETURN 1
+
+;애정
+ELSEIF CFLAG:201 < 6 && TALENT:TARGET:85 == 1
+	DRAWLINE
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 수줍어하며 %CALLNAME:MASTER%에게 고백한다
+	PRINTFORMW 「나는, 깨달아 버린거다…당신의…아니, 쓸데없는 말은 멋이 없지」
+	PRINTFORMW 「마왕님…당신의 곁에, 있게 해 주세요…」
+	PRINTFORMW 그렇게 말하고 %조사선택(SAVESTR:TARGET, "는")% 무릎을 끑고 당신의 손에 입을 맞추었다
+	CFLAG:201 = 6
+	RETURN 1
+
+;조수의 유무를 체크（없는 경우엔 두 번째 이후로 넘어감）
+ELSEIF ASSI < 0 
+	CALL K4_KOJO2
+
+;-------------------------------------------------
+;간이 조수 구상 CFLAG:202～210
+;Yn을 조교 대상 X1와의 대화가 발생하는 조수 케릭터 번호로 변경한다
+;대화가 발생하는 조수를 둘 이상으로 늘릴 경우엔、
+;카피＆페이스트를하고 CFLAG의 수를 203、204로 늘린다（210이 상한）
+;-------------------------------------------------
+;조수○○（○○にY1のキャラ名を入れる）
+;ELSEIF NO:ASSI == Y1
+;	DRAWLINE
+;	;처음
+;	IF CFLAG:202 == 0
+;		;既に愛持ちで愛取得時初口上（함락イベント）が発生済み
+;		IF TALENT:TARGET:85 == 1 && CFLAG:201 >= 5
+;			PRINTFORMW 
+;		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:202 = 1
+;		RETURN 1
+;	;두 번째 이후
+;	ELSE CFLAG:202 == 1 && FLAG:7 ==2
+;		;애정
+;		IF TALENT:TARGET:85 == 1
+;			PRINTFORMW 
+;		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		RETURN 1
+;	ENDIF
+;조수○○（○○にY2のキャラ名を入れる）
+;ELSEIF NO:ASSI == Y2
+;	DRAWLINE
+;	;처음
+;	IF CFLAG:203 == 0
+;		;既に愛持ちで愛取得時初口上（함락イベント）が発生済み
+;		IF TALENT:TARGET:85 == 1 && CFLAG:201 >= 5
+;			PRINTFORMW 
+;		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:203 = 1
+;		RETURN 1
+;	;두 번째 이후
+;	ELSE CFLAG:203 == 1 && FLAG:7 ==2
+;		;애정
+;		IF TALENT:TARGET:85 == 1
+;			PRINTFORMW 
+;		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		RETURN 1
+;	ENDIF
+;口上のある조수が居ない場合は、通常の二回目以降の口上へ飛ぶ
+ELSE
+	CALL K4_KOJO2
+ENDIF
+
+
+;-------------------------------------------------
+;조교 개시시（두 번째 이후、X1을 케릭터 번호로 변경함） CFLAG없이
+;-------------------------------------------------
+@K4_KOJO2
+;반발각인 Lv3
+IF MARK:3 == 3 && FLAG:7 == 2
+	DRAWLINE
+	PRINTFORMW 「더럽고 불쌍한 놈…」
+	PRINTFORM %SAVESTR:TARGET%의
+	;眼鏡
+	SIF CFLAG:42 == 83
+		PRINTFORM 안경의 속의
+	PRINTFORMW 눈은 차가워져었다…
+	RETURN 1
+
+;굴복각인 Lv0
+ELSEIF MARK:2 == 0 && FLAG:7 == 2
+	DRAWLINE
+	IF TALENT:11 || TALENT:12 || TALENT:16
+		;반항적・굳건함・시건방짐
+		PRINTFORMW 「네 놈따위가 내 마음을 굴복시키는 일 따윈 불가능하다。가소롭군」
+	ELSEIF TALENT:13 || TALENT:14
+		;솔직・얌전함
+		PRINTFORMW 「나에게 무슨 짓을 할 작정이야……？　큿、이런 일은……」
+	ELSE
+		PRINTFORMW 「나를 이래저래 할 수 있을거라 생각하느냐」
+	ENDIF
+	RETURN 1
+
+;굴복각인Lv1
+ELSEIF MARK:2 == 1 && FLAG:7 == 2
+	DRAWLINE
+	
+	IF TALENT:11 || TALENT:12 || TALENT:16
+		;반항적・굳건함・시건방짐
+		PRINTFORMW 「네 놈……네 놈 따위에게……무너질까보냐！」
+	ELSEIF TALENT:13 || TALENT:14
+		;솔직・얌전함
+		PRINTFORMW 「난 꺾이지 않아、나는……괜찮으니까」
+	ELSE
+		PRINTFORMW 「네 놈…무슨 짓을 한거냐？　그렇게 밖엔…」
+	ENDIF
+	
+	RETURN 1
+
+;굴복각인Lv2
+ELSEIF MARK:2 == 2 && FLAG:7 == 2
+	DRAWLINE
+	
+	IF TALENT:11 || TALENT:12 || TALENT:16
+		;반항적・굳건함・시건방짐
+		PRINTFORMW 「제길……이상해、이런건 이상한 일일텐데！」
+	ELSEIF TALENT:13 || TALENT:14
+		;솔직・얌전함
+		PRINTFORMW 「적어도……아픈 건 하지마……」
+	ELSE
+		PRINTFORMW 「웃기지마…이런 일은…있어서는 안되는데…」
+	ENDIF
+	
+	RETURN 1
+
+;굴복각인Lv3＋애정・음란 없음
+ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 0&& TALENT:TARGET:76 == 0 && FLAG:7 == 2
+	DRAWLINE
+	
+	IF TALENT:11 || TALENT:12 || TALENT:16
+		;반항적・굳건함・시건방짐
+		PRINTFORMW 「흥……마음대로 해라……」
+	ELSEIF TALENT:13 || TALENT:14
+		;솔직・얌전함
+		PRINTFORMW 「아아……말하는 대로 하지」
+	ELSE
+		PRINTFORMW 「이 승부…내가…질지도 모르겠군…」
+	ENDIF
+	
+	RETURN 1
+
+;음란
+ELSEIF TALENT:TARGET:76 == 1 && FLAG:7 == 2
+	DRAWLINE
+	;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+	IF TALENT:TARGET:314 == 3
+		;흡혈귀
+		IF RAND:3 == 0
+			PRINTFORMW 「피가 쑤신다……나는 더이상 참을 수가 없다앗…！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「잔뜩 짜내 주겠어……크후후」
+		ELSE
+			PRINTFORMW 「내 고귀한 피가……네놈을 원하고 있으니 어쩔 수 없군」
+		ENDIF
+	ELSE
+		IF RAND:3 == 0
+			PRINTFORMW 「크후우， 나는 기다리고 있었다…. 얼른 나의 구멍에 자지를 쳐박아 줘엇…！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「아…！자지 왔어엇！」
+		ELSE
+			PRINTFORMW 「크후후, 오늘도 시작 되는군…！자지를 먹고 싶어서 배가 텅텅 비었다고…！」
+		ENDIF
+	ENDIF
+	
+	;개발 여부에 따라 추가 대사
+	IF TALENT:74
+		;자위광
+		PRINTFORMW 「오늘도 나의 자위를 봐줘……♪」
+	
+	ELSEIF TALENT:74
+		;섹스광
+		PRINTFORMW 「자궁이 욱신거려 어쩔 수 없다구……♪」
+		
+	ELSEIF TALENT:77
+		;항문광
+		PRINTFORMW 「오늘도 똥구멍으로 절정시켜주도록 하지……♪」
+		
+	ELSEIF TALENT:78
+		;가슴광
+		PRINTFORMW 「유두가 또 불끈해서 발기해버렸다고……♪」
+		
+	ENDIF
+	
+	IF TALENT:83
+		;새드
+		PRINTFORMW 「후후、 가득 괴롭혀줄게……」
+		
+	ELSEIF TALENT:88
+		;마조
+		PRINTFORMW 「암퇘지인 나를 마음 껏 괴롭혀줘……」
+		
+	ENDIF
+	
+	IF TALENT:83
+		;노출광
+		PRINTFORMW 「자、빨리 밖에 나가지 않겠나？ 여긴 자극이 부족하니까」
+		
+	ENDIF
+	
+	IF TALENT:136
+		;암캐
+		PRINTFORMW 「아아……빨리 교미를 하고 싶어、난 짐승이니까……」
+		
+	ENDIF
+	
+	IF TALENT:204
+		;육변기
+		PRINTFORMW 「변기인 나에게 마음 껏 배설해줘」
+		
+	ENDIF
+	
+	;眼鏡
+	SIF CFLAG:42 == 83
+		PRINTFORMW %SAVESTR:TARGET%의 안경 속의 눈에서 정욕의 불길이 불타고 있었다…
+	
+	RETURN 1
+
+;애정
+ELSEIF TALENT:TARGET:85 == 1 && FLAG:7 == 2
+	DRAWLINE
+	;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+	IF TALENT:TARGET:314 == 4
+		;듀라한
+		IF RAND:3 == 0
+			PRINTFORMW 「어둠의 기사인 나는， 언제나 당신의 곁에서……」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「당신에게 시중드는 것이야말로, 내 기쁨……」
+		ELSE
+			PRINTFORMW 「명령을 부탁한다． 나는，당신이 하는 말대로 하겠다……」
+		ENDIF
+	ELSE
+		IF RAND:3 == 0
+			PRINTFORMW 「크훗， 왔군？오늘도 귀여워 해줘」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「너에게 안기는 것이…이렇게나 몹시 기다려 질 줄이야…」
+		ELSE
+			PRINTFORMW 「오늘도 상냥하게 해 줘…. 준비는 당연 되어있다」
+		ENDIF
+	ENDIF
+	
+	;개발 여부에 따라 추가 대사
+	IF TALENT:74
+		;자위광
+		PRINTFORMW 「나의 부끄러운 모습……봐 줘……♪」
+	
+	ELSEIF TALENT:74
+		;섹스광
+		PRINTFORMW 「자、깊은 사랑을 나눠요♪」
+		
+	ELSEIF TALENT:77
+		;항문광
+		PRINTFORMW 「뒷구멍이 이미 널 바라며 욱신거리고 있어……♪」
+		
+	ELSEIF TALENT:78
+		;가슴광
+		PRINTFORMW 「듬뿍 가슴을 괴롭혀줘……♪」
+		
+	ENDIF
+	
+	IF TALENT:83
+		;새드
+		PRINTFORMW 「과격한 플레이를 시도 해볼까」
+		
+	ELSEIF TALENT:88
+		;마조
+		PRINTFORMW 「암컷 노예인 제게 자비를……」
+		
+	ENDIF
+	
+	IF TALENT:83
+		;노출광
+		PRINTFORMW 「오늘도 나를 어디론가 데려가 줄 건가……？」
+		
+	ENDIF
+	
+	;眼鏡
+	SIF CFLAG:42 == 83
+		PRINTFORMW %SAVESTR:TARGET%의 안경 속의 눈에서는 사랑의 불길이 불타고 있었다…
+	
+	RETURN 1
+ENDIF
+RETURN 0
+
+;-------------------------------------------------
+;EVENTEND関係（X1をキャラ番号に置換） CFLAG 211～220を使用
+;調教終了時のセリフ
+;-------------------------------------------------
+@EVENTEND
+SIF FLAG:7 <= 0
+	RETURN 0
+SIF TALENT:164 != 1
+	RETURN 0
+
+;キャラ死亡時は口上をスキップ
+SIF BASE:0 <= 0
+	RETURN 0
+
+;--------------------------------------------------
+;調教終了時のセリフ
+;--------------------------------------------------
+;반발각인 Lv3+애정 없음
+IF MARK:3 == 3 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「쓰레기 자식」
+	RETURN 1
+
+;굴복각인 Lv1이하+애정 없음
+ELSEIF MARK:2 <= 1 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「하아하아…이, 이 정도는…」
+	RETURN 1
+
+;굴복각인 Lv2+애정 없음
+ELSEIF MARK:2 == 2 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「아직이다, 아직 굴복하지 않았어…」
+	RETURN 1
+
+;굴복각인 Lv3+애정 없음
+ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 0
+	DRAWLINE
+	PRINTFORMW 「이, 이제 안된다…전으로 돌아갈 수 없어…」
+	RETURN 1
+
+;음란(체력500이상)
+ELSEIF TALENT:TARGET:76 == 1 && BASE:0 >= 500
+	DRAWLINE
+	PRINTFORMW 「좀 더…자지 쑤셔박아 주어도…괜찮다고？」
+	RETURN 1
+;음란(체력500미만)
+ELSEIF TALENT:TARGET:76 == 1 && BASE:0 <= 500
+	DRAWLINE
+	PRINTFORMW 「가…가버려…응아아…」
+	RETURN 1
+
+;애정(체력500이상)
+ELSEIF TALENT:TARGET:85 == 1 && BASE:0 >= 500
+	DRAWLINE
+	PRINTFORMW 「크후, 오늘도 좋았었다」
+	RETURN 1
+;애정(체력500미만)
+ELSEIF TALENT:TARGET:85 == 1 && BASE:0 <= 500
+	DRAWLINE
+	PRINTFORMW 「이런 바보가…좀 더 상냥하게 해달라고…」
+	RETURN 1
+ENDIF
+RETURN 0
+
+;--------------------------------------------------
+;@KOJO_MESSAGE_COM관계（X1을 케릭터 번호로 치환）
+;명령 실행 시에 출력 됩니다
+;--------------------------------------------------
+@KOJO_MESSAGE_COM_4
+;조수が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI > 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には口上をスキップする
+SIF TEQUIP:45 && SELECTCOM != 45
+	RETURN 0
+;失神時には口上をスキップする
+SIF TFLAG:899
+	RETURN 0
+;獣姦プレイ中は専用口上
+IF TEQUIP:89
+	CALL DOG_KOJO_4
+	RETURN 0
+ENDIF
+;촉수조교중は口上をスキップする
+SIF TEQUIP:90
+	RETURN 0
+;コロシアム中は専用口上
+IF TEQUIP:55
+	CALL COLOSSEUM_KOJO_4
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;명령 실행시 대사 CFLAG 301～400을 사용
+;-------------------------------------------------
+;-------------------------------------------------
+;애무 CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;처음
+	IF CFLAG:301 == 0
+		;굴복각인 Lv2 이상
+		IF MARK:2 >= 2
+			PRINTFORMW 「흥, 꽤 능숙해졌지 않은가」
+		;그 이외
+		ELSE
+			PRINTFORMW 「추잡스럽다, 이 변태 자식」
+		ENDIF
+		CFLAG:301 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:301 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「크흑…좀 더…좀 더 강하게, 클리도, 말야…이잇, 좋앗!　엉덩이도…주물러 줘…」
+			CFLAG:301 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:301 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「어쩜 이렇게 상냥하고…따뜻한 손…응앗, 느, 느껴 버려…」
+			CFLAG:301 = 5
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:301 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「아앗…좋아…거깃」
+			CFLAG:301 = 4
+		;굴복각인Lv2
+		ELSEIF MARK:2 == 2 && (CFLAG:301 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「그만해…이런 일 계속했다간…나는…」
+			CFLAG:301 = 3
+		;그 이외
+		ELSEIF MARK:2 <= 1 && (CFLAG:301 <= 1 || FLAG:7 == 2)
+			PRINTFORMW 「변태 녀석…그 기분 나쁜 손놀림으로 만지지 마라」
+			CFLAG:301 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;커널링구스 CFLAG:302
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;처음
+	IF CFLAG:302 == 0
+		;처녀
+		IF TALENT:TARGET:0 == 1
+			PRINTFORMW 「바, 바보!　그만둬」
+		;그 이외
+		ELSE
+			PRINTFORMW 「그, 그런 곳 핥지 마라！　이…변태 녀석」
+		ENDIF
+		CFLAG:302 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:302 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「응아아아앗！　조…좋아앗♪　좀 더 들이마셔 줘…나도 보지 쥬스 잔뜩 낼테니까…」
+			CFLAG:302 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:302 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「크흣, 기분 좋아앗…마왕님이…이런 일 해준다니…」
+			CFLAG:302 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:302 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이, 이제 마음대로 해라！　…응, 으응아아앗」
+			CFLAG:302 = 3
+		;그 이외（굴복각인Lv3미만）
+		ELSEIF CFLAG:302 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「더러운 곳을 잘도 핥아대는구나」
+			CFLAG:302 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널애무 CFLAG:303
+;-------------------------------------------------
+IF SELECTCOM == 2
+	;처음
+	IF CFLAG:303 == 0
+		PRINTFORMW 「바, 바보! 뭘 생각하는 거냐! 그만둬!」
+		CFLAG:TARGET:303 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		P = PALAM:3 + UP:3
+		;음란+윤활 Lv2 이상
+		IF TALENT:TARGET:76 == 1 && P >= PALAMLV:2 && (CFLAG:303 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「흐아아아아앙！　조하아…똥구멍이 녹아버릴 것 같다…빠, 빨리 쑤셔박아 줘…」
+			CFLAG:303 = 7
+		;음란+윤활 Lv2 미만
+		ELSEIF TALENT:TARGET:76 == 1 && P < PALAMLV:2 && (CFLAG:303 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「아우우우…조, 좀 더 눅진눅진하게 적셔 주지 않으면 즐길 수 없어…」
+			CFLAG:303 = 6
+		;애정+윤활 Lv2 이상
+		ELSEIF TALENT:TARGET:85 == 1 && P >= PALAMLV:2 && (CFLAG:303 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아앗, 마왕님…엉덩이가 누덕누덕하게 녹아 버렸어…이런 굉장한 것을 알아버리게 하다니…」
+			CFLAG:303 = 5
+		;애정+윤활 Lv2 미만
+		ELSEIF TALENT:TARGET:85 == 1 && P < PALAMLV:2 && (CFLAG:303 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「아우우, 좀 더 적셔 줘…조금 아프다고…」
+			CFLAG:303 = 4
+		;윤활 Lv2 이상＋A감각 Lv3 이상
+		ELSEIF P >= PALAMLV:2 && ABL:3 >= 3 && (CFLAG:303 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「아, 안된다…엉덩이가…엉덩이가…녹아버려어…」
+			CFLAG:303 = 3
+		;그 이외（애정없음、윤활 Lv2 미만、A감각 Lv3 미만）
+		ELSEIF CFLAG:223 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「바보！　그만둬！　그만두라고 말하고 있지 않나！」
+			CFLAG:303 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;자위 CFLAG304
+;-------------------------------------------------
+IF SELECTCOM == 3
+	;처음
+	IF CFLAG:304 == 0
+			PRINTFORMW 「이런 것을 보고 싶은 건가…！？」
+		CFLAG:TARGET:304 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋처녀
+		IF TALENT:TARGET:76 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:304 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 「후후……이렇게 음란한 몸이…잇, 되어버렸는데…아직도 남자를 모른다니…」
+			CFLAG:304 = 9
+		;음란＋자위중독 Lv3 이상
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:31 >= 3 && (CFLAG:304 <= 7 || FLAG:7 == 2)
+			;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+			IF RAND:3 == 0
+				PRINTFORMW 「으읏……크으……하으……」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「으응……크읏……하으……아앗」
+			ELSE
+				PRINTFORMW 「으읏……크으……하으……응아앗」
+			ENDIF
+			CFLAG:304 = 8
+		;음란＋자위중독 Lv3 미만
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:31 < 3 && (CFLAG:304 <= 6 || FLAG:7 == 2)
+			;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+			IF RAND:2 == 0
+				PRINTFORMW 「이런 일보다는 자지를 원하지만…」
+			ELSE
+				PRINTFORMW 「혼자서 달래고 있으라니…심하구나」
+			ENDIF
+			CFLAG:304 = 7
+		;애정＋처녀
+		ELSEIF TALENT:TARGET:85 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:304 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「어서 처녀를 가져가 주신다면 좋을텐데…」
+			CFLAG:304 = 6
+		;애정＋자위중독 Lv3 이상
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:31 >= 3 && (CFLAG:304 <= 4 || FLAG:7 == 2)
+			;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+			IF RAND:3 == 0
+				PRINTFORMW 「으읏……크으……하으……」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「으응……크읏……하으……아앗」
+			ELSE
+				PRINTFORMW 「으읏……크으……하으……응아앗」
+			ENDIF
+			CFLAG:304 = 5
+		;애정＋자위중독 Lv3 미만 
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:31 < 3 && (CFLAG:304 <= 3 || FLAG:7 == 2)
+			;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+			IF RAND:2 == 0
+				PRINTFORMW 「으응…어째서 안아 주지 않는 것인가……」
+			ELSE
+				PRINTFORMW 「혼자서…달래봤자…」
+			ENDIF
+			CFLAG:304 = 4
+		;굴복각인 Lv3+자위중독 Lv1 이상
+		ELSEIF MARK:2 == 3 &&ABL:31 >= 1 && (CFLAG:304 <= 2 || FLAG:7 == 2)
+			;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+			IF RAND:2 == 0
+				PRINTFORMW （싫어……느껴버리는……건가？）
+			ELSE
+				PRINTFORMW （왜 이러는 거지…이런 것…）
+			ENDIF
+			CFLAG:304 = 3
+		;그 이외（애정없음、자위중독 Lv1 미만）
+		ELSEIF CFLAG:304 <= 1 || FLAG:7 == 2
+			;랜덤으로 구상이 변화한다（사용하지 않을 경우엔 모두 똑같이 해놓으면 좋다）
+			IF RAND:2 == 0
+				PRINTFORMW 「이런 일……시켜봤자……」
+			ELSE
+				PRINTFORMW 「수치를 줄 생각인가……」
+			ENDIF
+			CFLAG:304 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;가슴애무 CFLAG:306
+;-------------------------------------------------
+
+IF SELECTCOM == 5
+	;처음
+	IF CFLAG:306 == 0
+		;애정
+		IF TALENT:TARGET:85 == 1
+			PRINTFORMW 「가슴을 비비고 싶은 건가……？　후훗, 좋아……」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「가, 가슴에 손대지 마라! 이 바보 녀석」
+		ENDIF
+		CFLAG:TARGET:306 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:306 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「하아……가슴이 녹아내릴 것 같다……좋아……♪」
+			CFLAG:306 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:306 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「이 가슴은 마음대로 주물러도 괜찮다고……후훗」
+			CFLAG:306 = 4
+		;B감각 Lv3 이상
+		ELSEIF ABL:1 >= 3 && (CFLAG:306 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「아아아……가슴으로……느껴버린다니……？」
+			CFLAG:306 = 3
+		;그 이외（애정 없음、B감각 Lv3 미만）
+		ELSEIF CFLAG:306 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「흥, 가슴을 비벼봤자 아무것도 느끼지 않는다고」
+			CFLAG:306 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;키스한다 CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 6
+	;퍼스트 키스
+	IF CFLAG:307 == 0 && TFLAG:13
+		;음란하고 주인
+		IF TALENT:TARGET:76 == 1 && ASSIPLAY == 0 && TEQUIP:89 == 0 && TEQUIP:90 == 0
+			PRINTFORMW 「나의 첫 키스는 마왕님인가……♪　좋아……와 줘」
+		;애정과 주인
+		ELSEIF TALENT:TARGET:85 == 1 && ASSIPLAY == 0 && TEQUIP:89 == 0 && TEQUIP:90 == 0
+			PRINTFORMW 「마왕님……아아……당신이 처음이라서 다행이야……♪」
+		;그 이외
+		ELSE
+			PRINTFORMW 「우우……첫 키스가……그런……」
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;（조교에선）처음
+	ELSEIF CFLAG:307 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「응……키스인가。좋아。의외로 로맨틱하구나……♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「마왕님……아아……당신의 입술이 사랑스러워서 견딜 수 없어……♪」
+		;그 이외
+		ELSE
+			PRINTFORMW 「입술을 핥아봤자……아무 것도 바뀌지 않아」
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:307 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「응……크후……하후……좋은 입맞춤이다」
+			CFLAG:307 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:307 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「아아, 이 입술이……크후……하아아」
+			CFLAG:307 = 4
+		;순종 Lv2 이상
+		ELSEIF ABL:10 >=2 && (CFLAG:307 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「입술 정도, 어떻게 해버려도 상관 없어」
+			CFLAG:307 = 3
+		;그 이외
+		ELSEIF CFLAG:307 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「큿, 그 더러운 입을 저리 치워！」
+			CFLAG:307 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;조개벌리기 CFLAG:308
+;-------------------------------------------------
+IF SELECTCOM == 7
+	;처음
+	IF CFLAG:308 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「보여져버려……아아……좀 더 봐줘어！」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「당신에게만……보여줄게……」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「이런……부끄러운 걸 시킨다니……큿」
+		ENDIF
+			CFLAG:TARGET:308 = 1
+			RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:308 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아하앙……좀 더 봐줘……구멍의 안쪽까지……아아아……」
+			CFLAG:306 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:308 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「당신 전용의……그곳을……후후……」
+			CFLAG:306 = 4
+		;노출벽 Lv3 이상
+		ELSEIF ABL:17 >= 3 && (CFLAG:308 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「아아……보여지고 있어……전부……제길……」
+			CFLAG:306 = 3
+		;그 이외（애정 없음、노출벽 Lv3 미만）
+		ELSEIF CFLAG:306 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이런 모습을 하게 하다니……네 녀석……」
+			CFLAG:306 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;손가락넣기 CFLAG:309
+;-------------------------------------------------
+IF SELECTCOM == 8
+	;처음
+	IF CFLAG:TARGET:309 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「아앗, 후벼파는거구나, 그 손가락으로！　빨리 해 줘！」
+		;굴복각인 Lv3+애정
+		ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 1
+			PRINTFORMW 「아아……손가락이……아앗」
+		;그 이외
+		ELSE
+			PRINTFORMW 「손가락을 넣어버린……다니」
+		ENDIF
+		CFLAG:TARGET:309 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:309 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아앙……좀 더 휘저어 줘어♪　좋아앗」
+			CFLAG:309 = 5
+		;애정＋굴복각인Lv3
+		ELSEIF TALENT:TARGET:85 == 1 && MARK:2 == 3 && (CFLAG:309 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「대단해……손가락……흐으응♪」
+			CFLAG:309 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:309 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「아앙……손가락으로……이렇게 느껴버리면……」
+			CFLAG:309 = 3
+		;그 이외
+		ELSEIF CFLAG:309 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「그만둬, 그……기분 나쁜 손가락으로 만져대는건」
+			CFLAG:309 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널핥기 CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 9
+	;처음
+	IF CFLAG:310 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「크후으, 핥짝핥짝 해줘……좋앗♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「안된다, 그런 곳을 빨면……！」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「뭘 하는 거냐, 그, 그만둬！」
+		ENDIF
+		CFLAG:TARGET:310 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:310 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「크훗, 좀 더, 혀로 꿰뜷어 줘어♪」
+			CFLAG:310 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:310 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「거기를 빨아져 버리면……참을 수 없다……♪」
+			CFLAG:310 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:310 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「하고싶은 만큼……계속 빨아도 괜찮다」
+			CFLAG:310 = 3
+		;그 이외（굴복각인Lv3미만）
+		ELSEIF CFLAG:310 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이상한 곳을……핥지 마랏」
+			CFLAG:310 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;로터 CFLAG:311
+;-------------------------------------------------
+IF SELECTCOM == 10
+	;처음
+	IF CFLAG:TARGET:311 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「하앗, 뭐야 이거언……흐으읏」
+		;굴복각인 Lv3+애정
+		ELSEIF MARK:2 == 3 && TALENT:TARGET:85 == 1
+			PRINTFORMW 「진동하는거 그마안……흐앙♪」
+		;그 이외
+		ELSE
+			PRINTFORMW 「뭐야 그 돌은……멈춰！」
+		ENDIF
+		CFLAG:TARGET:311 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:311 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아아앙, 좀 더 클리에 꽉 눌러 줘……아앗♪」
+			CFLAG:311 = 5
+		;애정＋굴복각인Lv3
+		ELSEIF TALENT:TARGET:85 == 1 && MARK:2 == 3 && (CFLAG:311 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「도구로 가버리게 되버렷……아앙♪」
+			CFLAG:311 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:311 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이런 자갈 따위에……크읏……느껴버린다니」
+			CFLAG:311 = 3
+		;그 이외
+		ELSEIF CFLAG:311 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「그만둬라！　이상한 물건을……꾹 누르지 마！」
+			CFLAG:311 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;꿀단지웜 CFLAG:312　CFLAG:372
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 11 && TEQUIP:11
+	;처음
+	IF CFLAG:TARGET:312 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「아아……그 웜으로 뜷어버리는거군, 내 처음을！ 좋아……」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「아아……마왕님의 것이……좋았을텐데」
+			;그 이외
+			ELSE
+				PRINTFORMW 「히이, 뭐냐 그 혐오스러운 생물은……뭐？　그 것이 내 첫 경험 상대라고……거짓말……」
+			ENDIF
+		;비처녀
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「아아……정말 음란한 생물이다……후후, 그래서 좋아……」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「정말 변태같은 벌레……이걸 넣어버리는 거구나……」
+			;그 이외
+			ELSE
+				PRINTFORMW 「히이, 뭐냐 그 혐오스러운 생물은……그만둬！　가까이 오지 마라！」
+			ENDIF
+		ENDIF
+		CFLAG:312 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:312 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「하아아……와 줘……그 구불거리는 물건으로 내 여기를 휘저어 줘……♪」
+			CFLAG:312 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:312 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「오는거구나……나의 여긴 만반의 준비상태라고……♪」
+			CFLAG:312 = 4
+		;V感覚Lv3以上
+		ELSEIF ABL:2 >= 3 && (CFLAG:312 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「크읏……안 되는데……이런 혐오스러운 생물체한테……느껴 버렷」
+			CFLAG:312 = 3
+		;그 이외
+		ELSEIF CFLAG:312 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「그만둬, 그만해 줘엇……이런 괴생물에……그마아안……」
+			CFLAG:312 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;탈착 시
+ELSEIF SELECTCOM == 11 && TEQUIP:11 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:372 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「아아……벌써 가져가 버리는건가……」
+		CFLAG:372 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:372 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「웜 님……수고 많았었다」
+		CFLAG:372 = 2
+	;그 이외
+	ELSEIF CFLAG:372 < 1 || FLAG:7 == 2
+		PRINTFORMW 「하아하아……겨우……끝났다」
+		CFLAG:372 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;진동지팡이 CFLAG:313
+;-------------------------------------------------
+IF SELECTCOM == 12
+	;처음
+	IF CFLAG:313 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 「후후……뭐야 그 지팡이는？　좋은 것인가？」
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 「흠, 건강 기구인가……어깨가 결리진 않는데」
+		;그 이외
+		ELSE
+			PRINTFORMW 「뭐, 뭐냐 그 지팡이는……그만！　접근하지 마라！」
+		ENDIF
+		CFLAG:313 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:76 == 1 && (CFLAG:313 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「크……흐응, 찌르르라고 할까, 저리는 것 같은 쾌감이……응……참을수 없……어엇♪」
+			CFLAG:313 = 5
+		;애정
+		ELSEIF TALENT:85 == 1 && (CFLAG:313 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「아아앙……아앗, 느, 느껴버려엇……지팡이 같은 걸로……♪」
+			CFLAG:313 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:313 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「우으으……이, 이거엔……견뎌낼 수 없어엇……으응!」
+			CFLAG:313 = 3
+		;그 이외
+		ELSEIF CFLAG:313 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「우……크읏……그만해……그만해줘엇……이런것에 느껴버리고 싶지 않아앗」
+			CFLAG:313 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널웜 CFLAG:314　CFLAG:374
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 13 && TEQUIP:13
+	;처음
+	IF CFLAG:TARGET:314 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「아아……훌륭한 생물체다. 어서 맛보게 해줘……♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「후후……정말 야한 생물이군♪」
+		;그 이외
+		ELSE
+			PRINTFORMW 「뭐, 뭐냐 그 녀석은……멈춰, 가까이 오지 마！」
+		ENDIF
+		CFLAG:TARGET:314 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:314 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「우으읏……배 속이……구불구불 도려내져서……굉장해, 너무 굉장해엣♪」
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 애널 웜에게 장내를 괴롭혀지는 것에 환희의 교성을 지르고 있다
+			CFLAG:314 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:314 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「후후, 좋아, 똥구멍에 넣어 줘……♪　느끼게 해줘♪」
+			CFLAG:314 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:314 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아아앗, 엉덩이……좋아아, 어쩜 이렇게 귀여울 수가……♪」
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 엉덩이의 감각에 녹을것 같은 표정을 짓고 있다
+			CFLAG:314 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:314 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「후후, 엉덩이인가……그 생물을 넣는거군……♪」
+			CFLAG:314 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:314 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「큿……안돼, 느껴버려엇……이런 저급한 벌레따위한테……」
+			CFLAG:314 = 3
+		;그 이외
+		ELSEIF  CFLAG:314 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「그만 둬라！　그런 저질 생명체를……가까이 들고 오지 마！」
+			CFLAG:314 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;탈착 시
+ELSEIF SELECTCOM == 13 && TEQUIP:13 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:374 < 4 || FLAG:7 == 2)
+		PRINTFORMW 「하아하아……좋았었다……」
+		CFLAG:374 = 4
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:374 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「후후, 사랑스러운 웜이 엉덩이로부터 나와버렸다고♪」
+		CFLAG:374 = 3
+	;A感覚Lv3以上
+	ELSEIF ABL:3 >= 3 && (CFLAG:374 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「크읏……흐응……으읏……상냥하게 뽑아 줘……」
+		CFLAG:374 = 2
+	;그 이외
+	ELSEIF CFLAG:374 < 1 || FLAG:7 == 2
+		PRINTFORMW 「하아, 하아, 끝난건가……」
+		CFLAG:374 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;클리캡 CFLAG:315　CFLAG:375
+;-------------------------------------------------
+;개시 시
+;IF SELECTCOM == 14 && TEQUIP:14
+	;처음
+;	IF CFLAG:315 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:315 = 1
+;		RETURN 0
+	;두 번째 이후
+;	ELSE
+		;음란
+;		IF TALENT:76 == 1 && (CFLAG:315 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:315 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:315 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:315 = 3
+		;그 이외
+;		ELSEIF CFLAG:315 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:315 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;탈착 시
+;ELSEIF SELECTCOM == 14 && TEQUIP:14 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:375 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:375 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:375 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:375 = 2
+	;그 이외
+;	ELSEIF CFLAG:375 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:375 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;유두캡 CFLAG:316　CFLAG:376
+;-------------------------------------------------
+;개시 시
+;IF SELECTCOM == 15 && TEQUIP:15
+	;처음
+;	IF CFLAG:316 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:316 = 1
+;		RETURN 0
+	;두 번째 이후
+;	ELSE
+;		;음란
+;		IF TALENT:76 == 1 && (CFLAG:316 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:316 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:316 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:316 = 3
+		;그 이외
+;		ELSEIF CFLAG:316 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:316 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;탈착 시
+;ELSEIF SELECTCOM == 15 && TEQUIP:15 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:376 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:376 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:376 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:376 = 2
+	;그 이외
+;	ELSEIF CFLAG:376 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:376 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;착유기(모유체질만) CFLAG:317　CFLAG:377
+;-------------------------------------------------
+;개시 시
+;IF SELECTCOM == 16 && TEQUIP:16
+	;처음
+;	IF CFLAG:317 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:317 = 1
+;		RETURN 0
+	;두 번째 이후
+;	ELSE
+		;음란
+;		IF TALENT:76 == 1 && (CFLAG:317 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:317 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:317 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:317 = 3
+		;그 이외
+;		ELSEIF CFLAG:317 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:317 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;탈착 시
+;ELSEIF SELECTCOM == 16 && TEQUIP:16 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:377 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:377 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:377 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:377 = 2
+	;그 이외
+;	ELSEIF CFLAG:377 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:377 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;오나홀(후타나리/남자만) CFLAG:318　CFLAG:378
+;-------------------------------------------------
+;개시 시
+;IF SELECTCOM == 17 && TEQUIP:17
+	;처음
+;	IF CFLAG:318 == 0
+		;음란
+;		IF TALENT:76 == 1
+;			PRINTFORMW 
+		;애정
+;		ELSEIF TALENT:85 == 1
+;			PRINTFORMW 
+		;그 이외
+;		ELSE
+;			PRINTFORMW 
+;		ENDIF
+;		CFLAG:318 = 1
+;		RETURN 0
+	;두 번째 이후
+;	ELSE
+		;음란
+;		IF TALENT:76 == 1 && (CFLAG:318 <= 3 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:318 = 4
+		;애정
+;		ELSEIF TALENT:85 == 1 && (CFLAG:318 <= 2 || FLAG:7 == 2)
+;			PRINTFORMW 
+;			CFLAG:318 = 3
+		;그 이외
+;		ELSEIF CFLAG:318 <= 1 || FLAG:7 == 2
+;			PRINTFORMW 
+;			CFLAG:318 = 2
+;		ENDIF
+;		RETURN 0
+;	ENDIF
+;終了時
+;ELSEIF SELECTCOM == 17 && TEQUIP:17 == 0
+	;음란
+;	IF TALENT:TARGET:76 == 1 && (CFLAG:378 < 3 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:378 = 3
+	;애정
+;	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:378 < 2 || FLAG:7 == 2)
+;		PRINTFORMW 
+;		CFLAG:378 = 2
+	;그 이외
+;	ELSEIF CFLAG:378 < 1 || FLAG:7 == 2
+;		PRINTFORMW 
+;		CFLAG:378 = 1
+;	ENDIF
+;	RETURN 0
+;ENDIF
+
+;-------------------------------------------------
+;애널비즈 CFLAG:320　CFLAG:379
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 19 && TEQUIP:19
+	;처음
+	IF CFLAG:TARGET:320 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「후후, 또 무엇인가 음란한 도구를 꺼내왔구나……♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「후우, 그것을 엉덩이에 넣는다고……？　마음대로 해라……♪」
+		;그 이외
+		ELSE
+			PRINTFORMW 「뭐냐……그것은？　뭐？　엉덩이에！？　그런……」
+		ENDIF
+		CFLAG:TARGET:320 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:320 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「똥 구멍이 가득이다……후후, 아직 더 들어간다고？」
+			CFLAG:320 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:320 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「흐읏, 분명히 괴로운데도……참을 수 없을 만큼 좋다……♪」
+			CFLAG:320 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:320 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「엉덩이가 뜨겁다……좀 더, 좀 더 넣어 줘……♪」
+			CFLAG:320 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:320 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「엉덩이가……읏, 괜찮아, 계속해 줘……」
+			CFLAG:320 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:320 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「젠장, 느껴 버린다……이런 도구에……엉덩이로……」
+			CFLAG:320 = 3
+		;그 이외
+		ELSEIF  CFLAG:320 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「아프다, 그만둬라！　넣지마앗！」
+			CFLAG:320 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;탈착 시
+ELSEIF SELECTCOM == 19 && TEQUIP:19 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:379 < 4 || FLAG:7 == 2)
+		PRINTFORMW 「한번에, 한번에 뽑아 줘어♪」
+		CFLAG:379 = 4
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:379 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「상냥하게 뽑아 줘……그것만으로도, 충분히 느껴버리니까」
+		CFLAG:379 = 3
+	;A感覚Lv3以上
+	ELSEIF ABL:3 >= 3 && (CFLAG:379 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「읏……크읏……하아앙……」
+		CFLAG:379 = 2
+	;그 이외
+	ELSEIF CFLAG:379 < 1 || FLAG:7 == 2
+		PRINTFORMW 「아파, 천천히, 천천히 뽑아 줘……우그읏」
+		CFLAG:379 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;정상위 CFLAG:321
+;-------------------------------------------------
+IF SELECTCOM == 20
+	;처음
+	IF CFLAG:TARGET:321 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「빨리、나의 미사용 보지를 관통해줘어……♪」
+			;애정＋순종 Lv5
+			ELSEIF TALENT:85 == 1 && ABL:10 >= 5
+				PRINTFORMW 「좋아、빨리 와줘……♪」
+			;그 이외
+			ELSE
+				PRINTFORMW 「크……이런、처음이……」
+			ENDIF
+		;비처녀
+		ELSE
+			IF TALENT:76 == 1
+				PRINTFORMW 「이 자세인가、좋아、이리오 와……♪」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「아아、안겨버렸구나……♪」
+			;그 이외
+			ELSE
+				PRINTFORMW 「흥、겨우 허리를 흔드는 거군」
+			ENDIF
+		ENDIF
+		CFLAG:321 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:321 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「아아、좀 더 、좀 더 깊게……좋아앗♪」
+			CFLAG:321 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:321 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아아、멋져……확실히 안아 주겠어……♪」
+			CFLAG:321 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:321 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「큿、후……쿠아……느、느껴버려……」
+			CFLAG:321 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:321 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「내키는……대로 해라」
+			CFLAG:321 = 3
+		;그 이외
+		ELSEIF CFLAG:321 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「제기랄、그만둬！　까불지 마랏」
+			CFLAG:321 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;후배위 CFLAG:322
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;처음
+	IF CFLAG:TARGET:322 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「빠、빨리！　자지를 줘어！！　내 처음을…！」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「원해요…가지고 싶어！　당신의……！」
+
+			;그 이외
+			ELSE
+				PRINTFORMW 「웃기지 마라……첫 경험이……이런 자세라니」
+			ENDIF
+		;비처녀
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「빠、빨리！　자지를 줘어！！」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「원해요…가지고 싶어！　당신의……！」
+			;그 이외
+			ELSE
+				PRINTFORMW 「이렇게 짐승처럼……젠장」
+			ENDIF
+		ENDIF
+		CFLAG:322 = 1
+		RETURN 0
+	;임신
+	ELSEIF TALENT:153
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:322 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「뱃속의 아이에게 정액을 맛보게 해 줘엇！！」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「임산부를 범해버리는 것……마치 야수같군♪」
+			ELSE
+				PRINTFORMW 「응아아아아앗！！」
+			ENDIF
+			CFLAG:322 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:322 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「느껴져……배의 아이도 느끼고 있겠어♪」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「뱃속에서， 느껴져……둘이서 함께 느끼고 있다고♪」
+			ELSE
+				PRINTFORMW 「좀더 깊게……뱃속의 아이에게 닿을 정도로 해주라고♪」
+			ENDIF
+			CFLAG:322 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:322 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「느껴버려어……이런 자세인데……임산부인데……짐승처럼」
+			CFLAG:322 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:322 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「마음대로 해라……상관 없어」
+			CFLAG:322 = 3
+		;그 이외
+		ELSEIF CFLAG:322 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「임산부를 범한다니……장난치지마랏」
+
+			CFLAG:322 = 2
+		ENDIF
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:322 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「더、더、좀 더어！　격렬하게 찔러줘어！！」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「마、마치 야수처럼……！　최고야아……」
+			ELSE
+				PRINTFORMW 「응아아아아앗！！」
+			ENDIF
+			CFLAG:322 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:322 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「아아아……느껴 버린다」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「이 모습도……나쁘지 않은 것 같네」
+			ELSE
+				PRINTFORMW 「더 깊이……와 줘♪」
+			ENDIF
+			CFLAG:322 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:322 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「느껴 버려……이런 자세인데도……짐승처럼」
+			CFLAG:322 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:322 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「마음대로 해라……상관 없어」
+			CFLAG:322 = 3
+		;그 이외
+		ELSEIF CFLAG:322 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이런 꼴이라니……까불지마랏」
+
+			CFLAG:322 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+;-------------------------------------------------
+;대면좌위 CFLAG:323
+;-------------------------------------------------
+IF SELECTCOM == 22
+	IF CFLAG:TARGET:323 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「강하게 안아줘……내 처녀를、빼앗아 줘……♪」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「부드럽게 안아줘……처음이니까……」
+			;그 이외
+			ELSE
+				PRINTFORMW 「내 처음이……네 놈에게……！」
+			ENDIF
+		;비처녀
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「이렇게 껴안는거구나……♪　좋은데……♪」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「근사하네……이런식으로 껴안는 거……♪」
+			;그 이외
+			ELSE
+				PRINTFORMW 「네 놈에게……이런……」
+			ENDIF
+		ENDIF
+		CFLAG:323 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:323 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「좀 더 혀를 휘감아줘……응……크하아♪　깊이、깊숙하게……♪」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「좀 더 강하게 안아줘……응……좀 더 깊이……아앗♪」
+			ELSE
+				PRINTFORMW 「좋아……좋구나……네 쾌락에 일그러진 표정이 잘 보여……후후」
+			ENDIF
+			CFLAG:323 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:323 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「이렇게 마주보면서、서로 안겨있는 거……좋아해」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「좀 더 강하게 안아줘……아아……녹아버릴 것 같아」
+			ELSE
+				PRINTFORMW 「키스해 줘……이어진 채로……부드럽게、후후」
+			ENDIF
+			CFLAG:323 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:323 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「아앗……좋아……껴안아져서……아앗」
+			CFLAG:323 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:323 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「큿……마음대로 해라……입맞춤을 하든 마음대로 해도 좋아」
+			CFLAG:323 = 3
+		;그 이외
+		ELSEIF CFLAG:323 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「그만둬……이런……그만해 줘……！」
+			CFLAG:323 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;배면좌위 CFLAG:324
+;-------------------------------------------------
+IF SELECTCOM == 23
+	IF CFLAG:TARGET:324 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「처음부터 뒤에서 하는구나……후후、재미있는 체위네」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「처음이니까……뒤에서 안아주길 바래……」
+			;그 이외
+			ELSE
+				PRINTFORMW 「첫경험이 뒤에서부터라니……제길……」
+			ENDIF
+		;비처녀
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「뒤에서 하는구나……후후、재미있는 체위네」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「뒤에서 안아줘……」
+			;그 이외
+			ELSE
+				PRINTFORMW 「뒤에서부터라니……제길……」
+			ENDIF
+		ENDIF
+		CFLAG:324 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:324 <= 5 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「가슴을 좀 더 주물러 줘……뒤에서、밀어올려어♪」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「좋아아……하아……아……좀 더 밀어올려 줘어♪」
+			ELSE
+				PRINTFORMW 「좋아……아아앗……좋은데에♪」
+			ENDIF
+			CFLAG:324 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:324 <= 4 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「뒤에서……껴안아 줘어♪」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「이렇게 안기는 거……좋앗……읏♪」
+			ELSE
+				PRINTFORMW 「얼굴이 보이지 않는 게……유감이네。내 부끄러운 얼굴이 보이지 않는 건 좋지만……♪」
+			ENDIF
+			CFLAG:324 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:324 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「큿……핫……쿳……우웃응읏」
+			CFLAG:324 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:324 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「원하는……대로 해。네 놈의 얼굴을 볼 수 없어서……산뜻하군」
+			CFLAG:324 = 3
+		;그 이외
+		ELSEIF CFLAG:324 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「큿……뒤에서는…그만 둬어！」
+			CFLAG:324 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;정상위애널 CFLAG:327
+;-------------------------------------------------
+IF SELECTCOM == 26
+	;처음
+	IF CFLAG:TARGET:327 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「하핫、똥구멍을 좋아하는군。좋다……와라！」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「그런 곳에 넣고 싶은가……？　별난 녀석」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「그、그만해！　무슨 생각하는거냐！」
+		ENDIF
+		CFLAG:TARGET:327 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:327 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「쿠하아♪　똥구멍 느껴엇♪」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「응아앗♪　똥구멍에 들어왔어어♪」
+			ELSE
+				PRINTFORMW 「이、똥구멍으로 가버려어어어♪」
+			ENDIF
+			CFLAG:327 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:327 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「아픈 것도……좋네♪　괜찮으니까、곧 익숙해질거야」
+			CFLAG:327 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:327 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「엉덩이……느껴버려엇♪」
+			ELSE
+				PRINTFORMW 「엉덩이가……엉덩이가 뜨거웟♪」
+			ENDIF
+			CFLAG:327 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:327 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「엉덩이로 느낄 수 있도록 노력할테니까……괜찮아、기분 좋아」
+			CFLAG:327 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:327 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「응긋……응읏♪　！　느、느껴져……」
+			CFLAG:327 = 3
+		;그 이외（애정 없음、A감각 Lv3 미만）
+		ELSEIF  CFLAG:327 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이런 걸 이딴 곳에 넣는다고는……」
+			CFLAG:327 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;후배위애널 CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 27
+	;처음
+	IF CFLAG:TARGET:328 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「드、드디어 자지로 뚫어주는거냐…！　애타게 기다렸다고……」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「이런 부정한 구멍을……당신의 것이 더러워질거야」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「네 놈、무슨 생각을 하는거냐！　이……변태가！」
+		ENDIF
+		CFLAG:TARGET:328 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「핫、하읏、하아아아앗！ 똥구멍이 파내어지면서 보지가 질척질척하게 젖어버려어어엇！」
+			ELSE
+				PRINTFORMW 「아앗、좋아……똥구멍 쑤셔지며 느껴버려어……이젠 똥구멍 노예라도 좋앗♪」
+			ENDIF
+			CFLAG:328 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:328 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「아아……좋아、좋아……조금 더、조금만 더……」
+			CFLAG:328 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「좋아…설마…네가…이런 구멍까지…우윽！」
+			ELSE
+				PRINTFORMW 「엉덩이…느껴버려어…이젠、돌아갈 수 없는거네…」
+			ENDIF
+			CFLAG:328 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:328 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「이런 구멍도 사랑해주는구나……지、짐승 같아……」
+			CFLAG:328 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:328 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이런、이런 구멍에、내가……느끼게 되다니……」
+			CFLAG:328 = 3
+		;그 이외（애정 없음、A감각 Lv3 미만）
+		ELSEIF  CFLAG:328 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「그만 해、더러운……무슨 생각을 하는거냐！」
+			CFLAG:328 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;대면좌위애널 CFLAG:329
+;-------------------------------------------------
+IF SELECTCOM == 28
+	;처음
+	IF CFLAG:TARGET:329 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「아아……이렇게 마주보며 똥구멍을 괴롭혀주는구나……♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「이런 곳을……후후、유별난 놈」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「큭……네 놈의 얼굴 따위 보고 싶지 않아」
+		ENDIF
+		CFLAG:TARGET:329 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:329 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 「아아……녹아 버려어、좀 더 안아 줘어」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「좋아아……좋아아……나의 한심한 얼굴을 좀 더 봐 줘……♪」
+			ELSE
+				PRINTFORMW 「똥구멍이 녹아버려어……정말 멋져……♪」
+			ENDIF
+			CFLAG:329 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:329 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「후후……좋아……느껴져……」
+			CFLAG:329 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:329 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「아아……좋아아……앗♪」
+			ELSE
+				PRINTFORMW 「엉덩이를 좀 더어……파내 줘어……♪」
+			ENDIF
+			CFLAG:329 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:329 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「여기도 느낄 수 있도록……노력할테니까」
+			CFLAG:329 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:329 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「큭……이런……곳으로……느끼다니이」
+			CFLAG:329 = 3
+		;그 이외（애정 없음、A감각 Lv3 미만）
+		ELSEIF  CFLAG:329 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「아파……그만둬、아무도 이런 걸로 느끼지 않아！」
+			CFLAG:329 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;배면좌위애널 CFLAG:330
+;-------------------------------------------------
+IF SELECTCOM == 29
+	;처음
+	IF CFLAG:TARGET:330 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「후후……내게 와줘……♪」
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 허리를 비비꼬며 뒤쪽을 권했다
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「엉덩이……사랑해 줘……♪」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「큭…네 놈、뒤에서라곳」
+		ENDIF
+		CFLAG:TARGET:330 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:330 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「아아……뒤에서……꿰뚫엇♪」
+			ELSE
+				PRINTFORMW 「좋아아……좋아아……똥구멍이 이렇게 되어버렸어♪」
+			ENDIF
+			CFLAG:330 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:330 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「후후……이 구멍도 좋은 것 같아」
+			CFLAG:330 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:330 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「아아……느껴져……이런 구멍인데도……」
+			ELSE
+				PRINTFORMW 「야한 구멍이……되어 버렸군……」
+			ENDIF
+			CFLAG:330 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:330 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「아직 아프지만……익숙해질 거야」
+			CFLAG:330 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:330 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이런 구멍으로……느껴버린다니……」
+			CFLAG:330 = 3
+		;그 이외（애정 없음、A감각 Lv3 미만）
+		ELSEIF  CFLAG:330 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「큿……아플 뿐이야……！」
+			CFLAG:330 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수음 CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;처음
+	IF CFLAG:TARGET:331 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「후후……부비부비해줄게……♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「중요한 곳이니까……소중하게 닦아주겠어♪」
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 「큿……이런 곳을！」
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 「만지는 것만으로도 구역질 난다」
+		ENDIF
+		CFLAG:TARGET:331 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋봉사정신 Lv3 이상
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 5 || FLAG:7 == 2)
+			IF TALENT:PLAYER:318 == 1
+				;巨根
+				PRINTFORMW 「후후，어쩜 이렇게 훌륭한건지……양손에 안 들어가지 않는가♪」
+			ELSEIF TALENT:PLAYER:318 == 2
+				;短小包茎
+				PRINTFORMW 「뭐야 이 조그마한 건……후후， 좀더 발기해라고, 어이， 좀더 노력할 수 있을텐데♪」
+			ELSEIF TALENT:PLAYER:318 == 3
+				;包茎
+				PRINTFORMW 「후후, 포경자지가 껍질을 벗겨줘 벗겨줘라며 말하고 있지 않은가♪」
+			ELSEIF TALENT:PLAYER:318 == 4
+				;馬ペニス
+				PRINTFORMW 「말자지……어떻게 훑어 줄까， 후후, 어때？」
+			ENDIF
+			IF RAND:2 == 0
+				PRINTFORMW 「자 자……벌써 내고 싶은건가……♪」
+			ELSE
+				PRINTFORMW 「후후……움찔움찔 맥박치고……먹음직스럽군♪」
+			ENDIF
+			CFLAG:331 = 6
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:331 <= 4 || FLAG:7 == 2)
+			IF TALENT:PLAYER:318 == 1
+				;巨根
+				PRINTFORMW 「후후, 어쩜 이리 훌륭한가……양손에 안 들어가지 않은가♪」
+			ELSEIF TALENT:PLAYER:318 == 2
+				;短小包茎
+				PRINTFORMW 「뭐야 이 조그마한 건……후후， 좀더 발기해라고, 어이， 좀더 노력할 수 있을텐데♪」
+			ELSEIF TALENT:PLAYER:318 == 3
+				;包茎
+				PRINTFORMW 「후후, 포경자지가 껍질을 벗겨줘 벗겨줘라며 말하고 있지 않은가♪」
+			ELSEIF TALENT:PLAYER:318 == 4
+				;馬ペニス
+				PRINTFORMW 「말자지……어떻게 훑어 줄까， 후후, 어때？」
+			ENDIF
+			IF RAND:2 == 0
+				PRINTFORMW 「소중하게 닦아 줄게……이거 봐、딱딱해졌네♪」
+			ELSE
+				PRINTFORMW 「기분 좋은가……？　후후」
+			ENDIF
+			CFLAG:331 = 5
+		;애정＋봉사정신 Lv3 이상
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「손바닥의 감촉은 어때？」
+			CFLAG:331 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「알겠다……문지르면 좋구나」
+			CFLAG:331 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF CFLAG:331 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「더러운……부끄러운 줄 알아라！」
+			CFLAG:331 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;펠라치오 CFLAG:332
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;처음
+	IF CFLAG:TARGET:332 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「왜 지금까지 빨게 해주지 않은거야……？　후후」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「항상 그걸 입에 머금고 있길 기대하고 있었어……！」
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 「빨면 되는건가……」
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 「큭、그런 걸 핥을까보냐！」
+		ENDIF
+		CFLAG:TARGET:332 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋봉사정신 Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 「하얀 거 가득 내줘……더 이상 참을 수 없어？　후후」
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 입맛을 다시며 육봉을 입 속에 머금었다
+			CFLAG:332 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 「후후、여기가 이렇게 단단해져왔어」
+			CFLAG:332 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 「후후、참을 수 없으면 언제라도 내도 좋아？」
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 사랑스러운 듯이 육봉을 비비면서 올려 입에 머금었다
+			CFLAG:332 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:332 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「알겠다、핥지……」
+			CFLAG:332 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF CFLAG:332 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「큭、싫어、냄새……」
+			CFLAG:332 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;파이즈리 CFLAG:333
+;-------------------------------------------------
+IF SELECTCOM == 32
+	;처음
+	IF CFLAG:TARGET:333 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「가슴에 끼운다는 대단한 걸 생각한 놈도 있었던 거네♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「자、가슴에 끼워주겠어……♪」
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 「이걸로 되겠지……호색가 녀석」
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 「네 물건을 끼워넣으라니……바보취급하지마라」
+		ENDIF
+		CFLAG:TARGET:333 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋봉사정신 Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 5 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「자아、기분 좋아……？　후후、유두가 스쳐……」
+			ELSE
+				PRINTFORMW 「부드럽지？　어떤 기분이야？　으응？」
+			ENDIF
+			CFLAG:333 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:332 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 「가슴이 좋은 거야……？　후후」
+			CFLAG:333 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:333 <= 3 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「기분 좋으면 싸버려도 괜찮아……？　입으로 받아낼 테니까♪」
+			ELSE
+				PRINTFORMW 「자、기분 좋아……？　부드럽지？」
+			ENDIF
+			CFLAG:333 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:333 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「끼우면 되는건가……알겠다」
+			CFLAG:333 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF  CFLAG:333 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이런 실없는 짓을……제길」
+			CFLAG:333 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;가랑이비비기 CFLAG:334
+;-------------------------------------------------
+IF SELECTCOM == 33
+	;처음
+	IF CFLAG:TARGET:334 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「호오、이렇게 하는 법도 있었구나……！」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「가랑이 사이로 즐기는 건가……후후、재미있네」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「스마타……뭐야 그건？」
+		ENDIF
+		CFLAG:TARGET:334 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란+처녀
+		IF TALENT:TARGET:76 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:334 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「잘못하면 넣어질 것 같아……후후、농담이다。좀 더 변태적으로 빼앗기길 원해」
+			CFLAG:334 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:334 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「네 자지가 스쳐서……기분 좋아♪」
+			CFLAG:334 = 5
+		;애정+처녀
+		ELSEIF TALENT:TARGET:85 == 1 && TALENT:TARGET:0 == 1 && (CFLAG:334 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「후후……넣고 싶은가？　처음은 네가 빼앗아 가길 바래」
+			CFLAG:334 = 4
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:334 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「후후……이렇게 딱딱해져선……그렇게 가랑이 사이가 기분 좋은가？」
+			CFLAG:334 = 3
+		;그 이외（애정없음）
+		ELSEIF CFLAG:334 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이건가、이렇게 하면 되는 건가……？」
+			CFLAG:334 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;기승위 CFLAG:335
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;처음
+	IF CFLAG:TARGET:335 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;음란
+			IF TALENT:TARGET:76 == 1
+				PRINTFORMW 「훗, 간신히 처녀를 버리게 되는군……」
+				PRINTFORMW 「자지 세우고 있으라고, 천천히 허리를 내릴거니까」
+				PRINTFORMW %SAVESTR:TARGET%는 기다릴 수 없다고 말하는 듯이 허리를 가라앉혔다
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 「호우, 간신히 내 처녀를 받아 주게 되었는가」
+				PRINTFORMW 「처녀를 바칠 수 있어 영광이다……！자, 허리를 내리겠어」
+				PRINTFORMW %SAVESTR:TARGET%는 몹시 감동한 모습으로 %SAVESTR:PLAYER%의 페니스를 삼켜 갔다
+			;그 이외（애정없음）
+			ELSE
+				PRINTFORMW 「쿳, 이런 형태로 처녀를 버리게 될줄은……」
+				PRINTFORMW 말과는 정반대로 %SAVESTR:TARGET%는 명령에 따라%SAVESTR:PLAYER%의 페니스를 삼켜 간다
+			ENDIF
+		;비처녀
+		ELSE
+			;음란
+			IF TALENT:76 == 1
+				PRINTFORMW 「자지 세우고 있으라고, 천천히 허리를 내릴거니까」
+				PRINTFORMW %SAVESTR:TARGET%는 기다릴 수 없다는 듯이 허리를 가라앉혔다
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「이런 체위도 좋아하는 것인가？후후」
+				PRINTFORMW %SAVESTR:TARGET%는 느긋하게 %SAVESTR:PLAYER%의 페니스를 삼켜 갔다
+			;그 이외
+			ELSE
+				PRINTFORMW 「나, 내게 이런 모습을 시킬 줄은……」
+				PRINTFORMW 말과는 정반대로 %SAVESTR:TARGET%는 명령에 따라 %SAVESTR:PLAYER%의 페니스를 삼켜 갔다
+			ENDIF
+		ENDIF
+		CFLAG:TARGET:335 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:335 <= 5 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW 「누워 있기만 하는건 편하겠구나， 후후」
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 「자아, 너의 자지가 삼켜져 가는 것이 보이지？」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「나의 움직임, 잘 봐두도록」
+			ELSE
+				PRINTFORMW 「후후, 기다릴 수 없었던 것이다」
+			ENDIF
+			PRINTFORMW %SAVESTR:TARGET%는 가랑이를 열어, 느긋하게 허리를 가라앉혀 갔다
+			CFLAG:335 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:335 <= 4 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORML 「내가 움직일테니까 편하게 있도록」
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 「후후, 그렇게 밀어올리지 않아도 괜찮아」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「무겁지는 않은가？너의 것이 깊게 박히고 있다고」
+			ELSE
+				PRINTFORMW 「몸이 후벼파지는 것 같군……후후후」
+			ENDIF
+			PRINTFORMW %SAVESTR:TARGET%는 %SAVESTR:PLAYER%의 위에서 몸을 춤추게 하고 있다
+			CFLAG:335 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:335 <= 3 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW 「쿳……허리가, 허리가 움직여……」
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 「뇌까지 영향을 주는 것 같다……견딜 수 없어……」
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 「쿳, 꽤나……깊닷……」
+			ELSE
+				PRINTFORMW 「그만둬, 밀어 올리지 마라앗……」
+			ENDIF
+			CFLAG:335 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:335 <= 2 || FLAG:7 == 2)
+			PRINTFORML %SAVESTR:TARGET%는 명령에 따라 %SAVESTR:PLAYER%에 올라 타 페니스를 삼켜 간다
+			PRINTFORMW 「이것으로 좋을까， 내게 시킬줄은……비열한 놈」
+			CFLAG:335 = 3
+		;それ以外（愛無し、従順Lv5未満）
+		ELSEIF CFLAG:335 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이딴 굴욕……두고보자」
+			CFLAG:335 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;거품문지르기 CFLAG:336
+;-------------------------------------------------
+IF SELECTCOM == 35
+	;처음
+	IF CFLAG:TARGET:336 == 0
+		;봉사정신 Lv3 이상
+		IF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:336 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋봉사정신 Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 == 5 && (CFLAG:336 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:336 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:336 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:336 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:336 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:336 = 3
+		;그 이외
+		ELSEIF  CFLAG:336 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:336 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;기승위애널 CFLAG:337
+;-------------------------------------------------
+IF SELECTCOM == 36
+	;처음
+	IF CFLAG:TARGET:337 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「후후, 그대로 누워 있으라고……내 마음대로 하겠다」
+			PRINTFORMW 「어때, 네 자지가 점점 엉덩이 구멍에 삼켜져 가고 있다고……♪」
+			PRINTFORMW %SAVESTR:TARGET%는 기다릴 수 없다는 듯이 허리를 가라앉혔다
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「후후, 그대로 누워 있으라고……자지 이외는 편하게 하고 있어도 좋아」
+			PRINTFORMW 「아아……엉덩이 안이 채워져 간다……너에게도 잘 보이겠지」
+			PRINTFORMW %SAVESTR:TARGET%는 느긋하게 %SAVESTR:PLAYER%의 페니스를 삼켜 갔다
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「내게 시킨 겠다는 것인가……이런 구멍으로. 빌어먹을」
+		ENDIF
+		CFLAG:TARGET:337 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:337 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「자아， 전부 들어갔다고……！」
+				PRINTFORMW 「크하앗, 안에서……날뛰엇♪」
+			ELSE
+				PRINTFORMW 「똥구멍이 휘저어 지고있어……견딜 수 없엇」
+				PRINTFORMW 「좀더 엉덩이를 흔들까？ 읏……♪」
+			ENDIF
+			PRINTFORMW 페니스를 엉덩이 구멍에 삼킨 %SAVESTR:TARGET%는 %SAVESTR:PLAYER%에 올라타 음란한 댄스를 춤춘다
+		CFLAG:337 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:337 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「쿳……안이……똥 구멍이 뜨겁웟」
+			PRINTFORMW 페니스를 엉덩이 구멍에 삼킨 %SAVESTR:TARGET%는 몸을 천천히 위아래로 움직이고 있다
+			CFLAG:337 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:337 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「나의 구멍은 어때……？」
+				PRINTFORMW 「너의 자지는 딱딱하고 뜨거워서, 훌륭하군♪」
+			ELSE
+				PRINTFORMW 「자아， 엉덩이를 움직이겠어……이것은 어때？」
+				PRINTFORMW 「편하게 하고 있으라고……읏, 밀어올리지 않아도……♪」
+			ENDIF
+			PRINTFORMW 페니스를 엉덩이 구멍에 삼킨 %SAVESTR:TARGET%하%SAVESTR:PLAYER%에게 올라타 사랑스러운 듯이 엉덩이 구멍을 조이고 있었다
+		CFLAG:337 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:337 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「좀더 조이면 좋은 것인가……엉덩이가 녹는닷」
+			PRINTFORMW 페니스를 엉덩이 구멍에 삼킨 %SAVESTR:TARGET%는 몸을 천천히 위아래로 움직이고 있다
+			CFLAG:337 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:337 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이 무슨 뜨거움인가……거기다, 딱딱하닷……♪」
+			PRINTFORMW 페니스를 엉덩이 구멍에 삼킨 %SAVESTR:TARGET%는 엉덩이를 움직이며 쾌락을 탐내고 있다
+			CFLAG:337 = 3
+		;그 이외（애정 없음、A감각 Lv3 미만）
+		ELSEIF  CFLAG:337 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「내가 움직이라고……？두고보자」
+			CFLAG:337 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;애널봉사 CFLAG:338
+;-------------------------------------------------
+IF SELECTCOM == 37
+	;처음
+	IF CFLAG:TARGET:338 == 0
+		;봉사정신 Lv3 이상
+		IF ABL:TARGET:16 >= 3
+			PRINTFORMW 「큭, 엉덩이를 빨면 되는거지……알았다」
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 「장난치지마라， 이런， 이런 굴욕을……！」
+		ENDIF
+		CFLAG:TARGET:338 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋봉사정신 Lv5
+		IF TALENT:TARGET:76 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 「후후, 기분이 좋은가？혀를 넣어 주겠어……！」
+			CFLAG:338 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 3 || FLAG:7 == 2)
+				PRINTFORML 「깨끗하게 해 줄거니까， 후후……좀더 힘을 빼도록」
+			CFLAG:338 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:338 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「알았어, 빨아 주지……하지만, 우쭐거리지 마라」
+			CFLAG:338 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF CFLAG:338 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「젠장 , 이딴 짓도, 하지 않으면 되지 않는건가……」
+			CFLAG:338 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;스팽킹 CFLAG:341
+;-------------------------------------------------
+IF SELECTCOM == 40
+	;처음
+	IF CFLAG:TARGET:341 == 0
+		PRINTFORMW 「그, 그만둬！때리지마랏！힛」
+		CFLAG:TARGET:341 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋マゾっ気Lv3
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:341 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「히이, 히이, 나는 마조돼지야아！좀더 격렬하게 두드려 줘엇♪」
+			PRINTFORMW %SAVESTR:TARGET%는 군침을 늘어뜨리면서 엉덩이를 흔들고 있다
+			CFLAG:TARGET:341 = 5
+		;애정＋マゾっ気Lv3
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:341 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「나를 훈육 시켜줘어！이런, 상스러운 나를……히잇♪」
+			PRINTFORMW %SAVESTR:TARGET%는 뺨을 븕게 물들이며 엉덩이를 흔들고 있다
+			CFLAG:TARGET:341 = 4
+			RETURN 0
+		;苦痛刻印Lv3+屈服刻印Lv3
+		ELSEIF MARK:0 == 3 && MARK:2 == 3 && (CFLAG:341 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「쿳……이 정도는……나쁘지는 않다……」
+			CFLAG:TARGET:341 = 3
+			RETURN 0
+		;그 이외
+		ELSEIF CFLAG:341 <= 1 && FLAG:7 == 2
+			PRINTFORMW 「때리는 것 정도로 나는 꺽이지 않는다！이 머저리같은 놈！」
+			CFLAG:TARGET:341 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;채찍 CFLAG:342
+;-------------------------------------------------
+IF SELECTCOM == 41
+	;처음
+	IF CFLAG:TARGET:342 == 0
+	;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 「호오, 그 채찍으로 때리는 것이군♪ 자 어서 때려라！」
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 「내가 뭔가 나쁜 짓을 했는가……？그렇다면, 미안하구나」
+		;그 이외
+		ELSE
+			PRINTFORMW 「네놈, 폭력으로 나를 복종하게 할 수 있을거라고 생각하지마라……」
+		ENDIF
+		CFLAG:TARGET:342 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:342 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 「아파아아앗！기분이 좋아아아아！좀더， 좀더 후려쳐 줘엇！」
+			CFLAG:TARGET:342 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:342 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 「큭， 꽤나， 아픈걸……하지만, 점점 익숙해지는군……」
+			CFLAG:TARGET:342 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:342 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「윽， 이것은， 꽤나， 아픈걸……」
+			CFLAG:TARGET:342 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:342 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「좀더 때려 줘, 엉덩이도, 등도, 쑤셔 버린다아」
+			CFLAG:TARGET:342 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:342 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「나는 나쁜 노예군……이런 아픔으로도, 느끼게 되어 버렸다」
+			CFLAG:TARGET:342 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:342 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「으윽，……아프지만， 참아 보이겠어」
+			CFLAG:TARGET:342 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:342 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「후우후웃, 이런 처사로……느끼기 시작할 줄이야……」
+			CFLAG:TARGET:342 = 3
+		;그 이외
+		ELSEIF CFLAG:335 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「네놈, 그래서 채찍을 칠 생각인가……？아, 아직이다 그런 것 아프지……않다고……」
+			CFLAG:TARGET:342 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;바늘 CFLAG:343
+;-------------------------------------------------
+IF SELECTCOM == 42
+	;처음
+	IF CFLAG:TARGET:343 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:343 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:343 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:343 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:343 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:343 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:343 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:343 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:343 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 3
+		;그 이외
+		ELSEIF CFLAG:343 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:343 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;아이마스크 CFLAG:344　CFLAG:380
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 43 && TEQUIP:43
+	;처음
+	IF CFLAG:TARGET:344 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 「과연, 감도를 올리는 취향이로군……재미겠어」
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 「가끔 씩은 이런 것도 좋군」
+		;그 이외
+		ELSE
+			PRINTFORMW 「시야를 빼앗은 정도로, 나는 겁먹지 않는다」
+		ENDIF
+		CFLAG:TARGET:344 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 「하아하아……전신이……성감대가 된 것 같군……♪」
+			CFLAG:TARGET:344 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 「피부가……공기의 흐름도 느껴버린다……」
+			CFLAG:TARGET:344 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:344 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「후후, 무엇을 일을 할 생각일려나」
+			CFLAG:TARGET:344 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「근처에 있는거군……알겠다♪ 빨리 해줘……」
+			CFLAG:TARGET:344 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「어디에 있는거냐？준비는 되어 있다고……」
+			CFLAG:TARGET:344 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:344 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「너의 얼굴이 안 보이지 않은가, 후후」
+			CFLAG:TARGET:344 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:344 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이 피부의 긴장……느껴버린다……」
+			CFLAG:TARGET:344 = 3
+		;그 이외
+		ELSEIF CFLAG:344 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이런 잔재주 부리지 말고， 당당히 하는게 어떠냐」
+			CFLAG:TARGET:344 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 43 && TEQUIP:43 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:380 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「후후, 좋았다구……♪」
+		CFLAG:380 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:380 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「겨우， 너의 얼굴을 볼 수 있었군」
+		CFLAG:380 = 2
+	;それ以外 
+	ELSEIF CFLAG:380 < 1 || FLAG:7 == 2
+		PRINTFORMW 「이 정도인가， 대단한 것도 아니군！」
+		CFLAG:380 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;밧줄 CFLAG:345　CFLAG:385
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 44 && TEQUIP:44
+	;처음
+	IF CFLAG:TARGET:345 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 「나를 단단히 묶는거군♪ 후훗， 기대되는 걸」
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 「나를 묶어 두고 싶은 건가？후훗, 좋을 것이다」
+		;그 이외
+		ELSE
+			PRINTFORMW 「속박하는 걸로, 내 움직임을 봉할 생각인가」
+		ENDIF
+		CFLAG:TARGET:345 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:345 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 「마, 마조돼지 완성이다……！네가 원하는 만큼 괴롭혀 줘……」
+			CFLAG:TARGET:345 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:345 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 「흥분 되는군……이렇게, 속박되어 있으면……자궁이 뜨거워 진다……」
+			CFLAG:TARGET:345 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:345 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「가끔 씩은 이런 취향도 좋은 것이다」
+			CFLAG:TARGET:345 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:345 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「애완동물인……마조가축인 나를 좀더 훈육 해줘……」
+			CFLAG:TARGET:345 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:345 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아아， 좋구나……이 줄의 감각， 몸에 파고드는 것 같다……」
+			CFLAG:TARGET:345 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:345 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「후훗， 이렇게 꽁꽁 묶어도 나는 도망치지 않는다」
+			CFLAG:TARGET:345 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:345 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「쿳, 이런 굴욕으로……느껴버리다니……」
+			CFLAG:TARGET:345 = 3
+		;그 이외
+		ELSEIF CFLAG:345 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「묶은 것만으로， 나의 힘을 봉하겠다는 생각 하지마라！」
+			CFLAG:TARGET:345 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 44 && TEQUIP:44 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:385 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「벌써 끝인가？묶은 채로 방치해도 상관없는 것이다」
+		CFLAG:385 = 2
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:385 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「훌륭한 밧줄묶기였다……다리가 부들부들 떨리는군」
+		CFLAG:385 = 2
+	;그 이외
+	ELSEIF CFLAG:385 < 1 || FLAG:7 == 2
+		PRINTFORMW 「흥, 간신히 단념했는지……이정도의 밧줄묶기로는 나는 지지 않아」
+		CFLAG:385 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;볼개그 CFLAG:346　CFLAG:386
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 45 && TEQUIP:45
+	;처음
+	IF CFLAG:TARGET:346 == 0
+		;음란
+		IF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:346 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋マゾっ気Lv5以上
+		IF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:346 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:346 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:346 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:346 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:346 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:346 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:346 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 3
+		;그 이외
+		ELSEIF CFLAG:346 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:346 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 45 && TEQUIP:45 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1 && (CFLAG:386 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:386 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:386 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:386 = 2
+	;그 이외
+	ELSEIF CFLAG:386 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:386 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;관장기＋플러그 CFLAG:347
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 46 && TEQUIP:46
+	;처음
+	IF CFLAG:TARGET:347 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「그으읏……이것은……견딜 수 없구나♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「아, 안돼……새어 나오게 할 수는……」
+		;그 이외
+		ELSE
+			PRINTFORMW 「요, 용서해줘……새어 버려엇」
+		ENDIF
+		CFLAG:TARGET:347 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란＋A感覚Lv3以上＋マゾっ気Lv3以上
+		IF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && ABL:21 >= 3 && (CFLAG:347 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「후웃……아……왜 그래, 아직 더 들어갈 것이다……읏♪」
+			CFLAG:347 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:347 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「똥 싸는 걸 보고 싶은 건가……이 변태녀석♪」
+			CFLAG:347 = 6
+		;애정＋A感覚Lv3以上＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && ABL:21 >= 3 && (CFLAG:347 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「아앗……엉덩이가 폭발할 것 같다……읏♪」
+			CFLAG:347 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:347 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「나와 버린다……더 이상은……읏」
+			CFLAG:347 = 4
+		;A感覚Lv3以上＋マゾっ気Lv3以上
+		ELSEIF ABL:3 >= 3 && ABL:21 >= 3 && (CFLAG:347 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「그읏……」
+			PRINTFORMW （기대하고……있는 건가？분출하는 순간을……）
+			CFLAG:347 = 3
+		;그 이외
+		ELSEIF  CFLAG:347 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「더는 안돼……용서해 줘엇」
+			CFLAG:347 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;아무것도안한다 CFLAG:356
+;-------------------------------------------------
+IF SELECTCOM == 55
+	;처음
+	IF CFLAG:356 == 0
+		;애정
+		IF TALENT:85 == 1
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:356 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;애정＋欲情Lv3以上
+		IF TALENT:85 == 1 && PALAM:5 >= PALAMLV:3 && (CFLAG:356 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:356 = 4
+		;애정
+		ELSEIF TALENT:85 == 1 && (CFLAG:356 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:356 = 3
+		;그 이외
+		ELSEIF CFLAG:356 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:356 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;회화한다 CFLAG:357
+;「会話」はある意味最も口上が生きるコマンドかも
+;-------------------------------------------------
+IF SELECTCOM == 56
+	;처음
+	IF CFLAG:357 == 0
+		IF TEQUIP:53
+			;비디오 자기 소개
+			;음란
+			IF TALENT:TARGET:76 == 1
+				PRINTFORMW 「네…나는 %SAVESTR:TARGET%야…원래는 용사였지…지금은 완전히 임무를 잊고 자지에 중독 되어버렸다…」
+				PRINTFORMW 그렇게 말하면서 수정공를 향해 엉덩이를 들어올려 음탕하게 허릴 흔들었다
+				PRINTFORMW 「이걸 보고 있는 당신이 나에게 욕정해서 자지 주물럭거리는 걸 상상 만해도…읏…하아…살짝 가버릴 것 같아아…」
+				PRINTFORMW 「그럼 지금부터 여러가지 기분 좋은 일을 할 테니까 마음껏 사정해주길 바래…후훗」
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 「네…나는 %SAVESTR:TARGET%야…미안해 세계를 구할 수 없어서…」
+				PRINTFORMW 그렇게 말하면서 수정구를 향해 생긋 미소 지었다
+				PRINTFORMW 「하지만 난 행복해…이렇게 기분 좋은 일을…알게 되었으니까…」
+				PRINTFORMW 「내가 어디까지 마(魔)에 마음을 빼앗겼는지…천천히 봐 줘…후훗」
+			;그 이외
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ELSE
+			;음란
+			IF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;그 이외
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:357 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		IF TEQUIP:53
+			;비디오 자기 소개
+			;음란
+			IF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 「네…나는 %SAVESTR:TARGET%야…원래는 용사였지…지금은 완전히 임무를 잊고 자지에 중독 되어버렸다…」
+				PRINTFORMW 그렇게 말하면서 수정공를 향해 엉덩이를 들어올려 음탕하게 허릴 흔들었다
+				PRINTFORMW 「이걸 보고 있는 당신이 나에게 욕정해서 자지 주물럭거리는 걸 상상 만해도…읏…하아…살짝 가버릴 것 같아아…」
+				PRINTFORMW 「그럼 지금부터 여러가지 기분 좋은 일을 할 테니까 마음껏 사정해주길 바래…후훗」
+				CFLAG:357 = 4
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 2 || FLAG:7 == 2)
+				PRINTFORMW 「네…나는 %SAVESTR:TARGET%야…미안해 세계를 구할 수 없어서…」
+				PRINTFORMW 그렇게 말하면서 수정구를 향해 생긋 미소 지었다
+				PRINTFORMW 「하지만 난 행복해…이렇게 기분 좋은 일을…알게 되었으니까…」
+				PRINTFORMW 「내가 어디까지 마(魔)에 마음을 빼앗겼는지…천천히 봐 줘…후훗」
+				CFLAG:357 = 3
+			;그 이외
+			ELSEIF CFLAG:357 <= 1 || FLAG:7 == 2
+				PRINTFORMW 
+				CFLAG:357 = 2
+			ENDIF
+		ELSE
+			;음란
+			IF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 4
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 2 || FLAG:7 == 2)
+				PRINTFORMW 
+				CFLAG:357 = 3
+			;그 이외
+			ELSEIF CFLAG:357 <= 1 || FLAG:7 == 2
+				PRINTFORMW 
+				CFLAG:357 = 2
+			ENDIF
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;이라마치오 CFLAG:381
+;-------------------------------------------------
+IF SELECTCOM == 80
+	;처음
+	IF CFLAG:TARGET:381 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:381 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1 && (CFLAG:381 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:381 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:381 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:381 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:381 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:381 = 3
+		;그 이외
+		ELSEIF CFLAG:381 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:381 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;@DOG_KOJO관계（X1을 케릭터 번호로 치환）
+;수간 플레이용 구상을 독립시켰습니다
+;-------------------------------------------------
+@DOG_KOJO_4
+
+;-------------------------------------------------
+;수간 애무 CFLAG:301
+;-------------------------------------------------
+IF SELECTCOM == 0
+	;처음
+	IF CFLAG:301 == 0
+		;굴복각인 Lv2 이상
+		IF MARK:2 >= 2
+			PRINTFORMW 「마음대로 핥아도 좋아…」
+		;그 이외
+		ELSE
+			PRINTFORMW 「싫、싫어、핥는다니！」
+		ENDIF
+		CFLAG:301 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:301 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 「크후응…크응…착하지…좀 더 빨아줘…♪」
+			CFLAG:301 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:301 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「아하아♪　개도 좋구나…♪」
+			CFLAG:301 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:301 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「마왕님…개로는 만족할 수 없어…」
+			CFLAG:301 = 5
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:301 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「하아…하아…」
+			CFLAG:301 = 4
+		;굴복각인Lv2
+		ELSEIF MARK:2 == 2 && (CFLAG:301 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「이걸로 만족해？」
+			CFLAG:301 = 3
+		;그 이외
+		ELSEIF MARK:2 <= 1 && (CFLAG:301 <= 1 || FLAG:7 == 2)
+			PRINTFORMW 「윽、다가오지 마…짐승 냄새…」
+			CFLAG:301 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수간 커닐링구스 CFLAG:302
+;-------------------------------------------------
+IF SELECTCOM == 1
+	;처음
+	IF CFLAG:302 == 0
+		;처녀
+		IF TALENT:TARGET:0 == 1
+			PRINTFORMW 「히、히에에！」
+		;그 이외
+		ELSE
+			PRINTFORMW 「그、그만 둬！」
+		ENDIF
+		CFLAG:302 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:302 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「우후후…착하지、착해。더 핥는 거야…아아응읏♪」
+			CFLAG:302 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:302 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「개에게 핥아지는 것만으로도…느껴 버려」
+			CFLAG:302 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:302 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「마왕님、뭔가 이상해요…」
+			CFLAG:302 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:302 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「웃…우우웃…」
+			CFLAG:302 = 3
+		;그 이외（굴복각인Lv3미만）
+		ELSEIF CFLAG:302 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「갸아！　그、그만둬어！」
+			CFLAG:302 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;수간 가슴 애무 CFLAG:306
+;-------------------------------------------------
+IF SELECTCOM == 5
+	;처음
+	IF CFLAG:306 == 0
+		;애정
+		IF TALENT:TARGET:85 == 1
+			PRINTFORMW 「아아읏…젖꼭지가…」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「머、멈춰！　개라니！？」
+		ENDIF
+		CFLAG:TARGET:306 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:306 <= 5 || FLAG:7 == 2)
+			PRINTFORML 「가슴 맛있니？　우후후…♪」
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 가슴을 핥는 들개를 소중한듯 껴안았다
+			CFLAG:306 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:306 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「기분 좋아…좀 더 핥아 줘…♪」
+			CFLAG:306 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:306 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「마왕님…왠지…이상해」
+			CFLAG:306 = 4
+		;B감각 Lv3 이상
+		ELSEIF ABL:1 >= 3 && (CFLAG:306 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「느、느끼고 싶지…않아…」
+			CFLAG:306 = 3
+		;그 이외（애정 없음、B감각 Lv3 미만）
+		ELSEIF CFLAG:306 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이、이런 짐승 놈이…」
+			CFLAG:306 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수간 키스 CFLAG:307
+;-------------------------------------------------
+IF SELECTCOM == 6
+	;퍼스트 키스
+	IF CFLAG:307 == 0 && TFLAG:13
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 「나의 첫 키스…받아줘…♪」
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 「첫 키스가 개인 것도 …나쁘진 않네」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「마왕님께 받길 바랬는데…」
+		;그 이외
+		ELSE
+			PRINTFORMW 「그、그만둬！　첫 키스가…이런…거짓말…」
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;（조교에선）처음
+	ELSEIF CFLAG:307 == 0
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 「나의 첫 키스…받아줘…♪」
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 「첫 키스가 개인 것도 …나쁘진 않네」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「마왕님께 받길 바랬는데…」
+		;그 이외
+		ELSE
+			PRINTFORMW 「그、그만둬！　첫 키스가…이런…거짓말…」
+		ENDIF
+		CFLAG:307 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:307 <= 5 || FLAG:7 == 2)
+			PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 일심불란으로 들개와 혀를 얽히고 있다
+			PRINTFORMW 「아하아、개 냄새…좋은 향…」
+			CFLAG:307 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:307 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「개와 키스라니…마왕님 특이하네」
+			CFLAG:307 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:307 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「마왕님의 뜻 모르겠습니다…」
+			CFLAG:307 = 4
+		;순종 Lv2 이상
+		ELSEIF ABL:10 >=2 && (CFLAG:307 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「네…개와 키스하겠습니다…」
+			CFLAG:307 = 3
+		;그 이외
+		ELSEIF CFLAG:307 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「싫어어…냄새…용서해 줘…」
+			CFLAG:307 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수간 애널 핥기 CFLAG:310
+;-------------------------------------------------
+IF SELECTCOM == 9
+	;처음
+	IF CFLAG:310 == 0
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORMW 「엉덩이 핥게해서…우읏、미안해、강아지야…」
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 「히얏、싫어어」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「으ー응、개의…」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「그、그만 둬어！　어딜 핥는 거야！」
+		ENDIF
+		CFLAG:TARGET:310 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:310 <= 5 || FLAG:7 == 2)
+			PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 항문을 양손으로 넓혀 개의 혀를 받아들였다
+			PRINTFORMW 「하아…하아…좋아아…」
+			CFLAG:310 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:310 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「개가 핥는다니…킁」
+			CFLAG:310 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:310 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「무슨 일이죠…이런…」
+			CFLAG:310 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:310 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「네…항문 내밀겠습니다…」
+			CFLAG:310 = 3
+		;그 이외（굴복각인Lv3미만）
+		ELSEIF CFLAG:310 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「갸아！　그런 곳을 핥는다니…그만해줘어」
+			CFLAG:310 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수간 후배위 CFLAG:322
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;처음
+	IF CFLAG:TARGET:322 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;암캐
+			IF TALENT:136 == 1
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 완전히 암캐처럼 엉덩이를 흔들었다
+				PRINTFORML 「처녀 바치겠습니다아！　나의 보지는 개님 전용입니다！ 교배하고 싶어어！」
+				PRINTFORMW 교미의 기쁨에 가볍게 떨면서 침흘리며 %조사선택(SAVESTR:TARGET, "는")% 선언했다
+			;음란
+			ELSEIF TALENT:76 == 1
+				PRINTFORMW 「개 상대로 첫 경험을…나다운가」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「마왕님께 바치고 싶었는데…」
+
+			;그 이외
+			ELSE
+				PRINTFORMW 「그、만…그만둬어어어어어어！！」
+			ENDIF
+		;비처녀
+		ELSE
+			;암캐
+			IF TALENT:136 == 1
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 완전히 암캐처럼 엉덩이를 흔들었다
+				PRINTFORML 「나의 보지는 개님 전용입니다！　교미해줘어！　교배하고 싶어어！」
+				PRINTFORMW 교미의 기쁨에 가볍게 떨면서 침흘리며 %조사선택(SAVESTR:TARGET, "는")% 선언했다
+			;음란
+			ELSEIF TALENT:76 == 1
+				PRINTFORMW 「엣、개와…뭐어、괜찮지만」
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 「마왕님…왜 내가 이런 일에…」
+			;그 이외
+			ELSE
+				PRINTFORMW 「그、만…그만둬어어어어어어！！」
+			ENDIF
+		ENDIF
+		CFLAG:322 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:322 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 개 처럼 뒤에서 개를 받아들이고 있다
+				PRINTFORML 「교、교미！　교미하고 있어交！　나는 암캐야！　음란한 암캐야아！」
+				PRINTFORMW 2마리의 짐승은 서로를 탐하면서 육욕 속에 빠져있다
+			ELSEIF RAND:2 == 0
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 짐승같은 소리를 내며 교미에 빠져있다
+				PRINTFORML 「응아아아아！　좋아！　교미！　하아아아！　좀 더、좀 더！」
+				PRINTFORMW 인간을 버린 %조사선택(SAVESTR:TARGET, "는")% 완전히 짐승이 되어 있었다
+			ELSE
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 흥분해 엉덩이를 내밀고 있다
+				PRINTFORML 「와 줘…개님 전용 보지에 교배해 줘어…♪」
+				PRINTFORMW 더 이상 그 짐승의 표정엔 과거의 냉철함은 보이지 않았다
+			ENDIF
+			CFLAG:322 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:322 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「개와 섹스하는 것도 경험일까…」
+			CFLAG:322 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:322 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「개도 좋지만…마왕니임」
+			CFLAG:322 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:322 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「믿을 수 없어…나、교미하고 있어…」
+			CFLAG:322 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:322 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「네…교미합니다…」
+			CFLAG:322 = 3
+		;그 이외
+		ELSEIF CFLAG:322 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「싫어…이런 거…너무 가혹해…」
+
+			CFLAG:322 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수간 후배위 애널 CFLAG:328
+;-------------------------------------------------
+IF SELECTCOM == 27
+	;처음
+	IF CFLAG:TARGET:328 == 0
+		;암캐
+		IF TALENT:TARGET:136 == 1
+			PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 엉덩이를 흔들며 개를 유혹했다 
+			PRINTFORMW 「뒤쪽 구멍이지만…받아 줘어♪」
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1
+			PRINTFORMW 「개와 항문성교…라」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「개와 엉덩이로 라니…」
+		;그 이외（애정없음）
+		ELSE
+			PRINTFORMW 「무엇을 할 생각이야…거짓말이지…？」
+		ENDIF
+		CFLAG:TARGET:328 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐＋A감각 Lv3 이상
+		IF TALENT:TARGET:136 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 항문의 감각에 넋을 놓고 있다
+				PRINTFORML 「개님의 자지가…내 똥구멍에 가득해…♪」
+				PRINTFORMW 여기까지 오면 이제 돌아갈 수 없을 것이다
+			ELSE
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 흥분해서 엉덩이를 넓히고 있다
+				PRINTFORML 「개니임…내 똥구멍으로도 괜찮으시면 사용해 주세요…」
+				PRINTFORMW 짐승에게 아양을 떠는 모습은 이미 짐승 이하의 모습이었다
+			ENDIF
+			CFLAG:328 = 7
+		;음란＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 「개도…기분 좋앗」
+			CFLAG:328 = 6
+		;애정＋A感覚Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:3 >= 3 && (CFLAG:328 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 「마왕님이었다면 좋았을텐데…」
+			CFLAG:328 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:328 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「마왕님…어째서…」
+			CFLAG:328 = 4
+		;A感覚Lv3以上
+		ELSEIF ABL:3 >= 3 && (CFLAG:328 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「엉덩이가…개의…우웃」
+			CFLAG:328 = 3
+		;그 이외（애정 없음、A감각 Lv3 미만）
+		ELSEIF  CFLAG:328 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「이런 것을…미쳤군…」
+			CFLAG:328 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦手淫 CFLAG:331
+;-------------------------------------------------
+IF SELECTCOM == 30
+	;처음
+	IF CFLAG:TARGET:331 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「독특한 형태를 하고 있구나……이것이 개의 자지인가」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「후, 딱딱하게 발기 하고 있군」
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 「개의 냄새……손에 배어 버리겠군」
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 「쿳……더럽다……이런 것을……」
+		ENDIF
+		CFLAG:TARGET:331 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐＋奉仕精神Lv3以上
+		IF TALENT:TARGET:136 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 6 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「기분이 좋은가？후후, 움찔움찔 맥박치고 있다고」
+			ELSE
+				PRINTFORMW 「짐승의 냄새……짙어졌군. 자, 짐승 정액 듬뿍 내 주도록」
+			ENDIF
+			CFLAG:331 = 7
+		;음란＋봉사정신 Lv3 이상
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 5 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「후후, 낑낑 울고있군……귀여운데」
+			ELSE
+				PRINTFORMW 「느끼고 있는 것인가？개도 똑같군」
+			ENDIF
+			CFLAG:331 = 6
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:331 <= 4 || FLAG:7 == 2)
+			IF RAND:2 == 0
+				PRINTFORMW 「대단한, 짐승의 냄새다」
+			ELSE
+				PRINTFORMW 「그건그렇고……굉장한 박력이군」
+			ENDIF
+			CFLAG:331 = 5
+		;애정＋봉사정신 Lv3 이상
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 「후후, 느껴고 있는 것인가？」
+			CFLAG:331 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 >= 3 && (CFLAG:331 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「좋을 것이겠지, 개라고 해도, 느끼게 해주면 좋을 것이겠지」
+			CFLAG:331 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF CFLAG:331 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「쿳……냄새……이런……더러워운 짓을……」
+			CFLAG:331 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦フェラチオ CFLAG:332
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;처음
+	IF CFLAG:TARGET:332 == 0
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 「과연, 짐승의 자지는 어떤 맛일 련지♪」
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 「나는 이런 걸 빨고 싶지 않지만……」
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3
+			PRINTFORMW 「알았다…이것을 빨면 좋을 것이겠지？」
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 「시, 싫다！그딴 것 입에 넣고 싶지 않다！그만둬엇！！」
+		ENDIF
+		CFLAG:TARGET:332 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐＋奉仕精神Lv5
+		IF TALENT:TARGET:136 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 6 || FLAG:7 == 2)
+				PRINTFORML 「하훗, 하후웃, 쮸읍쮸읍……푸하, 자지, 자지, 개님의 자지……」
+				PRINTFORMW %SAVESTR:TARGET%는 콧김을 난폭하게 내뿜으며 개의 페니스를 빨고 있다
+			CFLAG:332 = 7
+		;음란＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:TARGET:16 >= 5 && (CFLAG:332 <= 5 || FLAG:7 == 2)
+				PRINTFORMW 「비록 개라도 나의 입보지로 봉사해 줄 것이니까♪」
+			CFLAG:332 = 6
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:332 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 「수상한 냄새다……하지만, 나쁘진 않구나」
+			CFLAG:332 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:332 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 「명령이라면, 개라도 힘껏 봉사를 하지 않으면 안되는거군……！」
+			CFLAG:332 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:332 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 「알았어…때로는 인간이 아닌 것도 봉사 하지 않으면 안 되는건가……」
+			CFLAG:332 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF CFLAG:332 <= 1 || FLAG:7 == 2
+			PRINTFORMW 「시, 싫다！우붓……내, 냄새 나……이 짐승같은 놈！」
+			CFLAG:332 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦騎乗位 CFLAG:335
+;-------------------------------------------------
+IF SELECTCOM == 34
+	;처음
+	IF CFLAG:TARGET:335 == 0
+		;처녀
+		IF TALENT:0 == 1
+			;암캐
+			IF TALENT:TARGET:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:TARGET:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 
+			;그 이외（애정없음）
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		;비처녀
+		ELSE
+			;암캐
+			IF TALENT:TARGET:136 == 1
+				PRINTFORMW 
+			;음란
+			ELSEIF TALENT:76 == 1
+				PRINTFORMW 
+			;애정
+			ELSEIF TALENT:85 == 1
+				PRINTFORMW 
+			;그 이외
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:TARGET:335 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:335 <= 6 || FLAG:7 == 2)
+			IF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 7
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:335 <= 5 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW 
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 6
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:335 <= 4 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORML 
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 5
+		;굴복각인 Lv3＋V 감각 Lv3 이상
+		ELSEIF MARK:2 == 3 && ABL:2 >= 3 && (CFLAG:335 <= 3 || FLAG:7 == 2)
+			IF RAND:4 == 0
+				PRINTFORMW
+			ELSEIF RAND:3 == 0
+				PRINTFORMW 
+			ELSEIF RAND:2 == 0
+				PRINTFORMW 
+			ELSE
+				PRINTFORMW 
+			ENDIF
+			CFLAG:335 = 4
+		;굴복각인Lv3
+		ELSEIF MARK:2 == 3 && (CFLAG:335 <= 2 || FLAG:7 == 2)
+			PRINTFORML 
+			PRINTFORMW 
+			CFLAG:335 = 3
+		;それ以外（愛無し、従順Lv5未満）
+		ELSEIF CFLAG:335 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:335 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦애널奉仕 CFLAG:338
+;-------------------------------------------------
+IF SELECTCOM == 37
+	;처음
+	IF CFLAG:TARGET:338 == 0
+		;봉사정신 Lv3 이상
+		IF ABL:TARGET:16 >= 3
+			PRINTFORMW 
+		;그 이외（봉사정신 Lv3 미만）
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:338 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐＋奉仕精神Lv5
+		IF TALENT:TARGET:136 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 5 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:338 = 6
+		;음란＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 
+			CFLAG:338 = 5
+		;애정＋봉사정신 Lv5
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:TARGET:16 == 5 && (CFLAG:338 <= 3 || FLAG:7 == 2)
+				PRINTFORML 
+			CFLAG:338 = 4
+		;봉사정신 Lv3 이상
+		ELSEIF ABL:TARGET:16 >= 3 && (CFLAG:338 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:338 = 3
+		;그 이외（봉사정신 Lv3 미만）
+		ELSEIF CFLAG:338 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:338 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;獣姦アイマスク CFLAG:344　CFLAG:380
+;-------------------------------------------------
+;개시 시
+IF SELECTCOM == 43 && TEQUIP:43
+	;처음
+	IF CFLAG:TARGET:344 == 0
+		;암캐
+		IF TALENT:136 == 1
+			PRINTFORMW 
+		;음란
+		ELSEIF TALENT:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:85 == 1
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+		CFLAG:TARGET:344 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		;암캐
+		IF TALENT:TARGET:136 == 1 && (CFLAG:344 <= 9 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 10
+		;음란＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 8 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 9
+		;음란＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:76 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 7 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 8
+		;음란
+		ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:344 <= 6 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 7
+		;애정＋マゾっ気Lv5以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 5 && (CFLAG:344 <= 5 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 6
+		;애정＋マゾっ気Lv3以上
+		ELSEIF TALENT:TARGET:85 == 1 && ABL:21 >= 3 && (CFLAG:344 <= 4 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 5
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:344 <= 3 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 4
+		;マゾっ気Lv3以上
+		ELSEIF ABL:21 >= 3 && (CFLAG:344 <= 2 || FLAG:7 == 2)
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 3
+		;그 이외
+		ELSEIF CFLAG:344 <= 1 || FLAG:7 == 2
+			PRINTFORMW 
+			CFLAG:TARGET:344 = 2
+		ENDIF
+		RETURN 0
+	ENDIF
+;終了時
+ELSEIF SELECTCOM == 43 && TEQUIP:43 == 0
+	;암캐
+	IF TALENT:TARGET:136 == 1 && (CFLAG:380 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:380 = 4
+	;음란
+	ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:380 < 3 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:380 = 3
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:380 < 2 || FLAG:7 == 2)
+		PRINTFORMW 
+		CFLAG:380 = 2
+	;それ以外 
+	ELSEIF CFLAG:380 < 1 || FLAG:7 == 2
+		PRINTFORMW 
+		CFLAG:380 = 1
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;獣姦会話 CFLAG:357
+;いぬと会話は出来ないので自己紹介のみ
+;-------------------------------------------------
+IF SELECTCOM == 56
+	;처음
+	IF CFLAG:357 == 0
+		IF TEQUIP:53
+			;비디오 자기 소개
+			;암캐
+			IF TALENT:TARGET:136 == 1
+				PRINTFORMW 「여어…나는 %SAVESTR:TARGET%다…이전에는 용사였지만……지금은 용사도 사람도 그만두고 가축이 되었다」
+				PRINTFORMW 그렇게 말하면서 수정구에 보이도록 똥개를 껴안았다
+				PRINTFORMW 「지금부터 주인님의 개님과 한 쌍이 되어 교미를 하게 되었다……짐승과 같은 가축섹스 기대되는군♪」
+				PRINTFORMW 「그러면 이제부터 여러 가지 기분 좋은 일을 할테니, 마음껏 딸딸이 치도록…후훗」
+			;음란
+			ELSEIF TALENT:TARGET:76 == 1
+				PRINTFORMW 「여어…나는 %SAVESTR:TARGET%다…이전에는 용사였지만……지금은 용사를 그만두어 암컷노예가 되었다」
+				PRINTFORMW 그렇게 말하면서 수정구를 향해 엉덩이를 흔들었다
+				PRINTFORMW 「지금부터 주인님의 개와 교미를 하게 되었다……명령에 복종해 개와도 교미하는 나를 경멸해 주도록」
+				PRINTFORMW 「그러면 이제부터 여러 가지 기분 좋은 일을 할테니, 마음껏 딸딸이 치도록…후훗」
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1
+				PRINTFORMW 「여어…나는 %SAVESTR:TARGET%다…이전에는 용사였지만……지금은 용사를 그만두고 노예가 되었다」
+				PRINTFORMW 그렇게 말하면서 수정공에 향해 가랑이를 열었다
+				PRINTFORMW 「지금부터 주인님의 개와 교미를 하게 되었다……사랑한 나머지 개와도 교미하는 나를 경멸해 주도록」
+				PRINTFORMW 「그러면 이제부터 여러 가지 기분 좋은 일을 할테니, 마음껏 딸딸이 치도록…후훗」
+			;그 이외
+			ELSE
+				PRINTFORMW 
+			ENDIF
+		ENDIF
+		CFLAG:357 = 1
+		RETURN 0
+	;두 번째 이후
+	ELSE
+		IF TEQUIP:53
+			;비디오 자기 소개
+			;암캐
+			IF TALENT:TARGET:136 == 1 && (CFLAG:357 <= 4 || FLAG:7 == 2)
+				PRINTFORMW 「여어…나는 %SAVESTR:TARGET%다…지난 번의 가축교미는 어땠나？」
+				PRINTFORMW 그렇게 말하면서 수정구에 보이도록 똥개를 껴안았다
+				PRINTFORMW 「또 주인님의 개님과 한 쌍이 되어 교미를 하겠다……짐승과 같은 가축섹스가 기대되는군♪」
+				PRINTFORMW 「그러면 이제부터 여러 가지 기분 좋은 일을 할테니, 마음껏 딸딸이 치도록…후훗」
+				CFLAG:357 = 5
+			;음란
+			ELSEIF TALENT:TARGET:76 == 1 && (CFLAG:357 <= 3 || FLAG:7 == 2)
+				PRINTFORMW 「여어…나는 %SAVESTR:TARGET%다…이전에 한 짐승섹스는 어땠나？」
+				PRINTFORMW 그렇게 말하면서 수정구를 향해 엉덩이를 흔든다
+				PRINTFORMW 「오늘도 주인님의 개와 교미를 하겠다……명령에 복종해 개와도 교미하는 나를 경멸해 주도록」
+				PRINTFORMW 「그러면 이제부터 여러 가지 기분 좋은 일을 할테니, 마음껏 딸딸이 치도록…후훗」
+				CFLAG:357 = 4
+			;애정
+			ELSEIF TALENT:TARGET:85 == 1 && (CFLAG:357 <= 2 || FLAG:7 == 2)
+				PRINTFORMW 「여어…나는 %SAVESTR:TARGET%다…지난 번의 교미는 어땠나？」
+				PRINTFORMW 그렇게 말하면서 수정구를 향해 가랑이를 연다
+				PRINTFORMW 「오늘도 주인님의 개와 교미를 하겠다……사랑한 나머지 개와도 교미하는 나를 경멸해 주도록」
+				PRINTFORMW 「그러면 이제부터 여러 가지 기분 좋은 일을 할테니, 마음껏 딸딸이 치도록…후훗」
+				CFLAG:357 = 3
+			;그 이외
+			ELSEIF CFLAG:357 <= 1 || FLAG:7 == 2
+				PRINTFORMW 
+				CFLAG:357 = 2
+			ENDIF
+		ENDIF
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+RETURN 0
+
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_PALAMCNG関係（X1をキャラ番号に置換）
+;パラメータ変動をトリガーにした口上
+;パラメータ変動後に口上を発動します
+;-------------------------------------------------
+@KOJO_MESSAGE_PALAMCNG_4
+;조수が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI > 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には口上をスキップする
+SIF TEQUIP:45
+	RETURN 0
+;失神時には口上をスキップする
+SIF TFLAG:899
+	RETURN 0
+;コロシアム中は口上をスキップする
+IF TEQUIP:55
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;파라미터 변화 시 대사 CFLAG 221～260을 사용
+;-------------------------------------------------
+;-------------------------------------------------
+;처음으로 윤활이 LV2를 초과 CFLAG:221
+;-------------------------------------------------
+P = PALAM:3 + UP:3
+IF P > PALAMLV:2 && CFLAG:TARGET:221 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		;로션을 사용한 경우
+		IF SELECTCOM == 50
+			PRINTFORMW 「뭐야、이 미끌거림은…」
+			PRINTFORMW 「뭐、내가 아프지 않도록 배려해준 건 좋은 마음가짐이군」
+		;그 이외
+		ELSE
+			PRINTFORMW 「그런…이 내가 이렇게 젖을 줄이야…믿을 수 없어…」
+		ENDIF
+	;그 이외
+	ELSE
+		;로션을 사용한 경우
+		IF SELECTCOM == 50
+			PRINTFORMW 「뭐야、이 미끌거림은…」
+			PRINTFORMW 「뭐、내가 아프지 않도록 배려해준 건 좋은 마음가짐이군」
+		;그 이외
+		ELSE
+			PRINTFORMW 「그런…이 내가 이렇게 젖을 줄이야…믿을 수 없어…」
+		ENDIF
+	ENDIF
+	CFLAG:TARGET:221 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 욕정이 LV2 초과 CFLAG:222
+;-------------------------------------------------
+P = PALAM:5 + UP:5
+IF P > PALAMLV:2 && CFLAG:222 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		;しあわせ草を使った場合
+		IF SELECTCOM == 51
+			PRINTFORMW 「아아…약물섹스 최고오…」
+		;그 이외
+		ELSE
+			PRINTFORMW 「이런거…즐거워…」
+		ENDIF
+	;그 이외
+	ELSE
+		;しあわせ草を使った場合
+		IF SELECTCOM == 51
+			PRINTFORMW 「비겁하군…이런 방법으로…」
+		;그 이외
+		ELSE
+			PRINTFORMW 「믿을 수 없어…내가…기꺼이 받아들이다니…？」
+		ENDIF
+	ENDIF
+	CFLAG:222 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 치정이 LV2를 초과 CFLAG:223
+;-------------------------------------------------
+P = PALAM:8 + UP:8
+IF P > PALAMLV:2 && CFLAG:223 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 「그만해요…부끄러워요…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「싫어어、이런거…부끄러워…」
+	ENDIF
+	CFLAG:223 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 공포가 LV2를 초과 CFLAG:224
+;-------------------------------------------------
+P = PALAM:10 + UP:10
+IF P > PALAMLV:2 && CFLAG:224 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 「마왕님？　저…무서워요…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「히이、히이이！　히이이이이！」
+	ENDIF
+	CFLAG:224 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 C절정 CFLAG:225
+;-------------------------------------------------
+IF NOWEX:0 > 0 && CFLAG:225 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 「좋아、가요、가버려어！」
+	;그 이외
+	ELSE
+		PRINTFORMW 「온다…와！ 뭔가가！ 우와아아아아아아！」
+	ENDIF
+	CFLAG:225 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 V절정 CFLAG:226
+;-------------------------------------------------
+IF NOWEX:1 > 0 && CFLAG:226 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1
+		PRINTFORMW 「응아아！　보지 가버려！　보지가 자지의 맛을 기억해버려어어！」
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1
+		PRINTFORMW 「아아아！　거기에서…뭔가가…이게、거기의 즐거움이구나…！」
+	;그 이외
+	ELSE
+		PRINTFORMW 「쿠후、온다…싫어…아아아아아아！」
+	ENDIF
+	CFLAG:TARGET:226 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 A절정 CFLAG:227
+;-------------------------------------------------
+IF NOWEX:2 > 0 && CFLAG:227 == 0
+	;음란
+	IF TALENT:TARGET:76 == 1
+		PRINTFORMW 「아하아！　좋아！　좋아요오！　나、처음으로、똥구멍 절정을 받아들여어！」
+	;애정
+	ELSEIF TALENT:TARGET:85 == 1
+		PRINTFORMW 「믿을 수 없어…나의、엉덩이가…성기가 되버려！」
+	;그 이외
+	ELSE
+		PRINTFORMW 「싫다、싫어어！　이런 구멍으로…가기 싫어！　가버리기…우와아아아아아아아아！！」
+	ENDIF
+	CFLAG:227 = 1
+ENDIF
+
+;-------------------------------------------------
+;처음으로 B절정 CFLAG:228
+;-------------------------------------------------
+IF NOWEX:3 > 0 && CFLAG:228 == 0
+	;애정
+	IF TALENT:TARGET:85 == 1
+		PRINTFORMW 「가슴이…이렇게 행복해…아아、간다、가버려요！」
+	;그 이외
+	ELSE
+		PRINTFORMW 「아응、아아아！　가、가슴이…응하아！」
+	ENDIF
+	CFLAG:TARGET:228 = 1
+ENDIF
+
+;-------------------------------------------------
+;処女喪失(処女のみ) CFLAG:229
+;-------------------------------------------------
+A = UP:11 + UP:12
+IF TFLAG:3 == 1 && CFLAG:229 == 0
+	;主人による処女喪失
+	IF TFLAG:20 == 1
+		;淫乱かつ反発刻印取得せず
+		IF TALENT:TARGET:76 == 1 && (A < 500 || TFLAG:150 == 1)
+			PRINTFORMW 
+		;愛かつ反発刻印取得せず
+		ELSEIF TALENT:TARGET:85 == 1 && (A < 500 || TFLAG:150 == 1)
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	;主人以外による処女喪失
+	ELSE
+		;음란
+		IF TALENT:TARGET:76 == 1
+			PRINTFORMW 
+		;애정
+		ELSEIF TALENT:TARGET:85 == 1
+			PRINTFORMW 
+		;그 이외
+		ELSE
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:TARGET:229 = 1
+ENDIF
+
+;-------------------------------------------------
+;@KOJO_MESSAGE_MARKCNG関係（X1をキャラ番号に置換）
+;刻印変動をトリガーにした口上
+;刻印変動後に口上を発動します
+;-------------------------------------------------
+@KOJO_MESSAGE_MARKCNG_4
+;조수が調教した時に口上をスキップする（好みに応じて使う、行頭の;を消すとスキップするようになる）
+;SIF ASSI > 0 && ASSIPLAY
+;	RETURN 0 
+;ボールギャグ着用時には口上をスキップする（OFFだと口を塞いでるのに喋りまくる）
+SIF TEQUIP:45
+	RETURN 0
+;-------------------------------------------------
+;苦痛刻印Lv3 취득 CFLAG:297
+;-------------------------------------------------
+IF TFLAG:22 == 3 && CFLAG:297 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 「아픔으로 느껴버리리다니……이것도 사랑하기 때문 인가……」
+	ELSE
+		PRINTFORMW 「후후……이것이 아픔의 감로라는 것인가」
+	ENDIF
+	CFLAG:297 = 1
+ENDIF
+
+;-------------------------------------------------
+;快楽刻印Lv3 취득 CFLAG:298
+;-------------------------------------------------
+IF TFLAG:23 == 3 && CFLAG:298 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 「느, 느껴버린다……이상해져버렷！！」
+	ELSE
+		PRINTFORMW 「느, 느껴버린다……이상해져버렷！！」
+	ENDIF
+	CFLAG:298 = 1
+ENDIF
+
+;-------------------------------------------------
+;屈服刻印Lv3 취득 CFLAG:299
+;-------------------------------------------------
+IF TFLAG:24 == 3 && CFLAG:299 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 「이 내가……꺽일 줄이야……」
+	ELSE
+		PRINTFORMW 「이 내가……꺽일 줄이야……」
+	ENDIF
+	CFLAG:299 = 1
+ENDIF
+
+;-------------------------------------------------
+;반발각인 Lv3 취득 CFLAG:300
+;-------------------------------------------------
+IF TFLAG:21 == 3 && CFLAG:300 == 0
+	;애정
+	IF TALENT:85 == 1
+		PRINTFORMW 「이자식……더 이상은……용서하지 않겠다！」
+	ELSE
+		PRINTFORMW 「이자식……더 이상은……용서하지 않겠다！」
+	ENDIF
+	CFLAG:300 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;이벤트 구상집（X1、X2를 케릭터 번호로 교체함） CFLAG 261～296
+;-------------------------------------------------
+@SELF_KOJO_K4
+;-------------------------------------------------
+;조교 후 자위 CFLAG:261
+;-------------------------------------------------
+IF TFLAG:13 == 1
+	;음란
+	IF TALENT:76 && (CFLAG:261 < 4 || FLAG:7 == 2)
+		PRINTFORMW 「나는 정말이지 야한 여자야…이렇게…이런 일을 하면서 달래다니이」
+		CFLAG:261 = 4
+	;애정
+	ELSEIF TALENT:85 && (CFLAG:261 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「아、하응、쿠읏、하아하아…또、해 버렸습니다…」
+		CFLAG:261 = 3
+	;자위중독 Lv3 이상
+	ELSEIF ABL:31 >= 3 && (CFLAG:261 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「멈출 수 없어…멈추질 않아요…이상해…」
+		CFLAG:261 = 2
+	;그 이외
+	ELSEIF CFLAG:261 < 1 || FLAG:7 == 2
+		PRINTFORMW 「응、크후、핫…하아하아」
+		CFLAG:261 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;레즈 플레이 CFLAG:262
+;-------------------------------------------------
+IF TFLAG:13 == 2
+	;음란
+	IF TALENT:76 && (CFLAG:262 < 5 || FLAG:7 == 2)
+		PRINTFORMW 「여성의 신체는…좋은 것 같군…아하아、좀 더 상스럽게 문란해져…」
+		CFLAG:262 = 5
+	;애정
+	ELSEIF TALENT:85 && (CFLAG:262 < 4 || FLAG:7 == 2)
+		PRINTFORMW 「여자끼리라…좋은 것 같네요。응크후、좀 더 안아줘…」
+		CFLAG:262 = 4
+	;레즈 중독 Lv3이상
+	ELSEIF ABL:33 >= 3 && (CFLAG:262 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「나는…더는 여자없인 살 수 없어…」
+		CFLAG:262 = 3
+	;레즈 끼 Lv3 이상
+	ELSEIF ABL:22 >= 3 && (CFLAG:262 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「여자와 라니…하지만…좋앗」
+		CFLAG:262 = 2
+	;그 이외
+	ELSEIF CFLAG:262 < 1 || FLAG:7 == 2
+		PRINTFORMW 「어째서 내가…여자와 같이…하지만…」
+		CFLAG:262 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;아침 펠라 CFLAG:263
+;-------------------------------------------------
+IF TFLAG:13 == 3
+	;음란
+	IF TALENT:76 == 1 && (CFLAG:263 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「크츄、쥬룹、쥬루쥬루ー읍」
+		PRINTFORMW 「역시 자지즙은 아침 때의 진한 것이 제일이구나…！」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 입맛을 다시며 입에서 흘러나온 정액을 핥았다
+		CFLAG:263 = 3
+	;애정
+	ELSEIF TALENT:85 && (CFLAG:263 < 3 || FLAG:7 == 2)
+		PRINTFORMW 「크후、힘껏 봉사할게♪」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 기쁜듯이 자지를 입에 물었다
+		CFLAG:263 = 3
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:16 >= 5 && (CFLAG:263 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「봉사하겠어…♪」
+		CFLAG:263 = 2
+	;그 이외
+	ELSEIF CFLAG:263 < 1 || FLAG:7 == 2
+		PRINTFORMW 「자지…♪」
+		CFLAG:263 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;조교 후 섹스 CFLAG:264
+;-------------------------------------------------
+IF TFLAG:13 == 4
+	;V감각 Lv4 이상
+	IF ABL:2 >= 4 && (CFLAG:264 < 2 || FLAG:7 == 2)
+		PRINTFORMW 「아아앗、좋아、좋습니다아♪」
+		CFLAG:264 = 2
+	;그 이외
+	ELSEIF CFLAG:264 < 1 || FLAG:7 == 2
+		PRINTFORMW 「좀 더、좀 더 나에게 뜨거운 걸 줘…♪」
+		CFLAG:264 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;요바이 CFLAG:265
+;-------------------------------------------------
+IF TFLAG:13 == 5
+	IF CFLAG:265 < 1 || FLAG:7 == 2
+		PRINTFORMW 「힘껏…안아줘…욱신거려 어쩔 수 없어…」
+		CFLAG:265 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;売却
+;-------------------------------------------------
+IF TFLAG:13 == 6
+	;애정+反発刻印Lv3未満
+	IF TALENT:85 && MARK:3 < 3
+		PRINTFORMW 
+	;반발각인 Lv3
+	ELSEIF MARK:3 == 3
+		PRINTFORMW 
+	;음란
+	ELSEIF TALENT:76
+		PRINTFORMW 
+	;그 이외
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	PRINTFORML 
+		SIF TALENT:122 != 1
+		CALL SELL_MATURO_K0
+ENDIF
+
+;-------------------------------------------------
+;妊娠発覚 CFLAG:271
+;CFLAG:102→誰によって妊娠させられたか（マスター = 1, 조수 = 2, 노예 = 3, 客 = 4, 犬 = 5, モンスター・촉수 = 6）
+;-------------------------------------------------
+IF TFLAG:13 == 11
+	SIF CFLAG:271 >= 1
+		RETURN 0
+	;崩壊してしまった場合
+	IF TALENT:9 == 1
+		PRINTFORMW 
+	;父親が主人で母親が愛持ち
+	ELSEIF TALENT:85 && CFLAG:102 == 1
+		PRINTFORMW 
+	;父親が조수
+	ELSEIF CFLAG:102 == 2
+		PRINTFORMW
+	;父親が노예
+	ELSEIF CFLAG:102 == 3
+		PRINTFORMW
+	;父親が野良犬
+	ELSEIF CFLAG:102 == 5
+		PRINTFORMW
+	;父親が狂王
+	ELSEIF CFLAG:102 == 7
+		PRINTFORMW
+	;その他
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:271 = 1
+ENDIF
+
+;-------------------------------------------------
+;出産 CFLAG:272
+;CFLAG:102→誰によって妊娠させられたか（マスター = 1, 조수 = 2, 노예 = 3, 客 = 4, 犬 = 5, モンスター・촉수 = 6）
+;-------------------------------------------------
+IF TFLAG:13 == 12
+	SIF CFLAG:272 >= 1
+		RETURN 0
+	;崩壊している場合
+	IF TALENT:9 == 1
+		PRINTFORMW 
+	;父親が主人で母親が愛持ち
+	ELSEIF TALENT:85 && CFLAG:102 == 1
+		PRINTFORMW 
+	;父親が조수
+	ELSEIF CFLAG:102 == 2
+		PRINTFORMW
+	;父親が노예
+	ELSEIF CFLAG:102 == 3
+		PRINTFORMW
+	;父親が野良犬
+	ELSEIF CFLAG:102 == 5
+		PRINTFORMW
+	;父親が狂王
+	ELSEIF CFLAG:102 == 7
+		PRINTFORMW
+	;その他
+	ELSE
+		PRINTFORMW 
+	ENDIF
+	CFLAG:272 = 1
+ENDIF
+
+;-------------------------------------------------
+;育児室 CFLAG:273
+;-------------------------------------------------
+IF TFLAG:13 == 13
+	;함락済
+	IF TALENT:85 || TALENT:76
+		;妊娠中
+		IF TALENT:153
+			PRINTFORMW 
+		;육아중
+		ELSEIF TALENT:154
+			PRINTFORMW 
+		ENDIF
+	ENDIF
+	CFLAG:273 = 1
+ENDIF
+
+;-------------------------------------------------
+;親離れ時 CFLAG:274
+;-------------------------------------------------
+IF TFLAG:13 == 14
+	;함락済
+	IF TALENT:85 || TALENT:76
+		PRINTFORMW 
+	ENDIF
+	CFLAG:274 = 1
+ENDIF
+
+
+;-------------------------------------------------
+;사망
+;-------------------------------------------------
+IF TFLAG:13 == 999
+	;애정
+	IF TALENT:85
+		PRINTFORMW 
+	;그 이외
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;수명에 의한 소실
+;-------------------------------------------------
+IF TFLAG:13 == 998
+	;애정
+	IF TALENT:85
+		PRINTFORMW 
+	;그 이외
+	ELSE
+		PRINTFORMW 
+	ENDIF
+ENDIF
+
+;--------------------------------------------------
+;플래그 초기화
+;--------------------------------------------------
+TFLAG:13 = 0
+
+RETURN 0
+
+;-------------------------------------------------
+;@単体エンディング関係(X1、X2をキャラ番号に置換する)
+;まだ未実装です
+;-------------------------------------------------
+;@SINGLE_ENDING_K4
+;DRAWLINE
+;PRINTFORMW ―――単体エンド条件達成―――
+;PRINTFORMW …………
+;PRINTFORMW ………
+;PRINTFORMW ……
+;PRINTFORMW 
+
+
+;PRINTFORMW 
+;PRINTFORMW 　　　　　　　　―― Ending No.104 (○○エンド)
+
+;CALL GAME_CONTINUE
+;RETURN 0
+
+
+;------------------------------------------------------------------------------------------------------------------------------
+;여기서는 eramaou 추가 구상
+;------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+;-------------------------------------------------------
+@DUNGEON_RYOUZYOKU_K4
+;-------------------------------------------------------
+;던전에서 능욕되기 전 한 마디
+
+
+IF TALENT:0 == 1
+	;처녀
+	PRINTFORMW 「그런 바보 같은…내 처음이…」
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+	
+		;무관심・감정결여라면 다른 말 없이 종료
+		PRINTFORMW 「제길」
+		
+		RETURN 0
+	ELSEIF TALENT:17 ==1 || TALENT:31 == 1 || TALENT:36 == 1
+		
+		;프라이드낮음・정조관부실・부끄러움 없음이면 신체를 팔아 살려 달라고 빈다
+		PRINTFORMW 「부탁이다！　놓아 줘…내 몸을 마음대로 다뤄도 괜찮으니까…」
+		
+		;A민감하거나 A경험이 있다면 애널을 쓸 것을 제안함
+		SIF TALENT:106 == 1 || EXP:1 > 0
+			PRINTFORMW 「엉덩이를 사용해도 좋아！　조금 더럽지만…나는 상관없다고」
+		
+		;펠라경험이 있다면 입으로 하는 봉사를 어필한다
+		SIF EXP:22 > 0
+			PRINTFORMW 「이, 입이라도 쓰겠어, 이래 보여도 경험이 있다…」
+		
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・저항이라면
+		;자지에 절대 지지 않아！계의 정신적 저항을 함
+		PRINTFORMW 「장난치지 마라！　나는 절대 인정하지 않아…절대로 굴복하지 않는다！」
+		
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・비관적이라면 자신의 운명에 절망함
+		PRINTFORMW 「이것이…내 운명이었던 거구나…」
+		
+	ELSE
+		
+		;기타 다른 성격에 따라서
+		PRINTFORMW 「난 절대로 굴복하지 않는다！　굴복할까 보냐…」
+		
+	ENDIF
+ELSE
+	;비처녀
+	PRINTFORMW （후, 처녀 같은건 이미 예전에 버려 두었어！）
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・감정결여라면 다른 말 없이 종료
+		PRINTFORMW 「마음대로 해버려」
+		
+		RETURN 0
+	ELSEIF TALENT:17 ==1 || TALENT:31 == 1 || TALENT:36 == 1
+		
+		;프라이드낮음・정조관부실・부끄러움 없음이면 신체를 팔아 살려 달라고 빈다
+		PRINTFORMW 「목숨만 살려준다면、난 뭐든지 할 수 있는데？」
+		
+		;A민감하거나 A경험이 있다면 애널을 쓸 것을 제안함
+		SIF TALENT:106 == 1 || EXP:1 > 0
+			PRINTFORMW 「엉덩이도 좋아、무엇이라도 할테니까…」
+		
+		;펠라경험이 있다면 입으로 하는 봉사를 어필한다
+		SIF EXP:22 > 0
+			PRINTFORMW 「입에 넣어도 좋아…열심히 핥아줄테니까…」
+		
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・저항이라면
+		;자지에 절대 지지 않아！계의 정신적 저항을 함
+		PRINTFORMW 「네 놈들 따위에게 내 마음이 꺾일 것 같으냐！」
+		
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・비관적이라면 자신의 운명에 절망함
+		PRINTFORMW 「이젠、끝인건가…」
+		
+	ELSE
+		
+		;기타 다른 성격에 따라서
+		PRINTFORMW 「나는、꺾이지 않아！ 절대로…」
+		
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;-------------------------------------------------------
+@DUNGEON_RYOUZYOKU_AFTER_K4
+;-------------------------------------------------------
+;던전에서 능욕당한 후의 한 마디
+
+
+IF TALENT:0 == 1
+	;처녀
+	PRINTFORMW 「나의…순결…무사하구나…」
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・감정결여라면 다른 말 없이 종료
+		PRINTFORMW 「큿」
+		
+		RETURN 0
+	ENDIF
+	
+	;애널을 너무 만지작거린 감상
+	IF EXP:1 > 20
+		PRINTFORMW 「엉덩이가…최악이다…」
+		PRINTFORMW 「이런…이런 처사…」
+	ENDIF
+	
+	;펠라한 감상
+	SIF EXP:22 > 20
+		PRINTFORMW 「이렇게 핥았던 적은 처음이다…」
+	
+	;정액의 맛
+	SIF EXP:20 > 20
+		PRINTFORMW 「더는、정액은 됬어…」
+ELSE
+	;비처녀
+	PRINTFORMW 「끝난…건가…？」
+	
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・감정결여라면 다른 말 없이 종료
+		PRINTFORMW 「…」
+		
+		RETURN 0
+	ENDIF
+	
+	;질을 지나치게 당한 감상
+	IF EXP:0 > 20
+		PRINTFORMW 「벌써 그 곳이 너덜너덜해…」
+		PRINTFORMW 「지독한…」
+	ENDIF
+	
+	;애널을 너무 만지작거린 감상
+	IF EXP:1 > 20
+		PRINTFORMW 「엉덩이에 감각이 없어…」
+		PRINTFORMW 「최악이야…」
+	ENDIF
+	
+	;펠라한 감상
+	SIF EXP:22 > 20
+		PRINTFORMW 「핥았더니…토할 것 같아」
+	
+	;정액의 맛
+	SIF EXP:20 > 20
+		PRINTFORMW 「이제 정액은 충분해…」
+ENDIF
+
+RETURN 0
+
+;-----------------------------------
+@BENKI_KOUJO_K4
+;-----------------------------------
+;육변기 구상。케릭터는 A
+;FLAG:62를 사용。상세한 행동은 BENKI.ERB에
+
+;FLAG:62 =  0 最下層モンスター奉仕
+;FLAG:62 =  1 レズ便器
+;FLAG:62 =  2 獣姦便器
+;FLAG:62 =  3 両穴便器
+;FLAG:62 =  4 膣便器
+;FLAG:62 =  5 アナル便器
+;FLAG:62 =  6 フェラ便器
+
+;FLAG:62 =  7 獣姦配信
+;FLAG:62 =  8 娼婦購入配信
+;FLAG:62 =  9 野外露出配信
+;FLAG:62 = 10 公衆便所配信
+;FLAG:62 = 11 アナル拡張配信
+;FLAG:62 = 12 自慰配信
+
+
+IF FLAG:62 == 0
+	;최하층민 능욕
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 「으음, 이해했다. 그들에게 육변기 봉사를 하면 되는것인가？」
+		PRINTFORMW 「문제는 없다. 『상식개변되면 어떤 더러운 일도 한다』는 것이니」
+		PRINTFORMW 「너, 너희들 자지를 꺼내라. 한사람도 남김없이 짜내 주겠어」
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		IF RAND:2 == 0
+			PRINTFORML 「훗……너희들 영광으로 생각해라. 이 냉철한 용사로 불린 내가」
+			PRINTFORMW 「너희들의 육변기로서 봉사하는 거니까」
+			PRINTFORMW 「왜 그러나？이렇게 눈앞에서 졸라대지 않으면 자지가 서지 않는건가？」
+			PRINTFORMW 「후훗, 착한아이다……응후읏, 커다랗지 않은가……♪」
+		ELSE
+			PRINTFORMW 「후후…더러운 자지네…！ 내가 깨끗하게 해줄테니까…！」
+		ENDIF
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 「이 것도…그 녀석이 원하니까…」
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 「잔뜩…봉사시켜 주세요…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「싫다…이런 추잡한 놈들과는…」
+	ENDIF
+ELSEIF FLAG:62 == 1
+	;레즈 변기
+	;음란
+	IF TALENT:A:76 == 1
+		PRINTFORMW 「나는 여성따위 관계없이 안기는 변태입니다…！　좀 더、좀 더 줘어…」
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 「여성의 냄새…기분 좋아…」
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 「네…보지 핥고 있습니다…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「여자끼리 뭘…」
+	ENDIF
+ELSEIF FLAG:62 == 2
+	;수간
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 「후후, 수간인가……『조금 심한 최면』이라고 생각하면, 맥 빠지는군」
+		PRINTFORMW 「『최면이 걸려 짐승에게 욕정한다』같이 된 것이기 떄문에 당연하지 않는가？후후, 즐겁겠군」
+		PRINTFORMW 「개를 부추겨 주도록. 개와 사랑에 빠진 변태녀와 같이 허덕여 주겠어」
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 「좀 더 봐 줘어！ 나는 가축과 섹스하는 걸 정말 좋아하는 변태입니다아♪」
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 「우후후…짐승 냄새♪」
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 「네…짐승에게…안깁니다…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「더、좀 더…」
+	ENDIF
+ELSEIF  FLAG:62 == 3
+	;A+V플레이
+	;상식변경
+	IF FLAG:63 == 1
+		PRINTFORMW 「알았다. 양쪽 구멍을 전부 써서 『육변기 봉사』하면 되는것이지？」
+		PRINTFORMW 「나도 얕보였군. 이 정도의 『육변기 봉사』로 주눅드는 것 따윈 없다」
+		PRINTFORMW 「자아, 네놈들！자지가 단단해진 녀석부터 덤벼라！」
+	;음란
+	ELSEIF TALENT:A:76 == 1
+		PRINTFORMW 「보지에도 똥구멍에도 가득 쳐넣어줘어♪」
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 「거기도 엉덩이도…가득해에♪」
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 「구멍은 전부 사용해줘…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「양쪽이라니…！」
+	ENDIF
+ELSEIF  FLAG:62 == 4
+	;V플레이
+	;음란
+	IF TALENT:A:76 == 1
+		PRINTFORMW 「나의 보지는 어때에？원하는 만큼 사용해 줘…♪」
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 「쥐어 짜내 주겠어」
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 「앞 구멍을 사용하겠습니다…」
+	;그 이외
+	ELSE
+		PRINTFORMW 「그 곳이…아읏」
+	ENDIF
+ELSEIF  FLAG:62 == 5
+	;A플레이
+	;음란
+	IF TALENT:A:76 == 1
+		PRINTFORMW 「나、나는 똥구멍으로 느끼는 구멍노예입니다…아♪　좀 더…아읏」
+	;애정
+	ELSEIF TALENT:A:85
+		PRINTFORMW 「엉덩이가…대단해…엣」
+	;봉사정신 Lv5 이상
+	ELSEIF ABL:A:16 >= 5
+		PRINTFORMW 「어、엉덩이…♪」
+	;그 이외
+	ELSE
+		PRINTFORMW 「아읏、거긴…」
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;-----------------------------------
+@DUNGEON_VICTORY_K4
+;-----------------------------------
+;전투 승리시
+
+;결정 대사
+PRINTFORMW 「흥…애송이가」
+	
+IF TALENT:21 == 1 || TALENT:22 == 1
+	
+	;무관심・감정결여라면 다른 말 없이 종료
+	PRINTFORMW 「……」
+	
+	RETURN 0
+ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+	
+	;반항적・굳건함・프라이드높음・정조관념・정조관념・저항은 위세있는 대사
+	IF RAND:3 == 0 
+		PRINTFORMW 「쓸데없는 저항이었군…」
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 「이 정도인가…」
+	ELSE
+		PRINTFORMW 「꼴사납군…」
+	ENDIF
+	
+ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+	
+	;겁쟁이・비관적이라면 간신히 하고 있다는 투의 기가 약한 대사
+	PRINTFORMW 「위、위험했군…하아하아」
+	
+	RETURN 0
+ELSE
+	
+	;기타 다른 성격에 따라서
+	IF RAND:3 == 0 
+		PRINTFORMW 「좋아、이겼다」
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 「내가 이겼군」
+	ELSE
+		PRINTFORMW 「…흥」
+	ENDIF
+	
+ENDIF
+
+IF (BASE:A:0 * 100 / MAXBASE:A:0 < 50) || (BASE:A:1 * 100 / MAXBASE:A:1 < 50)
+	;핀치일 때
+	PRINTFORMW 「큿…얕잡아 보고 있었던 것 같군…」
+ELSE
+	;여유여유
+	PRINTFORMW 「말도 안되는군。좀 더 강한 녀석을 데리고 와라」
+ENDIF
+
+RETURN 0
+
+
+;-----------------------------------
+@DUNGEON_ATTACK_K4
+;-----------------------------------
+;공격 시의 대사
+
+;처음에 한 마디
+IF CFLAG:1 == 2
+	;침공중 
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・감정결여라면 다른 말 없이 종료
+		PRINTFORMW 「……」
+		
+		RETURN 0
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・저항은 위세있는 대사
+		IF RAND:3 == 0 
+			PRINTFORMW 「쓰레기가！　꺼져라！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「짓밟아주지！」
+		ELSE
+			PRINTFORMW 「네 놈들 따위에！」
+		ENDIF
+	
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・비관적이라면 간신히 하고 있다는 투의 기가 약한 대사
+		PRINTFORMW 「큿……언제까지 싸워야 좋은거야……？」
+		
+		RETURN 0
+	ELSE
+		
+		;기타 다른 성격에 따라서
+		IF RAND:3 == 0 
+			PRINTFORMW 「싸움이 뭔지 가르쳐주지」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「흥……그 정도인가」
+		ELSE
+			PRINTFORMW 「네 놈……죽고 싶은가？」
+		ENDIF
+		
+	ENDIF
+ELSE
+	;그 이외・요격중
+	IF TALENT:21 == 1 || TALENT:22 == 1
+		
+		;무관심・감정결여라면 다른 말 없이 종료
+		PRINTFORMW 「……」
+		
+		RETURN 0
+	ELSEIF TALENT:11 == 1 || TALENT:12 == 1 || TALENT:15 == 1 || TALENT:30 == 1 || TALENT:34 == 1
+		
+		;반항적・굳건함・프라이드높음・정조관념・저항은 위세있는 대사
+		IF RAND:3 == 0 
+			PRINTFORMW 「후후……이 감미로운 힘、너도 곧 맛보게 될 거다」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「후하하、새로운 힘……굉장하군……」
+		ELSE
+			PRINTFORMW 「너에게도 알려주마……지하실에서、듬뿍」
+		ENDIF
+		
+	ELSEIF TALENT:10 == 1 || TALENT:26 == 1
+		
+		;겁쟁이・비관적이라면 간신히 하고 있다는 투의 기가 약한 대사
+		PRINTFORMW 「좀 더……좀 더 힘을……！」
+		
+		RETURN 0
+	ELSE
+		
+		;기타 다른 성격에 따라서
+		IF RAND:3 == 0 
+			PRINTFORMW 「마왕님께서 주신 이 힘……보여 주겠어！」
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 「이리 와라……너도 곧 알게 될 것이다」
+		ELSE
+			PRINTFORMW 「후후、귀여운 녀석이군。아무 것도 모르는구나」
+		ENDIF
+		
+	ENDIF
+ENDIF
+	
+
+
+RETURN 0
+
+
+
+
+;-------------------------------------------------
+;@COLOSSEUM_KOJO関係（X1をキャラ番号に置換）
+;コロシアム用口上を独立させました
+;-------------------------------------------------
+@COLOSSEUM_KOJO_4
+;-------------------------------------------------
+;아무것도안한다 CFLAG:
+;-------------------------------------------------
+IF SELECTCOM == 55
+	;기력 ０이하
+	IF BASE:1 <= 0
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 일어설 기력조차 없는 듯하다……
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 콜로세움의 열기와 앞의 싸울 상대를 보고 부들부들 떨고 있다……
+	ENDIF
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;회화한다 CFLAG:
+;-------------------------------------------------
+IF SELECTCOM == 56
+	;기력 ０이하
+	IF BASE:1 <= 0
+		;조수가 조교 중인 경우
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 「큿…우우…%SAVESTR:ASSI%에게 지다니……」
+			PRINTFORMW 기력이 다한 %조사선택(SAVESTR:TARGET, "는")% 한심하게 엉덩방아를 찧고 주저 앉아있다……
+		ELSE
+			PRINTFORMW 「앗…아앗…싫、싫어…저런 괴물들이 범하다니…싫어……」
+			PRINTFORMW 기력이 다한 %조사선택(SAVESTR:TARGET, "는")% 기어서라도 콜로세움 밖으로 도망가려 했다……
+		ENDIF
+	ELSE
+		;조수가 조교 중인 경우
+		IF ASSI > 0 && ASSIPLAY
+			PRINTFORMW 「훗…설마 %조사선택(SAVESTR:ASSI, "를")% 상대하게 될 줄이야……」
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% %NAME:MASTER%의 명령에 무장하는 %조사선택(SAVESTR:ASSI, "를")% 보고 미간을 찌푸렸다……
+		ELSE
+			PRINTFORMW 「큿…저따위 추악한 괴물들이라니………」
+			PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 대전 상대가 된 추악한 몬스터들을 보고 표정이 일그러졌다……
+		ENDIF
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;펠라치오 CFLAG:
+;-------------------------------------------------
+IF SELECTCOM == 31
+	;조수가 조교 중인 경우
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 「하아…하아하아…여、여기가 좋은 건가？…응구웁！」
+		PRINTFORM %조사선택(SAVESTR:ASSI, "는")%
+		SIF TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1
+			PRINT 생 자지를
+		SIF TALENT:ASSI:121 != 1 && TALENT:ASSI:122 != 1 && ITEM:PBAND == 1
+			PRINT 페니스 밴드를
+		PRINTFORMW %SAVESTR:TARGET%의 입에 물리곤 황홀한 표정을 짓고 있다……
+	ELSE
+		PRINTFORMW 「아앗…제대로 빨테니까、더、더는 심한 일을 하지 말아줘…아풉…읏응부읍……」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 구역질 날 것 같은 냄새가 진동하는 페니스를 빨고 있다……
+	ENDIF
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;가슴애무 CFLAG:
+;-------------------------------------------------
+IF SELECTCOM == 5
+	;조수가 조교 중인 경우
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 「아앗…%SAVESTR:ASSI%…그만…그만 둬어…」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 맥없이 그대로 있다……
+	ELSE
+		PRINTFORMW 「크웃…이、이런 일을 하더라도 나는………크으웃！」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 가슴을 강하게 문질러져 고통스러운듯 신음소릴 냈다……
+	ENDIF
+	RETURN 0
+ENDIF
+;-------------------------------------------------
+;후배위 CFLAG:
+;-------------------------------------------------
+IF SELECTCOM == 21
+	;조수가 조교 중인 경우
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 「아앗…！우으아앗…깊어…깊숙히잇！」
+		PRINTFORM %조사선택(SAVESTR:ASSI, "는")% 비명을 들으며
+		SIF TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1
+			PRINT 생 자지로
+		SIF TALENT:ASSI:121 != 1 && TALENT:ASSI:122 != 1 && ITEM:PBAND == 1
+			PRINT 페니스 밴드로
+		PRINTFORMW %SAVESTR:TARGET%의 질을 가차 없이 유린하고 있다……
+	;트롤
+	ELSEIF TFLAG:400 == 206
+		PRINTFORMW 「그앗…가아앗…크허엇…그으으읏……」
+		PRINTFORMW 불쌍한 %조사선택(SAVESTR:TARGET, "는")% 두꺼비가 짓눌러진 듯한 소리를 내며 트롤에게 제멋대로 다루어지고 있다……
+	ELSE
+		PRINTFORMW 「이、이런 놈 따위에게…히긋…우아아…앗아앗！」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 몬스터에게 범해지는 중이다……
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;후배위애널 CFLAG:
+;-------------------------------------------------
+IF SELECTCOM == 27
+	;조수가 조교 중인 경우
+	IF ASSI > 0 && ASSIPLAY
+		PRINTFORMW 「아！아아아앙！엉덩이잇…마, 망가져버려어！」」
+		PRINTFORM %조사선택(SAVESTR:ASSI, "는")% 비명을 들으며
+		SIF TALENT:ASSI:121 == 1 || TALENT:ASSI:122 == 1
+			PRINT 생 자지로
+		SIF TALENT:ASSI:121 != 1 && TALENT:ASSI:122 != 1 && ITEM:PBAND == 1
+			PRINT 페니스 밴드로
+		PRINTFORMW %SAVESTR:TARGET%의 애널을 용서도 없이 유린한다……
+	;트롤
+	ELSEIF TFLAG:400 == 206
+		PRINTFORMW 「그앗…가아앗…크허엇…그으으읏……」
+		PRINTFORMW 불쌍한 %조사선택(SAVESTR:TARGET, "는")% 두꺼비가 짓눌러진 듯한 소리를 내며 트롤에게 제멋대로 다루어지고 있다……
+	ELSE
+		PRINTFORMW 「이, 이런 녀석은…우아아아앗！어, 엉덩이 망가져버린다아앗…！」
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 몬스터에게 애널을 마음대로 범해져버리고 있다……
+	ENDIF
+	RETURN 0
+ENDIF
+
+;-------------------------------------------------
+;미약슬라임（しあわせ草）
+;-------------------------------------------------
+IF SELECTCOM == 51
+	PRINTFORMW 「이, 이런 약 따위에…나는…앗…아으읏！」
+	RETURN 0
+ENDIF
+
+
+RETURN 0
+
+;-----------------------------------
+@NTR_KOUJO_K4
+;-----------------------------------
+;NTR플래그
+SIF CFLAG:650 == 0
+	CFLAG:650 = 1
+
+;처녀상실
+IF P == 1
+	;함락済
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 「그…그만둬엇…이런…나는…너 같은 거에…히그으읏！」
+	ELSE
+		PRINTFORMW 「크으읏…너, 너 같은 거에…범해진…다니………아그읏」
+	ENDIF
+	CFLAG:651 = 1
+;처녀 애널 플레이
+ELSEIF P == 2
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 「하아…앗…아앙！…이제, 이 이상은…나는…어널이………히이이잇！」
+	ELSE
+		PRINTFORMW 「그만둬엇…이 변태…이 이상은…앗…히으아아앗！」
+	ENDIF
+	CFLAG:652 = 1
+;수간 쇼
+ELSEIF P == 3
+	IF TALENT:136
+		PRINTFORMW 「응긋…그힉！ 망가져엇…망가져버려엇…개에게 망가져버려엇%UNICODE(0x2661) *1%」
+	ELSEIF TALENT:76 || TALENT:85
+		PRINTFORMW 「아앗…제길…보지마라…보지 말앗…앗…아극…힉…히이익！」
+	ELSE
+		PRINTFORMW 「제길…이런 짓을…나중에 각오해둬…아긋…힉…히그우읏！」
+	ENDIF
+	CFLAG:653 = 1
+;V플레이
+ELSEIF P == 4
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 「아앗…나…는…광왕님의…것…입니다…좀 더…범해…범해줘엇%UNICODE(0x2661) *1%」
+	ELSE
+		PRINTFORMW 「히익…아긋…극…응그우웃！ 깊、깊게…온닷…와버렷♪」
+	ENDIF
+	CFLAG:654 = 1
+;VA난교 플레이
+ELSEIF P == 5
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 「이 봐…나의 보지도 엉덩이 구멍도 너희들의 자지로 채워 줘%UNICODE(0x2661) *1% 응크읏…아핫 두 개 꽂히는 거 최고옷%UNICODE(0x2661) *1%」
+	ELSE
+		PRINTFORMW 「하아하아…좀 더…좀 더 범해줘…나를 엉망진창으로 만들어줘………♪」
+	ENDIF
+	CFLAG:655 = 1
+;공중 변녀
+ELSEIF P == 6
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 「아아…좀 더다…좀 더 나를 사용해줘…이젠…그 녀석에겐 돌아갈 수 없으니까…아읏…그래 보지를 좀 더 찔러…찔러 줘엇%UNICODE(0x2661) *1%」
+	ELSE
+		PRINTFORMW 「하아…하아…져버리면…전부 빼앗겨 버리는구나…아읏…앗아그읏…미안해욧…제대로 조일 테니까앗…아그읏！」
+	ENDIF
+	CFLAG:656 = 1
+;광왕성욕처리
+ELSEIF P == 7
+	IF TALENT:76 || TALENT:85
+		PRINTFORMW 「광왕님의…응풋…맛있습니다…저를 좀 더…사용해 주십시오…」
+	ELSE
+		PRINTFORMW 「하아하아…좀 더 봉사…하겠습니다………」
+	ENDIF
+	CFLAG:657 = 1
+;NTR公開出産
+ELSEIF P == 20
+	IF TALENT:76 || TALENT:85
+		IF CFLAG:102 == 1
+			PRINTFORMW 「도, 돌려줘…그 아이는 나와 마왕님의 아이다…」
+		ELSE
+			PRINTFORMW 「나…내 자궁도 광왕님의 것입니다…%UNICODE(0x2661) *1%」
+		ENDIF
+	ELSE
+		PRINTFORMW 「아아…좀더 임신 되는걸 원하다고♪」
+	ENDIF
+ENDIF
+RETURN 0
+
+
+;-----------------------------------
+@EXUCUTION_KOUJO_K4
+;-----------------------------------
+;육변기형
+IF TFLAG:16 == 4
+	PRINTFORMW 「놔, 놔줘！내가…몬스터 따위에…앗…아아앗！」
+;戦闘員化
+ELSEIF TFLAG:16 == 5
+	PRINTFORMW 「싫다…내가 내가 아니게 되어버린다니…싫어…싫, 어…엇………」
+;노출대형
+ELSEIF TFLAG:16 == 6
+	PRINTFORMW 「네 녀석, 다음에 기억해라………」
+;記憶を消して解放する
+ELSEIF TFLAG:16 == 7
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@MUSEUM_KOUJO_K4
+;-----------------------------------
+;石化
+IF TFLAG:500 == 0
+	PRINTFORMW 「악취미인 놈…나 따위를 돌로 만들어도 즐겁지 않을텐데………」
+;박제화
+ELSEIF TFLAG:500 == 1
+	PRINTFORMW 「박제라니…마치 짐승같구나, 그런 것………」
+;蝋人形化
+ELSEIF TFLAG:500 == 2
+	PRINTFORMW 
+;人形化(マネキン)
+ELSEIF TFLAG:500 == 3
+	PRINTFORMW 「조금이라도, 자세를 무너 뜨리지 말라고 말해봤자…이렇게인가？」
+;人形化(球体間接)
+ELSEIF TFLAG:500 == 4
+	PRINTFORMW 「뭐, 뭐야…？몸이…움직,…이지 않,…」
+;金属化
+ELSEIF TFLAG:500 == 5
+	PRINTFORMW 
+;氷像化
+ELSEIF TFLAG:500 == 6
+	PRINTFORMW 
+;宝石化
+ELSEIF TFLAG:500 == 7
+	PRINTFORMW 
+;家具化
+ELSEIF TFLAG:500 == 8
+	PRINTFORMW 
+;絵画封印
+ELSEIF TFLAG:500 == 9
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@BANISHMENT_KOUJO_K4
+;処刑内容はBANISHMENT.ERBを参照してください。
+;-----------------------------------
+;추방
+IF TFLAG:510 == 0
+	PRINTFORMW 「나의…힘이…그런 거…거짓말이다………」
+;男体化
+ELSEIF TFLAG:510 == 1
+	PRINTFORMW 
+;記憶消去
+ELSEIF TFLAG:510 == 2
+	PRINTFORMW 
+;小動物化
+ELSEIF TFLAG:510 == 3
+	PRINTFORMW 
+;元の生活に戻す
+ELSEIF TFLAG:510 == 4
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@PUBLIC_EXUCUTION_KOUJO_K4
+;処刑内容はPUBLIC_EXUCUTION.ERBを参照してください。
+;-----------------------------------
+;능욕처형
+IF TFLAG:520 == 0
+	PRINTFORMW 「나를 이제부터 죽을 때까지 범한다고？재미있군…어디 한번 해봐라！」
+;교수형
+ELSEIF TFLAG:520 == 1
+	PRINTFORMW 「이런…죄인같은 최후…나는 인정하지 않아…놔랏…이거 놔라앗！」
+;魂粉砕
+ELSEIF TFLAG:520 == 2
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@GROTESQUE_KOUJO_K4
+;内容はGROTESQUE.ERBを参照してください。
+;-----------------------------------
+;四肢切断刑
+IF TFLAG:530 == 0
+	PRINTFORMW 
+;内臓陵辱刑
+ELSEIF TFLAG:530 == 1
+	PRINTFORMW 
+;ギロチン刑
+ELSEIF TFLAG:530 == 2
+	PRINTFORMW 
+;火あぶりの刑
+ELSEIF TFLAG:530 == 3
+	PRINTFORMW 
+;食肉刑
+ELSEIF TFLAG:530 == 4
+	PRINTFORMW 
+;死霊化
+ELSEIF TFLAG:530 == 5
+	PRINTFORMW 
+;ゾンビ化
+ELSEIF TFLAG:530 == 6
+	PRINTFORMW 
+ENDIF
+
+;-----------------------------------
+@ENTERENEMY_KOUJO_K4
+;-----------------------------------
+;ダンジョン攻略開始時
+IF TALENT:A:21 == 1 || TALENT:A:22 == 1
+	;무관심・감정결여라면 다른 말 없이 종료
+	PRINTFORMW 「………후우, 마왕, 인가………」
+ELSEIF TALENT:A:11 == 1 || TALENT:A:12 == 1 || TALENT:A:15 == 1 || TALENT:A:30 == 1 || TALENT:A:34 == 1
+	;반항적・굳건함・프라이드높음・정조관념・저항
+	PRINTFORMW 「이 내가 마왕을 죽인다！」
+ELSEIF TALENT:A:10 == 1 || TALENT:A:26 == 1
+	;겁쟁이・비관적
+	PRINTFORMW 「내가 마왕을 죽일 수 있을까………？」
+ELSE
+	;기타 다른 성격에 따라서
+	PRINTFORMW 「마왕 같은거, 비틀어 죽여주마！」
+ENDIF
+;-----------------------------------
+@GOHOUBI_REQUEST_KOUJO_K4
+;-----------------------------------
+;迎撃時のご褒美要求
+IF CFLAG:A:504 == 0
+	;お金
+	PRINTFORMW 「내 보수로는 돈으로 좋다」
+ELSEIF CFLAG:A:504 == 1 || CFLAG:A:504 == 2 || CFLAG:A:504 == 3
+	;獣姦要求
+	PRINTFORM 「부탁한다…
+	IF CFLAG:A:504 == 1
+		PRINT 개
+	ELSEIF Y == 2
+		PRINT 돼지
+	ELSEIF Y == 3
+		PRINT 말
+	ENDIF
+	PRINTFORMW 와 교미 하게…해 줘…！」
+ELSEIF CFLAG:A:504 == 4
+	;키스
+	PRINTFORMW 「훗…보수는 입맞춤만으로도 좋다」
+ELSEIF CFLAG:A:504 == 5
+	;セックス
+	PRINTFORMW 「어이…돌아오면 안아 주지 않겠는가？」
+ELSEIF CFLAG:A:504 == 6
+	;ザーメン
+	PRINTFORMW 「정액 모아놓고 있도록. 반드시 돌아올테니」
+ELSEIF CFLAG:A:504 == 7
+	;乱交
+	PRINTFORMW 「난교하고 싶어서 견딜 수 없다…다 네 탓이다…」
+ELSEIF CFLAG:A:504 == 8
+	;小水
+	PRINTFORMW 「마왕님…돌아가면 내게 소변을 먹여주도록 해줘.…이상한가？」
+ELSEIF CFLAG:A:504 == 9
+	;童貞狩り
+	PRINTFORMW 「오랫만에 동정자지를 빨고 싶은 기분이다」
+ENDIF
+;-----------------------------------
+@GOHOUBI_AFTER_KOUJO_K4
+;-----------------------------------
+;迎撃成功時
+;DUNGEON_AFTER.ERBを参照
+
+;아무것도안한다
+IF TFLAG:18 == 0
+	PRINTFORMW 「그런건가, 알았다」
+;勲章授与
+ELSEIF TFLAG:18 == 1
+	PRINTFORMW 「후후후, 고맙군」
+ELSEIF TFLAG:18 == 2
+	;お金を渡す
+	IF CFLAG:A:504 == 0
+		PRINTFORMW 「돈은 나를 배신하지 않으니까」
+	;犬と獣姦
+	ELSEIF CFLAG:A:504 == 1
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 「응호옷…개와의 항문 교미는 참을 수 없어 참을 수 없다고옷！」
+		ELSE
+			PRINTFORMW 「응호옷…개와의 교미는 참을 수 없어 참을 수 없다고옷！」
+		ENDIF
+	;豚と獣姦
+	ELSEIF CFLAG:A:504 == 2
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 「응호옷…돼지와의 항문 교미는 참을 수 없어 참을 수 없다고옷！」
+		ELSE
+			PRINTFORMW 「응호옷…돼지와의 교미는 참을 수 없어 참을 수 없다고옷！」
+		ENDIF
+	;馬と獣姦
+	ELSEIF CFLAG:A:504 == 3
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 「응호옷…말과의 항문 교미는 참을 수 없어 참을 수 없다고옷！」
+		ELSE
+			PRINTFORMW 「응호옷…말과의 교미는 참을 수 없어 참을 수 없다고옷！」
+		ENDIF
+	;키스
+	ELSEIF CFLAG:A:504 == 4
+		PRINTFORMW 「후훗, 마왕님과 키스를 했더니 소녀였던 무렵을 생각해버리는군…아니, 실언이었다. 잊어 줘」
+	;セックス
+	ELSEIF CFLAG:A:504 == 5
+		;膣とペニス
+		IF ABL:A:2 > ABL:A:3
+			PRINTFORMW 「좀더…좀더 나를 범해 줘…♪」
+		;애널とペニス
+		ELSE
+			PRINTFORMW 「좀더…좀더 나를 범해 줘…♪」
+		ENDIF
+	;ザーメン
+	ELSEIF CFLAG:A:504 == 6
+		PRINTFORMW 「이 정액을 마시기 위해서, 나는 살아 돌아온 것이다♪」
+	;乱交
+	ELSEIF CFLAG:A:504 == 7
+		;처녀
+		IF TALENT:A:0 == 1
+			PRINTFORMW 「아아…벌써 끝난건가…아직도 많이 부족하군♪」
+		ELSE
+			PRINTFORMW 「아아…벌써 끝난건가…아직도 많이 부족하군♪」
+		ENDIF
+	;おしっこ
+	ELSEIF CFLAG:A:504 == 8
+		PRINTFORMW 「이 소변을 마시기 위해서, 나는 살아 돌아온 것이다♪」
+	;童貞狩り
+	ELSEIF CFLAG:A:504 == 9
+		;膣
+		IF ABL:A:2 > ABL:A:3
+			PRINTFORMW 「후후후, 동정 자지는 역시 맛좋군%UNICODE(0x2661) *1%」
+		;애널
+		ELSE
+			PRINTFORMW 「후후후, 동정 자지는 애널로 무는 것이 최고군%UNICODE(0x2661) *1%」
+		ENDIF
+	ELSE
+	ENDIF
+ENDIF
+;------------------------------
+@OSIOKI_KOUJO_K4
+;-----------------------------
+;迎撃失敗時のおしおき
+;DUNGEON_AFTER.ERBを参照
+
+;아무것도안한다
+IF TFLAG:18 == 0
+	PRINTFORMW 「다음은 실패하지 않는다」
+;弱電気椅子刑
+ELSEIF TFLAG:18 == 1
+	;マゾっ気Lv3以上
+	IF ABL:A:21 >= 3
+		PRINTFORMW 「오옷…좋앗…좋아앗♪」
+	ELSE
+		PRINTFORMW 「아앗…전기는 싫엇！싫어엇！」
+	ENDIF
+;路上自慰刑
+ELSEIF TFLAG:18 == 2
+	;露出癖Lv4以上
+	IF ABL:A:17 >= 4
+		PRINTFORMW 「나를 보면서 자위 해도 괜찮다♪」
+	ELSE
+		PRINTFORMW 「부, 부끄럼 따윈 없다………」
+	ENDIF
+;路上脱糞刑
+ELSEIF TFLAG:18 == 3
+	;露出癖Lv6以上
+	IF ABL:A:17 >= 6
+		PRINTFORMW 「좋아앗！내 한심한 곳을 좀 더 봐 줘엇！」
+	ELSE
+		PRINTFORMW 「우웃…흐흑…우우우웃」
+	ENDIF
+;鞭打ち刑
+ELSEIF TFLAG:18 == 4
+	;マゾっ気Lv3以上
+	IF ABL:A:21 >= 3
+		PRINTFORMW 「아앗！마왕님의 채찍은 최고다앗！좀더 쳐 줘엇！」
+	ELSE
+		PRINTFORMW 「쿳！웃！우구웃！」
+	ENDIF 
+;人間小便器刑
+ELSEIF TFLAG:18 == 5
+	;マゾor淫乱
+	IF TALENT:A:88 == 1 || TALENT:A:76 == 1
+		PRINTFORMW 「역시 마왕님의 것보다는 맛이 월등히 떨어지는군…」
+	ELSE
+		PRINTFORMW 「이런 것은 내 취미는 아니다…」
+	ENDIF
+;トイレ掃除刑
+ELSEIF TFLAG:18 == 6
+	PRINTW 「이런 것은 내가 할만한 것은 아니다」
+;ご飯抜き刑
+ELSEIF TFLAG:18 == 7
+	PRINTW 「배…고프군…」
+;媚薬放置刑
+ELSEIF TFLAG:18 == 8
+	PRINTFORMW 「오…오오오옷！마왕님의 자지로 범해줫！부탁한닷！무엇이든지 해도 좋으니까！범해랏！나를 강간해라！아아아아앗！」
+;未定
+ELSEIF TFLAG:18 == 9
+	PRINTFORMW 「…가오가오」
+ENDIF
+
+;------------------------------
+@GOBI_KOUJO_K4, ARG:0
+;-----------------------------
+
+IF ARG:0 == 1
+	;喜んで誇らしげに
+	PRINTFORM 이군♪
+ELSEIF ARG:0 == 2
+	;怒って
+	PRINTFORM 이다！
+ELSEIF ARG:0 == 3
+	;悲しんで
+	PRINTFORM 하다…….
+ELSEIF ARG:0 == 4
+	;恥ずかしそうに
+	PRINTFORM 이다……큭…….
+ELSEIF ARG:0 == 5
+	;情けなさそうに
+	PRINTFORM 이라는 것이다…….
+ELSE
+	;デフォルト
+	;ARG:0==0を含む
+	IF RAND:3 == 0
+		PRINTFORM 이다.
+	ELSEIF RAND:2 == 0
+		PRINTFORM 이군.
+	ELSE
+		PRINTFORM 이다.
+	ENDIF
+ENDIF
+
+
+
+

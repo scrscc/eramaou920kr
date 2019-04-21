@@ -1,0 +1,883 @@
+﻿;---------------------------------
+;クエスト全般
+;---------------------------------
+
+;---------------------------------
+@SET_QUEST,ARG:0
+#DIM PM, 3
+#DIM LCOUNT
+;---------------------------------
+;クエスト受注
+;移動する際はかならず冒険の計画より後ろに置くこと
+;目標階層を参照するため
+;PM:0がリーダー, PM:1が仲間A, PM:2が仲間B
+
+;クエスト禁止
+SIF GETBIT(FLAG:8,3)
+	RETURN 0
+
+PM:0 = ARG
+PM:1 = CFLAG:ARG:531
+PM:2 = CFLAG:ARG:532
+
+;全員に順番に設定する
+FOR LCOUNT, 0 ,3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	
+	;終了したクエストの清算
+	IF GETBIT(CFLAG:(PM:LCOUNT):534,2)
+		CFLAG:(PM:LCOUNT):534 = 0
+	ELSEIF GETBIT(CFLAG:(PM:LCOUNT):534,1)
+		;成功報酬
+		IF CFLAG:(PM:LCOUNT):535 == 1
+			;お金
+			LOCAL = CFLAG:(PM:LCOUNT):9 * 10 + 100
+			PRINTFORMW %SAVESTR:(PM:LCOUNT)%は依頼の成功報酬で資金を{LOCAL}得た! 
+			CFLAG:(PM:LCOUNT):580 += LOCAL
+		ELSEIF CFLAG:(PM:LCOUNT):535 == 2
+			LOCAL = 10
+			PRINTFORMW %SAVESTR:(PM:LCOUNT)%は依頼の成功によってカルマを{LOCAL}得た! 
+			CALL KARMA, (PM:LCOUNT), LOCAL
+		ELSEIF CFLAG:(PM:LCOUNT):535 == 3
+			PRINTFORMW %SAVESTR:(PM:LCOUNT)%は依頼を成功させた! 
+			CALL ADD_EX_ITEM, -3, (PM:LCOUNT), 1
+		ENDIF
+		CFLAG:(PM:LCOUNT):534 = 0
+	ENDIF
+	
+	;受注状態が初期化されていないとダメ
+	SIF CFLAG:(PM:LCOUNT):534 != 0
+		CONTINUE
+	
+	;クエスト報酬
+	CFLAG:(PM:LCOUNT):535 = RAND:3 + 1
+	
+	;クエストの障害
+	;初期化
+	CFLAG:(PM:LCOUNT):536 = 0
+	;それはボスとの戦闘を強いられる
+	;クエスト戦闘で最後列の敵がボス化します
+	SIF RAND:3 == 0
+		SETBIT CFLAG:(PM:LCOUNT):536, 0
+	;それは罠が仕掛けてある
+	;クエスト戦闘で追加の罠が発動します
+	SIF RAND:3 == 0
+		SETBIT CFLAG:(PM:LCOUNT):536, 1
+	;それは時間制限がある
+	;受注カウンタが消滅すると失敗します
+	SIF RAND:3 == 0
+		SETBIT CFLAG:(PM:LCOUNT):536, 2
+	;それは敵の数が異様に多い
+	;最前列の敵の数が15体になります
+	SIF RAND:3 == 0
+		SETBIT CFLAG:(PM:LCOUNT):536, 3
+	;それは性奉仕を要求される
+	;スケベイベントを起こせばクエストが成功します
+	SIF RAND:3 == 0
+		SETBIT CFLAG:(PM:LCOUNT):536, 4
+	;それは偽の依頼である（非表示）
+	;自動的に失敗するクエストです
+	;ただし性奉仕要求による成功には干渉しません
+	SIF RAND:3 == 0
+		SETBIT CFLAG:(PM:LCOUNT):536, 5
+	
+	;クエストの目的
+	CALL QUEST_SELECT(PM:LCOUNT, "세트")
+	
+	;討伐対象（モンスターID）
+	
+	IF CFLAG:(PM:LCOUNT):1 == 12
+		CALL CAMPAIGN_MONSTER_LIST,CFLAG:(PM:LCOUNT):501
+		CFLAG:(PM:LCOUNT):538 = RESULT
+	ELSE
+		LOCAL = RAND:(CFLAG:(PM:LCOUNT):520)
+		CFLAG:(PM:LCOUNT):538 = (LOCAL * 10) + RAND:5 + 100
+	ENDIF
+	
+	IF GETBIT(CFLAG:(PM:LCOUNT):536, 3)
+		;時間制限あり
+		CFLAG:(PM:LCOUNT):539 = RAND:10 + 1
+	ELSE
+		;普通の依頼は99ターンまで猶予あり
+		CFLAG:(PM:LCOUNT):539 = 99
+	ENDIF
+	
+	;クエスト：受注状態
+	CFLAG:(PM:LCOUNT):534 = 1
+	
+	PRINTFORML %SAVESTR:(PM:LCOUNT)%는 퀘스트를 수주했다! 
+	CALL QUEST_SELECT,PM:LCOUNT, "이름"
+NEXT
+
+RETURN 1
+
+;---------------------------------
+@RESULT_QUEST,ARG:0,ARGS
+#DIM PM, 3
+#DIM LCOUNT
+#DIM MONID
+#DIM MCOUNT
+;---------------------------------
+;クエスト結果
+;PM:0がリーダー, PM:1が仲間A, PM:2が仲間B
+
+;クエスト禁止
+SIF GETBIT(FLAG:8,3)
+	RETURN 0
+
+PM:0 = ARG
+PM:1 = CFLAG:ARG:531
+PM:2 = CFLAG:ARG:532
+
+;全員に順番に結果を見るする
+FOR LCOUNT, 0 ,3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	
+	;クエスト受注で成功でも失敗でもない場合じゃないとダメ
+	SIF CFLAG:(PM:LCOUNT):534 != 1
+		CONTINUE
+	
+	MONID = CFLAG:(PM:LCOUNT):538
+	;該当モンスターがいないとダメ
+	LOCAL = 0
+	FOR MCOUNT, 0, 300, 100
+		SIF	E:MCOUNT == MONID
+			LOCAL = 1
+	NEXT
+	SIF LOCAL == 0
+		CONTINUE
+	
+	
+	PRINTW *퀘스트 결과*
+	
+	IF GETBIT(CFLAG:(PM:LCOUNT):536, 5)
+		PRINTW 아무래도 가짜 의뢰였던 모양이다……
+		ARGS = 失敗
+	ENDIF
+	
+	IF CFLAG:(PM:LCOUNT):539 < 1
+		PRINTW 아무래도 너무 늦어 버린것 같다……
+		ARGS = 失敗
+	ENDIF
+	
+	CALL QUEST_SELECT,PM:LCOUNT, ARGS
+	
+	IF ARGS == "실패"
+		PRINTFORML -퀘스트 실패-
+		SETBIT CFLAG:(PM:LCOUNT):534, 2
+	ELSE
+		PRINTFORML *퀘스트 성공*
+		SETBIT CFLAG:(PM:LCOUNT):534, 1
+	ENDIF
+	
+NEXT
+
+RETURN 1
+
+;---------------------------------
+@QUEST_SELECT, ARG:0, ARGS
+#DIM TYPE
+#DIM LCOUNT
+#DIM MON_ID
+;---------------------------------
+;クエスト分岐
+;ARGS = セット…クエスト種別の設定をする
+;ARGS = 成功……クエスト成功時のログ
+;ARGS = 失敗……クエスト失敗時のログ
+;ARGS = 名前……クエスト名と詳細
+
+;おためしで二つだけクエスト実装
+
+IF ARGS == "세트"
+	TYPE = RAND:3 + 1
+	CFLAG:ARG:537 = TYPE
+ELSE
+	TYPE = CFLAG:ARG:537
+ENDIF
+
+MON_ID = CFLAG:ARG:538
+
+IF TYPE == 1
+	;さらわれた娘
+	IF ARGS == "세트"
+		CFLAG:ARG:540 = RAND:5
+	ELSEIF ARGS == "성공"
+		PRINTFORM %SAVESTR:ARG%는%ITEMNAME:MON_ID%에게 납치되었다
+		IF CFLAG:ARG:540 == 0
+			PRINT 마을 소녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 귀족의 딸
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 여학생
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 번화가의 소녀
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINTFORML 을 무사히 구출했다! 
+	ELSEIF ARGS == "실패"
+		PRINTFORM %ITEMNAME:MON_ID%에게 납치 되었다
+		IF CFLAG:ARG:540 == 0
+			PRINT 마을 소녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 귀족의 딸
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 여학생
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 번화가의 소녀
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINT 은
+		IF RAND:10 == 0
+			PRINTL 실컷 능욕당해 임신까지 하고 있었다……
+		ELSEIF RAND:9 == 0
+			PRINTL 사지가 절단 된 채 능욕당해,  죽은 눈이 되었다……
+		ELSEIF RAND:8 == 0
+			PRINTL 완전히 쾌락에 빠진 색녀로 변해 있었다……
+		ELSEIF RAND:7 == 0
+			PRINTL 그로테스크 한 페니스에 길들여져 사정용인형화 되어 있었다……
+		ELSEIF RAND:6 == 0
+			PRINTL 애널을 집중 조교당해서,  평범한 생활을 보낼 수 없게 되었다……
+		ELSEIF RAND:5 == 0
+			PRINTL 유방을 비대화 당해,  모유를 분출하면서 절정하는 가축으로 개조 되었다……
+		ELSEIF RAND:4 == 0
+			PRINTL 괴물의 아이를 임신하고 있었다……
+		ELSEIF RAND:3 == 0
+			PRINTL 전신에 추잡한 문신이 새겨져,  정액만을 요구하는 육변기가 되어 있었다……
+		ELSEIF RAND:2 == 0 && ITEM:22 == 1
+			;野良犬で獣姦フラグON
+			PRINTL 돼지와 영혼을 교체되어 가축화 해,  돼지와의 교미를 기뻐하며 하고 있었다……
+		ELSE
+			PRINTL 벌써 범해진 뒤였다……
+		ENDIF
+	ELSEIF ARGS == "이름"
+		PRINTFORM 퀘스트 [납치된 
+		IF CFLAG:ARG:540 == 0
+			PRINT 마을 소녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 귀족의 딸
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 여학생
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 번화가의 소녀
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINTL ]
+	ENDIF
+ELSEIF TYPE == 2
+	;淫魔の虜
+	IF ARGS == "세트"
+		CFLAG:ARG:540 = RAND:5
+	ELSEIF ARGS == "성공"
+		PRINTFORM %SAVESTR:ARG%는%ITEMNAME:MON_ID%에게 매료되어 있다
+		IF CFLAG:ARG:540 == 0
+			PRINT 유부녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 여신관
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 귀족 따님
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 여학자
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINTFORML 를 무사히 구출했다! 
+	ELSEIF ARGS == "실패"
+		PRINTFORM %ITEMNAME:MON_ID%에게 매료되어 있다
+		IF CFLAG:ARG:540 == 0
+			PRINT 유부녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 여신관
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 귀족 따님
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 여학자
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINT 는(은)
+		IF RAND:10 == 0
+			PRINTL 완전히 타락해 마의 권속의 아이까지 임신 하고 있었다……
+		ELSEIF RAND:9 == 0
+			PRINTL 마족의 일원으로써 계약의 유두 피어싱을 착용 하고 있었다……
+		ELSEIF RAND:8 == 0
+			PRINTL 마의 권속으로써 노예의 목걸이를 착용 하고 있었다 ……
+		ELSEIF RAND:7 == 0
+			PRINTL 마족의 일원으로써 페니스를 기뻐하며 물고 있었다 ……
+		ELSEIF RAND:6 == 0
+			PRINTL 애널을 조련당한 마족으로 변해 있었다……
+		ELSEIF RAND:5 == 0
+			PRINTL 유방이 거대해진 마족이 되어 가고 있었다……
+		ELSEIF RAND:4 == 0
+			PRINTL 마족의 아이를 임신한 채 행복하게 웃고 있었다……
+		ELSEIF RAND:3 == 0
+			PRINTL 엉덩이에 마족의 문신을 새긴 정부(情婦)가 되어 있었다 ……
+		ELSEIF RAND:2 == 0
+			PRINTL 일찌기 청순했던 얼굴은 음탕한 마족의 모습으로 바뀌어 가고 있었다……
+		ELSE
+			PRINTL 이미 범해진 후였다……
+		ENDIF
+	ELSEIF ARGS == "이름"
+		PRINTFORM 퀘스트[마에 매료된 
+		IF CFLAG:ARG:540 == 0
+			PRINT 유부녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 여신관
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 귀족 따님
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 여학자
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINTL ]
+	ENDIF
+ELSEIF TYPE == 3
+	;変異する身体
+	IF ARGS == "세트"
+		CFLAG:ARG:540 = RAND:5
+	ELSEIF ARGS == "성공"
+		PRINTFORM %SAVESTR:ARG%는%ITEMNAME:MON_ID%의 간을 소포 귀환 마법으로 전송 시켜
+		IF CFLAG:ARG:540 == 0
+			PRINT 마녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 마법학교 여학생
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 여자 마법 기사
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 여자 마법 학자
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINTFORML 를 무사히 구출했다! 
+	ELSEIF ARGS == "실패"
+		PRINTFORM 변이 마법을 폭주시켰다
+		IF CFLAG:ARG:540 == 0
+			PRINT 마녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 마법학교 여학생
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 여자 마법 기사
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 여자 마법 학자
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험가
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINT 은(는)
+		IF RAND:10 == 0
+			PRINTL 거대한 페니스가 자라나 마을의 소녀들을 닥치는대 마구 범했다고 한다……
+		ELSEIF RAND:9 == 0
+			PRINTL 뇌가 망가져 색정광이 되어 알몸으로 청간(靑姦) 하고 있다고 한다……
+		ELSEIF RAND:8 == 0
+			PRINTL 스캇 취향에 눈을 떠,  매일 공중변소에 방문하고 있다고 한다……
+		ELSEIF RAND:7 == 0
+			PRINTL 오크가 이상형으로 보이게 되어서 추악한 오크와 결혼 했다고 한다……
+		ELSEIF RAND:6 == 0
+			PRINTL 뇌가 망가져 항문을 확장하는 변태가 되었다고 한다……
+		ELSEIF RAND:5 == 0
+			PRINTL 유방이 비대화되서,  거리의 변태에게 팔렸다고 한다……
+		ELSEIF RAND:4 == 0
+			PRINTL 음미(淫靡)한 몸으로 변해버려서 구경거리로 팔렸다고 한다……
+		ELSEIF RAND:3 == 0
+			PRINTL 변태 성벽에 눈을 떠,  전신에 추잡한 문신을 새긴뒤 육변기가 되었다고 한다……
+		ELSEIF RAND:2 == 0 && ITEM:22 == 1
+			;野良犬で獣姦フラグON
+			PRINTL 자신을 암컷이라고 믿어버려서,  풀숲의 떠도는 개와 발정난채 교미하고 있는 모습이 발견되었다고 한다……
+		ELSE
+			PRINTL 페니스가 자라나 거리의 여자를 강간하다가 체포되었다고 한다……
+		ENDIF
+	ELSEIF ARGS == "이름"
+		PRINTFORM 퀘스트[변이마법이 폭주한 
+		IF CFLAG:ARG:540 == 0
+			PRINT 마녀
+		ELSEIF CFLAG:ARG:540 == 1
+			PRINT 마법학교 여학생
+		ELSEIF CFLAG:ARG:540 == 2
+			PRINT 여자 마법 기사
+		ELSEIF CFLAG:ARG:540 == 3
+			PRINT 여자 마법 학자
+		ELSEIF CFLAG:ARG:540 == 4
+			PRINT 여자 모험자
+		ELSE
+			PRINT 마을 소녀
+		ENDIF
+		PRINTL ]
+	ENDIF
+ELSE
+	RETURN 0
+ENDIF
+
+IF ARGS == "이름"
+	SIF GETBIT(CFLAG:ARG:536, 0)
+		PRINTL *보스와 전투가 벌어질 때
+	SIF GETBIT(CFLAG:ARG:536, 1)
+		PRINTL *함정이 설치 되어있을 때
+	SIF GETBIT(CFLAG:ARG:536, 2)
+		PRINTL *시간제한이 있음
+	SIF GETBIT(CFLAG:ARG:536, 3)
+		PRINTL *적의 수가 이상하게 많을때
+	SIF GETBIT(CFLAG:ARG:536, 4)
+		PRINTL *성적인 봉사가 요구될 때
+	PRINTFORML *%ITEMNAME:MON_ID%가 토벌 대상
+	WAIT
+ENDIF
+
+RETURN 1
+
+;---------------------------------
+@QUEST_BATTLE_SET, ARG:0
+#DIM LCOUNT
+#DIM PM, 3
+#DIM MONID
+#DIM MCOUNT
+#DIM QUEST_ON
+;---------------------------------
+;クエスト戦闘判定と敵のセット
+;ARG:0 = リーダー
+;PM:0がリーダー, PM:1が仲間A, PM:2が仲間B
+PM:0 = ARG
+PM:1 = CFLAG:ARG:531
+PM:2 = CFLAG:ARG:532
+;クエスト発生フラグ
+QUEST_ON = 0
+
+FOR LCOUNT, 0 ,3
+	SIF PM:LCOUNT <= 0
+		CONTINUE
+	
+	;時間経過
+	SIF CFLAG:(PM:LCOUNT):539 > 0
+		CFLAG:(PM:LCOUNT):539 -= 1
+	
+	;発生しないときもある
+	SIF RAND:3 > 0
+		CONTINUE
+	
+	;クエスト受注で成功でも失敗でもない場合じゃないとダメ
+	SIF CFLAG:(PM:LCOUNT):534 != 1
+		CONTINUE
+	
+	MONID = CFLAG:(PM:LCOUNT):538
+	;該当モンスターがいないとダメ
+	LOCAL = 0
+	FOR MCOUNT, 0, 300, 100
+		SIF	E:MCOUNT == MONID
+			LOCAL = 1
+	NEXT
+	SIF LOCAL == 0
+		CONTINUE
+	
+	PRINTW *퀘스트 전투 발생*
+	QUEST_ON = 2
+	
+	IF GETBIT(CFLAG:(PM:LCOUNT):536, 0)
+		;最後列ボス化
+		E:208 = 1
+		E:299 = 1
+	ENDIF
+	
+	IF GETBIT(CFLAG:(PM:LCOUNT):536, 1)
+		;함정
+		LOCAL = A
+		A = PM:LCOUNT
+		IF RAND:3 == 0
+			CALL ARROW_TRAP
+		ELSEIF RAND:2 == 0
+			CALL OIL_TRAP
+		ELSE
+			CALL ALL_DOWN_TRAP
+		ENDIF
+		A = LOCAL
+	ENDIF
+	
+	IF GETBIT(CFLAG:(PM:LCOUNT):536, 3)
+		;最前列15匹
+		E:208 = 0
+		E:299 = 15
+	ENDIF
+	
+	IF GETBIT(CFLAG:(PM:LCOUNT):536, 4)
+		;性奉仕
+		PRINTL 아무래도 적은 성적인 봉사를 협상 조건으로 내세운 것 같다……
+		LOCAL = 100
+		;창부
+		SIF TALENT:(PM:LCOUNT):용자가되기이전의생활 == 5
+			LOCAL += 30
+		;奴隷
+		SIF TALENT:(PM:LCOUNT):용자가되기이전의생활 == 20
+			LOCAL += 30
+		;매춘경험
+		LOCAL += EXP:(PM:LCOUNT):74
+		;カルマ低い
+		SIF CFLAG:(PM:LCOUNT):151 < -30
+			LOCAL += 10
+		;カルマすごく低い
+		SIF CFLAG:(PM:LCOUNT):151 < -60
+			LOCAL += 20
+		IF RAND:LOCAL > 100
+			CALL QUEST_BITCH, PM:LCOUNT
+			PRINTFORML *퀘스트 성공*
+			SETBIT CFLAG:(PM:LCOUNT):534, 1
+			RETURN 1
+		ENDIF
+		PRINTFORML %SAVESTR:(PM:LCOUNT)%는 분노하며 그 조건을 거부했다
+	ENDIF
+	
+	
+NEXT
+
+RETURN QUEST_ON
+
+;---------------------------------
+@QUEST_BITCH, ARG:0
+#DIM LCOUNT
+#DIM MONID
+#DIM MONTYPE
+#DIM MONNUM
+#DIM MCOUNT
+;---------------------------------
+
+FOR MCOUNT, 0, 300, 100
+	;一応モンスター数の確認
+	MONNUM = E:(MCOUNT + 99)
+	SIF MONNUM <= 0
+		CONTINUE
+	MONID = E:MCOUNT
+	MONTYPE = E:(MCOUNT + 7)
+	IF MONTYPE == 1
+		;아인
+		CALL ORC_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 2
+		;슬라임
+		CALL SLIME_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 3
+		;곤충
+		CALL INSECT_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 4
+		;蔦触手
+		CALL IVY_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 5
+		;촉수
+		CALL SYOKUSYU_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 6
+		;요정
+		CALL FAILY_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 7
+		;거인
+		CALL GIANT_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 8
+		;男
+		CALL MAN_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 9
+		;女
+		CALL GIRL_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 10
+		;야수
+		CALL BEAST_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 11
+		;뇌간
+		CALL BRAIN_QUEST_BITCH,ARG,MCOUNT
+	ELSEIF MONTYPE == 12
+		;말
+		CALL HORSE_QUEST_BITCH,ARG,MCOUNT
+	ENDIF
+	
+NEXT
+
+IF EXP:0 > 0 && TALENT:0 == 1
+	TALENT:0 = 0
+	PRINTL 【처녀 상실】
+	CFLAG:15 = 104
+ENDIF
+
+
+RETURN 1
+
+;---------------------------------
+;各種モンスター性的交渉
+;---------------------------------
+;아인
+;---------------------------------
+@ORC_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%의 페니스를 빨았다……
+PRINTFORML 펠라경험+{MONNUM}
+PRINTFORML 정액경험+{MONNUM}
+EXP:ARG:22 += MONNUM
+EXP:ARG:20 += MONNUM
+;ファーストキス
+SIF CFLAG:16 == -1
+	CFLAG:16 = 995
+
+WAIT
+RETURN 1
+
+;---------------------------------
+;슬라임
+;---------------------------------
+@SLIME_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORM %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%에게 천천히
+IF TALENT:ARG:120 || TALENT:ARG:121
+	PRINTL 페니스를 삽입 했다……
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ELSE
+	PRINTL 허리를 떨어 뜨렸다……
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ENDIF
+WAIT
+RETURN 1
+
+;---------------------------------
+;곤충
+;---------------------------------
+@INSECT_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%와 섹스를 했다……
+IF TALENT:ARG:120 || TALENT:ARG:121
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ELSE
+	PRINTL V경험+1
+	EXP:ARG:0 += 1
+ENDIF
+
+WAIT
+RETURN 1
+
+;---------------------------------
+;蔦触手
+;---------------------------------
+@IVY_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%의 명령에 따라, %ITEMNAME:MONID%에게 몸을 맡겼다……
+PRINTL 덩쿨이 목을 강하게 조른다! 
+PRINTFORML 고통의 구슬+{MONNUM}
+PRINTFORML 공포의 구슬+{MONNUM}
+JUEL:ARG:9 += MONNUM
+JUEL:ARG:10 += MONNUM
+WAIT
+RETURN 1
+
+;---------------------------------
+;촉수
+;---------------------------------
+@SYOKUSYU_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%의 명령에 따라, %ITEMNAME:MONID%의 촉수를 받아 들였다……
+IF TALENT:ARG:120 || TALENT:ARG:121
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ELSE
+	PRINTL V경험+1
+	PRINTL 쾌C의 구슬+MONNUM
+	EXP:ARG:0 += 1
+	JUEL:ARG:0 += MONNUM
+ENDIF
+
+
+
+WAIT
+RETURN 1
+
+;---------------------------------
+;요정
+;---------------------------------
+@FAILY_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORM %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%에게
+IF TALENT:ARG:120 || TALENT:ARG:121
+	PRINTL 페니스를 훑어 졌다……
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ELSE
+	PRINTL 클리토리스를 훑어 졌다……
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ENDIF
+WAIT
+RETURN 1
+
+;---------------------------------
+;거인
+;---------------------------------
+@GIANT_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%의 거근을 빨았다……
+PRINTFORML 펠라경험+{MONNUM}
+PRINTFORML 정액경험+{MONNUM}
+EXP:ARG:22 += MONNUM
+EXP:ARG:20 += MONNUM
+;ファーストキス
+SIF CFLAG:16 == -1
+	CFLAG:16 = 995
+
+WAIT
+RETURN 1
+
+;---------------------------------
+;男
+;---------------------------------
+@MAN_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%의 페니스를 빨았다……
+PRINTFORML 펠라경험+{MONNUM}
+PRINTFORML 정액경험+{MONNUM}
+EXP:ARG:22 += MONNUM
+EXP:ARG:20 += MONNUM
+;ファーストキス
+SIF CFLAG:16 == -1
+	CFLAG:16 = 995
+
+WAIT
+RETURN 1
+
+;---------------------------------
+;女
+;---------------------------------
+@GIRL_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORM %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%와
+IF TALENT:ARG:120 || TALENT:ARG:121
+	PRINTL 섹스를 했다……
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ELSE
+	PRINTL 알몸으로 껴안았다……
+	PRINTL 쾌C의 구슬+MONNUM
+	JUEL:ARG:0 += MONNUM
+ENDIF
+WAIT
+RETURN 1
+
+;---------------------------------
+;야수
+;---------------------------------
+@BEAST_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%의 페니스를 빨았다……
+PRINTFORML 펠라경험+{MONNUM}
+PRINTFORML 정액경험+{MONNUM}
+PRINTFORMW 수간경험+{MONNUM}
+EXP:ARG:22 += MONNUM
+EXP:ARG:20 += MONNUM
+EXP:ARG:56 += MONNUM
+;ファーストキス
+SIF CFLAG:16 == -1
+	CFLAG:16 = 995
+
+WAIT
+RETURN 1
+
+;---------------------------------
+;뇌간
+;---------------------------------
+@BRAIN_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%에게 뇌를 범해져 자위를 하기 시작했다……
+PRINTL 쾌C의 구슬+MONNUM
+JUEL:ARG:0 += MONNUM
+WAIT
+RETURN 1
+
+;---------------------------------
+;말
+;---------------------------------
+@HORSE_QUEST_BITCH, ARG, MCOUNT
+#DIM MCOUNT
+#DIM MONID
+#DIM MONNUM
+MONID = E:MCOUNT
+MONNUM = E:(MCOUNT + 99)
+
+PRINTFORML %SAVESTR:ARG%는 명령에 따라, %ITEMNAME:MONID%의 말페니스를 빨았다……
+PRINTFORML 펠라경험+{MONNUM}
+PRINTFORML 정액경험+{MONNUM}
+PRINTFORMW 수간경험+{MONNUM}
+EXP:ARG:22 += MONNUM
+EXP:ARG:20 += MONNUM
+EXP:ARG:56 += MONNUM
+;ファーストキス
+SIF CFLAG:16 == -1
+	CFLAG:16 = 995
+
+WAIT
+RETURN 1
+

@@ -1,0 +1,3481 @@
+﻿;eraWIZ에서 도입했습니다
+;eramaou에서 여러가지 추가
+
+@LOOK_SET, ARG
+;ARG	種族設定
+#DIM MARRY
+;머리색
+IF TALENT:TARGET:300 > 0
+	;設定済み
+ELSE
+	Q = RAND:100
+	
+	; 0-20 金髪 21%
+	;21-30 青髪 10%
+	;31-40 緑髪 10%
+	;41-60 栗毛 20%
+	;61-80 黒髪 20%
+	;81-98 赤毛 18%
+	;99-99 銀髪  1%
+	
+	IF Q <= 20
+		;金髪
+		TALENT:TARGET:300 = 1
+	ELSEIF Q <= 30
+		;青髪
+		TALENT:TARGET:300 = 6
+	ELSEIF Q <= 40
+		;緑髪
+		TALENT:TARGET:300 = 7
+	ELSEIF Q <= 60
+		;栗毛
+		TALENT:TARGET:300 = 2
+	ELSEIF Q <= 80
+		;흑발
+		TALENT:TARGET:300 = 3
+	ELSEIF Q <= 98
+		;赤毛
+		TALENT:TARGET:300 = 4
+	ELSE
+		;은발
+		TALENT:TARGET:300 = 5
+	ENDIF
+ENDIF
+
+;머리상태
+Q = RAND:12
+IF Q <= 6
+	;直毛
+	TALENT:TARGET:301 = 1
+ELSEIF Q == 7
+	;カール
+	TALENT:TARGET:301 = 2
+ELSEIF Q == 8
+	;内カール
+	TALENT:TARGET:301 = 3
+ELSEIF Q == 9
+	;外カール
+	TALENT:TARGET:301 = 4
+ELSEIF Q == 10
+	;癖毛
+	TALENT:TARGET:301 = 5
+ELSE
+	;ウェーブ
+	TALENT:TARGET:301 = 6
+ENDIF
+
+;머리길이　ボーイッシュなら常にショート
+
+Q = RAND:6
+IF Q <= 1 || TALENT:TARGET:135
+	;ショート
+	TALENT:TARGET:302 = 1
+ELSEIF Q == 4
+	;セミロング
+	TALENT:TARGET:302 = 101
+ELSE
+	;ロング
+	TALENT:TARGET:302 = 201
+ENDIF
+
+;머리컷
+
+Q = RAND:6
+IF Q >= 2
+	;ベーシック
+	TALENT:TARGET:303 = 1
+ELSEIF Q == 3
+	;切り揃え
+	TALENT:TARGET:303 = 2
+ELSEIF Q == 4
+	;レイヤー
+	TALENT:TARGET:303 = 3
+ELSE
+	;シャギー
+	TALENT:TARGET:303 = 4
+ENDIF
+
+;髪型
+;長さによって出来る髪形と出来ない髪形がある
+IF TALENT:302 >= 1 && TALENT:302 <= 100
+	Q = RAND:3
+ELSEIF TALENT:302 >= 101 && TALENT:302 <= 200
+	Q = RAND:10
+ELSE
+	Q = RAND:12
+ENDIF
+Q += 1
+TALENT:304 = Q
+
+;눈
+Q = RAND:100
+; 0-10 切れ長 11%
+;11-20 大きい 10%
+;21-25 神秘的  5%
+;26-35 釣り目  5%
+;36-40 潤み目  5%
+;41-45 たれ目  5%
+;46-48 三白眼  3%
+;49-99 普通   56%
+IF Q <= 10
+	;切れ長
+	TALENT:TARGET:305 = 1
+ELSEIF Q <= 20
+	;大きい
+	TALENT:TARGET:305 = 2
+ELSEIF Q <= 25
+	;神秘的
+	TALENT:TARGET:305 = 3
+ELSEIF Q <= 35
+	;釣り目
+	TALENT:TARGET:305 = 4
+ELSEIF Q <= 40
+	;潤み目
+	TALENT:TARGET:305 = 5
+ELSEIF Q <= 45
+	;たれ目
+	TALENT:TARGET:305 = 8
+ELSEIF Q <= 48
+	;三白眼
+	TALENT:TARGET:305 = 7
+ELSE
+	;標準
+	TALENT:TARGET:305 = 6
+ENDIF
+
+;눈동자색
+Q = RAND:100
+IF Q <= 40
+	;碧
+	TALENT:TARGET:306 = 1
+ELSEIF Q <= 60
+	;ブラウン
+	TALENT:TARGET:306 = 2
+ELSEIF Q <= 80
+	;黒
+	TALENT:TARGET:306 = 6
+ELSEIF Q <= 97
+	;グレー
+	TALENT:TARGET:306 = 3
+ELSEIF Q <= 98
+	;ゴールド
+	TALENT:TARGET:306 = 4
+ELSE
+	;クリムゾン
+	TALENT:TARGET:306 = 5
+ENDIF
+
+;입술
+Q = RAND:6
+IF Q == 0
+	;肉感的
+	TALENT:TARGET:307 = 1
+ELSEIF Q == 1
+	;薄い
+	TALENT:TARGET:307 = 2
+ELSEIF Q == 2
+	;瑞々しい
+	TALENT:TARGET:307 = 3
+ELSE
+	;標準
+	TALENT:TARGET:307 = 4
+ENDIF
+
+;살집
+Q = RAND:3
+IF Q == 0
+	;グラマー
+	TALENT:TARGET:308 = 300
+ELSEIF Q == 1
+	;スレンダー
+	TALENT:TARGET:308 = 1
+ELSE
+	;標準
+	TALENT:TARGET:308 = 150
+ENDIF
+
+;유두
+Q = RAND:6
+IF Q == 0
+	;ピンク
+	TALENT:TARGET:309 = 1
+ELSEIF Q == 1
+	;褐色
+	TALENT:TARGET:309 = 2
+ELSEIF Q == 2
+	;陥没
+	TALENT:TARGET:309 = 4
+ELSE
+	;標準
+	TALENT:TARGET:309 = 3
+ENDIF
+
+;陰毛
+Q = RAND:150
+IF Q <= 20
+	;無
+	TALENT:TARGET:311 = 1
+ELSEIF Q <= 45
+	;産毛
+	TALENT:TARGET:311 = 20	
+ELSEIF Q <= 70
+	;薄い
+	TALENT:TARGET:311 = 50
+ELSEIF Q <= 100
+	;標準
+	TALENT:TARGET:311 = 100
+ELSEIF Q <= 130
+	;濃い
+	TALENT:TARGET:311 = 150
+ELSE
+	;剛毛
+	TALENT:TARGET:311 = 201
+ENDIF
+TALENT:TARGET:310 = TALENT:TARGET:311
+
+;ペニス
+;有無にかかわらず設定は入れておく
+Q = RAND:150
+IF Q <= 50
+	;普通
+	TALENT:TARGET:318 = 0
+ELSEIF Q <= 100
+	;包茎
+	TALENT:TARGET:318 = 3
+ELSEIF Q <= 130
+	;短小包茎
+	TALENT:TARGET:318 = 2
+ELSE
+	;巨根
+	TALENT:TARGET:318 = 1
+ENDIF
+
+;包茎・短小包茎は早漏を得ることがあるように
+SIF (TALENT:TARGET:318 == 2 || TALENT:TARGET:318 == 3) && RAND:10 == 0
+	TALENT:TARGET:조루 = 1
+
+;차밍포인트
+$CHARMPOINT
+Q = RAND:28
+Q += 1
+
+;貧乳は美乳になれない
+IF (TALENT:TARGET:109) && (Q == 12)
+	GOTO CHARMPOINT
+
+;ドワーフにくびれはない
+;ELSEIF (TALENT:TARGET:153) && (Q == 13)
+;	GOTO CHARMPOINT
+ENDIF
+
+;自前のペニス持ちなら追加のふたなり獲得チャンス
+IF Q == 29
+	SIF RAND:40 == 0
+		TALENT:TARGET:121 = 1
+	;ふたなりになれなければチャームポイント決め直し
+	SIF TALENT:TARGET:121 == 0
+		GOTO CHARMPOINT
+ENDIF
+
+TALENT:TARGET:312 = Q
+
+
+;버릇
+;$HABIT
+Q = RAND:34
+Q += 1
+
+;話せないなら決め台詞はありえない
+;IF (TALENT:TARGET:167) && (Q == 25)
+;	GOTO HABIT
+;ENDIF
+
+TALENT:TARGET:313 = Q
+
+;----------------------------------------------------------------------------------------------
+;종족. eramaou추가. TALENT절약 때문에 여기에
+;---------------------------------------------------------------------------------------------
+$RACE
+;사양상 두 종족을 갖진 못하지만 두 개 이상의 종족 특성을 가진 것은 역시 이상함…
+;でも【인랑】【엘프】이면 하프라고 해석도 가능하고 새로운 속성이 개화하는 것 같은데
+;最終的に某パンスト太郎になるのでやめました
+;7,8,9番は後天的なので追加する場合12番以降使ってください
+;人間50％, 호빗, 드워프, エルフ10％ずつ
+;人浪5％吸血鬼5％デュラハン5％ドラゴン4％天使１％
+
+Q = RAND:200
+IF (ARG == 0 && Q <= 99) || ARG == -1
+	;인간
+	TALENT:TARGET:314 = 0
+ELSEIF (ARG == 0 && Q <= 119) || ARG == 10
+	;호빗
+	TALENT:TARGET:314 = 10
+	TALENT:TARGET:100 = 1
+	SIF TALENT:TARGET:122 == 0
+		TALENT:TARGET:109 = 1
+	;ドワーフとホビットには巨乳と大柄は付かない（絶壁と爆乳, 超乳も付かない）
+	TALENT:TARGET:116 =0
+	TALENT:TARGET:114 =0
+	TALENT:TARGET:119 =0
+	TALENT:TARGET:110 =0
+	TALENT:TARGET:99 =0
+	;ホビットは陰毛が無毛になりやすい
+	IF RAND:10 <= 3
+		TALENT:A:311 = 1
+		TALENT:A:310 = TALENT:A:311
+	ENDIF
+ELSEIF (ARG == 0 && Q <= 139) || ARG == 11
+	;드워프
+	TALENT:TARGET:314 = 11
+	TALENT:TARGET:100 = 1
+	SIF TALENT:TARGET:122 == 0
+		TALENT:TARGET:109 = 1
+	;ドワーフとホビットには巨乳と大柄は付かない（絶壁と爆乳, 超乳も付かない）
+	TALENT:TARGET:116 =0
+	TALENT:TARGET:114 =0
+	TALENT:TARGET:119 =0
+	TALENT:TARGET:110 =0
+	TALENT:TARGET:99 =0
+	;ドワーフは陰毛が剛毛になりやすい
+	IF RAND:10 <= 3
+		TALENT:A:311 = 201
+		TALENT:A:310 = TALENT:A:311
+	ENDIF
+ELSEIF (ARG == 0 && Q <= 159) || ARG == 1
+	;엘프
+	TALENT:TARGET:314 = 1
+	;エルフはカルマが高い
+	CALL karma, TARGET, 20
+ELSEIF (ARG == 0 && Q <= 169) || ARG == 2
+	;인랑
+	TALENT:TARGET:314 = 2
+	TALENT:TARGET:124 = 1
+	;人狼はカルマが低い
+	CALL karma, TARGET, -20
+ELSEIF (ARG == 0 && Q <= 179) || ARG == 3
+	;흡혈귀
+	TALENT:TARGET:314 = 3
+	;吸血鬼はカルマが低い
+	CALL karma, TARGET, -40
+ELSEIF (ARG == 0 && Q <= 189) || ARG == 4
+	;듀라한
+	TALENT:TARGET:314 = 4
+	;闇の能力者になるチャンス
+	SIF RAND:40 == 0
+		TALENT:TARGET:279 = 1
+	;デュラハンはカルマが低い
+	CALL karma, TARGET, -40
+ELSEIF (ARG == 0 && Q <= 197) || ARG == 5
+	;드래곤
+	TALENT:TARGET:314 = 5
+	;角
+	TALENT:TARGET:264 = 1
+ELSEIF ARG
+	;その他指定の種族
+	TALENT:TARGET:314 = ARG
+ELSE
+	;천사
+	TALENT:TARGET:314 = 6
+	;光の能力者になるチャンス
+	SIF RAND:40 == 0
+		TALENT:TARGET:278 = 1
+	;天使はカルマが高い
+	CALL karma, TARGET, 40
+ENDIF
+
+;勇者の前の生活
+$BORN
+Q = RAND:21
+Q += 1
+
+;配下の場合, 特別な元職業
+SIF TALENT:220 == 1
+	Q = 1000 + RAND:5
+
+;法術を知らない場合修道女にはなれない
+SIF Q == 2 && TALENT:242 == 0
+	GOTO BORN
+;창부・物乞い・노예の場合, 経験がつく
+IF Q == 5 || Q == 7 || Q == 20
+	IF TALENT:122 && TALENT:1
+		;童貞オトコの場合
+		LOCAL = RAND:20 + 1
+		EXP:1 += LOCAL
+		EXP:5 += LOCAL
+		SIF Q != 20
+			EXP:74 += LOCAL
+	ELSEIF TALENT:122
+		;オトコの場合
+		LOCAL = RAND:40 + 1
+		EXP:1 += LOCAL
+		EXP:5 += LOCAL
+		SIF Q != 20
+			EXP:74 += LOCAL
+	ELSEIF TALENT:0
+		;処女の場合
+		LOCAL = RAND:40 + 1
+		EXP:1 += LOCAL
+		EXP:5 += LOCAL
+		SIF Q != 20
+			EXP:74 += LOCAL
+	ELSEIF RAND:5 == 0
+		;非処女で애널も使用している
+		LOCAL:0 = RAND:40 + 1
+		LOCAL:1 = RAND:40 + 1
+		EXP:0 += LOCAL:0
+		EXP:1 += LOCAL:1
+		EXP:5 += (EXP:0 + EXP:1)
+		SIF Q != 20
+			EXP:74 += EXP:5
+	ELSE
+		;非処女でVのみ
+		LOCAL = RAND:40 + 1
+		EXP:0 += LOCAL
+		EXP:5 += LOCAL
+		SIF Q != 20
+			EXP:74 += LOCAL
+	ENDIF
+	
+	;娼婦と노예は, 刺青を入れられていることがある
+	IF RAND:15 == 0 && Q != 7 && TALENT:122 == 0
+		LOCAL = RAND:8 + 10
+		LOCALS:10 '= "음란" , "암퇘지" , "뱀" , "무당거미" , "장미" , "육변기" , "변녀" , "페니스 그림" , "오크의 자지" , "해골"
+		CSTR:LOCAL = %LOCALS:LOCAL%
+	ENDIF
+	
+	;非処女の場合, 出産経験がつくことがある
+	SIF TALENT:0 == 0 && RAND:15 == 0 && TALENT:122 == 0
+		EXP:60 += RAND:3
+	;そしてカルマが低い
+	CALL karma, TARGET, -30
+ELSEIF Q == 2 || Q == 8 || Q == 11 || Q == 12 || Q == 13
+	;修道女・貴族・무녀・聖女・予言者はカルマが高い
+	CALL karma, TARGET, 30
+	;光の能力者になるチャンス
+	SIF RAND:40 == 0
+		TALENT:TARGET:278 = 1
+ELSEIF Q == 6
+	;盗人はカルマが低い
+	CALL karma, TARGET, -40
+ELSEIF Q == 21 && TALENT:122 == 0
+	;主婦は経験がつく
+	LOCAL:0 = RAND:20 + 10
+	EXP:0 += LOCAL:0
+	EXP:5 += LOCAL:0
+	
+	;主婦は確定で子持ち
+	
+	;子供の数が合わなくなっちゃうのでオミットしてしまいました
+	;すまない…
+	;その代わり主婦確定子持ちは受け継ぐぜお前の意思…
+	
+	;EXP:60 = 0
+	;EXP:60 += RAND:3
+	;処女を失う
+	TALENT:0 = 0
+	;処女封印も失う
+	TALENT:273 = 0
+	;必ず人妻がつく
+	TALENT:157 = 1
+ENDIF
+TALENT:TARGET:315 = Q
+
+;勇者になった理由
+$REASON
+Q = RAND:20
+Q += 1
+
+;配下の場合, 特別な理由
+SIF TALENT:220 == 1
+	Q = 1000 + RAND:5
+
+IF Q == 1 || Q == 3 || Q == 4 || Q == 7 || Q == 16 || Q == 17
+	;運命・啓示・使命・故郷・平和・正義はカルマが高い
+	CALL karma, TARGET, 20
+ELSEIF Q == 2 || Q == 11 || Q == 13
+	;金・自暴自棄・命令はカルマが低い
+	CALL karma, TARGET, -20
+ENDIF
+TALENT:TARGET:316 = Q
+
+;좋아하는것
+$LOVE
+Q = RAND:20
+Q += 1
+IF Q == 4 || Q == 8 || Q == 9 || Q == 10 || Q == 11
+	;연인・가족・사명・고향・동경은 카르마가 높음
+	CALL karma, TARGET, 20
+ELSEIF Q == 5 || Q == 13 || Q == 14
+	;금・장식품・보석은 카르마가 낮음
+	CALL karma, TARGET, -20
+ENDIF
+TALENT:TARGET:317 = Q
+
+
+;가족구성
+;0=秘密
+;            1の位 = 1のとき, 家族構成設定あり
+;           10の位 = 勇者以前の結婚歴（回数）
+;          100の位 = 勇者以前に生んだ娘
+;        1,000の位 = 勇者以前に生んだ息子
+;       10,000の位 = 結婚相手との関係
+;（0=未婚 1=결혼 2=離婚 3=現在の伴侶と重婚 4=現在の伴侶と契り, 離婚を宣言）
+;（5=死別）
+;      100,000の位 = 姉の数
+;    1,000,000の位 = 兄の数
+;   10,000,000の位 = 妹の数
+;  100,000,000の位 = 弟の数
+;1,000,000,000の位 = 自分と結婚相手の性別
+;（自分相手 0=女男 1=女ふた 2=女女 3=ふた女 4=ふた男 5=ふたふた）
+;（6=男女 7=男ふた 8=男男）
+
+SIF TALENT:220 == 0
+	TALENT:TARGET:320 = 1
+
+;結婚相手の設定
+$FAMILY
+LOCAL = 0
+MARRY = 0
+IF TALENT:157 == 1
+	;유부녀
+	IF RAND:20 == 0
+		;バツ2
+		LOCAL += 30
+	ELSEIF RAND:10 == 0
+		;バツ1
+		LOCAL += 20
+	ELSE
+		;初婚
+		LOCAL += 10
+	ENDIF
+	;現在の状況…결혼
+	LOCAL += 10000
+	MARRY = 1
+ELSEIF RAND:20 == 0
+	;離婚または未亡人
+	IF RAND:10 == 0
+		;バツ2
+		LOCAL += 20
+	ELSE
+		;バツ1
+		LOCAL += 10
+	ENDIF
+	
+	;現在の状況
+	IF RAND:2 == 0
+		;離婚
+		LOCAL += 20000
+	ELSE
+		;死別（未亡人）
+		LOCAL += 50000
+	ENDIF
+	MARRY = 1
+ENDIF
+
+;子供の設定
+;非処女限定
+IF TALENT:315 == 21 && TALENT:0 == 0
+	;主婦
+	;最大4人の子供がいる
+	FOR LOCAL:1,0,4
+		IF RAND:2 == 0
+			;娘
+			LOCAL += 100
+		ELSE
+			;息子
+			LOCAL += 1000
+		ENDIF
+		;ループ抜けの位置が違うので, 一人は確定する
+		SIF RAND:2 == 0
+			BREAK
+	NEXT
+ELSEIF LOCAL >= 10 && TALENT:0 == 0
+	;結婚経験がある
+	;最大4人の子供がいる
+	FOR LOCAL:1,0,4
+		;ループを抜け, 子供がいなかったり4人以下だったりする
+		SIF RAND:2 == 0
+			BREAK
+		IF RAND:2 == 0
+			;娘
+			LOCAL += 100
+		ELSE
+			;息子
+			LOCAL += 1000
+		ENDIF
+		
+	NEXT
+ELSEIF RAND:20 == 0 && TALENT:0 == 0
+	;未婚の母
+	;最大2人の子供がいる
+	LOCAL:2 = 2
+	;娼婦は4人もいる可能性
+	SIF TALENT:315 == 5
+		LOCAL:2 += 2
+	FOR LOCAL:1,0,LOCAL:2
+		;ループを抜け, 子供がいなかったり4人以下だったりする
+		SIF RAND:2 == 0
+			BREAK
+		IF RAND:2 == 0
+			;娘
+			LOCAL += 100
+		ELSE
+			;息子
+			LOCAL += 1000
+		ENDIF
+		
+	NEXT
+ENDIF
+
+;兄弟姉妹の設定
+;最大4人の兄弟姉妹がいる
+FOR LOCAL:1,0,4
+	;ループを抜け, 一人っ子だったり少なかったりする
+	SIF RAND:2 == 0
+		BREAK
+	IF RAND:4 == 0
+		;姉
+		LOCAL += 100000
+	ELSEIF RAND:3 == 0
+		;兄
+		LOCAL += 1000000
+	ELSEIF RAND:2 == 0
+		;妹
+		LOCAL += 10000000
+	ELSE
+		;弟
+		LOCAL += 100000000
+	ENDIF
+	
+NEXT
+
+;性別の設定（人妻の場合）
+IF TALENT:122 == 1 && MARRY == 1
+	;남자
+	IF RAND:20 == 0
+		;男男カップル
+		LOCAL += 8000000000
+		;BLっ気補正
+		ABL:ＢＬ끼 = 3
+	ELSEIF RAND:8 == 0
+		;男ふたカップル
+		LOCAL += 7000000000
+	ELSE
+		;男女カップル
+		LOCAL += 6000000000
+	ENDIF
+ELSEIF TALENT:121 == 1 && MARRY == 1
+	;후타나리
+	IF RAND:10 == 0
+		;希少なふたなりのカップル
+		LOCAL += 5000000000
+		;レズっ気補正
+		ABL:레즈끼 = 3
+	ELSEIF RAND:2 == 0
+		;ふた男カップル
+		LOCAL += 4000000000
+	ELSE
+		;ふた女カップル
+		LOCAL += 3000000000
+		;レズっ気補正
+		ABL:레즈끼 = 3
+	ENDIF
+ELSEIF MARRY == 1
+	;女
+	IF RAND:20 == 0
+		;女女カップル
+		LOCAL += 2000000000
+		;レズっ気補正
+		ABL:레즈끼 = 3
+	ELSEIF RAND:8 == 0
+		;女ふたカップル
+		LOCAL += 1000000000
+		;レズっ気補正
+		ABL:레즈끼 = 3
+	ENDIF
+ENDIF
+
+;データ反映
+TALENT:TARGET:320 += LOCAL
+
+
+RETURN 1
+
+;-----------------------------------------------------------------
+@LOOK_CLEAR
+;-----------------------------------------------------------------
+REPEAT 314
+	SIF COUNT < 300
+		COUNT = 300
+	TALENT:COUNT = 0
+REND
+
+;-----------------------------------------------------------------
+@LOOK_INFO
+;-----------------------------------------------------------------
+
+IF FLAG:5 & 2048
+	PRINT 「
+	SETCOLORBYNAME LightSalmon
+ELSE
+	PRINT [
+ENDIF
+PRINTFORM %GET_LOOK_INFO(TARGET, "종족")%
+RESETCOLOR
+
+;魔族化済みでサブ種族が設定されていない場合設定しておく
+SIF TALENT:TARGET:종족 == 9 && !INRANGE(TALENT:TARGET:서브종족, 100, 200)
+	TALENT:TARGET:서브종족 = 132 ;임프
+
+IF FLAG:5 & 2048
+	IF TALENT:TARGET:종족 == 9
+		PRINT 으로 
+		SETCOLORBYNAME LightSalmon
+		PRINTFORM %ITEMNAME:(TALENT:TARGET:서브종족)%
+		RESETCOLOR
+	ENDIF
+	PRINTFORM 인 %SAVESTR:TARGET%
+
+	CALL GOBI_KOUJO, (MARK:굴복각인 >= 3) ? 0 # 4
+	PRINT 」
+	IF TALENT:TARGET:종족 == 9
+		PRINTFORM 「마족이 되기 전의 종족은
+		IF TALENT:TARGET:원료족 == 9
+			PRINT 이제는 불명
+			CALL GOBI_KOUJO, (TALENT:TARGET:애정 || TALENT:TARGET:음란) ? 0 # 3
+		ELSE
+			SETCOLORBYNAME LightSalmon
+			PRINTFORM %GET_LOOK_INFO(TARGET, "원료족")%
+			RESETCOLOR
+			CALL GOBI_KOUJO, (MARK:굴복각인 >= 3) ? 0 # 2
+		ENDIF
+		PRINT 」
+	ENDIF
+	PRINTL
+ELSE
+	SIF TALENT:TARGET:종족 == 9
+		PRINTFORM ：%ITEMNAME:(TALENT:TARGET:서브종족)%
+	PRINT ]
+	SIF TALENT:TARGET:종족 == 9
+		PRINTFORML [원료족：%TALENT:TARGET:원료족 == 9 ? "불명" # GET_LOOK_INFO(TARGET, "원료족")%]
+ENDIF
+
+;髪の色と性質
+IF TALENT:300 && TALENT:301
+	IF FLAG:5 & 2048
+		PRINT 「머리카락은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [머리색：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "머리색")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 으로 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][머리상태：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "머리상태")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		;喜び
+		CALL GOBI_KOUJO, 1
+		PRINT 」
+	ELSE
+		PRINT ]
+	ENDIF
+ENDIF
+
+
+;머리길이・컷・머리
+IF TALENT:302 && TALENT:303 && TALENT:304
+	IF FLAG:5 & 2048
+		PRINT 「길이는 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [머리길이：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "머리길이")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 이고, 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][컷：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "머리컷")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 컷으로 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][스타일：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "머리스타일")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		;デフォ
+		CALL GOBI_KOUJO, 0
+		PRINTL 」
+	ELSE
+		PRINTL ]
+	ENDIF
+ENDIF
+
+;기타 외모
+IF TALENT:305 && TALENT:306 && TALENT:307
+	;눈
+	IF FLAG:5 & 2048
+		PRINT 「눈매는 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [눈매：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "눈")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 의 
+		;瞳
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][눈동자색：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "눈동자색")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 색
+		;デフォ
+		CALL GOBI_KOUJO, 0
+		;입술
+		PRINT 입술은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][입술：
+	ENDIF
+	
+	PRINTFORM %GET_LOOK_INFO(TARGET, "입술")%
+	RESETCOLOR
+	
+	IF FLAG:5 & 2048
+		;喜び
+		CALL GOBI_KOUJO, 1
+		PRINTL 」
+	ELSE
+		PRINTL ]
+	ENDIF
+ENDIF
+IF TALENT:308 && TALENT:309 && TALENT:310
+	;살집
+	IF FLAG:5 & 2048
+		PRINT 「
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [살집：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "살집")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 체형으로…… 
+		
+		;유두
+		PRINT 유두는…… 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][유두：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "유두")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		;デフォ
+		CALL GOBI_KOUJO, 0
+		
+		;陰毛
+		PRINT 음모는…… 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][음모：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "음모의상태")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		;수줍음
+		CALL GOBI_KOUJO, 4
+	ENDIF
+	;ペニス
+	;후타나리・オトコのみ
+	IF TALENT:121 || TALENT:122
+		IF FLAG:5 & 2048
+			PRINT 페니스는…… 
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT ][페니스：
+		ENDIF
+		PRINTFORM %GET_LOOK_INFO(TARGET, "페니스의상태")%
+		RESETCOLOR
+		IF FLAG:5 & 2048
+			;怒り
+			CALL GOBI_KOUJO, 2
+		ENDIF
+	ENDIF
+	IF FLAG:5 & 2048
+		PRINTL 」
+	ELSE
+		PRINTL ]
+	ENDIF
+	
+ENDIF
+IF TALENT:312 && TALENT:313
+	;차밍포인트
+	IF FLAG:5 & 2048
+		PRINT 「
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [차밍포인트：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "차밍포인트")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT 이(가) 차밍포인트
+		
+		;デフォ
+		CALL GOBI_KOUJO, 0
+		
+		;버릇
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT ][버릇：
+	ENDIF
+	PRINTFORM %GET_LOOK_INFO(TARGET, "버릇")%
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		PRINT (은)는 것이 버릇
+		;デフォ
+		CALL GOBI_KOUJO, 0
+		PRINTL 」
+	ELSE
+		PRINTL ]
+	ENDIF
+	
+ENDIF
+
+IF NO:TARGET != 0
+	IF FLAG:5 & 2048
+		PRINTFORM 「%SELF_CALL(TARGET)%는
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [배우자：
+	ENDIF
+ELSE
+	IF FLAG:5 & 2048
+		PRINT 「마왕은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [마왕의 배우자：
+	ENDIF
+ENDIF
+
+PRINTFORM %GET_LOOK_INFO(TARGET, "결혼")%
+RESETCOLOR
+IF FLAG:5 & 2048 && CFLAG:601 != 0
+	PRINT 그리고 지금은 
+	SETCOLORBYNAME LightSalmon
+	IF CFLAG:601 == 900
+		PRINT 똥개
+	ELSEIF CFLAG:601 == 901
+		PRINT 당신
+	ELSEIF CFLAG:601 == 902
+		IF CFLAG:606 == 200
+			CALL SEARCH_FAMILY,TARGET,"LOVE"
+			IF RESULT > 0
+				PRINTFORM %SAVESTR:RESULT%
+			ELSE
+				PRINT 연인
+			ENDIF
+		ELSE
+			CALL NAME_LOVER, CFLAG:606, 1
+		ENDIF
+	ELSEIF CFLAG:601 != 0
+		LOCAL = CFLAG:601
+		LOCAL %= 10
+		IF LOCAL == 9
+			CALL SEARCH_FAMILY,TARGET,"MARRIAGE"
+			IF RESULT > 0
+				PRINTFORM %SAVESTR:RESULT%
+			ELSE
+				PRINT 없음
+			ENDIF
+		ELSE
+			PRINTFORM %ITEMNAME:(CFLAG:601)%
+		ENDIF
+	ENDIF
+	PRINT 의 
+	IF TALENT:122 == 1
+		PRINT 남편
+	ELSE
+		PRINT 아내
+	ENDIF
+	RESETCOLOR
+	;수줍음
+	CALL GOBI_KOUJO, 4
+ELSEIF FLAG:5 & 2048 && CFLAG:606 != 0
+	PRINT 으로 
+	SETCOLORBYNAME LightSalmon
+	IF CFLAG:606 == 200
+		CALL SEARCH_FAMILY,TARGET,"LOVE"
+		IF RESULT > 0
+			PRINTFORM %SAVESTR:RESULT%
+		ELSE
+			PRINT 연인
+		ENDIF
+	ELSE
+		CALL NAME_LOVER, CFLAG:606, 1
+	ENDIF
+	RESETCOLOR
+	PRINT (과)와 교제중
+	;수줍음
+	CALL GOBI_KOUJO, 4
+ELSEIF FLAG:5 & 2048 
+	PRINT 으로 
+ELSEIF CFLAG:606 != 0
+	PRINT (
+	SETCOLORBYNAME LightSalmon
+	IF CFLAG:606 == 200
+		CALL SEARCH_FAMILY,TARGET,"LOVE"
+		IF RESULT >= 0
+			PRINTFORM %SAVESTR:RESULT%
+		ELSE
+			PRINT 연인
+		ENDIF
+	ELSE
+		CALL NAME_LOVER, CFLAG:606, 1
+	ENDIF
+	RESETCOLOR
+	PRINT (과)와 교제중)]
+ELSEIF CFLAG:601 != 0
+	PRINT ]
+ELSE
+	PRINT ]
+ENDIF
+
+IF NO:TARGET != 0
+	IF FLAG:5 & 2048
+		PRINTFORM 가족구성은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [가족：
+	ENDIF
+ELSE
+	IF FLAG:5 & 2048
+		PRINT 가족구성은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [마왕의 가족구성：
+	ENDIF
+ENDIF
+
+PRINTFORM %GET_LOOK_INFO(TARGET, "가족")%
+RESETCOLOR
+IF FLAG:5 & 2048
+	;喜び
+	CALL GOBI_KOUJO, 1
+	
+	PRINT 」
+ELSE
+	PRINT ]
+ENDIF
+
+IF CFLAG:TARGET:604 > 0 && CFLAG:TARGET:605 > 0
+	LOCAL = CFLAG:TARGET:605
+	LOCAL:1 = LOCAL % 10
+	CALL SEARCH_FAMILY, TARGET
+	LOCAL:2 = RESULT
+	IF NO:TARGET != 0
+		IF FLAG:5 & 2048
+			PRINTFORM 「
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT [
+		ENDIF
+		SELECTCASE LOCAL:1
+		CASE 1
+			PRINT 오빠
+		CASE 2
+			PRINT 언니
+		CASE 3
+			PRINT 남동생
+		CASE 4
+			PRINT 여동생
+		CASE 5
+			PRINT 아버지
+		CASE 6
+			PRINT 어머니
+		CASE 7
+			PRINT 아들
+		CASE 8
+			PRINT 딸
+		CASEELSE
+			PRINT 가족
+		ENDSELECT
+		
+		IF FLAG:5 & 2048
+			RESETCOLOR
+			PRINTFORM 은(는) 
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT ：
+		ENDIF
+		
+		IF LOCAL:2 < 0
+			IF CSTR:5 != ""
+				PRINTFORM %CSTR:5%
+			ELSE
+				PRINT 행방불명
+			ENDIF
+			RESETCOLOR
+			IF FLAG:5 & 2048
+				;情けない
+				CALL GOBI_KOUJO, 5
+				PRINTFORML 」
+			ELSE
+				PRINTL ]
+			ENDIF
+		ELSE
+			PRINTFORM %SAVESTR:(LOCAL:2)%
+			RESETCOLOR
+		
+			IF FLAG:5 & 2048
+				;喜び
+				CALL GOBI_KOUJO, 1
+				PRINTFORML 」
+			ELSE
+				PRINTL ]
+			ENDIF
+		ENDIF
+		
+	ELSE
+		IF FLAG:5 & 2048
+			PRINTFORM 「
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT [마왕의 
+		ENDIF
+		SELECTCASE LOCAL:1
+		CASE 1
+			PRINT 오빠
+		CASE 2
+			PRINT 언니
+		CASE 3
+			PRINT 남동생
+		CASE 4
+			PRINT 여동생
+		CASE 5
+			PRINT 아버지
+		CASE 6
+			PRINT 어머니
+		CASE 7
+			PRINT 아들
+		CASE 8
+			PRINT 딸
+		CASEELSE
+			PRINT 가족
+		ENDSELECT
+		
+		IF FLAG:5 & 2048
+			PRINTFORM 은(는) 
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT ：
+		ENDIF
+		
+		IF LOCAL:2 < 0
+			IF CSTR:5 != ""
+				PRINTFORM %CSTR:5%
+			ELSE
+				PRINT 행방불명
+			ENDIF
+			RESETCOLOR
+			IF FLAG:5 & 2048
+				;情けない
+				CALL GOBI_KOUJO, 5
+				PRINTFORML 」
+			ELSE
+				PRINTL ]
+			ENDIF
+		ELSE
+			PRINTFORM %SAVESTR:(LOCAL:2)%
+			RESETCOLOR
+		
+			IF FLAG:5 & 2048
+				;喜び
+				CALL GOBI_KOUJO, 1
+				PRINTFORML 」
+			ELSE
+				PRINTL ]
+			ENDIF
+		ENDIF
+	ENDIF
+ELSE
+	PRINTL  
+ENDIF
+
+IF NO:TARGET != 0
+	IF FLAG:5 & 2048
+		PRINT 「용사가 되기 전에 하던 일은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [용사가 되기 전：
+	ENDIF
+ELSE
+	IF FLAG:5 & 2048
+		PRINT 「마왕이 되기 전에 하던 일은 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [마왕이 되기 전：
+	ENDIF
+ENDIF
+
+PRINTFORM %GET_LOOK_INFO(TARGET, "용자가되기이전의생활")%
+RESETCOLOR
+IF FLAG:5 & 2048
+	IF TALENT:315 == 8 || TALENT:315 == 12 || TALENT:315 == 19
+		;貴族・聖女・軍人は誇らしい
+		;喜び
+		CALL GOBI_KOUJO, 1
+	ELSEIF TALENT:315 == 5 || TALENT:315 == 20
+		;창부・노예は恥ずかしい
+		;수줍음
+		CALL GOBI_KOUJO, 4
+	ELSEIF TALENT:315 == 6
+		;盗人は逆切れ
+		;怒り
+		CALL GOBI_KOUJO, 2
+	ELSEIF TALENT:315 == 7 || TALENT:315 == 9
+		;物乞い・貧民は情けなくなる
+		;情けない
+		CALL GOBI_KOUJO, 5
+	ELSE
+		;デフォ
+		CALL GOBI_KOUJO, 0
+	ENDIF
+	PRINT 」
+ELSE
+	PRINT ]
+ENDIF
+
+
+
+IF NO:TARGET != 0
+	IF FLAG:5 & 2048
+		PRINT 「용사가 된 계기는 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [용사가 된 동기：
+	ENDIF
+ELSE
+	IF FLAG:5 & 2048
+		PRINT 「마왕이 된 계기는 
+		SETCOLORBYNAME LightSalmon
+	ELSE
+		PRINT [마왕이 된 동기：
+	ENDIF
+ENDIF
+
+PRINTFORM %GET_LOOK_INFO(TARGET, "용자가된동기")%
+RESETCOLOR
+IF FLAG:5 & 2048
+	IF TALENT:316 == 3 || TALENT:316 == 7 || TALENT:316 == 16 || TALENT:316 == 17
+		;啓示・故郷・平和・正義は誇らしい
+		;喜び
+		CALL GOBI_KOUJO, 1
+	ELSEIF TALENT:316 == 10 || TALENT:316 == 14
+		;罪・仕方なくは恥ずかしい
+		;수줍음
+		CALL GOBI_KOUJO, 4
+	ELSEIF TALENT:316 == 8
+		;復讐
+		;怒り
+		CALL GOBI_KOUJO, 2
+	ELSEIF TALENT:316 == 2 || TALENT:316 == 13
+		;金のため・命令は情けなくなる
+		;情けない
+		CALL GOBI_KOUJO, 5
+	ELSE
+		;デフォ
+		CALL GOBI_KOUJO, 0
+	ENDIF
+	
+	PRINTL 」
+ELSE
+	PRINTL ]
+ENDIF
+
+
+;信仰. 무녀, 聖女, 법술・呪術持ちは信仰を持っている
+;信仰は呪術と法術を優先
+IF TALENT:242 == 1 || TALENT:250 == 1 || TALENT:315 == 11 || TALENT:315 == 12
+	;信仰表明にはある程度信仰値が必要
+	IF CFLAG:152 >= 10
+		IF FLAG:5 & 2048
+			PRINT 「신앙은 
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT [신앙：
+		ENDIF
+		IF TALENT:85 == 1
+			PRINTFORM 마왕님%UNICODE(0x2661) *3%
+		ELSEIF CFLAG:0 != 0
+			PRINTFORM 이름 없는 음탕한 여신님%UNICODE(0x2661) *3%
+		;저주술
+		ELSEIF TALENT:250 == 1
+			PRINTFORM 땅 아래에 숨어있는 죽음을 관장하는 여신님
+		;법술
+		ELSEIF TALENT:242 == 1
+			PRINTFORM 청정한 성천의 여신님
+		;무녀
+		ELSEIF TALENT:315 == 11
+			PRINTFORM 풍요로운 대지의 여신님
+		;聖女
+		ELSEIF TALENT:315 == 12
+			PRINTFORM 모두를 감싸안는 바다의 여신님
+		ENDIF
+		RESETCOLOR
+		;喜び
+		IF FLAG:5 & 2048
+			CALL GOBI_KOUJO, 1
+			
+			PRINTFORML （신앙치：{CFLAG:152}）」
+		ELSE
+			PRINTFORML （신앙치：{CFLAG:152}）]
+		ENDIF
+		
+		;堕落した場合, 以前の信仰を冒涜する
+		;프라이드낮음・冒涜者のみ
+		IF (TALENT:85 == 1 || CFLAG:0 != 0) && (TALENT:17 || TALENT:282)
+			IF FLAG:5 & 2048
+				PRINT 「
+				SETCOLORBYNAME LightSalmon
+			ELSE
+				PRINT [기교：
+			ENDIF
+			;저주술
+			IF TALENT:250 == 1
+				PRINTFORM 땅 속에 숨은 죽음을 관장하는 여신은 음침한 변태 성벽 암퇘지 
+			;법술
+			ELSEIF TALENT:242 == 1
+				PRINTFORM 청정무구한 성천의 여신은 걸레 빗치 육변기
+			;무녀
+			ELSEIF TALENT:315 == 11
+				PRINTFORM 풍요로운 대지의 여신은 유두 자위할 것 같은 젖소
+			;聖女
+			ELSEIF TALENT:315 == 12
+				PRINTFORM 모든 것을 감싸는 바다의 여신은 쇼타 신자를 따먹고다니는 색정광
+			ENDIF
+			RESETCOLOR
+			;喜び
+			IF FLAG:5 & 2048
+				CALL GOBI_KOUJO, 1
+				
+				PRINTFORML 」
+			ELSE
+				PRINTFORML 라고 생각하고 있다]
+			ENDIF
+		ENDIF
+		
+	ENDIF
+ENDIF
+
+IF TALENT:TARGET:158
+	IF FLAG:5 & 2048
+		PRINTFORM 「%SELF_CALL(TARGET)%는
+		SETCOLORBYNAME LightSalmon
+		PRINTFORM 착실하게 임신을 할 수가 없다
+		
+	ELSE
+		PRINT [임신적성：
+		SETCOLORBYNAME LightSalmon
+		PRINTFORM 이종족한정
+	ENDIF
+	RESETCOLOR
+	IF FLAG:5 & 2048
+		;情けない
+		CALL GOBI_KOUJO, 5
+		PRINTFORM 」
+	ELSE
+		PRINT ]
+	ENDIF
+	
+ENDIF
+
+IF FLAG:5 & 2048
+	PRINT 「소지금은 
+ELSE
+	PRINT [소지금：
+ENDIF
+
+IF CFLAG:580 <= 0
+	PRINT 없음
+	;情けない
+	SIF FLAG:5 & 2048
+		CALL GOBI_KOUJO, 5
+ELSE
+	PRINTV CFLAG:580
+	;デフォ
+	SIF FLAG:5 & 2048
+		CALL GOBI_KOUJO, 0
+ENDIF
+
+IF CFLAG:582 < 0
+	IF FLAG:5 & 2048
+		PRINT 채무는…… 
+	ELSE
+		PRINT ][채무：
+	ENDIF
+	PRINTV CFLAG:582
+	;情けない
+	SIF FLAG:5 & 2048
+		CALL GOBI_KOUJO, 5
+ENDIF
+
+IF FLAG:5 & 2048
+	PRINTL 」
+ELSE
+	PRINTL ]
+ENDIF
+
+;常識改変系
+IF TALENT:281 > 0 || TALENT:283 > 0
+	IF FLAG:5 & 2048
+		PRINT 「육변기로 세뇌 되어 버려서, 
+	ELSE
+		PRINT [상식개변：
+	ENDIF
+	;LOCALは連続に使う
+	LOCAL = 0
+	IF TALENT:281 > 0
+		IF FLAG:5 & 2048
+			PRINT 전투는
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT 【전투】 
+		ENDIF
+		PRINTFORM %GET_LOOK_INFO(TARGET, "상식개변【전투】")%
+		RESETCOLOR
+		LOCAL = 1
+	ENDIF
+	
+	IF TALENT:283 > 0
+		IF FLAG:5 & 2048 && LOCAL > 0
+			PRINT , 
+		ELSEIF LOCAL > 0
+			PRINT  
+		ENDIF
+		IF FLAG:5 & 2048
+			PRINT 일상은
+			SETCOLORBYNAME LightSalmon
+		ELSE
+			PRINT 【일상】 
+		ENDIF
+		PRINTFORM %GET_LOOK_INFO(TARGET, "상식개변【일상】")%
+		RESETCOLOR
+		LOCAL = 1
+	ENDIF
+	IF FLAG:5 & 2048
+		PRINTFORM 으로 바뀌어 버린 불쌍한 %SELF_CALL(TARGET)%
+		;喜び
+		CALL GOBI_KOUJO, 1
+		PRINTL 」
+	ELSE
+		PRINTL ]
+	ENDIF
+ENDIF
+
+;好きなものは別関数
+
+CALL LOOK_INFO_LOVE
+
+RETURN 1
+
+;-----------------------------------------------------------------
+@LOOK_INFO_LOVE
+#DIM MAIN_LOVE,100
+#DIM LOVE_SORT,100
+#DIM LOVE_POOL,100
+#DIM LOVE_NUM
+#DIM LOVE_ID
+#DIM LOVE_COUNT
+#DIM HEART
+#DIM LOVER
+;-----------------------------------------------------------------
+;MAIN_LOVE:0  = デフォで好きなもの. TALENT:317への愛情度
+;MAIN_LOVE:1  = あなたへの愛情度
+;MAIN_LOVE:2  = 世界の人々への愛情度
+;MAIN_LOVE:3  = ペニスへの愛情度
+;MAIN_LOVE:4  = 自らのペニスへの愛情度
+;MAIN_LOVE:10 = C性感への愛情度
+;MAIN_LOVE:11 = V性感への愛情度
+;MAIN_LOVE:12 = A性感への愛情度
+;MAIN_LOVE:13 = B性感への愛情度
+;MAIN_LOVE:20 = 自慰への愛情度
+;MAIN_LOVE:21 = 性交への愛情度
+;MAIN_LOVE:22 = 売春への愛情度
+;MAIN_LOVE:30 = 奉仕への愛情度
+;MAIN_LOVE:31 = 精液への愛情度
+;MAIN_LOVE:32 = 同性愛行為への愛情度
+;MAIN_LOVE:33 = マゾ性感への愛情度
+;MAIN_LOVE:34 = サド性感への愛情度
+;MAIN_LOVE:35 = 露出趣味への愛情度
+;MAIN_LOVE:40 = 夫への愛情度
+;MAIN_LOVE:41 = 新しい結婚相手への愛情度
+;MAIN_LOVE:42 = 恋人への愛情度
+;MAIN_LOVE:50 = コンプレックスへの性的倒錯
+;MAIN_LOVE:51 = 母への愛情度
+;MAIN_LOVE:52 = 父への愛情度
+;MAIN_LOVE:53 = 少女への愛情度
+;MAIN_LOVE:54 = 少年への愛情度
+;MAIN_LOVE:60 = 野良犬への愛情度
+;MAIN_LOVE:61 = 獣姦行為への愛情度
+
+;LOVE_SORT  = 好きなものの優先順位
+;LOVE_POOL  = 好きなもの相互作用修正値
+;LOVE_NUM   = 好きなものの数
+;LOVE_ID    = 好きなもののID
+;LOVE_COUNT = 好きなものの優先順位ソート用カウント
+;HEART      = ハートの数
+;LOVER       = 恋人
+
+;-------------------
+;仕様について
+;-------------------
+;各要素について素質や設定からポイントを集計し
+;ポイントが大きい順に好きなものを並べる
+
+;好きなものを狙って上位に持ってこれるようにしたが
+;ポイントが稼ぎにくい要素もあるので
+;そこら辺は長い目で調整したい
+
+;領域は0～100まで用意したので
+;要素を追加して色んな性癖を開拓させてあげたい
+;ただし多すぎるのも困るので
+;表示されるのは上位30個までとなっている
+
+;ハートは(ポイント/5)-1個が表示される
+;ハート0個以下の場合はハート無し. それほど好きではない
+;ハートは6個でMAX
+;ただし順位はポイントで細かく並べられる
+;ポイント3以上から好きなものが表示される
+
+LOVER = CFLAG:606
+
+;初期化
+FOR LOVE_ID, 0, 100
+	MAIN_LOVE:LOVE_ID = 0
+	LOVE_SORT:LOVE_ID = 0
+	LOVE_POOL:LOVE_ID = 0
+NEXT
+
+;初期値
+;最初から好きなものは最初から好き
+MAIN_LOVE:0 = 15
+
+;判定処理
+
+;設定での処理
+
+;種族補正
+IF TALENT:314 == 1 || TALENT:314 == 6
+	;一般的に高潔な種族
+	;엘프・천사
+	
+	;世界へのボーナス
+	MAIN_LOVE:2 += 1
+	;性交減少
+	MAIN_LOVE:21 -= 1
+	;売春減少
+	MAIN_LOVE:22 -= 1
+	;夫や恋人への愛情
+	MAIN_LOVE:40 += 1
+	MAIN_LOVE:42 += 1
+	;獣姦減少
+	MAIN_LOVE:61 -= 1
+	
+ELSEIF TALENT:314 == 3 || TALENT:314 == 4
+	;一般的に悪い種族
+	;흡혈귀・듀라한
+	
+	;世界減少
+	MAIN_LOVE:2 -= 1
+	;性交ボーナス
+	MAIN_LOVE:21 += 1
+	;売春ボーナス
+	MAIN_LOVE:22 += 1
+	;夫や恋人減少
+	MAIN_LOVE:40 -= 1
+	MAIN_LOVE:42 -= 1
+	
+ELSEIF TALENT:314 == 2
+	;인랑
+	
+	;世界減少
+	MAIN_LOVE:2 -= 1
+	;夫や恋人への愛情
+	MAIN_LOVE:40 += 1
+	MAIN_LOVE:42 += 1
+	;新しい結婚相手ボーナス
+	MAIN_LOVE:41 += 1
+	;野良犬ボーナス
+	MAIN_LOVE:60 += 1
+	;獣姦ボーナス
+	MAIN_LOVE:61 += 1
+	
+ELSEIF (TALENT:314 == 9 || TALENT:314 == 8 || TALENT:314 == 7)
+	;堕落した種族
+	;ダークエルフ・堕天使
+	
+	;世界減少
+	MAIN_LOVE:2 -= 2
+	;性交ボーナス
+	MAIN_LOVE:21 += 2
+	;売春ボーナス
+	MAIN_LOVE:22 += 2
+	;夫や恋人減少
+	MAIN_LOVE:40 -= 2
+	MAIN_LOVE:42 -= 1
+ENDIF
+
+;元の職業補正
+
+IF TALENT:315 == 2 || TALENT:315 == 12
+	;修道女・聖女
+	
+	;世界へのボーナス
+	MAIN_LOVE:2 += 3
+	;自慰減少
+	MAIN_LOVE:20 -= 1
+	;性交減少
+	MAIN_LOVE:21 -= 1
+	;売春減少
+	MAIN_LOVE:22 -= 1
+	;奉仕増加
+	MAIN_LOVE:30 += 1
+	
+ELSEIF TALENT:315 == 5
+	;창부
+	
+	;性交ボーナス
+	MAIN_LOVE:21 += 2
+	;売春ボーナス
+	MAIN_LOVE:22 += 2
+	
+ELSEIF TALENT:315 == 6
+	;盗人
+	
+	;世界減少
+	MAIN_LOVE:2 -= 2
+	;奉仕減少
+	MAIN_LOVE:30 -=1
+	
+ELSEIF TALENT:315 == 7 || TALENT:315 == 9
+	;物乞い・貧民
+	
+	;世界へのボーナス
+	MAIN_LOVE:2 += 1
+	
+ELSEIF TALENT:315 == 8
+	;貴族
+	
+	;性交減少
+	MAIN_LOVE:21 -= 1
+	;売春減少
+	MAIN_LOVE:22 -= 1
+	;コンプレックス増加
+	MAIN_LOVE:50 += 1
+	
+ELSEIF TALENT:315 == 11
+	;무녀
+	
+	;性交減少
+	MAIN_LOVE:21 -= 2
+	
+ELSEIF TALENT:315 == 21
+	;主婦
+	
+	;性交増加
+	MAIN_LOVE:21 += 1
+	;売春減少
+	MAIN_LOVE:22 -= 1
+	;夫への愛情
+	MAIN_LOVE:40 += 2
+	
+ENDIF
+
+;理由補正
+IF TALENT:316 == 2 || TALENT:316 == 11
+	;不純な動機
+	;金のため・自暴自棄になって
+	
+	;世界減少
+	MAIN_LOVE:2 -= 1
+	;売春ボーナス
+	MAIN_LOVE:22 += 1
+	
+ELSEIF TALENT:316 == 16 || TALENT:316 == 17
+	;大義名分
+	;平和のため・正義のため
+	
+	;世界へのボーナス
+	MAIN_LOVE:2 += 3
+	;奉仕増加
+	MAIN_LOVE:30 += 1
+	
+ENDIF
+
+;好きなもの補正
+IF TALENT:317 == 4
+	;故郷の恋人
+	
+	;恋人への愛情
+	MAIN_LOVE:42 += 3
+	
+ELSEIF TALENT:317 == 5
+	;お金
+	
+	;世界減少
+	MAIN_LOVE:2 -= 1
+	;売春ボーナス
+	MAIN_LOVE:22 += 1
+	
+ELSEIF TALENT:317 == 8 && TALENT:유부녀
+	;家族かつ人妻
+	
+	;夫への愛情
+	MAIN_LOVE:40 += 3
+	
+ELSEIF TALENT:317 == 8 && TALENT:마더콘
+	;家族かつマザコン
+	
+	;母増加
+	MAIN_LOVE:51 += 3
+	
+ELSEIF TALENT:317 == 8 && TALENT:파더콘
+	;家族かつファザコン
+	
+	;父増加
+	MAIN_LOVE:52 += 3
+	
+ELSEIF TALENT:317 == 9 || TALENT:317 == 10
+	;使命・故郷
+	
+	;世界へのボーナス
+	MAIN_LOVE:2 += 1
+	
+ELSEIF TALENT:317 == 12
+	;かわいい動物
+	
+	;野良犬ボーナス
+	MAIN_LOVE:60 += 1
+	;獣姦ボーナス
+	MAIN_LOVE:61 += 1
+	
+ENDIF
+
+;함락度合い
+
+IF CFLAG:0 == 1
+	;売却可
+	
+	;あなたへボーナス
+	MAIN_LOVE:1 += 1
+	;世界へは興味を失う
+	MAIN_LOVE:2 -= 1
+	;コンプレックスへの性的倒錯が強まる
+	MAIN_LOVE:50 += 1
+ELSEIF CFLAG:0 == 2
+	;조수可
+	
+	;あなたへボーナス
+	MAIN_LOVE:1 += 2
+	;世界へは興味を失う
+	MAIN_LOVE:2 -= 2
+	;コンプレックスへの性的倒錯が強まる
+	MAIN_LOVE:50 += 2
+ELSE
+	;未함락
+	
+	;あなたへの興味は無い
+	MAIN_LOVE:1 -= 1
+	;世界へボーナス
+	MAIN_LOVE:2 += 1
+	;コンプレックスへの性的倒錯が減少
+	MAIN_LOVE:50 -= 1
+ENDIF
+
+;素質による補正
+
+;음란
+IF TALENT:음란
+	;あなたへの興味は無い
+	MAIN_LOVE:1 -= 1
+	;世界へは興味を失う
+	MAIN_LOVE:2 -= 5
+	;コンプレックスへの性的倒錯が強まる
+	MAIN_LOVE:50 += 5
+ENDIF
+
+;애정
+IF TALENT:애정
+	;あなたへボーナス
+	MAIN_LOVE:1 += 10
+	;世界へは興味を失う
+	MAIN_LOVE:2 -= 5
+ENDIF
+
+;처녀
+IF TALENT:0
+	;V性感減少
+	MAIN_LOVE:11 -= 60
+ENDIF
+
+;동정
+IF TALENT:1
+	;自分のペニス減少
+	MAIN_LOVE:4 -= 1
+	;自慰増加
+	MAIN_LOVE:20 += 1
+ENDIF
+
+;붕괴
+IF TALENT:9
+	;あなた減少
+	MAIN_LOVE:1 -= 3
+	;世界減少
+	MAIN_LOVE:2 -= 60
+	;自慰増加
+	MAIN_LOVE:20 += 3
+	;性交増加
+	MAIN_LOVE:21 += 3
+	;売春増加
+	MAIN_LOVE:22 += 3
+	;精液増加
+	MAIN_LOVE:31 += 3
+	;露出増加
+	MAIN_LOVE:35 += 3
+	;夫や恋人への愛情
+	MAIN_LOVE:40 += 3
+	MAIN_LOVE:42 += 3
+	;新しい結婚相手ボーナス
+	MAIN_LOVE:41 += 3
+	;コンプレックス増加
+	MAIN_LOVE:50 += 3
+	;野良犬ボーナス
+	MAIN_LOVE:60 += 1
+	;獣姦ボーナス
+	MAIN_LOVE:61 += 1
+	
+ENDIF
+
+;호기심
+IF TALENT:23
+	;コンプレックス増加
+	MAIN_LOVE:50 += 1
+ENDIF
+
+;보수적
+IF TALENT:24
+	;売春減少
+	MAIN_LOVE:22 -= 1
+	;コンプレックス減少
+	MAIN_LOVE:50 -= 1
+ENDIF
+
+;정조관념
+IF TALENT:30
+	;性交減少
+	MAIN_LOVE:21 -= 1
+	;売春減少
+	MAIN_LOVE:22 -= 1
+	;コンプレックス減少
+	MAIN_LOVE:50 -= 1
+ENDIF
+
+;정조관부실
+IF TALENT:31
+	;性交増加
+	MAIN_LOVE:21 += 1
+	;売春増加
+	MAIN_LOVE:22 += 1
+	;コンプレックス増加
+	MAIN_LOVE:50 += 1
+ENDIF
+
+;수줍음
+IF TALENT:35
+	;露出増加
+	MAIN_LOVE:35 += 1
+ENDIF
+
+;수치심없음
+IF TALENT:36
+	;露出減少
+	MAIN_LOVE:35 -= 1
+ENDIF
+
+;아픔에약함
+IF TALENT:40
+	;マゾ増加
+	MAIN_LOVE:33 += 1
+ENDIF
+
+;정애미각
+IF TALENT:47
+	;精液増加
+	MAIN_LOVE:31 += 10
+ENDIF
+
+;오줌싸개
+IF TALENT:57
+	;露出増加
+	MAIN_LOVE:35 += 1
+ENDIF
+
+;자위쉬움
+IF TALENT:60
+	;自慰増加
+	MAIN_LOVE:20 += 1
+ENDIF
+
+;자위광
+IF TALENT:74
+	;C性感増加
+	MAIN_LOVE:10 += 3
+	;自慰増加
+	MAIN_LOVE:20 += 3
+ENDIF
+
+;섹스광
+IF TALENT:75
+	;V性感増加
+	MAIN_LOVE:11 += 3
+	;性交増加
+	MAIN_LOVE:21 += 3
+ENDIF
+
+;항문광
+IF TALENT:77
+	;A性感増加
+	MAIN_LOVE:12 += 3
+	;自慰増加
+	MAIN_LOVE:20 += 1
+	;性交増加
+	MAIN_LOVE:21 += 1
+ENDIF
+
+;가슴광
+IF TALENT:78
+	;B性感増加
+	MAIN_LOVE:13 += 3
+	;自慰増加
+	MAIN_LOVE:20 += 3
+ENDIF
+
+;도착적
+IF TALENT:80
+	;同性愛増加
+	MAIN_LOVE:32 += 1
+	;マゾ増加
+	MAIN_LOVE:33 += 1
+	;サド増加
+	MAIN_LOVE:34 += 1
+	;露出増加
+	MAIN_LOVE:35 += 1
+	;コンプレックス増加
+	MAIN_LOVE:50 += 1
+	;野良犬ボーナス
+	MAIN_LOVE:60 += 1
+	;獣姦ボーナス
+	MAIN_LOVE:61 += 1
+ENDIF
+
+;바이
+IF TALENT:80
+	;同性愛増加
+	MAIN_LOVE:32 += 1
+ENDIF
+
+;새드
+IF TALENT:83
+	;サド増加
+	MAIN_LOVE:34 += 10
+ENDIF
+
+;마조
+IF TALENT:88
+	;マゾ増加
+	MAIN_LOVE:33 += 10
+ENDIF
+
+;노출광
+IF TALENT:89
+	;露出増加
+	MAIN_LOVE:35 += 10
+ENDIF
+
+;C鈍感
+IF TALENT:101
+	;C性感減少
+	MAIN_LOVE:10 -= 1
+ENDIF
+
+;C敏感
+IF TALENT:102
+	;C性感増加
+	MAIN_LOVE:10 += 1
+ENDIF
+
+;V鈍感
+IF TALENT:103
+	;V性感減少
+	MAIN_LOVE:11 -= 1
+ENDIF
+
+;V敏感
+IF TALENT:104
+	;V性感増加
+	MAIN_LOVE:11 += 1
+ENDIF
+
+;A鈍感
+IF TALENT:105
+	;A性感減少
+	MAIN_LOVE:12 -= 1
+ENDIF
+
+;A敏感
+IF TALENT:106
+	;A性感増加
+	MAIN_LOVE:12 += 1
+ENDIF
+
+;B鈍感
+IF TALENT:107
+	;B性感減少
+	MAIN_LOVE:13 -= 1
+ENDIF
+
+;B敏感
+IF TALENT:108
+	;B性感増加
+	MAIN_LOVE:13 += 1
+ENDIF
+
+;후타나리・남자
+IF TALENT:121 || TALENT:122
+	;自ペニス増加
+	MAIN_LOVE:4 += 1
+ENDIF
+
+;동물귀
+IF TALENT:124
+	;獣姦ボーナス
+	MAIN_LOVE:61 += 1
+ENDIF
+
+;噴乳体質
+IF TALENT:130
+	;B性感増加
+	MAIN_LOVE:13 += 1
+ENDIF
+
+;조루
+IF TALENT:133 && (TALENT:121 || TALENT:122)
+	;自分のペニス減少
+	MAIN_LOVE:4 -= 1
+ENDIF
+
+;암캐
+IF TALENT:124
+	;野良犬ボーナス
+	MAIN_LOVE:60 += 3
+	;獣姦ボーナス
+	MAIN_LOVE:61 += 3
+ENDIF
+
+;마더콘
+IF TALENT:140
+	;母増加
+	MAIN_LOVE:51 += 10
+ENDIF
+
+;파더콘
+IF TALENT:141
+	;父増加
+	MAIN_LOVE:52 += 10
+ENDIF
+
+;로리콘
+IF TALENT:142
+	;ロリ増加
+	MAIN_LOVE:53 += 10
+ENDIF
+
+;쇼타콘
+IF TALENT:143
+	;ショタ増加
+	MAIN_LOVE:54 += 10
+ENDIF
+
+;자위안함
+IF TALENT:150
+	;自慰減少
+	MAIN_LOVE:20 -= 60
+ENDIF
+
+;봉사안함
+IF TALENT:151
+	;奉仕減少
+	MAIN_LOVE:30 -= 60
+ENDIF
+
+;유부녀
+IF TALENT:157
+	;夫への愛情
+	MAIN_LOVE:40 += 3
+ENDIF
+
+;창부
+IF TALENT:180
+	;売春増加
+	MAIN_LOVE:22 += 1
+ENDIF
+
+;경국지색
+IF TALENT:181
+	;売春増加
+	MAIN_LOVE:22 += 2
+ENDIF
+
+;육변기
+IF TALENT:204
+	;世界減少
+	MAIN_LOVE:2 -= 1
+	;性交ボーナス
+	MAIN_LOVE:21 += 1
+	;売春ボーナス
+	MAIN_LOVE:22 += 1
+	;夫や恋人減少
+	MAIN_LOVE:40 -= 1
+	MAIN_LOVE:42 -= 1
+ENDIF
+
+;음핵
+IF TALENT:230
+	;C性感増加
+	MAIN_LOVE:10 += 3
+ENDIF
+
+;淫壺
+IF TALENT:232
+	;V性感増加
+	MAIN_LOVE:11 += 3
+ENDIF
+
+;음항
+IF TALENT:233
+	;A性感増加
+	MAIN_LOVE:12 += 3
+ENDIF
+
+;음유
+IF TALENT:231
+	;B性感増加
+	MAIN_LOVE:13 += 3
+ENDIF
+
+;처녀봉인
+IF TALENT:273
+	;V性感減少
+	MAIN_LOVE:11 -= 3
+ENDIF
+
+;광왕의포로
+IF TALENT:광왕의포로
+	;あなたへの興味を失う
+	MAIN_LOVE:1 -= 10
+	;狂王へのボーナス
+	MAIN_LOVE:62 += 30
+ENDIF
+
+;能力による補正
+
+;C感覚
+	;C性感増加
+	MAIN_LOVE:10 += ABL:0
+
+;B感覚
+	;B性感増加
+	MAIN_LOVE:13 += ABL:1
+
+;V感覚
+	;V性感増加
+	MAIN_LOVE:11 += ABL:2
+
+;A感覚
+	;A性感増加
+	MAIN_LOVE:12 += ABL:3
+
+;순종
+IF TALENT:애정 && !TALENT:광왕의포로
+	;愛の場合
+	;あなた増加
+	MAIN_LOVE:1 += ABL:10 * 3
+ENDIF
+
+
+;욕망
+IF TALENT:음란
+	;淫乱の場合
+	;コンプレックス増加
+	MAIN_LOVE:50 += ABL:11 * 3
+ENDIF
+
+;기교
+	;奉仕や性交の技術にボーナス
+
+;봉사기술
+IF ABL:13
+	;奉仕増加
+	MAIN_LOVE:30 += ABL:13 + ABL:12
+ENDIF
+
+;성교기술
+IF ABL:14
+	;性交増加
+	MAIN_LOVE:21 += ABL:14 + ABL:12
+ENDIF
+
+;봉사정신
+	;奉仕増加
+	MAIN_LOVE:30 += ABL:16
+
+;노출벽
+	;露出増加
+	MAIN_LOVE:35 += ABL:17
+
+;새드끼
+	;サド増加
+	MAIN_LOVE:34 += ABL:20
+
+;마조끼
+	;マゾ増加
+	MAIN_LOVE:33 += ABL:21
+
+;레즈끼
+	;同性愛増加
+	MAIN_LOVE:32 += ABL:22
+
+;BLっ気
+	;同性愛増加
+	MAIN_LOVE:32 += ABL:23
+
+;성교중독
+	;性交増加
+	MAIN_LOVE:21 += ABL:30 * 3
+
+;자위중독
+	;自慰増加
+	MAIN_LOVE:20 += ABL:31 * 3
+
+;정액중독
+	;精液増加
+	MAIN_LOVE:31 += ABL:32 * 3
+
+;레즈중독
+	;同性愛増加
+	MAIN_LOVE:32 += ABL:33 * 3
+
+;매춘중독
+	;売春増加
+	MAIN_LOVE:22 += ABL:37 * 3
+
+;수간중독
+	;獣姦ボーナス
+	MAIN_LOVE:61 += ABL:39 * 3
+
+;経験補正
+;明らかに快感を感じた経験のみカウントする
+
+IF EXP:정음절정경험 > 100
+	;精液増加
+	MAIN_LOVE:31 += 3
+ELSEIF EXP:정음절정경험 > 30
+	;精液増加
+	MAIN_LOVE:31 += 2
+ELSEIF EXP:정음절정경험 > 0
+	;精液増加
+	MAIN_LOVE:31 += 1
+ENDIF
+
+IF EXP:봉사쾌락경험 > 100
+	;奉仕増加
+	MAIN_LOVE:30 += 3
+ELSEIF EXP:봉사쾌락경험 > 30
+	;奉仕増加
+	MAIN_LOVE:30 += 2
+ELSEIF EXP:봉사쾌락경험 > 0
+	;奉仕増加
+	MAIN_LOVE:30 += 1
+ENDIF
+
+IF EXP:애정경험 > 100
+	;あなた増加
+	MAIN_LOVE:1 += 3
+ELSEIF EXP:애정경험 > 30
+	;あなた増加
+	MAIN_LOVE:1 += 2
+ELSEIF EXP:애정경험 > 0
+	;あなた増加
+	MAIN_LOVE:1 += 1
+ENDIF
+
+IF EXP:피학쾌락경험 > 100
+	;マゾ増加
+	MAIN_LOVE:33 += 3
+ELSEIF EXP:피학쾌락경험 > 30
+	;マゾ増加
+	MAIN_LOVE:33 += 2
+ELSEIF EXP:피학쾌락경험 > 0
+	;マゾ増加
+	MAIN_LOVE:33 += 1
+ENDIF
+
+IF EXP:Ａ쾌락경험 > 200
+	;A性感増加
+	MAIN_LOVE:12 += 3
+ELSEIF EXP:Ａ쾌락경험 > 80
+	;A性感増加
+	MAIN_LOVE:12 += 2
+ELSEIF EXP:Ａ쾌락경험 > 0
+	;A性感増加
+	MAIN_LOVE:12 += 1
+ENDIF
+
+IF EXP:가학쾌락경험 > 100
+	;サド増加
+	MAIN_LOVE:34 += 3
+ELSEIF EXP:가학쾌락경험 > 30
+	;サド増加
+	MAIN_LOVE:34 += 2
+ELSEIF EXP:가학쾌락경험 > 0
+	;サド増加
+	MAIN_LOVE:34 += 1
+ENDIF
+
+IF EXP:영업애정경험 > 100
+	;売春ボーナス
+	MAIN_LOVE:22 += 3
+ELSEIF EXP:영업애정경험 > 30
+	;売春ボーナス
+	MAIN_LOVE:22 += 2
+ELSEIF EXP:영업애정경험 > 0
+	;売春ボーナス
+	MAIN_LOVE:22 += 1
+ENDIF
+
+;新しい夫ボーナス
+	MAIN_LOVE:41 += CFLAG:602 / 3
+;恋人ボーナス
+	MAIN_LOVE:42 += CFLAG:607 / 3
+
+;刻印
+
+;쾌락각인
+	;コンプレックス増加
+	MAIN_LOVE:50 += MARK:쾌락각인 * 3
+
+;반발각인
+	;あなた減少
+	MAIN_LOVE:1 -= MARK:반발각인 * 5
+
+;---------------
+;相互作用
+;---------------
+
+;コンプレックスがこじれる
+
+;마더콘
+SIF MAIN_LOVE:51
+	LOVE_POOL:51 += MAIN_LOVE:50
+;파더콘
+SIF MAIN_LOVE:52
+	LOVE_POOL:52 += MAIN_LOVE:50
+;로리콘
+SIF MAIN_LOVE:53
+	LOVE_POOL:53 += MAIN_LOVE:50
+;쇼타콘
+SIF MAIN_LOVE:54
+	LOVE_POOL:54 += MAIN_LOVE:50
+
+;可愛い動物好きなボーナス
+IF TALENT:317 == 12
+	;똥개・獣姦が加算
+	LOVE_POOL:0 += MAIN_LOVE:60 / 3
+	LOVE_POOL:0 += MAIN_LOVE:61 / 3
+ENDIF
+
+;獣姦好きは野良犬も好き
+LOVE_POOL:60 += MAIN_LOVE:61 / 2
+
+;新しい夫の方がいいの…
+LOVE_POOL:40 -= MAIN_LOVE:41 / 3
+
+
+;修正値適用
+FOR LOVE_ID, 0, 100
+	MAIN_LOVE:LOVE_ID += LOVE_POOL:LOVE_ID
+NEXT
+
+
+;--------------
+;各種表示
+;--------------
+
+LOVE_NUM = 0
+
+IF FLAG:5 & 2048
+	PRINTL 「좋아하는 것은……
+ELSE
+	PRINTL [좋아하는것]
+ENDIF
+
+;ソート
+;LOCAL = 最大値
+LOCAL = -9999
+
+;最大値を算出
+FOR LOVE_ID, 0, 100
+	SIF LOCAL < MAIN_LOVE:LOVE_ID
+		LOCAL = MAIN_LOVE:LOVE_ID
+NEXT
+
+LOVE_COUNT = 0
+
+;無限ループ避け
+LOCAL:1 = 0
+
+;最大値の次に大きい数記憶
+LOCAL:2 = -9999
+
+;30位までソート
+WHILE LOVE_COUNT < 30
+	
+	FOR LOVE_ID, 0, 100
+		
+		;現在の最大値と同じものを選択
+		IF LOCAL == MAIN_LOVE:LOVE_ID
+			
+			;リストにIDを記憶
+			LOVE_SORT:LOVE_COUNT = LOVE_ID
+			;順位を進める
+			LOVE_COUNT++
+			
+		ELSEIF MAIN_LOVE:LOVE_ID < LOCAL && MAIN_LOVE:LOVE_ID > LOCAL:2
+			
+			;現在の最大値ではない, 現在の最大値の次に大きい数記憶
+			LOCAL:2 = MAIN_LOVE:LOVE_ID
+			
+		ENDIF
+		
+	NEXT
+	
+	;次にソートする最大値をセット
+	LOCAL = LOCAL:2
+	LOCAL:2 = -9999
+	
+	;無限ループ避け
+	LOCAL:1++
+	SIF LOCAL:1 > 100
+		BREAK
+	
+WEND
+
+
+PRINT 　
+FOR LOVE_COUNT, 0, 30
+	
+	;順位からIDを取り出す
+	LOVE_ID = LOVE_SORT:LOVE_COUNT
+	
+	;愛情度が2以下の場合, 何も表示されない
+	SIF MAIN_LOVE:LOVE_ID <= 3
+		CONTINUE
+	
+	IF LOVE_ID == 0
+		CALL LOVE_LIKE_BASE
+		SIF RESULT == 0
+			CONTINUE
+	ELSEIF LOVE_ID == 1
+		PRINTFORM 마왕님
+	ELSEIF LOVE_ID == 2
+		PRINTFORM 사람을 구하는 것
+	ELSEIF LOVE_ID == 3
+		PRINTFORM 자지
+	ELSEIF LOVE_ID == 4
+		PRINTFORM 발기
+	ELSEIF LOVE_ID == 10
+		PRINTFORM 클리토리스
+	ELSEIF LOVE_ID == 11
+		PRINTFORM 보지
+	ELSEIF LOVE_ID == 12
+		PRINTFORM 애널
+	ELSEIF LOVE_ID == 13
+		PRINTFORM 유두
+	ELSEIF LOVE_ID == 20
+		PRINTFORM 자위
+	ELSEIF LOVE_ID == 21
+		PRINTFORM 섹스
+	ELSEIF LOVE_ID == 22
+		PRINTFORM 매춘
+	ELSEIF LOVE_ID == 30
+		PRINTFORM 봉사
+	ELSEIF LOVE_ID == 31
+		PRINTFORM 정액
+	ELSEIF LOVE_ID == 32 && TALENT:남자
+		PRINTFORM 호모 행위
+	ELSEIF LOVE_ID == 32
+		PRINTFORM 레즈 행위
+	ELSEIF LOVE_ID == 33
+		PRINTFORM 괴롭힘 받는 것
+	ELSEIF LOVE_ID == 34
+		PRINTFORM 괴롭히는 것
+	ELSEIF LOVE_ID == 35
+		PRINTFORM 노출
+	ELSEIF LOVE_ID == 40
+		PRINTFORM 남편
+	ELSEIF LOVE_ID == 40  && TALENT:남자
+		PRINTFORM 아내
+	ELSEIF LOVE_ID == 41
+		PRINTFORM 지금의 서방님
+	ELSEIF LOVE_ID == 41  && TALENT:남자
+		PRINTFORM 지금의 아내
+	ELSEIF LOVE_ID == 42
+		;恋人無し
+		IF LOVER == 0 && TALENT:남자
+			PRINTFORM 미래의 아내
+		ELSEIF LOVER == 0
+			PRINTFORM 미래의 서방님
+		ELSEIF LOVER == 200
+			PRINTFORM 연인
+		ELSE
+			PRINT 연인인 
+			CALL NAME_LOVER,LOVER,1
+		ENDIF
+	ELSEIF LOVE_ID == 50
+		;コンプレックスは強化ソースなので表示はしない
+		CONTINUE
+	ELSEIF LOVE_ID == 51 && MAIN_LOVE:50 > 6
+		PRINTFORM 유부녀
+	ELSEIF LOVE_ID == 51
+		PRINTFORM 엄마
+	ELSEIF LOVE_ID == 52 && MAIN_LOVE:50 > 6
+		PRINTFORM 중년 아저씨
+	ELSEIF LOVE_ID == 52
+		PRINTFORM 아빠
+	ELSEIF LOVE_ID == 53 && MAIN_LOVE:50 > 6
+		PRINTFORM 로리보지
+	ELSEIF LOVE_ID == 53
+		PRINTFORM 어린 여자아이
+	ELSEIF LOVE_ID == 54 && MAIN_LOVE:50 > 6
+		PRINTFORM 쇼타 자지
+	ELSEIF LOVE_ID == 54
+		PRINTFORM 미소년
+	ELSEIF LOVE_ID == 60 && MAIN_LOVE:50 > 6
+		PRINTFORM 똥개님
+	ELSEIF LOVE_ID == 60
+		PRINTFORM 개
+	ELSEIF LOVE_ID == 61 && MAIN_LOVE:50 > 6
+		PRINTFORM 동물과 교미
+	ELSEIF LOVE_ID == 61
+		PRINTFORM 복실복실
+	ELSEIF LOVE_ID == 62
+		PRINTFORM 광왕님
+	ELSE
+		CONTINUE
+	ENDIF
+	
+	;5個ごとにハートが一つずつ増える
+	HEART = (MAIN_LOVE:LOVE_ID / 5) -1
+	;ハートの数最大値は6個
+	SIF HEART > 6
+		HEART = 6
+	SIF HEART > 0
+		PRINTFORM %UNICODE(0x2661) *HEART%
+	
+	;間の空白
+	PRINT 　
+	
+	;好きな数を増やす
+	LOVE_NUM++
+	
+	;改行
+	IF LOVE_NUM % 6 == 0
+		PRINTL  
+		PRINT 　
+	ENDIF
+NEXT
+
+IF FLAG:5 & 2048
+	;喜び
+	CALL GOBI_KOUJO, 1
+	
+	PRINTL 」 
+ELSE
+	PRINTL  
+ENDIF
+
+PRINTFORML [{LOVE_NUM}개 좋아하는 것이 있습니다]
+
+RETURN 1
+
+;---------------------
+@LOVE_LIKE_BASE
+;---------------------
+;これだけバラバラなので, 別に移しました
+;TARGETの好きなものを表示ます
+;表示された場合LOCALに1が返ります
+
+LOCAL = 0
+
+IF TALENT:317 == 1
+	PRINTFORM 달콤한 것
+	LOCAL++
+ELSEIF TALENT:317 == 2
+	PRINTFORM 매운 것
+	LOCAL++
+ELSEIF TALENT:317 == 3
+	PRINTFORM 노래
+	LOCAL++
+ELSEIF TALENT:317 == 4 && CFLAG:0 == 0
+	PRINTFORM 고향의 애인
+	LOCAL++
+ELSEIF TALENT:317 == 5
+	PRINTFORM 돈
+	LOCAL++
+ELSEIF TALENT:317 == 6
+	PRINTFORM 춤
+	LOCAL++
+ELSEIF TALENT:317 == 7
+	PRINTFORM 그림
+	LOCAL++
+ELSEIF TALENT:317 == 8 && CFLAG:0 == 0
+	PRINTFORM 가족
+	LOCAL++
+ELSEIF TALENT:317 == 9 && CFLAG:0 == 0
+	PRINTFORM 사명
+	LOCAL++
+ELSEIF TALENT:317 == 10 && CFLAG:0 == 0
+	PRINTFORM 고향
+	LOCAL++
+ELSEIF TALENT:317 == 11 && CFLAG:0 == 0
+	PRINTFORM 동경하는 사람
+	LOCAL++
+ELSEIF TALENT:317 == 12
+	PRINTFORM 귀여운 동물
+	LOCAL++
+ELSEIF TALENT:317 == 13
+	PRINTFORM 예쁜 장식품
+	LOCAL++
+ELSEIF TALENT:317 == 14
+	PRINTFORM 보석
+	LOCAL++
+ELSEIF TALENT:317 == 15
+	PRINTFORM 과자
+	LOCAL++
+ELSEIF TALENT:317 == 16
+	PRINTFORM 차
+	LOCAL++
+ELSEIF TALENT:317 == 17
+	PRINTFORM 수면
+	LOCAL++
+ELSEIF TALENT:317 == 18
+	PRINTFORM 소설
+	LOCAL++
+ELSEIF TALENT:317 == 19
+	PRINTFORM 웃음
+	LOCAL++
+ELSEIF TALENT:317 == 20
+	PRINTFORM 영원
+	LOCAL++
+ENDIF
+
+RETURN LOCAL
+
+
+;----------------------------------------------
+@GET_LOOK_INFO(ARG, ARGS)
+#FUNCTIONS
+#DIM TEMP
+;----------------------------------------------
+;ARG  参照キャラ
+;ARGS 参照内容
+;　머리색,머리상태,머리길이,머리컷,머리스타일,눈,눈동자색,입술,살집,유두,음모의상태,차밍포인트,버릇,
+;　종족,용자가되기이전의생활,용자가된동기,페니스의상태,職業,性格 に対応
+
+IF ARGS == "머리색"
+	SELECTCASE TALENT:ARG:머리색
+	CASE 1
+		LOCALS = 금발
+	CASE 2
+		LOCALS = 갈색머리
+	CASE 3
+		LOCALS = 흑발
+	CASE 4
+		LOCALS = 붉은머리
+	CASE 5
+		LOCALS = 은발
+	CASE 6
+		LOCALS = 푸른머리
+	CASE 7
+		LOCALS = 초록머리
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "머리상태"
+	SELECTCASE TALENT:ARG:머리상태
+	CASE 1
+		LOCALS = 직모
+	CASE 2
+		LOCALS = 컬있음
+	CASE 3
+		LOCALS = 안쪽컬
+	CASE 4
+		LOCALS = 바깥쪽컬
+	CASE 5
+		LOCALS = 곱슬머리
+	CASE 6
+		LOCALS = 웨이브짐
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "머리길이"
+	SELECTCASE TALENT:ARG:머리길이
+	CASE 1 TO 100
+		LOCALS = 숏컷
+	CASE 101 TO 200
+		LOCALS = 세미롱헤어
+	CASE 201 TO 300
+		LOCALS = 롱헤어
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "머리컷"
+	SELECTCASE TALENT:ARG:머리컷
+	CASE 1
+		LOCALS = 베이직
+	CASE 2
+		LOCALS = 가지런함
+	CASE 3
+		LOCALS = 레이어
+	CASE 4
+		LOCALS = 샤기
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "머리스타일"
+	SELECTCASE TALENT:ARG:머리스타일
+	CASE 1
+		LOCALS = 내추럴
+	CASE 2
+		LOCALS = 양가르마
+	CASE 3
+		LOCALS = 언밸런스
+	CASE 4
+		LOCALS = 말총머리
+	CASE 5
+		LOCALS = 포니테일
+	CASE 6
+		LOCALS = 사이드포니
+	CASE 7
+		LOCALS = 땋은머리
+	CASE 8
+		LOCALS = 트윈테일
+	CASE 9
+		LOCALS = 업스타일
+	CASE 10
+		LOCALS = 사이드 업
+	CASE 11
+		LOCALS = 피쉬본스타일
+	CASE 12
+		LOCALS = 롤헤어
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "눈"
+	SELECTCASE TALENT:ARG:눈
+	CASE 1
+		LOCALS = 째짐
+	CASE 2
+		LOCALS = 큼
+	CASE 3
+		LOCALS = 신비스러움
+	CASE 4
+		LOCALS = 치켜올라감
+	CASE 5
+		LOCALS = 물기젖음
+	CASE 6
+		LOCALS = 표준
+	CASE 7
+		LOCALS = 삼백안
+	CASE 8
+		LOCALS = 반만뜸
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "눈동자색"
+	SELECTCASE TALENT:ARG:눈동자색
+	CASE 1
+		LOCALS = 푸른색
+	CASE 2
+		LOCALS = 갈색
+	CASE 3
+		LOCALS = 회색
+	CASE 4
+		LOCALS = 금색
+	CASE 5
+		LOCALS = 심홍색
+	CASE 6
+		LOCALS = 검정
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "입술"
+	SELECTCASE TALENT:ARG:입술
+	CASE 1
+		LOCALS = 육감적
+	CASE 2
+		LOCALS =  얇음
+	CASE 3
+		LOCALS = 두꺼움
+	CASE 4
+		LOCALS = 표준
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "살집"
+	SELECTCASE TALENT:ARG:살집
+	CASE 1 TO 100
+		LOCALS = 슬렌더
+	CASE 101 TO 200
+		LOCALS = 표준
+	CASE 201 TO 300
+		LOCALS = 글래머
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "유두"
+	SELECTCASE TALENT:ARG:유두
+	CASE 1
+		LOCALS = 핑크
+	CASE 2
+		LOCALS = 갈색
+	CASE 3
+		LOCALS = 표준
+	CASE 4
+		LOCALS = 함몰
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "음모의상태"
+	SELECTCASE TALENT:ARG:음모의상태
+	CASE 1
+		LOCALS = 털없음
+	CASE 2 TO 20
+		LOCALS = 솜털
+	CASE 21 TO 50
+		LOCALS = 난듯만듯함
+	CASE 51 TO 100
+		LOCALS = 엷음
+	CASE 101 TO 150
+		LOCALS = 표준
+	CASE 151 TO 200
+		LOCALS = 짙음
+	CASE 201 TO 500
+		LOCALS = 강모
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "차밍포인트"
+	SELECTCASE TALENT:ARG:차밍포인트
+	CASE 1
+		LOCALS = 피부
+	CASE 2
+		LOCALS = 눈매
+	CASE 3
+		LOCALS = 코
+	CASE 4
+		LOCALS = 입가
+	CASE 5
+		LOCALS = 눈물점
+	CASE 6
+		LOCALS = 쇄골
+	CASE 7
+		LOCALS = 팔뚝
+	CASE 8
+		LOCALS = 손목
+	CASE 9
+		LOCALS = 손
+	CASE 10
+		LOCALS = 손가락
+	CASE 11
+		LOCALS = 배꼽
+	CASE 12
+		LOCALS = 예쁜가슴
+	CASE 13
+		LOCALS = 잘록한허리
+	CASE 14
+		LOCALS = 엉덩이라인
+	CASE 15
+		LOCALS = 각선미
+	CASE 16
+		LOCALS = 무릎
+	CASE 17
+		LOCALS = 발목
+	CASE 18
+		LOCALS = 복사뼈
+	CASE 19
+		LOCALS = 등
+	CASE 20
+		LOCALS = 귀
+	CASE 21
+		LOCALS = 성기
+	CASE 22
+		LOCALS = 머릿결
+	CASE 23
+		LOCALS = 큰엉덩이
+	CASE 24
+		LOCALS = 긴속눈썹
+	CASE 25
+		LOCALS = 덧니
+	CASE 26
+		LOCALS = 눈썹
+	CASE 27
+		LOCALS = 손톱
+	CASE 28
+		LOCALS = 잠버릇
+	CASE 29
+		SIF TALENT:ARG:121 == 1 || TALENT:ARG:122 == 1 
+			PRINT 자신의 페니스
+		SIF TALENT:ARG:121 == 0 && TALENT:ARG:122 == 0 
+			PRINT 거대클리
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "버릇"
+	SELECTCASE TALENT:ARG:버릇
+	CASE 1
+		LOCALS = 입술을 핥는다
+	CASE 2
+		LOCALS = 엉뚱한곳을본다
+	CASE 3
+		LOCALS = 머리카락을 만진다
+	CASE 4
+		LOCALS = 무릎에 손을 얹는다
+	CASE 5
+		LOCALS = 팔짱을 낀다
+	CASE 6
+		LOCALS = 깍지를 낀다
+	CASE 7
+		LOCALS = 다리를 떤다
+	CASE 8
+		LOCALS = 리듬을 탄다
+	CASE 9
+		LOCALS = 눈을 치켜뜬다
+	CASE 10
+		LOCALS = 고개를 갸웃거린다
+	CASE 11
+		LOCALS = 한숨을 쉰다
+	CASE 12
+		LOCALS = 오버액션
+	CASE 13
+		LOCALS = 눈을 자주 깜빡인다
+	CASE 14
+		LOCALS = 볼을 부풀린다
+	CASE 15
+		LOCALS = 입술을 깨문다
+	CASE 16
+		LOCALS = 입을 가린다
+	CASE 17
+		LOCALS = 귀를 만진다
+	CASE 18
+		LOCALS = 늘어진다
+	CASE 19
+		LOCALS = 혀를 찬다
+	CASE 20
+		LOCALS = 손톱을 깨문다
+	CASE 21
+		LOCALS = 코를 만진다
+	CASE 22
+		LOCALS = 뺨을 친다
+	CASE 23
+		LOCALS = 주먹을 쥔다
+	CASE 24
+		LOCALS = 삿대질 한다
+	CASE 25
+		LOCALS = 결정대사가 있다
+	CASE 26
+		LOCALS = 허리를 튼다
+	CASE 27
+		LOCALS = 윙크한다
+	CASE 28
+		LOCALS = 눈을 가늘게 뜬다
+	CASE 29
+		LOCALS = 입술을 삐쭉 내민다
+	CASE 30
+		LOCALS = 끙끙거린다
+	CASE 31
+		LOCALS = 모퉁이로 걷는다
+	CASE 32
+		LOCALS = 길이를 잰다
+	CASE 33
+		LOCALS = 말할 때 거리를 좁힌다
+	CASE 34
+		LOCALS = 손등을 핥는다
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "종족"
+	SELECTCASE TALENT:ARG:종족
+	CASE 0
+		LOCALS = 인간
+	CASE 1
+		LOCALS = 엘프
+	CASE 2
+		LOCALS = 인랑
+	CASE 3
+		LOCALS = 흡혈귀
+	CASE 4
+		LOCALS = 듀라한
+	CASE 5
+		LOCALS = 드래곤
+	CASE 6
+		LOCALS = 천사
+	CASE 7
+		LOCALS = 다크 엘프
+	CASE 8
+		LOCALS = 타천사
+	CASE 9
+		LOCALS = 마족
+	CASE 10
+		LOCALS = 호빗
+	CASE 11
+		LOCALS = 드워프
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "용자가되기이전의생활"
+	SELECTCASE TALENT:ARG:용자가되기이전의생활
+	CASE 0
+		LOCALS = 불명
+	CASE 1
+		LOCALS = 학생
+	CASE 2
+		LOCALS = 수녀
+	CASE 3
+		LOCALS = 농가
+	CASE 4
+		LOCALS = 어부
+	CASE 5
+		LOCALS = 창부
+	CASE 6
+		LOCALS = 도둑
+	CASE 7
+		LOCALS = 거지
+	CASE 8
+		LOCALS = 귀족
+	CASE 9
+		LOCALS = 빈민
+	CASE 10
+		LOCALS = 묘지기
+	CASE 11
+		LOCALS = 무녀
+	CASE 12
+		LOCALS = 성녀
+	CASE 13
+		LOCALS = 예언자
+	CASE 14
+		LOCALS = 점술사
+	CASE 15
+		LOCALS = 상인
+	CASE 16
+		LOCALS = 약초꾼
+	CASE 17
+		LOCALS = 은자
+	CASE 18
+		LOCALS = 빵집
+	CASE 19
+		LOCALS = 군인
+	CASE 20
+		LOCALS = 노예
+	CASE 21
+		LOCALS = 주부
+	CASE 1000
+		LOCALS = 사정타락의 부산물
+	CASE 1001
+		LOCALS = 타락의 결과
+	CASE 1002
+		LOCALS = 사랑의 결정
+	CASE 1003
+		LOCALS = 침대의 얼룩
+	CASE 1004
+		LOCALS = 마의 웅덩이
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "용자가된동기"
+	SELECTCASE TALENT:ARG:용자가된동기
+	CASE 0
+		LOCALS = 불명
+	CASE 1
+		LOCALS = 운명에 이끌려서
+	CASE 2
+		LOCALS = 돈 때문에
+	CASE 3
+		LOCALS = 계시를 받아서
+	CASE 4
+		LOCALS = 사명감에 불타서
+	CASE 5
+		LOCALS = 일상이 따분해져서
+	CASE 6
+		LOCALS = 슬픔의 끝에
+	CASE 7
+		LOCALS = 고향을 구하기 위해
+	CASE 8
+		LOCALS = 복수를 위해서
+	CASE 9
+		LOCALS = 국가의 명을 받아서
+	CASE 10
+		LOCALS = 죄를 씻기 위해서
+	CASE 11
+		LOCALS = 자포자기해서
+	CASE 12
+		LOCALS = 우연하게도
+	CASE 13
+		LOCALS = 명령받아서
+	CASE 14
+		LOCALS = 하는 수 없이
+	CASE 15
+		LOCALS = 힘을 시험하기 위해
+	CASE 16
+		LOCALS = 평화를 위해서
+	CASE 17
+		LOCALS = 정의를 위해서
+	CASE 18
+		LOCALS = 꿈이었으므로
+	CASE 19
+		LOCALS = 힘을 얻었으므로
+	CASE 20
+		LOCALS = 여행의 끝에
+	CASE 1000
+		LOCALS = 부모의 명령으로
+	CASE 1001
+		LOCALS = 마왕을 동경해서
+	CASE 1002
+		LOCALS = 세상에 이름을 알리기 위해서
+	CASE 1003
+		LOCALS = 은혜를 갚기 위해
+	CASE 1004
+		LOCALS = 마에 매료되어서
+	CASEELSE
+		LOCALS = ERROR
+	ENDSELECT
+ELSEIF ARGS == "페니스의상태"
+	SELECTCASE TALENT:ARG:페니스의상태
+	CASE 1
+		LOCALS = 거근
+	CASE 2
+		LOCALS = 단소포경
+	CASE 3
+		LOCALS = 포경
+	CASE 4
+		LOCALS = 말자지
+	CASEELSE
+		LOCALS = 보통
+	ENDSELECT
+ELSEIF ARGS == "직업"
+	FOR LOCAL, 200, 229
+		SIF TALENT:ARG:LOCAL
+			LOCALS = %TALENTNAME:LOCAL%
+	NEXT
+ELSEIF ARGS == "성격"
+	FOR LOCAL, 160, 179
+		SIF TALENT:ARG:LOCAL
+			LOCALS = %TALENTNAME:LOCAL%
+	NEXT
+ELSEIF ARGS == "결혼"
+	LOCAL = TALENT:ARG:320
+	;家族設定の有無
+	LOCAL:1 = LOCAL % 10
+	IF LOCAL:1 == 0
+		LOCALS = 결혼관계는 비밀
+		RETURNF LOCALS
+	ENDIF
+	
+	;夫の有無
+	LOCAL:1 = LOCAL % 100000
+	LOCAL:2 = LOCAL % 10000000000
+	LOCALS = 
+	
+	SELECTCASE LOCAL:1 / 10000
+		CASE 0
+			SIF CFLAG:ARG:601 != 0
+				LOCALS += "이전"
+			LOCALS += "미혼"
+		CASE 1
+			SELECTCASE LOCAL:2 / 1000000000
+				CASE 0,4,8
+					LOCALS += "남편과"
+				CASE 1,5,7
+					LOCALS += "후타나리아내와"
+				CASEELSE
+					LOCALS += "아내와"
+			ENDSELECT
+			LOCALS += "결혼함"
+		CASE 2
+			LOCALS += "이전"
+			SELECTCASE LOCAL:2 / 1000000000
+				CASE 0,4,8
+					LOCALS += "남편과"
+				CASE 1,5,7
+					LOCALS += "후타나리아내와"
+				CASEELSE
+					LOCALS += "아내와"
+			ENDSELECT
+			LOCALS += "이혼상태"
+		CASE 3
+			SELECTCASE LOCAL:2 / 1000000000
+				CASE 0,4,8
+					LOCALS += "남편과"
+				CASE 1,5,7
+					LOCALS += "후타나리아내와"
+				CASEELSE
+					LOCALS += "아내와"
+			ENDSELECT
+			LOCALS += "중혼상태"
+		CASE 4
+			LOCALS = 이전
+			SELECTCASE LOCAL:2 / 1000000000
+				CASE 0,4,8
+					LOCALS += "남편과"
+				CASE 1,5,7
+					LOCALS += "후타나리아내와"
+				CASEELSE
+					LOCALS += "아내와"
+			ENDSELECT
+			LOCALS += "이혼후 새로운 상대와 결혼상태"
+		CASE 5
+			LOCALS = 미망인
+		CASEELSE
+			LOCALS = 비밀
+	ENDSELECT
+
+ELSEIF ARGS == "가족"
+	IF TALENT:ARG:323 > 0 && TALENT:ARG:324 > 0
+		;両親指定
+		LOCALS = 
+		LOCAL = TALENT:ARG:323
+		IF LOCAL > 1000
+			LOCAL -= 1000
+			LOCALS += TALENTNAME:LOCAL
+			LOCALS += "의 아버지, "
+		ELSE
+			LOCALS += ITEMNAME:LOCAL
+			LOCALS += "의 아버지, "
+		ENDIF
+		
+		LOCAL = TALENT:ARG:324
+		IF LOCAL > 1000
+			LOCAL -= 1000
+			LOCALS += TALENTNAME:LOCAL
+			LOCALS += "의 어머니"
+		ELSE
+			LOCALS += ITEMNAME:LOCAL
+			LOCALS += "의 어머니"
+		ENDIF
+		
+		RETURNF LOCALS
+	ENDIF
+	LOCAL = TALENT:ARG:320
+	;家族設定の有無
+	LOCAL:1 = LOCAL % 10
+	IF LOCAL:1 == 0
+		LOCALS = 비밀
+		RETURNF LOCALS
+	ENDIF
+	
+	;あくまで勇者になる前の家族構成
+	
+	LOCALS = 
+	
+	;夫の有無
+	LOCAL:1 = LOCAL % 100000
+	LOCAL:2 = LOCAL % 10000000000
+	IF LOCAL:1 / 10000 == 1
+		SELECTCASE LOCAL:2 / 1000000000
+			CASE 0,4,8
+				LOCALS += "남편"
+			CASE 1,5,7
+				LOCALS += "후타나리아내"
+			CASEELSE
+				LOCALS += "아내"
+		ENDSELECT
+	ELSEIF LOCAL:1 / 10000 == 3
+		SELECTCASE LOCAL:2 / 1000000000
+			CASE 0,4,8
+				LOCALS += "남편"
+			CASE 1,5,7
+				LOCALS += "후타나리아내"
+			CASEELSE
+				LOCALS += "아내"
+		ENDSELECT
+	ENDIF
+	
+	;娘の有無
+	LOCAL:1 = LOCAL % 1000
+	LOCAL:1 /= 100
+	FOR LOCAL:2,0,LOCAL:1
+		LOCALS += "딸"
+	NEXT
+	
+	;息子の有無
+	LOCAL:1 = LOCAL % 10000
+	LOCAL:1 /= 1000
+	FOR LOCAL:2,0,LOCAL:1
+		LOCALS += "아들"
+	NEXT
+	
+	;姉の有無
+	LOCAL:1 = LOCAL % 1000000
+	LOCAL:1 /= 100000
+	FOR LOCAL:2,0,LOCAL:1
+		LOCALS += "언니(누나)"
+	NEXT
+	
+	;兄の有無
+	LOCAL:1 = LOCAL % 10000000
+	LOCAL:1 /= 1000000
+	FOR LOCAL:2,0,LOCAL:1
+		LOCALS += "오빠(형)"
+	NEXT
+	
+	;妹の有無
+	LOCAL:1 = LOCAL % 100000000
+	LOCAL:1 /= 10000000
+	FOR LOCAL:2,0,LOCAL:1
+		LOCALS += "여동생"
+	NEXT
+	
+	;弟の有無
+	LOCAL:1 = LOCAL % 1000000000
+	LOCAL:1 /= 100000000
+	FOR LOCAL:2,0,LOCAL:1
+		LOCALS += "남동생"
+	NEXT
+	
+	SIF LOCALS == ""
+		LOCALS = 자기혼자
+	
+ELSEIF ARGS == "원료족"
+	SELECTCASE TALENT:ARG:원료족
+	CASE 0
+		LOCALS = 인간
+	CASE 1
+		LOCALS = 엘프
+	CASE 2
+		LOCALS = 인랑
+	CASE 3
+		LOCALS = 흡혈귀
+	CASE 4
+		LOCALS = 듀라한
+	CASE 5
+		LOCALS = 드래곤
+	CASE 6
+		LOCALS = 천사
+	CASE 7
+		LOCALS = 다크 엘프
+	CASE 8
+		LOCALS = 타천사
+	CASE 9
+		LOCALS = 마족
+	CASE 10
+		LOCALS = 호빗
+	CASE 11
+		LOCALS = 드워프
+	CASEELSE
+		ARGS = "종족"
+		RESTART
+	ENDSELECT
+ELSEIF ARGS == "상식개변【전투】"
+	SELECTCASE  TALENT:ARG:281
+	CASE 0
+		LOCALS = 개변하지 않는다
+	CASE 1
+		LOCALS = 봉사전투
+	CASE 2
+		LOCALS = 도게자
+	CASE 3
+		LOCALS = 
+	CASE 4
+		LOCALS = 
+	CASE 5
+		LOCALS = 
+	CASE 6
+		LOCALS = 
+	CASE 7
+		LOCALS = 
+	CASE 8
+		LOCALS = 
+	CASE 9
+		LOCALS = 
+	CASE 10
+		LOCALS = 
+	CASE 11
+		LOCALS = 
+	CASEELSE
+		LOCALS = 개변하지 않는다
+	ENDSELECT
+ELSEIF ARGS == "상식개변【일상】"
+	SELECTCASE  TALENT:ARG:283
+	CASE 0
+		LOCALS = 개변하지 않는다
+	CASE 1
+		LOCALS = 봉사구걸
+	CASE 2
+		LOCALS = 야외노출
+	CASE 3
+		LOCALS = 치태공개
+	CASE 4
+		LOCALS = 공중 변기녀
+	CASE 5
+		LOCALS = 수간 매니아
+	CASE 6
+		LOCALS = 
+	CASE 7
+		LOCALS = 
+	CASE 8
+		LOCALS = 
+	CASE 9
+		LOCALS = 
+	CASE 10
+		LOCALS = 
+	CASE 11
+		LOCALS = 
+	CASEELSE
+		LOCALS = 개변하지 않는다
+	ENDSELECT
+;ELSEIF ARGS == ""
+;	SELECTCASE TALENT:ARG:
+;ELSEIF ARGS == ""
+;	SELECTCASE TALENT:ARG:
+ELSE
+	LOCALS = ERROR!
+ENDIF
+RETURNF LOCALS

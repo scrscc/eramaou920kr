@@ -1,0 +1,184 @@
+﻿;------------------------------------------
+@PUBLIC_EXECUTION
+#DIM LV
+#DIMS MATURO
+#DIM FAMILY,3
+;ZはTARGETを保存してるため使用禁止
+;------------------------------------------
+;公開？処刑コマンド
+
+SIF A == 0
+	RETURN 0
+B = A
+
+FAMILY = CFLAG:A:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, A
+FAMILY:2 = RESULT
+
+PRINTL [0] 능욕처형
+PRINTL [1] 교수형
+PRINTL [2] 영혼분쇄
+PRINTL  
+PRINTL [100] 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 3 && RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+IF RESULT == 100
+	TARGET = FLAG:1
+	RETURN 0
+ENDIF
+
+TARGET = A
+TFLAG:520 = RESULT
+
+CALL PUBLIC_EXUCUTION_KOUJO
+
+IF TFLAG:520 == 0
+	SIF TALENT:A:85
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 어째서 처형당하는지조차 알지 못한채、사랑하는 당신의 이름을 외치며 몇번이고 용서를 청했다。그러나 %조사선택(SAVESTR:PLAYER, "는")%
+	PRINTFORML %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 눌러찍고、
+	PRINTL 던전의 몬스터들에게 던져 망가질때까지 능욕시킨후 
+	PRINTW 한때의 즐거움을 위한 공개처형을 행했다
+	SIF TALENT:A:85
+		PRINTFORMW %SAVESTR:A%의 시체는 당신에게 제물로서 정중하게 바쳐졌다。
+	PRINTL  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = 공개처형
+	
+ELSEIF TFLAG:520 == 1
+	SIF TALENT:A:85
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 어째서 처형당하는지조차 알지 못한채、사랑하는 당신의 이름을 외치며 몇번이고 용서를 청했다。허나 
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 모든 힘을 봉쇄당하고 
+	PRINTW 던전의 대로에 전라로 매달려있다。
+	PRINTW 「저는 걸레입니다」라고 쓰여진 종이가 목에 걸린채로  
+	PRINTW 질과 항문에는 거대한 딜도가 꽃혀있다…
+	SIF TALENT:A:85
+		PRINTFORMW %SAVESTR:A%의 시체는 3일간 노출시킨후 후、당신의 손으로 %SAVESTR:A%의 시체를 화장시켰다。
+	PRINTL  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = 교수형
+	
+ELSEIF TFLAG:520 == 2
+;よおし、この女（の肉体）はくれてやる！好きにしろ！
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 모든 힘을 봉쇄당하고、사지를 쇠사슬로 결박당한 상태다。
+	PRINTFORMW 부하 주술사에게 지시를 내려 영창을 시작하게 하자、이윽고 계속 저항하는 그녀의 몸으로부터 하얗게 빛나는 구슬형태의 영혼이 빠져나왔다。
+	PRINTFORMW %NAME:MASTER%는 그것을 움켜쥐어、그대로 붙잡았다！
+	PRINTW 그 광경은、마왕에게 거역한 용자의 말로로서 전 영토에 공개되었다。
+	PRINTFORM 힘 없이 고개숙인 %SAVESTR:A%의 육체는、
+		A = RAND:10
+		IF A == 0
+				;匠の手によって実用的な○○に！
+				PRINT 어떤 마계의 대장장이에 의해 거둬들여져、무기따위의 가공에 이용되었다。
+				MATURO = 무기의 소재
+		ELSEIF A == 1
+				;主に武具とか新魔法の威力とか効果とかの検証などに…
+				PRINT 어떤 마계길드에 의해 거둬들여져、실험용 인형으로서 활용되었다。
+				MATURO = 실험용 인형
+		ELSEIF A == 2
+				;小隊共有のダッチワイフ！
+				PRINT 어떤 사관에 의해 거둬들여져、위안용의 인형으로서 활용되었다。
+				MATURO = 위안용 고기 오나홀
+		ELSEIF A == 3
+				;「使い魔欲しかったんだー☆」などと供述しており
+				PRINT 어떤 레즈비언 서큐버스에 의해 거둬들여져、사역마로서 활용되었다。
+				MATURO = 음마의 사역마
+		ELSEIF A == 4
+				;ワシはピチピチギャル（死語）になってムフフでアハ～ンなことをしてみたい…いや、されたいんじゃ！
+				PRINT 은거중인 노마술사에게 거둬들여져、새로운 자신의 육체로서 이용되었다고 한다。
+				MATURO = 마술사의 육체
+		ELSEIF A == 5
+				;食品化！…というよりただの食材化なんやな…
+				PRINT 어떤 마계의 요리사에게 거둬들여져、가게의 특별메뉴로 내놓아졌다。
+				MATURO = 요리
+		ELSEIF A == 6
+				;ヤクい連中が新薬の実験台に欲しいって…
+				;この実験の結果なんかよくわからないモンスターが生まれるのもありだと思います
+				PRINT 어떤 마술학원에 의해 거둬들여져、인체실험의 소재로써 활용되었다。
+				MATURO = 인체실험의 소재
+		ELSEIF A == 7
+				;丁度良い身体もあるしとりあえず使ってみるスタイル
+				PRINT 어느 이상한 집단에의해 거두어져、그들이 믿는 존재의 제물이 되었다고 한다。
+				MATURO = 神霊の憑代
+		ELSE
+				;特に意味の無い欲望が勇者の身体を襲う！（食欲的な意味で
+				PRINT 하급 몬스터들의 먹이가 되었다。
+				MATURO = 몬스터의 먹이
+		ENDIF
+	PRINTW  
+	PRINTL 손에 넣은 용사의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	
+
+ENDIF
+
+SIF FAMILY:2 >= 0
+	CSTR:(FAMILY:2):5 = %MATURO%
+
+A = TARGET
+
+;武器解除
+W:0 = CFLAG:A:550
+CALL EQUIP_GET
+CFLAG:A:550 = -1
+;指輪解除
+W:0 = CFLAG:A:551
+CALL EQUIP_GET
+CFLAG:A:551 = -1
+;指輪解除
+W:0 = CFLAG:A:552
+CALL EQUIP_GET
+CFLAG:A:552 = -1
+
+LV = CFLAG:A:9
+
+X = NO:A + 199
+FLAG:X = 1
+
+;前回の助手・調教対象だった場合はフラグを空に
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;前回の助手・調教対象より前だった場合はフラグを減算
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+CALL PARTY_CHAR_DEL, A
+
+DELCHARA A
+
+CALL NAME_RESET
+
+
+FLAG:80 += 1
+
+LV += 1
+LV *= 50
+
+EXP:0:80 += LV
+PRINTFORMW 《봉인한 용자의 힘을 흡수해 당신은 {LV}의 경험치를 얻었다！》
+
+TARGET = -1
+RETURN 0
+

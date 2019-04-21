@@ -1,0 +1,23 @@
+﻿@EVENTTRAIN
+;主人公の사정を0に
+BASE:MASTER:2 = 0
+;いちおう調教対象と조수も
+BASE:TARGET:2 = 0
+SIF ASSI >= 0
+	BASE:ASSI:2 = 0
+
+;사정フラグ、処女喪失フラグなどをリセット
+REPEAT 200
+	TFLAG:COUNT = 0
+	A = COUNT+100
+	TFLAG:A = 0
+REND
+
+;調教者は誰か
+IF ASSIPLAY == 0
+	PLAYER = MASTER
+ELSE
+	PLAYER = ASSI
+ENDIF
+
+

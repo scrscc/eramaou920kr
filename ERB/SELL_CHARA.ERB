@@ -1,0 +1,428 @@
+﻿
+;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;매각과 조수화의 체크
+;-------------------------------------------------
+@CHECK_SELLASSIABLE
+
+SIF TARGET < 0 || TARGET >= CHARANUM
+	RETURN 0
+
+;순종+욕망이6LV이상일 때
+SIF ABL:10+ABL:11 < 6
+	RETURN 0
+;C감각・V감각・A감각・B감각의 하나가 최저3LV인 경우.
+SIF ABL:0 < 3 && ABL:1 < 3 && ABL:2 < 3 && ABL:3 < 3
+	RETURN 0
+;【반항적】이나【굳건함】을 가지고 있을 때 순종이 4LV이상일 때.
+SIF ABL:10 < 4 && (TALENT:11 || TALENT:12)
+	RETURN 0
+;【자제심】【억압】【저항】을 가지고 있을 때 욕망이 4LV이상일 때.
+SIF ABL:11 < 4 && (TALENT:20 || TALENT:32 || TALENT:34)
+	RETURN 0
+;「〈기교〉3LV이상과〈봉사정신〉3LV이상」또는「〈노출증〉3LV이상과〈자위중독〉2LV이상」또는「C・V・A・B감각의 합계가 13LV이상」또는「순종과 욕망이 LV5」에 도달했을 때.
+IF (ABL:12 >= 3 && ABL:16 >= 3) || (ABL:17 >= 3 && ABL:31 >= 2) || ABL:21 >= 3 || (ABL:0+ABL:1+ABL:2+ABL:3 >= 13) || ABL:10 >= 5 || ABL:11 >= 5
+	IF CFLAG:0 <= 0
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 매각 가능해졌습니다
+		CFLAG:0 = 1
+	ENDIF
+ELSE
+	RETURN 0
+ENDIF
+
+;「〈순종〉〈욕망〉〈기교〉〈Ｃ감각〉〈레즈끼〉이 모두 3LV이상」또는「〈순종〉이 5LV이상, 〈욕망〉이 4LV이상」일 때
+IF (ABL:10 >= 3 && ABL:11 >= 3 && ABL:12 >= 3 && ABL:0 >= 3 && ABL:22 >= 3) || (ABL:10 >= 5 && ABL:11 >= 4)
+	IF CFLAG:0 <= 1
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 조수 가능해졌습니다
+		CFLAG:0 = 2
+	ENDIF
+ENDIF
+;
+;-------------------------------------------------
+;노예 매각 처리
+;-------------------------------------------------
+@CHARA_SALE
+#DIM PRICE_N
+#DIMS PRICE_S
+DRAWLINE
+PRINTV DAY+1
+PRINT 日目
+IF TIME == 0
+	PRINTL  오전
+ELSE
+	PRINTL  오후
+ENDIF
+
+PRINTFORML 소지금：${MONEY}포인트
+DRAWLINE
+
+$INPUT_LOOP
+
+PRINTL 누구를 판매합니까？
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+REPEAT CHARANUM
+	IF COUNT == 0
+		CONTINUE
+	;팔리지 않는 케릭터는 배제
+	ELSEIF CFLAG:COUNT:0 < 1
+		CONTINUE
+	;임사 중의 케릭터는 배제
+	ELSEIF  BASE:COUNT:0 < 1
+		CONTINUE
+	;魔王の影は排除
+	ELSEIF TALENT:COUNT:292
+		CONTINUE
+	ELSEIF CFLAG:COUNT:1 == 0
+		PRINTFORM [{COUNT}] %SAVESTR:COUNT, 16, LEFT% 
+		TARGET = COUNT
+		S = 0
+		CALL ESTIMATE_CHARA
+		PRICE_N = S
+		PRICE_S = 
+		WHILE PRICE_N > 0
+			IF PRICE_N < 1000
+				PRICE_S = {PRICE_N % 1000}%PRICE_S%
+			ELSE
+				PRICE_S = ,{PRICE_N % 1000 / 100}{PRICE_N % 100 / 10}{PRICE_N % 10}%PRICE_S%
+			ENDIF
+			PRICE_N /= 1000
+		WEND
+		IF S > 0
+			PRINTFORM [평가액 :%PRICE_S, 13%포인트]
+		ELSE
+			PRINTFORM [판매불가]
+		ENDIF
+		IF ISASSI:COUNT == 1
+			PRINT (전 조수)
+		ELSEIF CFLAG:COUNT:1 == 2
+			PRINT (전 용자)
+		ENDIF
+		SIF CFLAG:COUNT:700
+			PRINT [☆]
+		PRINTL  
+	ENDIF
+REND
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+PRINTFORML [999] - 돌아가기
+
+INPUT
+
+IF RESULT == 999
+	TARGET = FLAG:1
+	RETURN 999
+ELSEIF RESULT <= 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;임사 중의 캐릭터는 배제
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;영업 중인 캐릭터는 배제
+ELSEIF  CFLAG:RESULT:12 && TIME == 1
+	PRINTL 오늘의 영업이 끝날 때까지는 팔 수 없습니다
+	WAIT
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:700
+	PRINTFORMW %SAVESTR:RESULT%는 즐겨찾기 등록되어 있기 때문에 매각할 수 없습니다. 
+	GOTO INPUT_LOOP
+;魔王の影は排除
+ELSEIF TALENT:RESULT:292
+	PRINTFORMW %SAVESTR:RESULT%은 그림자여서 당신에게 벗어나면 사라지기 때문에 판매 할 수 없습니다．
+	GOTO INPUT_LOOP
+ENDIF
+
+;현재 조교 대상의 정보를 취득
+SIF TARGET > 0
+	T = NO:TARGET
+
+TARGET = RESULT
+
+;매각 처리
+S = 0
+CALL SALE_CHARA
+
+;긴 이별
+SIF S > 0
+	CALL LONG_GOOD_BYE
+
+;매각한 경우는 케릭터를 삭제
+IF S > 0
+	T = -1
+	CALL KILL_TARGET
+ENDIF
+
+;대상을 되돌림
+TARGET = -1
+REPEAT CHARANUM
+	SIF NO:COUNT == T
+		TARGET = COUNT
+REND
+
+
+
+RESTART
+;
+;-------------------------------------------------
+;현재 조교 대상 삭제
+;-------------------------------------------------
+@KILL_TARGET
+X = NO:TARGET + 199
+FLAG:X = 1
+
+CALL PARTY_CHAR_DEL, TARGET
+
+;케릭터 삭제
+DELCHARA TARGET
+
+;전회의 조교・조교 대상이었던 경우 플래그를 하늘로
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;전회의 조수・조교대상의 이전했을 경우 플래그를 감산
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+;調教対象を空に
+TARGET = FLAG:1
+
+;조수を空に
+ASSI = FLAG:2
+
+REPEAT CHARANUM
+	SIF COUNT >= 1
+		CALL NAMING, COUNT
+REND
+;
+;-------------------------------------------------
+;긴 이별
+;-------------------------------------------------
+@LONG_GOOD_BYE
+A = NO:TARGET
+
+REPEAT CHARANUM
+	SIF COUNT == 0
+		CONTINUE
+	;케릭터의 스트레스 값
+	U = 0
+	SIF A == (CFLAG:COUNT:21 % 100) && (CFLAG:COUNT:21 / 100) < 2
+		U += 40
+	SIF A == (CFLAG:COUNT:21 % 100)
+		U += 80
+	SIF A == (CFLAG:COUNT:22 % 100) && (CFLAG:COUNT:22 / 100) < 2
+		U += 40
+	SIF A == (CFLAG:COUNT:22 % 100)
+		U += 80
+	SIF A == (CFLAG:COUNT:23 % 100) && (CFLAG:COUNT:23 / 100) < 2
+		U += 40
+	SIF A == (CFLAG:COUNT:23 % 100)
+		U += 80
+	SIF A == (CFLAG:COUNT:24 % 100) && (CFLAG:COUNT:24 / 100) < 2
+		U += 40
+	SIF A == (CFLAG:COUNT:24 % 100)
+		U += 80
+	SIF A == (CFLAG:COUNT:25 % 100) && (CFLAG:COUNT:25 / 100) < 2
+		U += 40
+	SIF A == (CFLAG:COUNT:25 % 100)
+		U += 80
+	SIF RELATION:COUNT:A > 100
+		U += RELATION:COUNT:A - 100
+	IF U > 50
+		DRAWLINE
+		PRINTL 
+		PRINTFORML 그날, %NAME:COUNT%은, 팔려가는 %조사선택(SAVESTR:TARGET, "가")% 타고 있는 수송차가, 
+		SIF TALENT:COUNT:45 == 0
+			PRINT 눈물로 흐려진 
+		PRINTFORML 시야 밖으로 나가 안보일 때까지, 
+		PRINTFORML 그리고 시야에서 사라진 후에도 계속 배웅했다.. 
+		WAIT
+		;애정
+		SIF TALENT:COUNT:85
+			U -= 120
+		;음란
+		SIF TALENT:COUNT:76
+			U -= 60
+		;굳건함
+		SIF TALENT:COUNT:12
+			U -= 20
+		;감정결여
+		SIF TALENT:COUNT:22
+			U -= 20
+		;멘탈약함
+		SIF TALENT:COUNT:134
+			U += 20
+		;순종
+		U -= ABL:COUNT:10 * 10
+		;반발각인
+		U += MARK:COUNT:3 * 30
+
+		;스트레스의 누적 값이 100을 초과하는 경우
+		IF U >= 100 && TALENT:COUNT:9 == 0
+		DRAWLINE
+			PRINTFORML %CALLNAME:COUNT%(은)는 멍한 표정을 하고 있다
+			PRINTFORML %CALLNAME:COUNT%의 안에서 뭔가가 부서져버린 것 같다……
+			PRINTFORML %CALLNAME:COUNT%의 정신은 【%TALENTNAME:9%】해버렸다
+			WAIT
+			IF TALENT:COUNT:85
+				PRINTFORML %CALLNAME:COUNT%(은)는【%TALENTNAME:85%】를 잃었다
+				TALENT:COUNT:85 = 0
+			ENDIF
+			IF TALENT:COUNT:76
+				PRINTFORML %CALLNAME:COUNT%(은)는【%TALENTNAME:76%】를 잃었다
+				TALENT:COUNT:76 = 0
+			ENDIF
+			TALENT:COUNT:9 = 1
+			WAIT
+		ENDIF
+	ENDIF
+REND
+;-------------------------------------------------
+;노예매각
+;-------------------------------------------------
+@SALE_CHARA
+
+;매각금액
+S = 0
+CALL ESTIMATE_CHARA
+
+;평가표시
+SIF A:10 > 0
+	PRINTFORML %ABLNAME:10, 8, LEFT%{ABL:10, 2}LV ＋{A:10, 5}
+SIF A:11 > 0
+	PRINTFORML %ABLNAME:11, 8, LEFT%{ABL:11, 2}LV ＋{A:11, 5}
+SIF A:12 > 0
+	PRINTFORML %ABLNAME:12, 8, LEFT%{ABL:12, 2}LV ＋{A:12, 5}
+SIF A:13 > 0
+	PRINTFORML %ABLNAME:13, 8, LEFT%{ABL:13, 2}LV ＋{A:13, 5}
+SIF A:14 > 0
+	PRINTFORML %ABLNAME:14, 8, LEFT%{ABL:14, 2}LV ＋{A:14, 5}
+SIF A:15 > 0
+	PRINTFORML %ABLNAME:15, 8, LEFT%{ABL:15, 2}LV ＋{A:15, 5}
+SIF A:30 > 0
+	PRINTFORML %ABLNAME:30, 8, LEFT%{ABL:30, 2}LV ＋{A:30, 5}
+SIF A:31 > 0
+	PRINTFORML %ABLNAME:31, 8, LEFT%{ABL:31, 2}LV ＋{A:31, 5}
+SIF A:32 > 0
+	PRINTFORML %ABLNAME:32, 8, LEFT%{ABL:32, 2}LV ＋{A:32, 5}
+SIF A:33 > 0
+	PRINTFORML %ABLNAME:33, 8, LEFT%{ABL:33, 2}LV ＋{A:33, 5}
+SIF A:39 > 0
+	PRINTFORML %ABLNAME:39, 8, LEFT%{ABL:39, 2}LV ＋{A:39, 5}
+SIF A:37 > 0
+	PRINTFORML %ABLNAME:37, 8, LEFT%{ABL:37, 2}LV －{A:37, 5}
+SIF B:0 > 0
+	PRINTFORML Ｃ감각봉쇄　 －{B:0, 5}
+SIF B:1 > 0
+	PRINTFORML Ｖ감각봉쇄　 －{B:1, 5}
+SIF B:2 > 0
+	PRINTFORML Ａ감각봉쇄　 －{B:2, 5}
+SIF B:3 > 0
+	PRINTFORML Ｂ감각봉쇄　 －{B:3, 5}
+
+SIF A:0 != 100
+	PRINTFORML %ABLNAME:0, 8, LEFT%{ABL:0, 2}LV × {A:0/100}.{A:0%100/10}{A:0%10}
+SIF A:1 != 100
+	PRINTFORML %ABLNAME:1, 8, LEFT%{ABL:1, 2}LV × {A:1/100}.{A:1%100/10}{A:1%10}
+SIF A:2 != 100
+	PRINTFORML %ABLNAME:2, 8, LEFT%{ABL:2, 2}LV × {A:2/100}.{A:2%100/10}{A:2%10}
+SIF A:3 != 100
+	PRINTFORML %ABLNAME:3, 8, LEFT%{ABL:3, 2}LV × {A:3/100}.{A:3%100/10}{A:3%10}
+SIF A:16 != 100
+	PRINTFORML %ABLNAME:16, 8, LEFT%{ABL:16, 2}LV × {A:16/100}.{A:16%100/10}{A:16%10}
+SIF A:17 != 100
+	PRINTFORML %ABLNAME:17, 8, LEFT%{ABL:17, 2}LV × {A:17/100}.{A:17%100/10}{A:17%10}
+SIF A:20 != 100
+	PRINTFORML %ABLNAME:20, 8, LEFT%{ABL:20, 2}LV × {A:20/100}.{A:20%100/10}{A:20%10}
+SIF A:21 != 100
+	PRINTFORML %ABLNAME:21, 8, LEFT%{ABL:21, 2}LV × {A:21/100}.{A:21%100/10}{A:21%10}
+SIF A:22 != 100
+	PRINTFORML %ABLNAME:22, 8, LEFT%{ABL:22, 2}LV × {A:22/100}.{A:22%100/10}{A:22%10}
+SIF A:23 != 100
+	PRINTFORML %ABLNAME:23, 8, LEFT%{ABL:23, 2}LV × {A:23/100}.{A:23%100/10}{A:23%10}
+
+SIF E:74 != 100
+	PRINTFORML %EXPNAME:74, 8, LEFT%{EXP:74, 4} × {E:74/100}.{E:74%100/10}{E:74%10}
+SIF E:60 != 100
+	PRINTFORML %EXPNAME:60, 8, LEFT%{EXP:60, 4} × {E:60/100}.{E:60%100/10}{E:60%10}
+
+;소질에 의한 배율 표시
+REPEAT 300
+	SIF T:COUNT != 100
+		PRINTFORML %TALENTNAME:COUNT, 12, LEFT% × {T:COUNT/100}.{T:COUNT%100/10}{T:COUNT%10}
+REND
+
+SIF T:310 != 100
+	PRINTFORML 전 친위대　　 × {T:310/100}.{T:310%100/10}{T:310%10}
+
+SIF T:311 != 100
+	PRINTFORML 전 용사　　　 × {T:311/100}.{T:311%100/10}{T:311%10}
+
+SIF O:0 != 100
+	PRINTFORML 전 조수　　　 × {O:0/100}.{O:0%100/10}{O:0%10}
+
+PRINT 종족：
+IF TALENT:314 == 0
+	PRINTFORML 인간
+ELSEIF TALENT:314 == 1
+	PRINTFORML 엘프
+ELSEIF TALENT:314 == 2
+	PRINTFORML 인랑
+ELSEIF TALENT:314 == 3
+	PRINTFORML 흡혈귀
+ELSEIF TALENT:314 == 4
+	PRINTFORML 듀라한
+ELSEIF TALENT:314 == 5
+	PRINTFORML 드래곤
+ELSEIF TALENT:314 == 6
+	PRINTFORML 천사
+ELSEIF TALENT:314 == 7
+	PRINTFORML 다크엘프
+ELSEIF TALENT:314 == 8
+	PRINTFORML 타천사
+ELSEIF TALENT:314 == 9
+	PRINTFORML 마족
+ELSEIF TALENT:314 == 10
+	PRINTFORML 호빗
+ELSEIF TALENT:314 == 11
+	PRINTFORML 드워프
+ENDIF
+
+PRINTFORML 　　　　　　 × {T:314/100}.{T:314%100/10}{T:314%10}
+
+IF O:1 != 100
+	PRINTFORM 가격인상교섭 ×{O:1/100}.
+	SIF O:1 > 100 && O:1 < 110
+		PRINT 0
+	PRINTFORML {O:1%100}
+ENDIF
+
+;매각금액표시
+PRINTFORML %조사선택(SAVESTR:TARGET, "는")% {S}포인트에 팔렸습니다. 
+PRINTFORML %조사선택(SAVESTR:TARGET, "를")% 매각합니까？
+PRINTL  [0] - 예
+PRINTL  [1] - 아니오
+
+$INPUT_LOOP
+INPUT
+
+IF RESULT == 0
+	;매각시 구상
+	TFLAG:13 = 6
+	CALL SELF_KOJO
+
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% {S}포인트에 매각했습니다. 
+	MONEY += S
+	RETURN 1
+ELSEIF RESULT == 1
+	S = -1
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+;
+;
+;

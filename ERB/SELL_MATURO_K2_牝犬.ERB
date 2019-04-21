@@ -1,0 +1,177 @@
+﻿;-------------------------------------------------
+;牝犬売却末路口上
+;Sは売却値
+;値段（100万以上, 50万以上, 10万以上, 10万未満）によって分岐
+;セックス狂分岐…子犬をとにかく孕みまくる
+;話術分岐…………牝犬トレーナーや舞台女優
+;その他……………ペットとして買われる
+;-------------------------------------------------
+@SELL_MATURO_K2
+#DIMS MATURO
+#DIM FAMILY,3
+
+FAMILY = CFLAG:TARGET:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, TARGET
+FAMILY:2 = RESULT
+			;売値100万以上
+			IF S >= 1000000
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					LOCALS = 마계의 암캐 사육사
+					LOCAL = 3
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					LOCALS = 마계의 암캐 트레이너
+					LOCAL = 2
+				;その他
+				ELSE
+					LOCALS = 마계의 거상
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					PRINTFORMW %SAVESTR:TARGET%(은)는 최고급 암캐 사육사가 되어 오늘도 암캐노예들에게 개의 아이를 임신시키고 있다고 한다.
+					PRINTFORMW 아무래도 그녀는 개의 아이를 임신하는 것이 지상 최고의 기쁨이라고 생각해 있는 것 같아서, 여자 노예를 사들여 개의 아이을 교배시키고 있다.
+					PRINTFORMW 축사에서 수애(獣愛)에 흐느껴 우는수간 노예들을 바라보면서, %SAVESTR:TARGET%(은)는 자위를 하거나 스스로도 수간을 하며 유유자적한 생활을 보내고 있다고 한다.
+					MATURO = 최고급 암캐 사육사
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					PRINTFORMW 수애(獣愛)에 눈을 뜬 %SAVESTR:TARGET%(은)는, 다른 여자들에게도 수애에 눈을 뜨게 하기 위해서 암캐 트래이너가 되었다.
+					PRINTFORMW 여자 노예들을 사들이고, 1개월정도 지나자 모두 네발로 다니며 허리를 흔드는 암캐 수간 노예가 되어 있다고 한다.
+					PRINTFORMW 장래는 누구라도 길가에서 암캐 교미하고 있어도 이상하지 않는 세계를 만드는 것이 그녀의 꿈인것 같다…….
+					MATURO = 최고급 암캐 트레이너
+				ELSE
+					PRINTFORMW 거상의 애완동물로서 사졌던 %SAVESTR:TARGET%(은)는, 우아한 암캐 라이프를 보내고 있는 것 같다.
+					PRINTFORMW 변태인 손님이 있으면, 반드시 그녀의 교미가 공개 되어 매우 즐겁게 했다고 한다.
+					PRINTFORMW 그리고 암캐 품평회에서 몇번이나 수상을 해, 다른 암캐 노예들의 부러움의 대상이 된 것 같다.
+					MATURO = 최고급 암캐 노예
+				ENDIF
+			;売値50万以上
+			ELSEIF S >= 500000
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					LOCALS = 마계의 암캐 사육사에게
+					LOCAL = 3
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					LOCALS = 마계의 원형 극장에
+					LOCAL = 2
+				;その他
+				ELSE
+					LOCALS = 마계의 여부호에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					PRINTFORMW %SAVESTR:TARGET%(은)는 마족의 최고급 임신 암캐로서 오늘도 개의 아이를 임신하고 있다고 한다.
+					PRINTFORMW 이종족의 유전자가 뒤섞인 강아지는 마견이 되어 우수한 지능을 가진다고 한다.
+					PRINTFORMW 절정에 이르며 정액을 졸라대는 모친의 지성도 품성도 없는 얼굴에서는 상상 할 수 없을 정도로…….
+					MATURO = 고급 임신 암캐
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					PRINTFORMW %SAVESTR:TARGET%(은)는, 원형 극장에서 수간 쇼를 실시하는 암캐 여배우가 되었다.
+					PRINTFORMW 무수한 관객이 지켜보는 와중에, 네 발로 엎드려 개나 염소와 교미를 해서 관객의 흥분을 일으켰다.
+					PRINTFORMW 그녀의 티켓은 날개 돋친듯 팔린다고 한다…….
+					MATURO = 고급 암캐 여배우
+				ELSE
+					PRINTFORMW 여부호의 애완동물로서 사졌던 %SAVESTR:TARGET%(은)는, 음란한 암캐 라이프를 보내고 있는 것 같다.
+					PRINTFORMW 가학 취미가 있는 여부호는 %SAVESTR:TARGET%(이)가 저속해지면 저속해질수록 흥분하는 것 같다.
+					PRINTFORMW 최근에는 길가에서 돌연 교미를 시작시켜 매도받는 %SAVESTR:TARGET%의 모습을 보고 즐기고 있는 것 같다.
+					MATURO = 고급 암캐 노예
+				ENDIF
+			;売値10万以上
+			ELSEIF S >= 100000
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					LOCALS = 마계의 개인 사육사
+					LOCAL = 3
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					LOCALS = 마계의 개인 경영 트레이너
+					LOCAL = 2
+				;その他
+				ELSE
+					LOCALS = 마계의 수간 매니아녀
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					PRINTFORMW %SAVESTR:TARGET%(은)는 암캐 사육사로서 동료와 손을 잡아, 암캐노예에게 개의 아이를 임신시키고 있다고 한다.
+					PRINTFORMW 교미를 보는 것도 하는 것도 정말 좋아하는 %SAVESTR:TARGET%(은)는 동료인 여자 조련사와 함께 노예를 사 모았다.
+					PRINTFORMW 한달에 한 번은 동료나 노예와 함께 난교 수간을 하는 것이 즐거움이 되고 있는 것 같다.
+					MATURO = 암캐 사육사
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					PRINTFORMW 수애(獣愛)에 눈을 뜬 %SAVESTR:TARGET%(은)는, 수간 매니아를 늘리기 위해서 암캐 트래이너가 되었다.
+					PRINTFORMW 여자 노예를 사들여, 원래대로 돌아갈수 없을 정도로 수애를 철저히 가르쳐, 풀어준다.
+					PRINTFORMW 장래에는 수간 잡지를 창간 하는 것이 그녀의 꿈인것 같다…….
+					MATURO = 암캐 트레이너
+				ELSE
+					PRINTFORMW 수간 매니아녀의 친구로서 사졌던 %SAVESTR:TARGET%(은)는, 즐거운 암캐 라이프를 보내고 있는 것 같다.
+					PRINTFORMW 공통의 취미가 있는 주인과 %SAVESTR:TARGET%(은)는 곧바로 의기투합 해, 동거를 시작했다.
+					PRINTFORMW 사이 좋게에 엉덩이를 늘어 놓으며 대형개와 번식교미를 하고 있다고 한다…….
+					MATURO = 암캐 노예
+				ENDIF
+			;売値10万未満
+			ELSE
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					LOCALS = 마계의 개에게
+					LOCAL = 3
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					LOCALS = 마계의 작은 극장에
+					LOCAL = 2
+				;その他
+				ELSE
+					LOCALS = 마계의 변태에게
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS% 팔렸던 %SAVESTR:TARGET%(은)는 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+				;섹스광
+				IF TALENT:TARGET:75 == 1 
+					PRINTFORMW %SAVESTR:TARGET%(은)는 지성을 가진 마계의 개에게 구매되어 버렸다.
+					PRINTFORMW 그는 스스로의 우수한 유전자를 남기기 위해서, 최고의 모체를 요구하고 있었다고 한다.
+					PRINTFORMW 유감스럽게 예산은 부족했지만, 두 마리의 몸의 궁합은 발군이었다고 말한다…….
+					MATURO = 개의 신부
+				;話術LV5以上
+				ELSEIF ABL:15 >= 5
+					PRINTFORMW %SAVESTR:TARGET%(은)는, 작은 극장에서 수간 쇼를 실시하는 암캐 여배우 되었다.
+					PRINTFORMW 무수한 관객이 지켜보는 중, 네 발로 개나 염소와 교미를 하며 관객의 흥분을 일으켰다.
+					PRINTFORMW 그럼에도 좀처럼 티켓이 팔리지 않아서, 추악하고 진귀한 짐승들과의 교미도 시작했다고 한다…….
+					MATURO = 암캐 여배우
+				ELSE
+					PRINTFORMW 변태의 애완동물로서 구매된 %SAVESTR:TARGET%(은)는, 기묘한 성생활을 보내고 있는 것 같다.
+					PRINTFORMW 변태 노예 주인은 %SAVESTR:TARGET%(이)가 대형개와 교미하고 있는 모습을 보지 않으면 흥분 할 수 없다는 것 같다.
+					PRINTFORMW 자위 하는 주인을 올려다보면서, 복잡한 표정으로 %SAVESTR:TARGET%(은)는 절정 했다.
+					MATURO = 암캐
+				ENDIF
+			ENDIF
+	
+	SIF FAMILY:2 >= 0
+		CSTR:(FAMILY:2):5 = %MATURO%
+	
+	;結びの文, 特殊な文を入れたくなったら後で分岐を入れよう
+	PRINTFORML
+	PRINTFORMW 이렇게 해서 %NAME:MASTER%(와)과 %SAVESTR:TARGET%(은)는 두 번 다시 만나는 일은 없었다………
+	PRINTFORML
+RETURN 0
+
+
+

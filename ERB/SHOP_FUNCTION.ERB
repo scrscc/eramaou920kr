@@ -1,0 +1,122 @@
+﻿
+
+
+
+
+;----------------------------------------------
+@SHOW_LIST_TRAINABLE
+;----------------------------------------------
+;調教可能노예の一覧表示
+;ついでに調教可能人数を返す
+LOCAL = 0
+FOR COUNT, 1, CHARANUM
+	IF IS_TRAINABLE(COUNT) == 0
+		PRINTFORM [{COUNT,2}] %SAVESTR:COUNT,16,LEFT% %GET_JOB_NAME(COUNT),8,LEFT% {CFLAG:COUNT:9,2,RIGHT}LV　HP {BASE:COUNT:0}／{MAXBASE:COUNT:0} 조교횟수({CFLAG:COUNT:10})
+		;애정, 음란
+		IF TALENT:COUNT:애정
+			SETCOLOR 255,100,100
+			PRINTL <애정>　
+			RESETCOLOR
+		ELSEIF TALENT:COUNT:음란
+			SETCOLOR 255,100,100
+			PRINTL <음란>
+			RESETCOLOR
+		ELSE
+			SETCOLOR 100,100,100
+			PRINTL <미함락>
+			RESETCOLOR
+		ENDIF
+		LOCAL += 1
+	ENDIF
+NEXT
+RETURN LOCAL
+
+;----------------------------------------------
+@SHOW_LIST_ASSISTABLE
+;----------------------------------------------
+;조수可能노예の一覧表示
+;ついでに조수可能人数を返す
+LOCAL = 0
+FOR COUNT, 1, CHARANUM
+	IF IS_ASSISTABLE(COUNT) == 0
+		PRINTFORM [{COUNT, 2}] %SAVESTR:COUNT% {CFLAG:COUNT:9}LV
+		;애정, 음란
+		IF TALENT:COUNT:애정
+			SETCOLOR 255,100,100
+			PRINTL <애정>　
+			RESETCOLOR
+		ELSEIF TALENT:COUNT:음란
+			SETCOLOR 255,100,100
+			PRINTL <음란>
+			RESETCOLOR
+		ELSE
+			SETCOLOR 100,100,100
+			PRINTL <미함락>
+			RESETCOLOR
+		ENDIF
+		LOCAL += 1
+	ENDIF
+NEXT
+RETURN LOCAL
+
+;----------------------------------------------
+@IS_TRAINABLE(ARG)
+#FUNCTION
+;----------------------------------------------
+;ARG番のキャラが調教可能なら0, ダメならそれ以外を返す式中関数
+SIF ARG < 1 || ARG >= CHARANUM ;キャラ登録範囲外はダメ
+	RETURNF 1
+SIF CFLAG:ARG:1 != 0 ;조교중でないとダメ
+	RETURNF 2
+RETURNF 0
+
+;----------------------------------------------
+@IS_ASSISTABLE(ARG)
+#FUNCTION
+;----------------------------------------------
+;ARG番のキャラが조수可能なら0, ダメならそれ以外を返す式中関数
+SIF ARG < 1 || ARG >= CHARANUM ;キャラ登録範囲外はダメ
+	RETURNF 1
+SIF CFLAG:ARG:0 != 2 ;조수可能でないとダメ
+	RETURNF 2
+SIF CFLAG:ARG:1 != 0 ;조교중でないとダメ
+	RETURNF 3
+SIF TARGET == ARG ;調教対象はダメ
+	RETURNF 4
+RETURNF 0
+
+;----------------------------------------------
+@GET_JOB_NAME(ARG)
+#FUNCTIONS
+;----------------------------------------------
+;ARG番のキャラの職業名の文字列を返す式中関数
+IF TALENT:ARG:200
+	RETURNF "전사"
+ELSEIF TALENT:ARG:201
+	RETURNF "마술사"
+ELSEIF TALENT:ARG:202
+	RETURNF "신관"
+ELSEIF TALENT:ARG:203
+	RETURNF "도적"
+ELSEIF TALENT:ARG:204
+	RETURNF "육변기 "
+ELSEIF TALENT:ARG:205
+	RETURNF "기사"
+ELSEIF TALENT:ARG:206
+	RETURNF "무녀"
+ELSEIF TALENT:ARG:207
+	RETURNF "닌자"
+ELSEIF TALENT:ARG:208
+	RETURNF "궁사"
+ELSEIF TALENT:ARG:209
+	RETURNF "씨받이"
+ELSEIF TALENT:ARG:210
+	RETURNF "마계장군"
+ELSEIF TALENT:ARG:211
+	RETURNF "마도신관"
+ENDIF
+
+;職業ない場合は空白を返す
+;マオちゃんとかがここに来る
+RETURNF " "
+

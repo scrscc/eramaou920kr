@@ -1,0 +1,127 @@
+﻿;--------------------------------------------
+@NAEDOKO, ARG:0
+;--------------------------------------------
+;モンスターを産む機械にする
+
+;苗床職についてると苗床領域へ
+SIF TALENT:(ARG:0):209 == 1
+	CFLAG:(ARG:0):1 = 7
+
+;苗床領域にいないと返脚
+SIF CFLAG:(ARG:0):1 != 7
+	RETURN 0
+
+;男の場合別の仕事
+IF TALENT:(ARG:0):남자
+	CALL NAEDOKO_MAN, ARG:0
+	RETURN 0
+ENDIF
+
+
+IF TALENT:(ARG:0):273
+	;貞操封印
+	CALL NAEDOKO_NOT_V, ARG:0
+	RETURN 0
+ELSEIF CFLAG:(ARG:0):42 == 79 && (CFLAG:(ARG:0):40 & 64) && FLAG:37
+	;貞操帯
+	CALL NAEDOKO_NOT_V, ARG:0
+	RETURN 0
+ENDIF
+
+
+DRAWLINE
+PRINTFORMW %조사선택(SAVESTR:A, "는")% 육벽에 파묻혀 구멍이라는 구멍에는 전부 촉수가 쑤셔넣어지고 있었다
+PRINTFORMW 촉수에서는 끊임없이 양분과 미약과 정액이 투입되어져간다
+
+IF TALENT:(ARG:0):0 == 1
+	TALENT:(ARG:0):0 = 0
+	PRINTL 【처녀상실】
+	SIF CFLAG:(ARG:0):15 == 0
+		CFLAG:(ARG:0):15 = 102
+ENDIF
+
+LOCAL = CFLAG:0:9
+PRINTFORML 쾌V의 구슬+{LOCAL*10}
+PRINTFORML V경험+{LOCAL}
+JUEL:(ARG:0):1 += LOCAL*10
+EXP:(ARG:0):0 += LOCAL
+PRINTFORML 쾌A의 구슬+{LOCAL*10}
+PRINTFORML A경험+{LOCAL}
+JUEL:(ARG:0):2 += LOCAL*10
+EXP:(ARG:0):1 += LOCAL
+PRINTFORML 정액경험+{LOCAL}
+PRINTFORML 절정경험+{LOCAL}
+EXP:(ARG:0):20 += LOCAL
+EXP:(ARG:0):2 += LOCAL
+PRINTFORMW 경험치+{LOCAL}
+EXP:(ARG:0):80 += LOCAL
+DRAWLINE
+
+TARGET = ARG:0
+CFLAG:(ARG:0):107 += RAND:40
+CALL IN_VAGINA_SYOKU_TO_T
+CALL CONCEPTION_CHECK_SYOKU_TO_T
+
+RETURN 0
+
+;--------------------------------------------
+@NAEDOKO_MAN, ARG:0
+;--------------------------------------------
+;種馬にする
+;男だって苗床にしたい! というときは
+;A感覚で分岐するとか改造できるかもしれない（任せた）
+;ARG:0 = キャラ
+
+DRAWLINE
+PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 서큐버스의 무리에게 둘러싸여 정액을 짜내지고 있다
+PRINTFORMW 순서를 기다리는 서큐버스가 몇 명이나 엉덩이를 늘어놓고 기다리고 있다
+PRINTFORMW 전원을 임신시킬 때까지, 정력증강의 마법을 몇 겹이나 걸려지는 것이다
+
+IF TALENT:(ARG:0):동정 == 1
+	TALENT:(ARG:0):동정 = 0
+	PRINTL 【동정상실】
+ENDIF
+
+LOCAL = CFLAG:0:9
+PRINTFORML 쾌C의 구슬+{LOCAL*10}
+JUEL:(ARG:0):0 += LOCAL*10
+
+PRINTFORML 사정경험+{LOCAL}
+EXP:(ARG:0):3 += LOCAL
+
+PRINTFORML 절정경험+{LOCAL}
+EXP:(ARG:0):2 += LOCAL
+PRINTFORMW 경험치+{LOCAL}
+EXP:(ARG:0):80 += LOCAL
+DRAWLINE
+
+
+RETURN 0
+
+;--------------------------------------------
+@NAEDOKO_NOT_V, ARG:0
+;--------------------------------------------
+;性器が使えない場合
+;A経験と経験値に特化
+;ARG:0 = キャラ
+
+DRAWLINE
+PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 애널에 마수의 알을 품게되었다
+PRINTFORMW 알은 장내에서 무러무럭 자라나, 격렬한 쾌락을 동반하며 배출되었다……
+
+LOCAL = CFLAG:0:9
+PRINTFORML 쾌A의 구슬+{LOCAL*10}
+JUEL:(ARG:0):2 += LOCAL*10
+
+PRINTFORML  %EXPNAME:1%+{LOCAL}
+EXP:(ARG:0):1 += LOCAL
+
+PRINTFORML 절정경험+1
+EXP:(ARG:0):2 += 1
+PRINTFORMW 경험치+{LOCAL * 5}
+EXP:(ARG:0):80 += LOCAL * 5
+DRAWLINE
+
+
+RETURN 0
+

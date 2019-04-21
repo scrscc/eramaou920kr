@@ -1,0 +1,311 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;--------------------------------------------------------
+;조교 개시시 메세지
+;--------------------------------------------------------
+@PRITRAIN_MESSAGE
+;조교 경험을 가산
+CFLAG:10 += 1
+
+;조교 텍스트 생략 설정의 경우
+IF (FLAG:6 & 1)
+	PRINTFORML %SAVESTR:TARGET%에 대한、제{CFLAG:10}번째의 조교를 시작했다。
+	WAIT
+	RETURN 0
+ENDIF
+
+DRAWLINE
+
+;구상이 있으면 그쪽을 우선
+
+;착의OFF일 때 알몸으로
+SIF FLAG:37 == 0
+	CFLAG:40 = 0
+	
+
+;첫 조교시
+IF CFLAG:10 == 1
+	PRINTFORML %SAVESTR:TARGET%에의 첫 조교를 시작했다。
+	PRINTL 
+ 
+	IF FLAG:37
+		CALL PRITRAIN_MESSAGE_CLOTHED
+	ELSE
+		CALL PRITRAIN_MESSAGE_NOCLOTHES
+	ENDIF
+
+	IF TALENT:23
+		PRINTFORML 
+		PRINTFORML 다만 그 한편으로는、%SAVESTR:TARGET%의 눈동자의 깊은 곳에
+		PRINTFORML 마치 뭔가를 기대하는 것 같은 빛이 떠올라 있는 것도 사실이였다。
+	ENDIF
+
+	IF ASSI > 0
+		IF TALENT:ASSI:83
+			PRINTFORML 
+			PRINTFORML 한편、조수인 %조사선택(SAVESTR:ASSI, "는")%、마음껏 %조사선택(SAVESTR:TARGET, "를")% 아프게 할 수 있다는 즐거움에
+			PRINTFORML 지금부터 내심의 기대를 숨길 수가 없는 모습이었다。
+		ELSEIF TALENT:ASSI:13
+			PRINTFORML 
+			PRINTFORML 조수인 %조사선택(SAVESTR:ASSI, "는")% 그런 %SAVESTR:TARGET%의 상태를 보고
+			PRINTFORML %CALLNAME:MASTER%의 허가를 얻어、%SAVESTR:TARGET%의 어깨에 살그머니 손을 올렸다。
+			SIF TALENT:11
+				PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 그 손을 매몰차게 털어냈다。
+		ENDIF
+	ENDIF
+
+	WAIT
+	RETURN 1
+ENDIF
+
+PRINTFORML %SAVESTR:TARGET%에의、제{CFLAG:10}번째의 조교를 개시했다。
+
+S = 0
+
+;붕괴되어 있는 경우
+IF TALENT:9
+	WAIT
+	PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 인 채、멍해진 얼굴로 멍하니 있었다。자세히 보면 눈동자에는 생기가 머물지 않았다………
+
+;素直かおとなしいなら従順4以上、奉仕精神3以上、反発刻印無しで土下座
+ELSEIF (TALENT:13 || TALENT:14 || TALENT:88) && ABL:10 >= 4 && ABL:16 >= 3 && MARK:3 == 0
+	WAIT
+	PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 인 채로 땅에 엎드려、%CALLNAME:MASTER%에게 조교 전의 인사를 했다。
+	IF TALENT:MASTER:83
+		PRINTFORML %CALLNAME:MASTER%은 그 후두부를 가죽 구두로 밟아 천천히 %SAVESTR:TARGET%의 안면을 마루에 문질렀다。
+			SIF ABL:21 >= 3
+				PRINTFORML 그리고 그 상황에서 %조사선택(SAVESTR:TARGET, "는")% 사타구니를 적시고 있는 것 같았다
+	ENDIF
+	S = 1
+;素直かおとなしいなら従順3以上、反発刻印1以下で調教前の挨拶
+ELSEIF (TALENT:13 || TALENT:14) && ABL:10 >= 3 && MARK:3 <= 1
+	WAIT
+	PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 인 채、%CALLNAME:MASTER%에게 살그머니 고개를 숙여 조교 전에 인사를 했다。
+	S = 1
+;その他（口上があればそちらを優先）
+ELSE
+	WAIT
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 %조사선택(SAVESTR:TARGET, "가")% 끌려 왔다。
+	S = 1
+ENDIF
+
+
+;ズーコの着ぐるみを着てるならここで終了
+IF CFLAG:42 == 11 && (CFLAG:40 & 64)
+	SIF CFLAG:40 == 64
+		PRINTL 아무래도、안쪽은 알몸인 것 같다……。
+	WAIT
+	S = 0
+	RETURN 0
+ENDIF
+
+;임신중
+IF TALENT:153 && CFLAG:110 <= DAY+10
+	IF S == 0
+		CALL PRINT_CLOTHTYPE
+		PRINT 의 
+	ENDIF
+	PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+	SIF TALENT:100
+		PRINT 그 작은 신체에는 부조화스러운、
+	PRINTFORML 당장 터질 것 같은 배를 움켜 쥐고 있다。
+	PRINTFORML （과격한 조교는 피해 줍시다）
+ELSEIF TALENT:153 && CFLAG:110 <= DAY+20
+	PRINTFORML %SAVESTR:TARGET%의 배는 안정기에 접어 들어 임산부 특유의 둥글게 부풀어 오른 라인을 보여 주고 있다。
+ELSEIF TALENT:153 && CFLAG:110 <= DAY+30
+	PRINTFORML %SAVESTR:TARGET%의 배는 약간 부풀어 오른 곳이 눈에 띄기 시작하고 있다。
+ENDIF	
+
+A = CFLAG:40
+CALL WEARING_CLOTH_ALL
+B = CFLAG:40
+CFLAG:40 = A
+
+IF (CFLAG:40 & 4)
+	IF (CFLAG:40 & 2) == 0 && (B & 2) && (TALENT:109 == 0 && TALENT:116 == 0)
+		PRINT 노브라의 유방이 옷 아래에서 흔들리는 모습을 
+		IF TALENT:110 || TALENT:114
+			PRINT 분명하게 
+		ELSE
+			PRINT 희미하게 
+		ENDIF
+		PRINTL 알 수 있어、눈을 즐겁게 해 준다。
+	ENDIF
+ENDIF
+
+;乳房ピアスでノーブラの場合
+IF (CFLAG:7 & 1) && (CFLAG:40 & 2) == 0
+	IF (CFLAG:40 & 4) == 1
+		PRINTFORML 옷의 천 너머로、%SAVESTR:TARGET%의 양 유두에 달린 피어스의 형태가 드러나 있었다。
+	ELSE
+		PRINTFORML %조사선택(SAVESTR:TARGET, "가")% 움직일 때 마다、그 양유두에 달려있는 피어스가 가볍게 흔들렸다。
+	ENDIF
+ENDIF
+
+;ノーパンで下半身着衣、かつ露出癖Lv3未満の場合
+IF  (CFLAG:40 & 1) == 0 && ((CFLAG:40 & 8) || (CFLAG:40 & 16))
+	SIF (B & 1) && TALENT:135 == 0 && ABL:17 < 3
+		PRINTL 노팬티의 하체가 미덥지 못한지、끊임없이 사타구니의 근처를 신경쓰고 있다……。
+ENDIF
+
+;ノーパンでスカートタイプ、かつ露出癖Lv3以上の場合
+IF  (CFLAG:40 & 1) == 0 && (CFLAG:40 & 8)
+	SIF (B & 1) && ABL:17 >= 3
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 스커트의 온자락을 걷어 올리고、속옷을 입지 않은 비부를 당신에게 노출해 보였다。
+ENDIF
+
+;下半身ピアスでノーパン、かつズボンタイプでない場合
+IF (CFLAG:7 & 4) || (CFLAG:7 & 8) && (CFLAG:40 & 1) == 0 && (CFLAG:40 & 16) == 0
+	IF (CFLAG:40 & 8) == 1
+		PRINT 스커트 사이에서 엿보이는 
+	ELSE
+		PRINT 벌거벗은 채의 
+	ENDIF
+	PRINT 비부에서는、
+		SIF (CFLAG:7 & 4)
+			PRINT 양쪽 모두의 음순
+		SIF (CFLAG:7 & 4) && (CFLAG:7 & 8)
+			PRINT 과 
+		SIF (CFLAG:7 & 8)
+			PRINT 클리토리스
+	PRINTL 에 달아진 피어스가 금속의 빛을 수놓고 있었다……。
+ENDIF
+WAIT
+
+;조수
+IF ASSI > 0
+	PRINTL
+	;음란+새드끼 Lv3이상
+	IF TALENT:ASSI:76 && ABL:ASSI:20 >= 3
+		PRINTFORMW %SAVESTR:PLAYER%의 조수인 %조사선택(SAVESTR:ASSI, "는")% 입맛을 다시며 %조사선택(SAVESTR:TARGET, "를")% 흥미로운 듯이 보고 있다。
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 어떻게 괴롭혀줄지 생각하는 것 같다。
+	;애정+새드끼 Lv3이상
+	ELSEIF TALENT:ASSI:85 && ABL:ASSI:20 >= 3
+		PRINTFORMW 조수인 %조사선택(SAVESTR:ASSI, "는")% %SAVESTR:PLAYER%의 팔에 안겨、%조사선택(SAVESTR:TARGET, "를")% 보고 있다。
+		PRINTFORMW 그리고 %SAVESTR:PLAYER%에게 무언가 귓속말 하면서 %조사선택(SAVESTR:TARGET, "를")% 가리키며 키득거렸다。
+	ELSE
+		PRINTFORMW %SAVESTR:PLAYER%의 옆에는 조수로서 %조사선택(SAVESTR:ASSI, "가")% 서있다。
+	ENDIF
+ENDIF
+C = 0
+S = 0
+
+RETURN 1
+
+;--------------------------------------------------------
+;첫 조교시・착의설정 오프
+;--------------------------------------------------------
+@PRITRAIN_MESSAGE_NOCLOTHES
+IF TALENT:22
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% %CALLNAME:MASTER%에게 명령받은 대로 옷을 벗으며、
+	PRINTFORML 아무 감정도 보이지 않고、앞을 숨기려 하지도 않은 채로 우뚝 서 있다。
+ELSEIF TALENT:132 && TALENT:135
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 뜻 모른 채 옷을 벗어 던지고、알몸이 되었다。
+ELSEIF TALENT:12
+	PRINTFORML 알몸에 익숙해진 %조사선택(SAVESTR:TARGET, "는")% 、손으로 가슴과 사타구니를 숨기면서도、
+	PRINTFORML 의연한 태도를 취하고 있다。약점만은 결코 보이지 않는다는 각오인 것 같다。
+ELSEIF TALENT:11
+	PRINTFORML %CALLNAME:MASTER%을 실컷 애먹이고서 알몸에 익숙해진 %조사선택(SAVESTR:TARGET, "는")% 、
+	PRINTFORML 필사적으로 몸을 덮어 가리려고 앞으로 웅크려 앉으면서도、
+	PRINTFORML 눈만은 무서운 기세로 %CALLNAME:MASTER%을 노려보고 있다。
+ELSEIF TALENT:21
+	PRINTFORML %CALLNAME:MASTER%의 명령에、%조사선택(SAVESTR:TARGET, "는")% 어깨를 움츠리며 옷을 벗었다。
+	PRINTFORML 무엇을 당해도 좋으니까、이런 뻔한 연극은 빨리 끝냈으면 좋겟다、
+	PRINTFORML 라는 태도다。
+ELSEIF TALENT:132
+	PRINTFORML 알몸이 된 %조사선택(SAVESTR:TARGET, "는")%、그저 무서워 하고 있다。
+	PRINTFORML 결국、단순한 아이다。
+ELSEIF TALENT:20
+	PRINTFORML 알몸이 된 %조사선택(SAVESTR:TARGET, "는")% 양손으로 몸은 가리고 있지만、
+	PRINTFORML 표면은 어디까지나 평정을 가장하고 있다。
+ELSEIF TALENT:10
+	PRINTFORML 알몸에 적합해진 %조사선택(SAVESTR:TARGET, "는")% 、자신의 어깨를 안고 떨고 있다。
+	PRINTFORML 지금부터 자신을 기다리는 운명을 상상하며、공포에 이빨을 떨고 있다。
+ELSEIF TALENT:15
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 알몸을 노출했다는 치욕과 지금부터 노예로서 다루어진다는 굴욕을、
+	PRINTFORML 이를 악물고 어깨를 떨면서、필사적으로 견디고 있다。
+ELSEIF TALENT:17
+	PRINTFORML 알몸이 된 %조사선택(SAVESTR:TARGET, "는")% 、흠칫흠칫 %CALLNAME:MASTER%의 안색을 살피고 있다。
+	PRINTFORML 말하는 것을 들으면 아픈 일은 당하지 않을지도 모른다、라고 생각하고 있는 것 같다。
+ELSEIF TALENT:13
+	PRINTFORML 알몸에 익숙해지면서도、%조사선택(SAVESTR:TARGET, "는")% 자신이 놓여있는 상황을 받아들일 수 없는 듯한 모습이다。
+	PRINTFORML 인간이 이런 심한 짓을 다른 인간에게 할 수 있을 리 없다、그렇게 생각하고 있을까。
+ELSEIF TALENT:14
+	PRINTFORML 저항은 쓸데없다는 것을 깨달았는지、%조사선택(SAVESTR:TARGET, "는")% 얌전히 옷을 벗고 알몸이 되었다。
+	PRINTFORML 적어도、억지로 옷을 벗겨내지는 굴욕만큼은 피하고 싶었던 것일지도 모른다。
+ELSEIF TALENT:16
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 무서워하면서도、약간 도전적으로 %CALLNAME:MASTER%을 노려보고 있다。
+	PRINTFORML 이런 일로 자신은 굴복당하거나 하지 않는다는 자신이 있는 것 같다。
+ELSE
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 알몸에 익숙해졌다。
+ENDIF
+
+
+RETURN 1
+
+;--------------------------------------------------------
+;첫 조교시・상의착용시
+;--------------------------------------------------------
+@PRITRAIN_MESSAGE_CLOTHED
+IF TALENT:22
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 %조사선택(SAVESTR:TARGET, "는")% 、어떤 감정도 보이지 않고 그저 우두커니 서 있었다。
+ELSEIF TALENT:132 && TALENT:135
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 %조사선택(SAVESTR:TARGET, "는")% 、무엇을 당하고 있는지 이해하고 있지 못한 것 같다。
+ELSEIF TALENT:12
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、의연한 태도를 취하고 있다。
+	PRINTFORML 약점만은 결코 보이지 않는다는 각오인 것 같다。
+ELSEIF TALENT:11
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 %조사선택(SAVESTR:TARGET, "는")% 、무서운 기세로 %CALLNAME:MASTER%을 노려보고 있다。
+ELSEIF TALENT:21
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 어깨를 움츠리고 있다。
+	PRINTFORM 무엇을 당해도 좋으니까、이런 뻔한 연극은 빨리 끝냈으면 좋겟다、
+	PRINTFORML 라는 태도다。
+ELSEIF TALENT:132
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、그저 무서워하고 있다。
+	PRINTFORML 결국、단순한 아이다。
+ELSEIF TALENT:20
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 %조사선택(SAVESTR:TARGET, "는")% 、표면은 어디까지나 평정을 가장하고 있다。
+ELSEIF TALENT:10
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、자신의 어깨를 안아 떨고 있다。
+	PRINTFORML 지금부터 자신을 기다리는 운명을 상상하며、공포에 이빨을 떨고 있다。
+ELSEIF TALENT:15
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、지금부터 노예로서 다루어 진다는 굴욕을、
+	PRINTFORML 이를 악물고 어깨를 떨면서、필사적으로 견디고 있다。
+ELSEIF TALENT:17
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、흠칫흠칫 %CALLNAME:MASTER%의 안색을 살피고 있다。
+	PRINTFORML 말하는 것을 들으면、아픈 일은 당하지 않을지도 모른다、라고 생각하고 있는 것 같다。
+ELSEIF TALENT:13
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、자신이 놓여진 상황을 받아들일 수 없는 모습이다。
+	PRINTFORML 인간이 이런 심한 짓을 다른 인간에게 할 수 있을 리 없다、그렇게 생각하고 있을까。
+ELSEIF TALENT:14
+	PRINTFORM 저항은 쓸데없다라는 것을 깨달았는지、
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 %조사선택(SAVESTR:TARGET, "는")% 얌전히 있다。
+ELSEIF TALENT:16
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "는")% 、무서워 하면서도 약간 도전적으로 %CALLNAME:MASTER%을 노려보고 있다。
+	PRINTFORML 이런 일로 자신은 굴복당하거나 하지 않는다는 자신이 있는 것 같다。
+ELSE
+	CALL PRINT_CLOTHTYPE
+	PRINTFORM 의 %조사선택(SAVESTR:TARGET, "가")% 조교실로 끌려왔다。
+ENDIF
+
+RETURN 1

@@ -1,0 +1,1123 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+
+;-------------------------------------------------
+;조교 시에 녹화한 비디오를 매각합니다.
+;-------------------------------------------------
+@SELL_VIDEO
+#DIM SCORE
+#DIM UP_SCORE
+#DIM MANIAC
+#DIM VIEW
+#DIM VIDEO_COUNT
+#DIM MENU
+#DIM VIDEO_ASSI
+#DIM EQUIP_MENU
+#DIM PLAY_CBVA,10
+#DIM PLAY_MENU,10
+#DIM PLAY_ACTION,10
+#DIM PLAY_EXTRA,20
+#DIM BONUS_ABL
+
+
+SIF TARGET < 0 || TARGET > CHARANUM
+	RETURN 0
+
+;촬영중のまま売却まで来た場合はテープの数を減らす
+;テープの減数は撮影後処理のため
+SIF TEQUIP:53
+	ITEM:28 -= 1
+
+;録画終了の分のカウントを削る
+CFLAG:491 -= 1
+
+;有効なビデオを録画してなければここで終了
+SIF CFLAG:491 <= 0
+	RETURN 0
+
+DRAWLINE
+
+;비디오 가격
+SCORE = 0
+;장사꾼에 의해 비디오 가격 가산
+Q = 0
+
+;ビデオ内容分析用フラグ
+;行われている調教
+MENU = 0
+;조수プレイかどうか
+VIDEO_ASSI = 0
+;その調教で有利になる能力
+BONUS_ABL = 0
+;撮影進行時の状況. bit値の立て方はFLAG:22に準拠
+EQUIP_MENU = 0
+;가산 액수
+UP_SCORE = 0
+;一緒にビデオ鑑賞する相手
+H = 0
+R = 0
+
+;「부위」
+;PLAY_CBVA:0 = C
+;PLAY_CBVA:1 = B
+;PLAY_CBVA:2 = V
+;PLAY_CBVA:3 = A
+;「내용」
+;PLAY_MENU:1 = 애무
+;PLAY_MENU:2 = 器具
+;PLAY_MENU:3 = 性交
+;「경향] 
+;PLAY_ACTION:1 = 奉仕
+;PLAY_ACTION:2 = 加虐
+;PLAY_ACTION:3 = 被虐
+;PLAY_ACTION:4 = 자위
+;「특수」
+;PLAY_EXTRA:1 = 로션
+;PLAY_EXTRA:2 = 薬物
+;PLAY_EXTRA:3 = 緊縛
+;PLAY_EXTRA:4 = 搾乳
+;PLAY_EXTRA:5 = スカトロジー
+;PLAY_EXTRA:6 = 乱交
+;PLAY_EXTRA:7 = 野外露出
+;PLAY_EXTRA:8 = 촉수
+;PLAY_EXTRA:9 = レズ
+;PLAY_EXTRA:10 = 후타나리
+;PLAY_EXTRA:11 = 獣姦
+
+;특수
+
+EQUIP_MENU = CFLAG:90
+
+FOR VIDEO_COUNT,0,CFLAG:491
+	
+	;調教内容と助手のロード
+	MENU = CFLAG:(VIDEO_COUNT + 460)
+	VIDEO_ASSI = MENU / 1000
+	MENU %= 1000
+
+	;着脱系の処理
+	;야외플레이
+	IF MENU == 54
+		IF EQUIP_MENU & 1
+			EQUIP_MENU -= 1
+		ELSE
+			UP_SCORE = 500
+			PLAY_EXTRA:7 += 4
+			EQUIP_MENU |= 1
+		ENDIF
+	;욕실플레이
+	ELSEIF MENU == 58
+		IF EQUIP_MENU & 2
+			EQUIP_MENU -= 2
+		ELSE
+			EQUIP_MENU |= 2
+		ENDIF
+	;새댁플레이
+	ELSEIF MENU == 59
+		IF EQUIP_MENU & 4
+			EQUIP_MENU -= 4
+		ELSE
+			EQUIP_MENU |= 4
+		ENDIF
+	;밧줄
+	ELSEIF MENU == 44
+		IF EQUIP_MENU & 8
+			EQUIP_MENU -= 8
+		ELSE
+			UP_SCORE = 500
+			PLAY_ACTION:3 += 4
+			PLAY_EXTRA:3 += 4
+			EQUIP_MENU |= 8
+		ENDIF
+	;바이브
+	ELSEIF MENU == 11
+		UP_SCORE = 300
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:2 += 3
+		IF EQUIP_MENU & 16
+			EQUIP_MENU -= 16
+		ELSE
+			EQUIP_MENU |= 16
+		ENDIF
+	;애널 바이브
+	ELSEIF MENU == 13
+		UP_SCORE = 700
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:2 += 3
+		IF EQUIP_MENU & 32
+			EQUIP_MENU -= 32
+		ELSE
+			EQUIP_MENU |= 32
+		ENDIF
+	;관장
+	ELSEIF MENU == 46
+		;관장が評価されるのは失禁時のみ
+		IF EQUIP_MENU & 64
+			UP_SCORE = 1500
+			PLAY_CBVA:3 += 3
+			PLAY_MENU:2 += 3
+			PLAY_ACTION:3 += 5
+			PLAY_EXTRA:5 += 20
+			EQUIP_MENU -= 64
+		ELSE
+			EQUIP_MENU |= 64
+		ENDIF
+	;수간
+	ELSEIF MENU == 89
+		IF EQUIP_MENU & 128
+			EQUIP_MENU -= 128
+		ELSE
+			EQUIP_MENU |= 128
+		ENDIF
+	;촉수생물
+	ELSEIF MENU == 100
+		IF EQUIP_MENU & 256
+			EQUIP_MENU -= 256
+		ELSE
+			UP_SCORE = 100
+			PLAY_EXTRA:8 += 5
+			EQUIP_MENU |= 256
+		ENDIF
+	;샤워
+	ELSEIF MENU == 18
+		IF EQUIP_MENU & 512
+			EQUIP_MENU -= 512
+		ELSE
+			EQUIP_MENU |= 512
+			UP_SCORE = 100
+		ENDIF
+	;通常の調教
+	;COM:愛撫を見る
+	ELSEIF MENU == 0
+		UP_SCORE = 50
+		PLAY_CBVA:0 += 2
+		PLAY_CBVA:1 += 2
+		PLAY_MENU:1 += 3
+	;COM:クンニを見る
+	ELSEIF MENU == 1
+		UP_SCORE = 50
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:1 += 3
+	;COM:애널愛撫を見る
+	ELSEIF MENU == 2
+		;애널バイブ責めの場合
+		IF (EQUIP_MENU & 32)
+			UP_SCORE = 600
+			PLAY_CBVA:3 += 3
+			PLAY_MENU:1 += 3
+			PLAY_MENU:2 += 3
+		ELSE
+			UP_SCORE = 100
+			PLAY_CBVA:3 += 3
+			PLAY_MENU:1 += 3
+		ENDIF
+	;COM:自慰を見る
+	ELSEIF MENU == 3
+		BONUS_ABL = 31
+		;両穴オナニーを見る
+		IF (EQUIP_MENU & 16) && (EQUIP_MENU & 32)
+			UP_SCORE = 1800
+			PLAY_CBVA:2 += 2
+			PLAY_CBVA:3 += 2
+			PLAY_MENU:2 += 3
+			PLAY_ACTION:4 += 5
+		;バイブオナニーを見る
+		ELSEIF (EQUIP_MENU & 16)
+			UP_SCORE = 1000
+			PLAY_CBVA:2 += 3
+			PLAY_MENU:2 += 3
+			PLAY_ACTION:4 += 3
+		;애널バイブオナニーを見る
+		ELSEIF (EQUIP_MENU & 32)
+			UP_SCORE = 1300
+			PLAY_CBVA:3 += 3
+			PLAY_MENU:2 += 3
+			PLAY_ACTION:4 += 3
+		;シャワーオナニーを見る
+		ELSEIF (EQUIP_MENU & 512)
+			UP_SCORE = 1200
+			PLAY_CBVA:0 += 2
+			PLAY_CBVA:1 += 2
+			PLAY_MENU:2 += 3
+			PLAY_ACTION:4 += 3
+		;通常自慰を見る
+		ELSE
+			UP_SCORE = 500
+			PLAY_CBVA:0 += 2
+			PLAY_CBVA:1 += 2
+			PLAY_ACTION:4 += 3
+		ENDIF
+	;COM:フェラするを見る
+	ELSEIF MENU == 4
+		BONUS_ABL = 32
+		UP_SCORE = 200
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:1 += 3
+		SIF TALENT:121 == 0
+			PLAY_EXTRA:10 += 10
+	;COM:胸愛撫を見る
+	ELSEIF MENU == 5
+		UP_SCORE = 100
+		PLAY_CBVA:1 += 3
+		PLAY_MENU:1 += 3
+	;COM:キスするを見る
+	ELSEIF MENU == 6
+		UP_SCORE = 100
+		PLAY_ACTION:1 += 3
+	;秘貝開帳を見る
+	ELSEIF MENU == 7
+		BONUS_ABL = 17
+		UP_SCORE = 300
+		PLAY_CBVA:0 += 2
+		PLAY_CBVA:2 += 2
+		PLAY_ACTION:4 += 2
+	;COM:指挿入れを見る
+	ELSEIF MENU == 8
+		;バイブ責めの場合
+		IF (EQUIP_MENU & 16)
+			UP_SCORE = 400
+			PLAY_CBVA:2 += 3
+			PLAY_MENU:1 += 3
+			PLAY_MENU:2 += 3
+		ELSE
+			UP_SCORE = 150
+			PLAY_CBVA:2 += 3
+			PLAY_MENU:1 += 3
+		ENDIF
+	;COM:애널舐めを見る
+	ELSEIF MENU == 9
+		UP_SCORE = 150
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:1 += 3
+	;COM:ローターを見る
+	ELSEIF MENU == 10
+		UP_SCORE = 250
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:2 += 3
+	;COM:Eマッサージャを見る
+	ELSEIF MENU == 12
+		UP_SCORE = 300
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:2 += 3
+	;COM:クリキャップを見る
+	ELSEIF MENU == 14
+		UP_SCORE = 150
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:2 += 3
+	;COM:二プルキャップを見る
+	ELSEIF MENU == 15
+		UP_SCORE = 150
+		PLAY_CBVA:1 += 3
+		PLAY_MENU:2 += 3
+	;COM:搾乳器を見る
+	ELSEIF MENU == 16
+		UP_SCORE = 500
+		PLAY_CBVA:1 += 3
+		PLAY_MENU:2 += 3
+		PLAY_ACTION:3 += 3
+		PLAY_EXTRA:4 += 10
+	;COM:オナホールを見る
+	ELSEIF MENU == 17
+		UP_SCORE = 100
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:2 += 3
+		PLAY_ACTION:4 += 3
+		SIF TALENT:121 == 0
+			PLAY_EXTRA:10 += 10
+	;COM:애널ビーズを見る
+	ELSEIF MENU == 19
+		UP_SCORE = 700
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:2 += 3
+	;COM:正常位を見る
+	ELSEIF MENU == 20
+		BONUS_ABL = 30
+		UP_SCORE = 800
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM:後背位を見る
+	ELSEIF MENU == 21
+		BONUS_ABL = 30
+		UP_SCORE = 1300
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM:対面座位を見る
+	ELSEIF MENU == 22
+		BONUS_ABL = 30
+		UP_SCORE = 700
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM:背面座位を見る
+	ELSEIF MENU == 23
+		BONUS_ABL = 30
+		UP_SCORE = 1500
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM:正常位애널を見る
+	ELSEIF MENU == 26
+		BONUS_ABL = 30
+		UP_SCORE = 1000
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+	;COM:後背位애널を見る
+	ELSEIF MENU == 27
+		BONUS_ABL = 30
+		UP_SCORE = 1500
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+	;COM:対面座位애널を見る
+	ELSEIF MENU == 28
+		BONUS_ABL = 30
+		UP_SCORE = 900
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+	;COM:背面座位애널を見る
+	ELSEIF MENU == 29
+		BONUS_ABL = 30
+		UP_SCORE = 1700
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+	;COM:手淫を見る
+	ELSEIF MENU == 30
+		BONUS_ABL = 32
+		UP_SCORE = 300
+		PLAY_ACTION:1 += 3
+	;COM:フェラチオを見る
+	ELSEIF MENU == 31
+		BONUS_ABL = 32
+		UP_SCORE = 500
+		PLAY_ACTION:1 += 3
+	;COM:パイズリを見る
+	ELSEIF MENU == 32
+		BONUS_ABL = 32
+		UP_SCORE = 650
+		PLAY_CBVA:1 += 3
+		PLAY_ACTION:1 += 3
+	;COM:素股を見る
+	ELSEIF MENU == 33
+		BONUS_ABL = 32
+		UP_SCORE = 770
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:3 += 3
+		PLAY_ACTION:1 += 3
+	;COM:騎乗位を見る
+	ELSEIF MENU == 34
+		BONUS_ABL = 30
+		UP_SCORE = 1700
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+		PLAY_ACTION:2 += 3
+	;COM:騎乗位애널を見る
+	ELSEIF MENU == 36
+		BONUS_ABL = 30
+		UP_SCORE = 1700
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+		PLAY_ACTION:2 += 3
+	;COM:足コキを見る
+	ELSEIF MENU == 38
+		BONUS_ABL = 20
+		UP_SCORE = 550
+		PLAY_ACTION:2 += 3
+	;COM:スパンキングを見る
+	ELSEIF MENU == 40
+		BONUS_ABL = 21
+		UP_SCORE = 250
+		PLAY_ACTION:3 += 3
+	;COM:鞭を見る
+	ELSEIF MENU == 41
+		BONUS_ABL = 21
+		UP_SCORE = 450
+		PLAY_ACTION:3 += 3
+	;COM:針を見る
+	ELSEIF MENU == 42
+		BONUS_ABL = 21
+		UP_SCORE = 700
+		PLAY_ACTION:3 += 3
+	;COM:アイマスクを見る
+	ELSEIF MENU == 43
+		UP_SCORE = 150
+		PLAY_ACTION:3 += 5
+	;COM:ボールギャグを見る
+	ELSEIF MENU == 45
+		UP_SCORE = 100
+		PLAY_ACTION:3 += 5
+	;COM:ローションを見る
+	ELSEIF MENU == 50 && (EQUIP_MENU & 128) == 0
+		UP_SCORE = 100
+		PLAY_EXTRA:1 += 20
+	;회화한다（自己紹介）を見る
+	ELSEIF MENU == 56
+		UP_SCORE = 10
+	;COM:조수にキスを見る
+	ELSEIF MENU == 60
+		UP_SCORE = 100
+		IF TALENT:ASSI:122 == 0
+			BONUS_ABL = 33
+			PLAY_EXTRA:9 += 3
+		ENDIF
+	;COM:クンニ강제を見る
+	ELSEIF MENU == 61
+		BONUS_ABL = 33
+		UP_SCORE = 250
+		PLAY_MENU:3 += 3
+		PLAY_ACTION:1 += 3
+		PLAY_EXTRA:6 += 3
+	;COM:조수を犯すを見る
+	ELSEIF MENU == 62
+		UP_SCORE = 800
+	;COM:貝あわせを見る
+	ELSEIF MENU == 63
+		BONUS_ABL = 33
+		UP_SCORE = 1000
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:1 += 3
+		PLAY_EXTRA:9 += 10
+	;COM:３Ｐを見る
+	ELSEIF MENU == 64
+		UP_SCORE = 3000
+		PLAY_CBVA:2 += 2
+		PLAY_CBVA:3 += 2
+		PLAY_MENU:3 += 5
+		PLAY_EXTRA:6 += 3
+	;COM:조수を犯させるを見る
+	ELSEIF MENU == 65
+		BONUS_ABL = 33
+		UP_SCORE = 1200
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+		PLAY_EXTRA:6 += 3
+	;COM:二本フェラを見る
+	ELSEIF MENU == 66
+		BONUS_ABL = 32
+		UP_SCORE = 800
+		PLAY_ACTION:1 += 3
+		PLAY_EXTRA:6 += 3
+	;COM:ダブルフェラを見る
+	ELSEIF MENU == 68
+		BONUS_ABL = 32
+		UP_SCORE = 800
+		PLAY_ACTION:1 += 3
+		PLAY_EXTRA:6 += 3
+	;COM:シックスナインを見る
+	ELSEIF MENU == 69
+		BONUS_ABL = 32
+		UP_SCORE = 600
+		PLAY_CBVA:0 += 3
+		PLAY_ACTION:1 += 3
+	;COM:ダブル素股を見る
+	ELSEIF MENU == 70
+		UP_SCORE = 1200
+		PLAY_CBVA:0 += 3
+		PLAY_ACTION:1 += 3
+		PLAY_EXTRA:6 += 3
+	;COM:ダブルパイズリを見る
+	ELSEIF MENU == 71
+		UP_SCORE = 1300
+		PLAY_CBVA:1 += 3
+		PLAY_ACTION:1 += 3
+		PLAY_EXTRA:6 += 3
+	;COM:イラマチオを見る
+	ELSEIF MENU == 80
+		BONUS_ABL = 32
+		UP_SCORE = 1000
+		PLAY_ACTION:3 += 3
+	;COM:フィストファックを見る
+	ELSEIF MENU == 81
+		BONUS_ABL = 21
+		UP_SCORE = 2000
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:4 += 10
+	;COM:애널フィストを見る
+	ELSEIF MENU == 82
+		BONUS_ABL = 21
+		UP_SCORE = 2500
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:4 += 10
+	;COM:両穴フィストを見る
+	ELSEIF MENU == 83
+		BONUS_ABL = 21
+		UP_SCORE = 3000
+		PLAY_CBVA:2 += 2
+		PLAY_CBVA:3 += 2
+		PLAY_MENU:4 += 20
+	;COM:放尿を見る
+	ELSEIF MENU == 85
+		BONUS_ABL = 17
+		UP_SCORE = 500
+		PLAY_EXTRA:5 += 5
+	;COM:飲尿を見る
+	ELSEIF MENU == 86
+		BONUS_ABL = 17
+		UP_SCORE = 600
+		PLAY_EXTRA:5 += 5
+	;COM:ニプルファックを見る
+	ELSEIF MENU == 90
+		BONUS_ABL = 35
+		UP_SCORE = 900
+		PLAY_CBVA:1 += 3
+		PLAY_MENU:3 += 3
+		PLAY_ACTION:3 += 3
+		PLAY_EXTRA:4 += 10
+	;COM:촉수挿入を見る
+	ELSEIF MENU == 101
+		UP_SCORE = 800
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+		PLAY_EXTRA:8 += 5
+	;COM:애널촉수を見る
+	ELSEIF MENU == 102
+		UP_SCORE = 1000
+		PLAY_CBVA:3 += 3
+		PLAY_MENU:3 += 3
+		PLAY_EXTRA:8 += 5
+	;COM:촉수クリ責めを見る
+	ELSEIF MENU == 103
+		UP_SCORE = 300
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:1 += 3
+		PLAY_EXTRA:8 += 5
+	;COM:촉수乳首責めを見る
+	ELSEIF MENU == 104
+		UP_SCORE = 300
+		PLAY_CBVA:1 += 3
+		PLAY_MENU:1 += 3
+		PLAY_EXTRA:8 += 5
+	;COM:촉수搾乳を見る
+	ELSEIF MENU == 105
+		UP_SCORE = 1000
+		PLAY_CBVA:1 += 3
+		PLAY_ACTION:3 += 3
+		PLAY_EXTRA:4 += 10
+		PLAY_EXTRA:8 += 5
+	;COM:촉수緊縛を見る
+	ELSEIF MENU == 106
+		UP_SCORE = 800
+		PLAY_ACTION:3 += 20
+		PLAY_EXTRA:3 += 20
+		PLAY_EXTRA:8 += 5
+	;COM:촉수관장を見る
+	ELSEIF MENU == 107
+		UP_SCORE = 1500
+		PLAY_CBVA:3 += 3
+		PLAY_ACTION:3 += 3
+		PLAY_EXTRA:5 += 20
+		PLAY_EXTRA:8 += 5
+	;COM:촉수口辱を見る
+	ELSEIF MENU == 108
+		UP_SCORE = 800
+		PLAY_ACTION:3 += 3
+		PLAY_EXTRA:8 += 5
+	;COM:촉수ペニス責めを見る
+	ELSEIF MENU == 109
+		UP_SCORE = 1000
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:1 += 3
+		PLAY_EXTRA:8 += 5
+		PLAY_EXTRA:10 += 10
+	;COM,挿入Ｇスポ責めを見る
+	ELSEIF MENU == 120
+		BONUS_ABL = 30
+		UP_SCORE = 1200
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM,挿入子宮口責めを見る
+	ELSEIF MENU == 121
+		BONUS_ABL = 30
+		UP_SCORE = 1400
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM,兜あわせを見る
+	ELSEIF MENU == 122
+		BONUS_ABL = 32
+		UP_SCORE = 200
+		PLAY_CBVA:0 += 3
+		PLAY_MENU:1 += 3
+		SIF TALENT:121 == 0
+			PLAY_EXTRA:10 += 10
+	;COM,パイズリフェラを見る
+	ELSEIF MENU == 123
+		BONUS_ABL = 32
+		UP_SCORE = 700
+		PLAY_CBVA:1 += 3
+		PLAY_ACTION:1 += 3
+	;COM,ディープスロートを見る
+	ELSEIF MENU == 124
+		BONUS_ABL = 32
+		UP_SCORE = 750
+		PLAY_ACTION:1 += 5
+	;COM,フェラ自慰を見る
+	ELSEIF MENU == 125
+		BONUS_ABL = 32
+		UP_SCORE = 800
+		PLAY_CBVA:0 += 2
+		PLAY_CBVA:1 += 2
+		PLAY_ACTION:1 += 3
+	;COM,손으로 애무하는 펠라치오를 봅니다.
+	ELSEIF MENU == 126
+		BONUS_ABL = 32
+		UP_SCORE = 600
+		PLAY_ACTION:1 += 4
+	;COM,흡입 펠라치오를 봅니다
+	ELSEIF MENU == 127
+		BONUS_ABL = 32
+		UP_SCORE = 800
+		PLAY_ACTION:1 += 5
+	;COM,정상위·키스 장면을 봅니다.
+	ELSEIF MENU == 128
+		BONUS_ABL = 30
+		UP_SCORE = 800
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM,정상위·가슴 애무를 봅니다.
+	ELSEIF MENU == 129
+		BONUS_ABL = 30
+		UP_SCORE = 900
+		PLAY_CBVA:1 += 2
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM,정상위 SP를 봅니다.
+	ELSEIF MENU == 130
+		BONUS_ABL = 30
+		UP_SCORE = 1000
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 4
+	;COM,후배위·가슴 애무를 봅니다
+	ELSEIF MENU == 131
+		BONUS_ABL = 30
+		UP_SCORE = 1300
+		PLAY_CBVA:1 += 2
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM,후배위·스팽킹을 봅니다
+	ELSEIF MENU == 132
+		BONUS_ABL = 30
+		UP_SCORE = 1400
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+		PLAY_ACTION:2 += 3
+	;COM,立ちバックを見る
+	ELSEIF MENU == 133
+		BONUS_ABL = 30
+		UP_SCORE = 1500
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+	;COM,후배위 SP를 봅니다
+	ELSEIF MENU == 134
+		BONUS_ABL = 30
+		UP_SCORE = 1500
+		PLAY_CBVA:2 += 3
+		PLAY_MENU:3 += 3
+
+	ENDIF
+
+	;야외 플레이 계속중
+	IF EQUIP_MENU & 1
+		BONUS_ABL = 17
+		PLAY_EXTRA:7 += 1
+	ENDIF
+	;긴박 플레이 계속중
+	IF EQUIP_MENU & 8
+		BONUS_ABL = 21
+		PLAY_EXTRA:3 += 1
+	ENDIF
+	;獣姦プレイ継続中
+	IF EQUIP_MENU & 128
+		BONUS_ABL = 39
+		PLAY_EXTRA:11 += 1
+	ENDIF
+	
+	;助手が女
+	SIF VIDEO_ASSI == 1
+		PLAY_EXTRA:5 += 1
+
+	;능력 보너스
+	IF BONUS_ABL
+		IF ABL:BONUS_ABL > 5
+			TIMES UP_SCORE , 1.50
+		ELSEIF ABL:BONUS_ABL > 2
+			TIMES UP_SCORE , 1.20
+		ELSEIF ABL:BONUS_ABL > 0
+			TIMES UP_SCORE , 1.10
+		ENDIF	
+	ENDIF
+
+	SCORE += UP_SCORE
+
+	BONUS_ABL = 0
+	UP_SCORE = 0
+
+NEXT
+
+;ビデオ鑑賞
+;CALL WATCHING_VIDEO
+
+;ボーナス
+;処女喪失シーンがあれば加算
+IF TFLAG:32 & 1
+	SCORE += 5000
+	PRINTFORML 수정구에는 %SAVESTR:TARGET%의 처녀 상실 장면이 찍혀 있다
+	EXP:50 += 1
+	PRINTFORML %EXPNAME:50%＋１
+ENDIF
+
+;自己紹介シーンがあれば話術に応じてボーナス
+IF TFLAG:32 & 2
+	IF ABL:15 == 0
+		TIMES SCORE , 0.90
+	ELSEIF ABL:15 == 1
+		TIMES SCORE , 1.00
+	ELSEIF ABL:15 == 2
+		TIMES SCORE , 1.05
+	ELSEIF ABL:15 == 3
+		TIMES SCORE , 1.10
+	ELSEIF ABL:15 == 4
+		TIMES SCORE , 1.15
+	ELSEIF ABL:15 == 5
+		TIMES SCORE , 1.20
+	ELSE
+		TIMES SCORE , 1.25
+	ENDIF
+ENDIF
+
+;素質:処女を見る
+SIF TALENT:0
+	TIMES SCORE , 1.20
+;素質:崩壊を見る
+SIF TALENT:9
+	TIMES SCORE , 0.50
+;素質:無関心を見る
+SIF TALENT:21
+	TIMES SCORE , 0.70
+;素質:感情乏しいを見る
+SIF TALENT:22
+	TIMES SCORE , 0.70
+;素質:恥じらいを見る
+SIF TALENT:35
+	TIMES SCORE , 1.10
+;素質:淫乱を見る
+SIF TALENT:76
+	TIMES SCORE , 1.50
+;素質:謎の魅力を見る
+SIF TALENT:92
+	TIMES SCORE , 1.30
+
+;素質:小柄体系を見る
+SIF TALENT:100
+	TIMES SCORE , 1.20
+;素質:巨乳を見る
+SIF TALENT:110
+	TIMES SCORE , 1.20
+;素質:魅力を見る
+SIF TALENT:113
+	TIMES SCORE , 1.30
+;素質:爆乳を見る
+SIF TALENT:114
+	TIMES SCORE , 1.40
+;素質:超乳を見る
+SIF TALENT:119
+	TIMES SCORE , 1.60
+;素質:ふたなりを見る
+SIF TALENT:121
+	TIMES SCORE , 1.20
+;素質:オトコを見る. 幼稚なら大丈夫
+SIF TALENT:122 && TALENT:132 == 0
+	TIMES SCORE , 0.20
+;素質:狂気を見る
+SIF TALENT:123
+	TIMES SCORE , 0.10
+;素質:動物耳を見る
+SIF TALENT:124
+	TIMES SCORE , 1.10
+;素質:人気者を見る
+SIF TALENT:126
+	TIMES SCORE , 1.30
+;素質:母乳体質を見る
+SIF TALENT:130
+	TIMES SCORE , 1.20
+;素質:未熟を見る
+SIF TALENT:135
+	TIMES SCORE , 2.00
+
+;ABL:被写技能をみる
+IF ABL:70 == 0
+	TIMES SCORE , 0.50
+ELSEIF ABL:70 == 1
+	TIMES SCORE , 0.80
+ELSEIF ABL:70 == 2
+	TIMES SCORE , 1.00
+ELSEIF ABL:70 == 3
+	TIMES SCORE , 1.20
+ELSEIF ABL:70 == 4
+	TIMES SCORE , 1.40
+ELSEIF ABL:70 == 5
+	TIMES SCORE , 1.50
+ELSEIF ABL:70 == 6
+	TIMES SCORE , 1.60
+ELSEIF ABL:70 == 7
+	TIMES SCORE , 1.70
+ELSEIF ABL:70 == 8
+	TIMES SCORE , 1.80
+ELSEIF ABL:70 == 9
+	TIMES SCORE , 1.90
+ELSE
+	TIMES SCORE , 2.00
+ENDIF
+
+;난이도 보정
+;HARD
+;IF FLAG:5 == 3
+;	TIMES SCORE , 0.70
+;POWERFUL
+;ELSEIF FLAG:5 == 4
+;	TIMES SCORE , 0.50
+;ENDIF
+
+;ビデオタイトルを決める
+
+LOCALS = 
+
+IF PLAY_ACTION:2 > 3
+	LOCALS += "여왕님"
+ELSEIF PLAY_ACTION:1 > 3
+	LOCALS += "M녀"
+ENDIF
+
+;境遇
+
+;素質:마더콘
+SIF TALENT:140
+	LOCALS += "마더콘"
+;素質:파더콘
+SIF TALENT:141
+	LOCALS += "파더콘"
+;素質:로리콘
+SIF TALENT:142
+	LOCALS += "로리콘"
+;素質:쇼타콘
+SIF TALENT:143
+	LOCALS += "쇼타콘"
+
+;素質:유부녀
+SIF TALENT:157
+	LOCALS += "유부녀"
+;素質:임신
+SIF TALENT:153
+	LOCALS += "임산부"
+
+IF TALENT:122
+	SELECTCASE TALENT:용자가되기이전의생활
+	CASE 1
+		LOCALS += "학생"
+	CASE 2
+		LOCALS += "신관"
+	CASE 3
+		LOCALS += "농부"
+	CASE 4
+		LOCALS += "어부"
+	CASE 5
+		LOCALS += "창부"
+	CASE 6
+		LOCALS += "좀도둑"
+	CASE 7
+		LOCALS += "거지"
+	CASE 8
+		LOCALS += "도련님"
+	CASE 9
+		LOCALS += "영세민"
+	CASE 10
+		LOCALS += "묘지기"
+	CASE 11
+		LOCALS += "주술사"
+	CASE 12
+		LOCALS += "성인"
+	CASE 13
+		LOCALS += "예언자"
+	CASE 14
+		LOCALS += "점쟁이"
+	CASE 15
+		LOCALS += "점원"
+	CASE 16
+		LOCALS += "약초꾼"
+	CASE 17
+		LOCALS += "은둔자"
+	CASE 18
+		LOCALS += "점원"
+	CASE 19
+		LOCALS += "군인"
+	CASE 20
+		LOCALS += "노예"
+	CASE 21
+		LOCALS += "주부"
+	CASEELSE
+		LOCALS += "노예"
+	ENDSELECT
+ELSE
+	SELECTCASE TALENT:용자가되기이전의생활
+	CASE 1
+		LOCALS += "학생"
+	CASE 2
+		LOCALS += "수녀"
+	CASE 3
+		LOCALS += "농부녀"
+	CASE 4
+		LOCALS += "해녀"
+	CASE 5
+		LOCALS += "창부"
+	CASE 6
+		LOCALS += "좀도둑녀"
+	CASE 7
+		LOCALS += "거지녀"
+	CASE 8
+		LOCALS += "규중처녀"
+	CASE 9
+		LOCALS += "빈민가녀"
+	CASE 10
+		LOCALS += "묘지기"
+	CASE 11
+		LOCALS += "무녀"
+	CASE 12
+		LOCALS += "성녀"
+	CASE 13
+		LOCALS += "예언자"
+	CASE 14
+		LOCALS += "점쟁이"
+	CASE 15
+		LOCALS += "간판녀"
+	CASE 16
+		LOCALS += "약초꾼"
+	CASE 17
+		LOCALS += "영애"
+	CASE 18
+		LOCALS += "간판녀"
+	CASE 19
+		LOCALS += "군인"
+	CASE 20
+		LOCALS += "노예"
+	CASE 21
+		LOCALS += "주부"
+	CASEELSE
+		LOCALS += "노예"
+	ENDSELECT
+ENDIF
+
+;露出癖4以上だと実名配信
+IF ABL:17 >= 4
+	LOCALS += SAVESTR:TARGET
+ENDIF
+
+LOCALS += "의"
+
+SIF PLAY_EXTRA:7 > 3
+	LOCALS += "야외"
+SIF PLAY_EXTRA:3 > 3
+	LOCALS += "속박"
+SIF PLAY_EXTRA:10 > 3
+	LOCALS += "후타나리"
+SIF PLAY_EXTRA:9 > 3
+	LOCALS += "레즈"
+SIF PLAY_EXTRA:6 > 3
+	LOCALS += "난교"
+SIF PLAY_EXTRA:11 > 3
+	LOCALS += "수간"
+
+IF PLAY_CBVA:0 > 6
+	LOCALS += "클리 고문"
+ELSEIF PLAY_CBVA:1 > 6
+	LOCALS += "가슴 고문"
+ELSEIF PLAY_CBVA:2 > 3
+	LOCALS += "자궁 고문"
+ELSEIF PLAY_CBVA:3 > 3
+	LOCALS += "애널"
+ENDIF
+
+IF PLAY_ACTION:0 > 3
+	LOCALS += "봉사"
+ELSEIF PLAY_ACTION:4 > 3
+	LOCALS += "자위"
+ELSEIF PLAY_MENU:3 > 3
+	LOCALS += "섹스"
+ELSE
+	LOCALS += "조교"
+ENDIF
+
+IF SCORE > 0
+	PRINTFORMW 조교될 때 녹화 된 영상은 {SCORE}포인트의 가격이 붙었다.
+	IF ASSI > 0
+		IF ABL:ASSI:15
+			LOCAL = SCORE * ABL:ASSI:15 * 5
+			LOCAL /= 100
+			PRINTFORMW %SAVESTR:ASSI%의 능숙한 편집 기술로 인해 영상은 {LOCAL}포인트 높게 팔렸다.
+			SCORE += LOCAL
+		ENDIF
+	ENDIF
+	PRINTFORML 영상을 팔아 {SCORE}포인트를 손에 넣었다.
+	MONEY += SCORE
+	CFLAG:493 = SCORE
+	CSTR:6 = %LOCALS%
+	CFLAG:498 = -1
+ELSE
+	PRINTL 녹화 된 영상은 쓸모가 없습니다.
+ENDIF
+
+;再調教時に出ないようにビデオを消す
+CFLAG:491 = 0
+
+WAIT
+
+RETURN 0
+
+;-----------------------------------
+@EVENT_VIDEO_DAY
+#DIM VIEW
+#DIM FAV
+;-----------------------------------
+
+SIF TARGET < 0 || TARGET > CHARANUM
+	RETURN 0
+
+;非公開ははじく
+SIF CFLAG:497 == 0
+	RETURN 0
+
+VIEW = 0
+FAV = 0
+
+;評価ボーナス
+VIEW += CFLAG:493 / 10
+
+;マニアックさによるデメリット
+IF CFLAG:494 > 0 && CFLAG:494 < 100
+	VIEW *= 100 - CFLAG:494
+	VIEW /= 100
+	VIEW += 1
+ENDIF
+
+;ふぁぼは閲覧数の1%程度
+FAV = (VIEW / 100) + RAND:2
+;マニアックボーナス
+FAV *= (CFLAG:494 / 2) + 1
+;閲覧数以上のふぁぼは得られない
+SIF FAV > VIEW
+	FAV = VIEW
+
+;加算
+CFLAG:495 += VIEW
+CFLAG:496 += FAV
+
+IF CSTR:6 != ""
+	PRINTL  
+	PRINTFORML 수정구에 저장된 「%CSTR:6%」을 뒷세계에 팔아 치웠다……
+	IF FAV > 0
+		PRINTFORMW {VIEW}포인트를 벌고, {FAV}통의 팬레터가 도착했다
+	ELSE
+		PRINTFORMW {VIEW}포인트를 벌었다
+	ENDIF
+	
+	MONEY += VIEW
+	
+	PRINTL  
+ENDIF
+
+RETURN 0
+

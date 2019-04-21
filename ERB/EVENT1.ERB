@@ -1,0 +1,9 @@
+﻿@EVENTCOMEND
+
+SIF CFLAG:TARGET:100
+	RETURN 0
+
+IF EXP:0 == 0 && EXP:1 > 0 && TALENT:30
+	CFLAG:TARGET:100 = 1
+	PRINTW （정조를 지킬 수 있다면 조금 정도는 엉덩이로 해도 괜찮다고 생각하는 것 같다）
+ENDIF

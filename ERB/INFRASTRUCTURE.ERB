@@ -1,0 +1,296 @@
+﻿;------------------------------------------
+@INFRASTRUCTURE
+;------------------------------------------
+;시설・設備の様子を見る
+;処刑コマンド内に各調度品(人形とか宝石像とか)の様子を見るコマンドを追加しようと思ったけど
+;結構数あるし視覚的に宜しくないかなと思い別コマンドに
+;ついでに肉便器もこっちに統一
+
+;FLAG:83  肉便器の数
+;FLAG:84  調度品の合計数
+
+;FLAG:600 = 石像の個数
+;FLAG:601 = 剥製の個数
+;FLAG:602 = 蝋人形の個数
+;FLAG:603 = 人形(マネキン)の個数
+;FLAG:604 = 人形(球体間接)の個数
+;FLAG:605 = 金属像の個数
+;FLAG:606 = 氷像の個数
+;FLAG:607 = 金属像の個数
+;FLAG:608 = 家具の個数
+;FLAG:609 = 絵画の個数
+
+;FLAG:611 = 噴水像(石)の個数
+;FLAG:612 = 噴水像(金属)の個数
+
+
+;SIF A == 0
+;	RETURN 0
+;B = A
+
+PRINTL 어떤 시설을 관람하시겠습니까?
+PRINTL 
+PRINTL [인간목장]
+PRINTL [51] 육변기의 상태를 본다
+PRINTL 
+PRINTL [박물관]
+PRINTL [50] 모든 전시품을 본다
+PRINTL 
+PRINTL [0] 석상의 상태를 본다
+PRINTL [1] 박제의 상태를 본다
+PRINTL [2] 밀랍 인형의 상태를 본다
+PRINTL [3] 마네킹 인형의 상태를 본다
+PRINTL [4] 구체관절 인형의 상태를 본다
+PRINTL [5] 주조된 동상의 상태를 본다
+PRINTL [6] 얼음 조각의 상태를 본다
+PRINTL [7] 보석의 상태를 본다
+PRINTL [8] 실내 가구의 상태를 본다
+PRINTL [9] 회화(그림)의 상태를 본다
+PRINTL 
+PRINTL [11] 분수상(돌)의 상태를 본다
+PRINTL [12] 분수상(금속)의 상태를 본다
+PRINTL 
+PRINTL [100] 돌아온다
+DRAWLINE
+
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 0
+	IF FLAG:600 == 0
+		PRINTFORMW 아직 석상을 만들지 않은 것 같다. 
+	ELSEIF FLAG:600 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:600}점의 석상이 있다
+		PRINTW 돌이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 괴로움, 경악, 황홀함, 비장함… 석상은 다양한 표정을 지은채, 보는 이들에게 무언가를 호소하고 있지만 
+		PRINTW 그것들이 전해질 일은 없을 것이다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 1
+	IF FLAG:601 == 0
+		PRINTFORMW 아직 박제를 만들지 않은 것 같다. 
+	ELSEIF FLAG:601 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:601}점의 박제가 있다
+		PRINTW 박제가 된 옛 용사들의 아름다운 지체는, 허공을 응시한 채 벽에 장식되어 있다
+		PRINTW 괴로움, 황홀함, 비장함, 체념…박제는 다양한 표정을 지은채, 보는 이들에게 무언가를 호소하고 있지만
+		PRINTW 그녀들이 그 얼어붙은 감정을 움직일 일은 더 이상 없을 것이다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 2
+	IF FLAG:602 == 0
+		PRINTFORMW 아직 밀랍인형이 전시되어 있지 않다. 
+	ELSEIF FLAG:602 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:602}점의 밀랍인형이 있다
+		PRINTW 밀랍인형이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 괴로움, 경악, 황홀함, 비장함… 그녀들은 다양한 표정을 지은채, 지금 당장이라도 움직일 것 같지만
+		PRINTW 이제 두번 다시 그 몸을 움직이는 일은 없을 것이다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 3
+	IF FLAG:603 == 0
+		PRINTFORMW 아직 마네킹을 만들지 않은 것 같다. 
+	ELSEIF FLAG:603 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:603}점의 마네킹이 있다
+		PRINTW 마네킹이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 그녀들의 사지나 머리, 반신은 자유롭게 뽑아낼 수 있어, 완전한 사람의 형태를 유지하고 있는 것은 적다
+		PRINTW 뽑아진 부품은, 아무렇게나 흩어져 있거나, 본래의 것과는 다른 인형에 꼽혀있거나 하며 심한 취급을 받고 있다
+		PRINTW 의식용의 새로운 의상을 입은 마네킹도 전시되어 있어, 구 아휴 타락신의 신자를 포함한 많은 관객으로 붐비게 되었다
+		PRINTW 국부나 가슴을 노출한 의상을 입고, 대중의 면전에 그 지체를 비추는 그녀들은 표정을 무너트리지 않고 조용히 멈춰 서있다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 4
+	IF FLAG:604 == 0
+		PRINTFORMW 아직 구체관절인형을 만들지 않은 것 같다. 
+	ELSEIF FLAG:604 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:604}점의 구체관절인형이 있다
+		PRINTW 구체관절인형이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 그녀들의 사지나 머리, 반신은 자유롭게 움직일 수 있어, 살아있는 인간은 할 수 없는 자세로 되어있는 인형도 있다
+		PRINTW 그녀들과 성교는 할 수 없지만, 그래도 굳이 보는 사람을 유혹하는 듯한 자세를 한 자도 있다
+		PRINTW 어떤 자세로 되든, 그녀들은 표정을 바꾸는 일도 없이 취해진 자세대로 있다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 5
+	IF FLAG:605 == 0
+		PRINTFORMW 아직 금속상을 만들지 않은 것 같다. 
+	ELSEIF FLAG:605 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:605}점의 금속상이 있다
+		PRINTW 금속이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다 
+		PRINTW 모든 금속상은 매일 정해진 시간에 전신을 닦아, 언제나 아름다운 광택을 내는 상태로 전시되어 있다
+		PRINTW 너무나도 아름다운 모습에 몇 번이나 온 몸을 만져져, 일부가 손상된 금속상도 개중에 있는 모양이다
+		PRINTW 예전의 아름다운 지체를 신체가 떨어질 정도로 농락당하면서도, 그녀들은 아무 것도 느낄 일 없이 조용하게 멈춰 서있다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 6
+	IF FLAG:606 == 0
+		PRINTFORMW 아직 얼음 조각을 만들지 않은 것 같다. 
+	ELSEIF FLAG:606 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:606}점의 얼음 조각이 있다
+		PRINTW 얼음 조각이 된 옛 용사들의 아름다운 자체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 얼어붙은 그녀들의 모습을 유지하기 위해, 다른 전시품이 있는 지역보다 기온이 낮아져 있다
+		PRINTW 그 추위에 무심코 오줌이 마려워, 얼음 조각을 향해 소변을 보는 자도 있지만, 다음날이 되면 그것도 올어붙어 얼음 조각품에 새로운 고드름이 생기는 것이다
+		PRINTW 그 몸에 무엇을 당하든 그녀들은 표정을 무너트리지 않고, 예전의 아름다운 지체를 대중의 면전에 보여주는 것이었다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 7
+	IF FLAG:607 == 0
+		PRINTFORMW 아직 보석상을 만들지 않은 것 같다. 
+	ELSEIF FLAG:607 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:607}점의 보석상이 있다
+		PRINTW 보석이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 모든 보석상은 매일 정해진 시간에 전신을 닦아, 반투명의 광택이 항상 아름답게 빛나는 상태로 전시되어 있다
+		PRINTW 드물대 대량의 정액 투성이가 되어있는 보석상도 있었지만, 다음날에는 원래대로 돌아가 있기 때문에 딱히 신경 쓰는 자는 없었다
+		PRINTW 보석상들의 표정은 무언가를 호소하고 있는 것처럼 보이지만, 보는 자들은 대개 보석상의 아름다움에 감동한 후 떠나는 것이었다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 8
+	IF FLAG:608 == 0
+		PRINTFORMW 아직 가구를 만들지 않은 것 같다. 
+	ELSEIF FLAG:608 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:608}점의 가구가 있다
+		PRINTW 한 때는 살아있는 인간이었던 용사들은, 무기질의 가구로 재구축되어 전시되어 있다
+		PRINTW 촛대의 촛불에는 파란 불이 켜지고, 꽃병에는 마계의 꽃이 장식되어 있다
+		PRINTW 장롱에는 다양한 도구와 잡화가 수납되어 있고, 여기에서의 짧은 휴식에 도움이 되는 것도 들어 있다
+		PRINTW 독특한 분위기 안에서, 전시되어 있는 책상이나 의자를 사용해 휴식장소로 쓰는 자도 있는 것 같다
+		PRINTW 지금의 그녀들은 인간으로서가 아니라, 가구로서 마계를 위해, 마물들을 위해 봉사하고 있는 것이다
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 9
+	IF FLAG:609 == 0
+		PRINTFORMW 아직 회화를 만들지 않은 것 같다. 
+	ELSEIF FLAG:609 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:609}점의 회화가 있다
+		PRINTW 한 때는 살아있는 인간이었던 용사들은, 회화의 일부가 되어 벽에 전시되어 있다
+		PRINTW 회화의 앞에는 수정구가 놓여져 있어, 그 수정구를 통해 회화 안의 모습을 엿보는 것이 가능하다
+		PRINTW 그림 안의 세계에서, 엉원히 이어질 치욕을 받고 있는 그녀들의 모습을 보고 즐기는 것이 이 지역의 일반적인 재미이다
+		PRINTW 그녀들은 도움을 요청하지만, 그것을 보는 사람에게는 전해지지 않고, 오늘도 그림 안의 세계에서 계속해서 능욕당하는 것이다…
+	ENDIF
+	RETURN 0
+
+ELSEIF RESULT == 11
+	IF FLAG:611 == 0
+		PRINTFORMW 아직 분수용 석상을 만들지 않은 것 같다. 
+	ELSEIF FLAG:611 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:611}점의 분수용 석상이 있다
+		PRINTW 돌이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다
+		PRINTW 유방이나 성기, 요도등을 분수장치로 변환당한 그녀들은, 각각의 위치에서 물을 힘차게 뿜어내고 있다
+		PRINTW 그녀들에게 인간적인 부끄러움은 이미 없고, 앞으로도 남들의 시선을 신경쓰지 않고 계속해서 물을 뿜어낼 것이다…
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 12
+	IF FLAG:612 == 0
+		PRINTFORMW 아직 분수용 금속상을 만들지 않은 것 같다. 
+	ELSEIF FLAG:612 >= 1
+		PRINTFORML 박물관에는 현재 {FLAG:612}점의 분수용 금속상이 있다
+		PRINTW 금속이 된 옛 용사들의 아름다운 지체는, 하나 하나 각기 다른 자세로 장식되어 있다 
+		PRINTW 유방이나 성기, 요도등을 분수장치로 변환당한 그녀들은, 각각의 위치에서 물을 힘차게 뿜어내고 있다
+		PRINTW 뿜어내는 물 때문에, 일부는 녹이 생기는 금속상도 있는 것 같다
+		PRINTW 그러나 그녀들은 그것을 신경쓰는 것이 아니라, 물을 뿜어내는 것을 계속할 수 밖에 없는 것이었다
+	ENDIF
+	RETURN 0
+	
+ELSEIF RESULT == 50
+	IF FLAG:84 == 0
+		PRINTFORMW 아직 전시품을 만들지 않은 것 같다. 
+	ELSEIF FLAG:84 >= 1
+		PRINTFORML 이 던전에는 현재 {FLAG:84}점의 전시품이 있다
+		PRINTL 옛 용사들의 아름다운 지체를 그대로 남긴 다양한 동상이나 인형에서는
+		PRINTL 괴로움의 표정이나 경악의 표정, 절망의 표정 같은 다양한 감정을 엿볼 수 있다
+		PRINTW 그들의 그 얼어붙은 감정이 움직이는 일은 더는 없다. 
+	ENDIF
+	RETURN 0
+ELSEIF RESULT == 51
+	IF FLAG:83 == 0
+		PRINTFORMW 이 던전에는 육변기가 설치되어 있지 않은 것 같다. 
+	ELSEIF FLAG:83 >= 1
+		
+		PRINTFORML 이 던전의 변소에는 현재 {FLAG:83}개의 육변기가 설치되어 있다. 
+		PRINT 육변기들은
+		
+		IF FLAG:613 == 1
+			PRINT 중년남 포로
+		ELSEIF FLAG:613 == 2
+			PRINT 소년 포로
+		ELSEIF FLAG:613 == 3
+			PRINT 후타나리 음마
+		ELSE
+			PRINT 몬스터
+		ENDIF
+		
+		PRINTL 들에게  자는 시간조차 없이 사용되고 있는것 같다
+		PRINTL 날뛰고 있든 기절해 있든 임신해 있든 상관없이 범해지고 있다
+		
+		IF FLAG:613 == 1
+			PRINTL 중년 남자 포로의 걸쭉하고 냄새나는 정액이 육변기들의 개조자궁을 순신간에 임신시켜 마물의 아이를 잉태시켰다……
+		ELSEIF FLAG:613 == 3
+		ELSEIF FLAG:613 == 2
+			PRINTL 소년 포로의 젊고 농후한 정액이  육변기들의 개조자궁을 순식간에 임신시켜 마물의 아이를 잉태시켰다……
+		ELSEIF FLAG:613 == 3
+			PRINTL 후타나리 음마의 미약정액이 육변기들의 개조자궁을 순식간에 임신시켜 마물의 아이를 잉태시켰다……
+		ENDIF
+		
+		$INPUT_LOOP_FARM
+		
+		PRINTW 이 던전의 변소는 부서진 것 같은 교성이나 비명과 썩은 내가 넘쳐나고 있다. 
+		
+		PRINTL 각종 설정
+		PRINT [0] 교배역　　　　　　현재：
+		IF FLAG:613 == 1
+			PRINT 중년남 포로  
+		ELSEIF FLAG:613 == 2
+			PRINT 소년 포로  
+		ELSEIF FLAG:613 == 3
+			PRINT 후타나리 음마  
+		ELSE
+			PRINT 몬스터
+		ENDIF
+		PRINTL  
+		PRINTFORML [1] 인간목장 로그 표시　　현재：\@ GETBIT(FLAG:614,0) ? 비표시 # 표시 \@
+		PRINTFORML [2] 태어난 아이 매각　		현재：\@ GETBIT(FLAG:614,1) ? 매각한다 # 매각하지 않는다 \@
+		
+		PRINTFORML [999]돌아온다
+		
+		INPUT
+		
+		IF RESULT == 999
+			RETURN 0
+		ELSEIF RESULT == 0
+			PRINTL 교배역을 선택해 주세요
+			PRINTL [0] 몬스터  
+			PRINT [1] 중년남 포로  
+			PRINT [2] 소년 포로
+			PRINT [3] 후타나리 음마 
+			PRINTL  
+			
+			INPUT
+			
+			IF RESULT == 1
+				PRINTW 교배역을 중년남 포로로 하였습니다
+			ELSEIF RESULT == 2
+				PRINTW 교배역을 소년 포로로 하였습니다
+			ELSEIF RESULT == 3
+				PRINTW 교배역을 후타나리 음마로 하였습니다
+			ELSE
+				PRINTW 교배역을 몬스터로 하였습니다
+				RESULT = 0
+			ENDIF
+			FLAG:613 = RESULT
+		ELSEIF RESULT >= 1 && RESULT <= 2
+			LOCAL = RESULT - 1
+			INVERTBIT FLAG:614,LOCAL
+		ELSE
+			GOTO INPUT_LOOP_FARM
+		ENDIF
+		
+		GOTO INPUT_LOOP_FARM
+		
+		
+		
+	ENDIF
+	RETURN 0
+ELSEIF RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+SIF RESULT == 100
+	RETURN 0

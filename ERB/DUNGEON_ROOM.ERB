@@ -1,0 +1,988 @@
+﻿;----------------------------------------
+@DUNGEON_ROOM,ARG:0
+#DIM ROOMID
+#DIM ROOM
+#DIM EXTRA
+;----------------------------------------
+;ダンジョンの施設
+
+IF CFLAG:(ARG:0):1 == 3
+	;迎撃の場合, 建設
+	A = ARG:0
+	CALL DUNGEON_ROOM_BUILD
+	RETURN 0
+ENDIF
+
+;侵攻中の勇者？
+SIF CFLAG:(ARG:0):1 != 2 && CFLAG:(ARG:0):1 != 12
+	RETURN 0
+
+;店遭遇の可能性
+IF RAND:12 == 0
+	A = ARG:0
+	CALL DUNGEON_SHOP_ITEMSELL
+	;戦闘が発生しないフラグを返す
+	RETURN 1
+ENDIF
+
+
+
+
+
+;施設番号
+IF CFLAG:(ARG:0):1 == 12
+	CALL CAMPAIGN_ROOM,CFLAG:(ARG:0):501
+	ROOM = RESULT
+	;拡張
+	CALL CAMPAIGN_ROOM_EXTRA,CFLAG:(ARG:0):501
+	EXTRA = RESULT
+ELSE
+	ROOMID = CFLAG:(ARG:0):501 + 349
+	
+	;施設なし
+	SIF FLAG:ROOMID <= 0
+		RETURN 0
+	ROOM = FLAG:ROOMID
+	;拡張
+	ROOMID += 10
+	EXTRA = FLAG:ROOMID
+	;ITEM:ROOM -= 1
+ENDIF
+
+
+
+
+IF ROOM == 500
+	CALL DUNGEON_SHOP, EXTRA
+ELSEIF ROOM == 501
+	CALL DUNGEON_SWAMP, EXTRA
+ELSEIF ROOM == 502
+	CALL DUNGEON_FARM_RESCUE, EXTRA
+ELSEIF ROOM == 503
+	CALL DUNGEON_ICE, EXTRA
+ELSEIF ROOM == 504
+	CALL DUNGEON_HEAT, EXTRA
+ELSEIF ROOM == 505
+	CALL DUNGEON_MASE, EXTRA
+ELSEIF ROOM == 506
+	CALL DUNGEON_MUSEUM, EXTRA
+ELSEIF ROOM == 507
+	CALL DUNGEON_HOTEL, EXTRA
+ENDIF
+
+RETURN 0
+
+;----------------------------------------
+@DUNGEON_ROOM_BUILD
+#DIM ROOMID
+#DIM ROOM
+#DIM EXTRA
+;----------------------------------------
+;ダンジョンの建設
+;全ての拡張を同一に行うので
+;拡張を追加する際は全部の数を増やすこと
+;SHOP_2.ERB@INTERCEPTにも必要な設定があります
+;いまは2個だけ
+
+;命令チェック
+SIF CFLAG:A:500 != 3
+	RETURN 0
+
+ROOMID = CFLAG:A:501 + 349
+
+;施設なし
+SIF FLAG:ROOMID <= 0
+	RETURN 0
+
+;施設番号
+ROOM = FLAG:ROOMID
+
+ROOMID += 10
+
+;拡張
+EXTRA = FLAG:ROOMID
+
+;確率を弄る場合ここのランダムを弄る
+
+IF RAND:4 == 0
+	;拡張1
+	SIF EXTRA & 1
+		RETURN 0
+	FLAG:ROOMID += 1
+ELSEIF RAND:3 == 0
+	;拡張2
+	SIF EXTRA & 2
+		RETURN 0
+	FLAG:ROOMID += 2
+ELSE
+	RETURN 0
+ENDIF
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml %ITEMNAME:ROOM%의 확장을 실시한다! 
+	printform 확장
+	IF FLAG:ROOMID & 1
+		print ：○
+	ELSE
+		print ：×
+	ENDIF
+	IF FLAG:ROOMID & 2
+		print ：○
+	ELSE
+		print ：×
+	ENDIF
+	PRINTL  
+	printformw %조사선택(SAVESTR:A, "는")% 일을 부업으로 변경했다
+ENDIF
+
+CFLAG:A:500 = 0
+
+RETURN 0
+
+
+;------------------------------------
+@DUNGEON_ROOM_DAY
+#DIM ROOMID
+#DIM ROOM
+#DIM EXTRA
+;------------------------------------
+
+FOR ROOMID, 350, 359
+	
+	ROOM = FLAG:ROOMID
+	
+	ROOMID += 10
+	EXTRA = FLAG:ROOMID
+	ROOMID -= 10
+	
+	IF ROOM == 500
+		CALL DUNGEON_SHOP_DAY, EXTRA
+	ELSEIF ROOM == 502
+		CALL DUNGEON_FARM, EXTRA
+	ENDIF
+
+NEXT
+
+RETURN 0
+
+;------------------------------------
+@DUNGEON_SHOP, ARG:0
+#DIM COST
+;------------------------------------
+;상점가. 僅かながら현금수입
+;拡張& 1=武具屋
+;拡張& 2=道具屋
+;COST = 代金
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 상가 던전인것 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：무구실
+	SIF ARG:0 & 2
+		print ：도구실
+	PRINTL  
+ENDIF
+
+COST = (CFLAG:A:9 * 5)+10
+
+IF ARG:0 & 1 && RAND:3 == 0
+	;武器屋分岐
+	IF FLAG:5 & 32
+		printformw %조사선택(SAVESTR:A, "는")% 무기점을 찾은 것 같다…
+	ENDIF
+	
+	COST = (CFLAG:A:9 * 8)+20
+	
+	IF CFLAG:A:580 < COST
+		IF FLAG:5 & 32
+			printformw %조사선택(SAVESTR:A, "는")% 가지고 있는 돈이 없는 것 같다…
+		ENDIF
+		RETURN 0
+	ENDIF
+	
+	CALL ADD_EX_ITEM, -2, A, 1
+	SIF FLAG:5 & 32 && RESULT > 0
+		printformw 현금수입+{COST}
+	
+	IF RESULT > 0
+		MONEY += COST
+		CFLAG:A:580 -= COST
+	ENDIF
+	
+	RETURN 0
+ELSEIF ARG:0 & 2 && RAND:2 == 0
+	;道具屋分岐
+	IF FLAG:5 & 32
+		printformw %조사선택(SAVESTR:A, "는")% 도구실을 찾은거 같다…
+	ENDIF
+	
+	COST = (CFLAG:A:9 * 6)+20
+	
+	IF CFLAG:A:580 < COST
+		IF FLAG:5 & 32
+			printformw %조사선택(SAVESTR:A, "는")% 가지고 있는 돈이 없는 것 같다…
+		ENDIF
+		RETURN 0
+	ENDIF
+	
+	CALL ADD_EX_ITEM, -3, A, 1
+	SIF FLAG:5 & 32 && RESULT > 0
+		printformw 현금수입+{COST}
+	
+	IF RESULT > 0
+		MONEY += COST
+		CFLAG:A:580 -= COST
+	ENDIF
+	
+	RETURN 0
+ENDIF
+
+IF CFLAG:A:580 < COST
+	IF FLAG:5 & 32
+		printformw %조사선택(SAVESTR:A, "는")% 가지고 있는 돈이 없는 것 같다…
+	ENDIF
+	RETURN 0
+ENDIF
+
+MONEY += COST
+CFLAG:A:580 -= COST
+BASE:A:0 += 20
+BASE:A:1 += 50
+
+IF FLAG:5 & 32
+	printformw %조사선택(SAVESTR:A, "는")% 상점가에서 마음껏 먹고 마시고 있는 것 같다…（체력+20, 기력+50）
+	printformw 현금수입+{COST}
+ENDIF
+
+RETURN 0
+
+;------------------------------------
+@DUNGEON_SHOP_ITEMSELL
+#DIM COST
+;------------------------------------
+;ダンジョン内にあるアイテムを売る店
+;不思議のダンジョン系で床にアイテム置いて売ってるやつのイメージ
+;COST = 値段
+
+COST = (CFLAG:A:9 * 6)+50
+
+;最大値
+SIF COST > 1000
+	COST = 1000
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml %조사선택(SAVESTR:A, "는")% 이상한 방을 발견했다. 거기에는 점원이 있고, 아이템을 팔고 있는 것 같다……
+ENDIF
+
+;否定の珠売却
+IF JUEL:A:100 > 2000
+	IF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 점주로부터 돈을 받고, 마왕에 대한 분노를 거두었다（자금+500 부정의구슬-500）
+	ENDIF
+	JUEL:A:100 -= 500
+	CFLAG:A:580 += 500
+ENDIF
+
+;反発刻印売却
+IF MARK:A:3 > 0
+	IF FLAG:5 & 32
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 점주로부터 힘을 빼앗고, 마왕에 대한 분노를 거두었다（경험치+{MARK:A:3 * 1000} 반발각인-1）
+	ENDIF
+	EXP:A:80 += MARK:A:3 * 1000
+	MARK:A:3 -= 1
+ENDIF
+
+;アイテム売却
+CALL SELL_EX_ITEM,A
+
+IF CFLAG:A:580 < COST
+	IF FLAG:5 & 32
+		printforml %조사선택(SAVESTR:A, "는")% 가지고 있는 돈이 없는 것 같다…
+	ENDIF
+	RETURN 0
+ENDIF
+
+CALL ADD_EX_ITEM, -3, A, 1
+SIF FLAG:5 & 32 && RESULT > 0
+	printforml 현금수입+{COST}
+
+IF RESULT > 0
+	MONEY += COST
+	CFLAG:A:580 -= COST
+ENDIF
+
+
+RETURN 0
+
+;------------------------------------
+@DUNGEON_SHOP_DAY, ARG:0
+#DIM INCOME
+;------------------------------------
+;상점가. 僅かながら현금수입
+;拡張& 1=武具屋
+;拡張& 2=道具屋
+
+INCOME = CFLAG:0:9 * (RAND:10 + 5)
+
+;拡張によって僅かに増える
+SIF ARG:0 & 1
+	INCOME += CFLAG:0:9 + 20
+SIF ARG:0 & 2
+	INCOME += CFLAG:0:9 + 20
+
+	PRINTL
+	printformw 오늘 분의 상가의 세금이 징수 된다. （현금수입+{INCOME}）
+
+MONEY += INCOME
+
+RETURN 0
+
+;------------------------------------
+@DUNGEON_SWAMP, ARG:0
+#DIM DMG
+;------------------------------------
+;습지. 機能していないようなので毒沼に変更
+;DMG = ダメージ量
+;拡張& 1=毒草
+;拡張& 2=毒蟲
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 독 늪 던전 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：독초
+	SIF ARG:0 & 2
+		print ：독충
+	PRINTL  
+ENDIF
+
+DMG = CFLAG:0:9 + 10
+
+;毒草
+;相手が強いほど強化
+SIF ARG:0 & 1
+	DMG += CFLAG:A:9
+
+;毒蟲
+;罠レベルで強化
+SIF ARG:0 & 2
+	DMG += FLAG:85 * 2
+
+BASE:A:0 -= DMG
+
+;最低1は残るタイプ
+SIF BASE:A:0 < 1
+	BASE:A:0 = 1
+
+IF FLAG:5 & 32
+	printformw %조사선택(SAVESTR:A, "는")% 독 늪을 걸었다………（{DMG}의 데미지! ）
+ENDIF
+
+RETURN 0
+
+;-------------------------------------
+@DUNGEON_FARM, ARG:0
+#DIM MON_ID
+#DIM MON_NUM
+#DIM TALK
+#DIM LOG_OFF
+#DIM SELL_BABY
+;-------------------------------------
+;モンスターが増える. ターン終了時効果
+;拡張& 1=搾乳設備
+;拡張& 2=ふたなり種付け노예
+
+;肉便器ないとダメ
+SIF FLAG:83 <= 0
+	RETURN 0
+
+;20160524改変
+
+GETBIT FLAG:614,0
+LOG_OFF = RESULT
+GETBIT FLAG:614,1
+SELL_BABY = RESULT
+
+CALL RAND_MONSTER_NUMBER
+MON_ID = RESULT
+MON_NUM = ITEM:MON_ID
+IF SELL_BABY
+	MONEY += FLAG:83 * 10
+ELSEIF MON_NUM + FLAG:83 > 999
+	MON_NUM = 999
+ELSE
+	MON_NUM += FLAG:83
+ENDIF
+
+;竿役分岐
+IF FLAG:613 == 1 && LOG_OFF == 0
+	PRINTL 「교배아저씨들 열심히 변기를 임신시키라구∼」
+	PRINTW 감독역 음마에게 허리를 걷어차진 중년 남자 포로는, 찐득찐득하고 냄새나는 중년남의 정액을 육변기의 자궁 안에 쏟아냈다……
+ELSEIF FLAG:613 == 2 && LOG_OFF == 0
+	PRINTL 「오∼자지노예소년,  열심히 허리를 움직이고 있네∼ 임신 할당량을 제대로 소화할 수 있겠는걸 」
+	PRINTW 감독역 음마에게 상냥하게 재촉받은 포로의 소년은,  젊고 농후한 정액을 육변기의 자궁 안에 쏟아냈다……
+ELSEIF FLAG:613 == 3 && LOG_OFF == 0
+	PRINTL 「임신해!  임신하라구!  아하하핫,  임신해랏! 」
+	PRINTW 후타나리 음마의 미약 정액이 육변기의 자궁 안에 가득 쏟아졌다……
+ENDIF
+
+FOR LOCAL:0, 0, FLAG:83
+	SIF LOCAL:0 >= 5
+		BREAK
+	
+	SIF LOG_OFF
+		BREAK
+	
+	;1の位はランダムパターン
+	TALK = RAND:6
+	
+	;10の位は施設拡張フラグ
+	IF ARG:0 & 1 && RAND:6 == 0
+		;搾乳フラグON
+		TALK += 10
+	ELSEIF ARG:0 & 2 && RAND:5 == 0
+		;ふたなりフラグON
+		TALK += 20
+	ENDIF
+	
+	;100の位は肉便器の数
+	IF FLAG:83 > 100  && RAND:6 == 0
+		TALK += 500
+	ELSEIF FLAG:83 > 80  && RAND:5 == 0
+		TALK += 400
+	ELSEIF FLAG:83 > 60  && RAND:4 == 0
+		TALK += 300
+	ELSEIF FLAG:83 > 40  && RAND:3 == 0
+		TALK += 200
+	ELSEIF FLAG:83 > 20  && RAND:2 == 0
+		TALK += 100
+	ENDIF
+	
+	SELECTCASE TALK
+	;フラグ無し
+		CASE 0
+			PRINT 「히이…히이…」
+		CASE 1
+			PRINT 「더이상…낳고싶지 않…아…」
+		CASE 2
+			PRINT 「우으…아아아…가버려엇! 」
+		CASE 3
+			PRINT 「아하…아하하하하…」
+		CASE 4
+			PRINT 「히…히이익…」
+		CASE 5
+			PRINT 「아기가 있단말야…더는 범하지 말아줘어…」
+	;搾乳フラグあり
+		CASE 10 TO 15
+			PRINT 「젖가슴 나와버려어……」
+	;ふたなりフラグあり
+		CASE 20 TO 25
+			PRINT 「후타나리자지이…」
+	
+	;20人超フラグあり
+		CASE 100
+			PRINT 「그만…그만둬…」
+		CASE 101
+			PRINT 「아아…」
+		CASE 102
+			PRINT 「배속…움직이고있어」
+		CASE 103
+			PRINT 「정액…싫어어…」
+		CASE 104
+			PRINT 「이젠싫어…」
+		CASE 105
+			PRINT 「여긴…어디？」
+	;20人超・搾乳フラグあり
+		CASE 110 TO 115
+			PRINT 「젖가슴 멈추지 않아……」
+	;20人超・ふたなりフラグあり
+		CASE 120 TO 125
+			PRINT 「자지이…기분좋아아」
+	
+	;40人超フラグあり
+		CASE 200
+			PRINT 「이젠…거부할수없어」
+		CASE 201
+			PRINT 「클리 잡아당기지마아…」
+		CASE 202
+			PRINT 「몇명이나 낳은걸까…」
+		CASE 203
+			PRINT 「정액…마시서어…」
+		CASE 204
+			PRINT 「돌아가고싶어…」
+		CASE 205
+			PRINT 「지금…몇시정도일까…」
+	;40人超・搾乳フラグあり
+		CASE 210 TO 215
+			PRINT 「젖가슴이랍니다……아하하」
+	;40人超・ふたなりフラグあり
+		CASE 220 TO 225
+			PRINT 「발기가 멈추지 않아」
+	
+	;60人超フラグあり
+		CASE 300
+			PRINT 「용서해줘어…더이상 임신하고 싶지 않아」
+		CASE 301
+			PRINT 「클리…좀더 빨아줘어…」
+		CASE 302
+			PRINT 「자지…마시서어」
+		CASE 303
+			PRINT 「엉덩이에도 넣어어…」
+		CASE 304
+			PRINT 「하아하아…」
+		CASE 305
+			PRINT 「당신…신참？」
+	;60人超・搾乳フラグあり
+		CASE 310 TO 315
+			PRINT 「안돼…유두 발기해버려…」
+	;60人超・ふたなりフラグあり
+		CASE 320 TO 325
+			PRINT 「정액 잔뜩 주룩주룩해버려…」
+	
+	;80人超フラグあり
+		CASE 400
+			PRINT 「또 태어나아…귀여워」
+		CASE 401
+			PRINT 「클리 발기한거 돌아오질 않아」
+		CASE 402
+			PRINT 「좀더어…」
+		CASE 403
+			PRINT （지면에 흘러넘쳐있는 정액을 핥고있따）
+		CASE 404
+			PRINT 「좋아아……」
+		CASE 405
+			PRINT 「가버려엇…」
+	;80人超・搾乳フラグあり
+		CASE 410 TO 415
+			PRINT 「짜지는거 기분 좋아아…」
+	;80人超・ふたなりフラグあり
+		CASE 420 TO 425
+			PRINT 「나도 변소 써도 돼？」
+	
+	;100人超フラグあり
+		CASE 500
+			PRINT 「사랑스런 내 아기들…」
+		CASE 501
+			PRINT 「클리 찌릿찌릿…아아…」
+		CASE 502
+			PRINT 「히극…」
+		CASE 503
+			PRINT （페니스를 조르고있다）
+		CASE 504
+			PRINT （허리를 흔들며 유혹하고 있다）
+		CASE 505
+			PRINT 「……」
+	;80人超・搾乳フラグあり
+		CASE 510 TO 515
+			PRINT 「밀크 맛있어…」
+	;80人超・ふたなりフラグあり
+		CASE 520 TO 525
+			PRINT 「헤헤…자지이…기분좋아아…」
+	
+	ENDSELECT
+	
+	PRINT  
+	
+NEXT
+
+PRINTL  
+
+SIF LOG_OFF == 0 && SELL_BABY == 0
+	PRINTFORML 인간목장의 육변기로부터 %ITEMNAME:MON_ID%가{FLAG:83}마리 태어났다
+
+SIF LOG_OFF == 0 && SELL_BABY == 1
+	PRINTFORML 인간목장의 육변기로부터 태어난 아이를 {FLAG:83 * 10}포인트로 매각했다
+
+IF ARG:0 & 1
+	;搾乳
+	SIF LOG_OFF == 0
+		PRINTFORML 육변기로부터 짜내어진 모유는 {FLAG:83}포인트로 매각했다
+	MONEY += FLAG:83
+ENDIF
+
+IF ARG:0 & 2
+	;ふたなり노예
+	SIF LOG_OFF == 0
+		PRINTFORML 육변기를 범한 이전 용사인 후타나리 노예의 음욕에서 {FLAG : 83}의 경험치가 되었다
+	EXP:0:80 += FLAG:83
+ENDIF
+
+SIF LOG_OFF == 0
+	WAIT
+
+ITEM:MON_ID = MON_NUM
+
+;-------------------------------------
+@DUNGEON_FARM_RESCUE, ARG:0
+;-------------------------------------
+;牧場に勇者が到達すると肉便器を救出されてしまう
+;拡張& 1=搾乳設備
+;拡張& 2=ふたなり種付け노예
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 인간목장 던전인것 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：착유시설
+	SIF ARG:0 & 2
+		print ：후타나리 교배 시설
+	PRINTL  
+ENDIF
+
+;肉便器ないとダメ
+SIF FLAG:83 <= 0
+	RETURN 0
+
+IF FLAG:5 & 32
+	PRINTFORMW 용사는 불쌍한 육변기 하나를 찾아내 풀어 주었다
+ENDIF
+
+FLAG:83 -= 1
+
+RETURN 0
+
+;-------------------------------------
+@DUNGEON_ICE, ARG:0
+#DIM MDMG
+;-------------------------------------
+;勇者の攻撃力が1割下がる
+;MDMG=기력ダメージ
+;拡張& 1=吹雪（アイテム破壊）
+;拡張& 2=積雪（체력消耗）
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 얼음 던전인것 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：눈보라
+	SIF ARG:0 & 2
+		print ：적설
+	PRINTL  
+ENDIF
+
+MDMG = 0
+
+IF ARG:0 & 1 && RAND:6 == 0
+	LOCAL = RAND:5 + 560
+	IF CFLAG:A:LOCAL > 0 && FLAG:5 & 32
+		PRINTFORM 심한 눈보라로
+		CALL EX_ITEM_NAME,CFLAG:A:LOCAL
+		PRINTFORMW 가 파괴 되어 버렸다……
+	ENDIF
+	CFLAG:A:LOCAL = 0
+ENDIF
+
+;デフォの攻撃値減少
+CFLAG:A:11 *= 9
+CFLAG:A:11 /= 10
+
+;積雪による精神ダメージ
+SIF ARG:0 & 2
+	MDMG += CFLAG:0:9 + 2
+
+BASE:A:1 -= MDMG
+
+IF FLAG:5 & 32
+	printform %조사선택(SAVESTR:A, "는")% 빙실의 추위에서 몸을 웅크 리고있다………（공격력이 １다운! ）
+	SIF MDMG > 0
+		printform （{MDMG}의 기력 데미지! ）
+	PRINTW 
+ENDIF
+
+
+
+RETURN 0
+
+;-------------------------------------
+@DUNGEON_HEAT, ARG:0
+#DIM DMG
+;-------------------------------------
+;勇者の防御力が1割下がる
+;DMG = ダメージ量
+;拡張& 1=オアシス（回復ポイント）
+;拡張& 2=火柱（ダメージ）
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 화염 던전인것 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：오아시스
+	SIF ARG:0 & 2
+		print ：불기둥
+	PRINTL  
+ENDIF
+
+IF ARG:0 & 1 && RAND:6 == 0
+	;回復ポイント
+	;誘惑的な効果
+	
+	BASE:A:1 += 50
+	SIF BASE:A:1 > MAXBASE:A:1
+		BASE:A:1 = MAXBASE:A:1
+	
+	IF  FLAG:5 & 32
+		PRINTFORML 오아시스를 발견한거 같다………（기력50회복!  친밀도 상승! ）
+		PRINTFORMW 굴복 구슬+{CFLAG:0:9 * 4}
+	ENDIF
+	
+	JUEL:TARGET:6 += CFLAG:0:9 * 4
+	CFLAG:TARGET:2 += 20
+	
+	RETURN 0
+ENDIF
+
+DMG = 0
+
+CFLAG:A:12 *= 9
+CFLAG:A:12 /= 10
+
+;火柱によるダメージ
+SIF ARG:0 & 2
+	DMG += CFLAG:0:9 + 10
+
+BASE:A:0 -= DMG
+
+;最低1は残るタイプ
+SIF BASE:A:0 < 1
+	BASE:A:0 = 1
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml %조사선택(SAVESTR:A, "는")% 열사의 더위로 집중력이 떨어지고있다………（방어력 １ 다운! ）
+	SIF DMG > 0
+		printform （불기둥에 의한 {DMG}의 데미지! ）
+	PRINTW 
+ENDIF
+
+RETURN 0
+
+;-------------------------------------
+@DUNGEON_MASE, ARG:0
+#DIM BACK
+;-------------------------------------
+;たまに迷う
+;BACK = 侵攻減少度
+;拡張& 1=回転床（侵攻度減少）
+;拡張& 2=ダークゾーン（侵攻度減少）
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 미궁 던전인것 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：회전 바닥
+	SIF ARG:0 & 2
+		print ：다크존
+	PRINTL  
+ENDIF
+
+BACK = 0
+
+SIF ARG:0 & 1
+	BACK += 5
+SIF ARG:0 & 2
+	BACK += 5
+
+SIF RAND:3 < 1
+	RETURN 0
+
+D:20 -= BACK
+
+IF FLAG:5 & 32
+	printformw %조사선택(SAVESTR:A, "는")% 미궁에서 헤메고 있다………
+	SIF BACK > 0
+		printform 정신이 들어 보니 전에 온 곳이다
+	PRINTW 
+ENDIF
+
+CFLAG:A:509 = 1
+
+RETURN 0
+
+;-------------------------------------
+@DUNGEON_MUSEUM, ARG:0
+#DIM DMG
+#DIM MDMG
+;-------------------------------------
+;石像と剥製の数に応じて最大1/4기력が減る
+;DMG  = ダメージ
+;MDMG = 기력ダメージ
+;拡張& 1=巡回ゴーレム（ダメージ）
+;拡張& 2=陳列棚（先制封印）
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 박물관인것 같다!
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：경비 골렘
+	SIF ARG:0 & 2
+		print ：진열장
+	PRINTL  
+ENDIF
+
+;石像と剥製ないとダメ
+SIF FLAG:84 <= 0
+	RETURN 0
+
+MDMG = FLAG:84 * 5
+DMG = 0
+
+SIF ARG:0 & 1
+	DMG += FLAG:84 * 2
+
+SIF MDMG > (MAXBASE:A:1 / 4)
+	MDMG = MAXBASE:A:1 / 4
+
+IF FLAG:5 & 32
+	printforml %조사선택(SAVESTR:A, "는")% 비품을 보며 이것이 용사의 말로인가라고 생각하며 몸도 마음도 떨고있다………（기력-{MDMG}）
+	SIF DMG > 0
+		printforml 피해자에게서 만들어진 골렘이 습격했다! （{DMG}의 데미지! ）
+	PRINTW 
+ENDIF
+
+IF RAND:4 == 0 && ARG:0 & 2
+	;陳列棚
+	SIF FLAG:5 & 32
+		printformw 진열대가 방해되서 원격 공격을 할 수있을 것 같지 않다……（선제불가! ）
+	IF CFLAG:A:503 & 32
+		SIF FLAG:5 & 32
+			PRINTL 이미 선제 할 수 없다
+	ELSE
+		CFLAG:A:503 += 32
+	ENDIF
+ENDIF
+
+BASE:A:1 -= MDMG
+SIF DMG > 0
+	BASE:A:0 -= DMG
+
+;最低1は残るタイプ
+SIF BASE:A:0 < 1
+	BASE:A:0 = 1
+
+RETURN 0
+
+;------------------------------------
+@DUNGEON_HOTEL, ARG:0
+#DIM COST
+#DIM MENU
+;------------------------------------
+;창관거리. 性癖に合致すれば高額収入
+;拡張& 1=アナルOK
+;拡張& 2=本番OK
+;COST = 代金
+;MENU = お店のメニュー
+
+IF FLAG:5 & 32
+	PRINTL
+	printforml 창관거리 던전인것 같다
+	printform 확장
+	SIF ARG:0 == 0
+		print ：없음
+	SIF ARG:0 & 1
+		print ：애널OK
+	SIF ARG:0 & 2
+		print ：섹스OK
+	PRINTL  
+ENDIF
+
+;判定
+MENU = 0
+
+;MENU = 1 쇼타콘
+;MENU = 2 로리콘
+;MENU = 3 男淫魔
+;MENU = 4 女淫魔
+
+;カルマが低い非処女の場合
+SIF CFLAG:A:151 < -20 && TALENT:A:0 == 0
+	MENU = 3
+;カルマが低いレズっ気の場合
+SIF CFLAG:A:151 < 0 && ABL:A:22 > 0
+	MENU = 4
+;カルマが低いふたなりの場合
+SIF CFLAG:A:151 < 30 && TALENT:A:121
+	MENU = 4
+;カルマが低いオトコの場合
+SIF CFLAG:A:151 < 10 && TALENT:A:122
+	MENU = 4
+;쇼타콘
+SIF TALENT:A:143
+	MENU = 1
+;로리콘
+SIF TALENT:A:142
+	MENU = 2
+
+IF MENU == 0
+	IF FLAG:5 & 32
+		printformw %조사선택(SAVESTR:A, "는")% 혐오하는 눈으로 거리를 통과했다…
+	ENDIF
+	RETURN 0
+ENDIF
+
+COST = (CFLAG:A:9 * 8)+150
+
+;オプション
+SIF ARG:0 & 1
+	TIMES COST, 1.1
+SIF ARG:0 & 2
+	TIMES COST, 1.1
+
+IF CFLAG:A:580 < COST
+	IF FLAG:5 & 32
+		printformw %조사선택(SAVESTR:A, "는")% 가지고 있는 돈이 없는 것 같다…
+	ENDIF
+	RETURN 0
+ENDIF
+
+MONEY += COST
+CFLAG:A:580 -= COST
+CALL KARMA, A, -1
+
+IF FLAG:5 & 32
+	printform %조사선택(SAVESTR:A, "는")% 창관거리에서
+	IF MENU == 1
+		PRINT 노예소년
+	ELSEIF MENU == 2
+		PRINT 노예소녀
+	ELSEIF MENU == 3
+		PRINT 남자 음마
+	ELSEIF MENU == 4
+		PRINT 여자 음마
+	ENDIF
+	printform 상대로
+	IF MENU == 1 || MENU == 2
+		PRINT 지상에서는 즐길 수 없는 배덕을 즐긴 것 같다……
+	ELSE
+		PRINT 즐거운 것 같아 보인다…
+	ENDIF
+	printl （카르마가 1 감소했다）
+	printformw 현금수입+{COST}
+ENDIF
+
+RETURN 0
+
+

@@ -1,0 +1,218 @@
+﻿;------------------------------------------
+@GROTESQUE
+#DIM LV
+#DIMS MATURO
+#DIM FAMILY,3
+;ZはTARGETを保存してるため使用禁止
+;------------------------------------------
+;猟奇・グロ系処刑コマンド
+
+SIF A == 0
+	RETURN 0
+B = A
+
+FAMILY = CFLAG:A:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, A
+FAMILY:2 = RESULT
+
+PRINTL [0] 사지절단형
+PRINTL [1] 내장능욕형
+PRINTL [2] 단두대형
+PRINTL [3] 화형
+PRINTL [4] 식육형
+PRINTL [5] 사령화
+PRINTL [6] 좀비화
+PRINTL  
+PRINTL [100] 그만둔다
+
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 7 && RESULT != 100
+	GOTO INPUT_LOOP
+ENDIF
+
+IF RESULT == 100
+	TARGET = FLAG:1
+	RETURN 0
+ENDIF
+
+TARGET = A
+TFLAG:530 = RESULT
+
+CALL GROTESQUE_KOUJO
+
+IF TFLAG:530 == 0
+	SIF TALENT:A:85
+		PRINTFORM %SAVESTR:A%는 왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나 %SAVESTR:PLAYER%는
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍어
+	PRINTFORMW 사지가 고정된 %SAVESTR:A%는 몬스터들에게 잔뜩 희롱된 후,
+	PRINTFORMW 손발이 잘려、하급 몬스터의 위장에 들어갔다
+	PRINTFORMW %SAVESTR:A%는 그대로 방치되어 실혈사했다。
+	PRINTFORMW %SAVESTR:A%의 몸은 깔끔하게 박제되어、마왕의 살롱에 전시되었다………
+	SIF TALENT:A:85
+		PRINTFORMW 당신은 박제된 %SAVESTR:A%의 얼굴을 사랑스럽게 쓰다듬었다………
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = トルソー
+	
+ELSEIF TFLAG:530 == 1
+	SIF TALENT:A:85
+		PRINTFORM %SAVESTR:A%는 왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나 %SAVESTR:PLAYER%는
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍었고
+	PRINTFORMW 사지를 고정시킨채 %SAVESTR:A%는 몬스터들의 손에 의해 산채로 배가 갈라졌고
+	PRINTFORMW 간과 신장은 빼앗겨 먹히고、생명 유지에 필요한 최소한의 장기만 남겨졌다。
+	PRINTFORMW %SAVESTR:A%는 잠시동안 살아 있었지만………힘이 다했다………
+	SIF TALENT:A:85
+		PRINTFORMW あなたは%SAVESTR:A%의 시체를 깨끗이 박제하여 당신의 방에 장식하기로 했다………
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = 生き餌食
+	
+ELSEIF TFLAG:530 == 2
+	SIF TALENT:A:85
+	PRINTFORM %SAVESTR:A%는 왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나 %SAVESTR:PLAYER%는
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍었고
+	PRINTFORMW 단두대에 걸린 %SAVESTR:A%는 몬스터에게 잔뜩 범해졌다………
+	PRINTFORMW 단두대의 칼날이 떨어졌다………
+	SIF TALENT:A:85
+		PRINTFORMW 잘려진 %SAVESTR:A%의 목은 포르말린에 절여져 보관됐다………
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = ギロチン
+	
+ELSEIF TFLAG:530 == 3
+	SIF TALENT:A:85
+		PRINTFORM %SAVESTR:A%는 왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나 %SAVESTR:PLAYER%는
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍었고
+	PRINTFORMW 화형에 처해진 %SAVESTR:A%는 화염에 휩싸였다………
+	SIF TALENT:A:85
+		PRINTFORMW 불길 속에서 %SAVESTR:A%가 통곡하면서 도움을 요청하는 소리가 들린다………
+	PRINTFORMW 타버린 %SAVESTR:A%의 시체는 던전에 입구에 매달려졌다.
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+
+	MATURO = 火あぶり
+	
+ELSEIF TFLAG:530 == 4
+	SIF TALENT:A:85
+		PRINTFORM %SAVESTR:A%는 왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍었고、식육형에 처해졌다………
+	PRINTFORMW 마법에 의해 고통은 쾌락으로 개조되었고、몬스터들은 %SAVESTR:A%의 신체에 달라붙었다………
+	SIF TALENT:A:85
+		PRINTFORMW 「가슴…가슴…먹히는거…기분 좋아아…구히…구…구부우욱」
+	SIF TALENT:A:85
+		PRINTFORMW %SAVESTR:A%는 이미 미친거 같다………
+	PRINTFORMW 마지막으로 남은 %SAVESTR:A%의 머리를 몬스터가 반쯤 먹었을 때 비로소 %SAVESTR:A%는 절명했다………
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = 食肉
+	
+ELSEIF TFLAG:530 == 5
+	SIF TALENT:A:85
+		PRINTFORM %SAVESTR:A%는 왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나 %SAVESTR:PLAYER%는
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍었고
+	PRINTFORMW %SAVESTR:A%에게 사령화의 저주를 걸었다………
+	PRINTFORMW 저주에 의해 하급 사령이 된 %SAVESTR:A%는 이상한 비명을 지르고 있다………
+	SIF TALENT:A:85
+		PRINTFORMW 「아아아…이제…%SAVESTR:PLAYER% とず、쭉 함께라니…기、기、기뻐어어어어…………」
+	SIF TALENT:A:85
+		PRINTFORMW %SAVESTR:A%는 당신의 몸에 철썩 달라 붙은 것처럼 맴돌고 있다 ………
+	PRINTFORMW %SAVESTR:A%는 두번 다시 환생하지 않고 영원히 당신을 섬기는 사령이 되었다………
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = 低級死霊
+	
+ELSEIF TFLAG:530 == 6
+	SIF TALENT:A:85
+		PRINTFORM %SAVESTR:A%왜 처형되는지 알지 못한채、사랑스럽게 당신의 이름을 몇번이나 외치면서 용서를 빌었다。그러나 %SAVESTR:PLAYER%는
+	PRINTFORMW %SAVESTR:A%에게 모든 힘을 봉인하는 낙인을 찍었고
+	PRINTFORMW %SAVESTR:A%는 좀비화의 저주를 받았다………
+	PRINTFORMW 좀비가 된 %SAVESTR:A%는 던전 확장 공사에 종사하고 있다………
+	SIF TALENT:A:85
+		PRINTFORMW 「아우…우…가슴…썩어버렸다…그 사람에게…미움받아버려…미움받아버려…」
+	SIF TALENT:A:85
+		PRINTFORMW %SAVESTR:A%는 입 끝에서 구더기를 흘리면서 중얼거리고 있다………
+	PRINTFORMW 영원히 노예가 된 %SAVESTR:A%는 당신의 힘의 초석이 될 것이다。
+	PRINTL  
+	PRINTL 손에 넣은 용자의 힘은 훈장의 형태로 남았다
+	PRINTW 훈장경험+1
+	EXP:0:81 += 1
+	
+	MATURO = ゾンビ奴隷
+	
+ENDIF
+
+
+A = TARGET
+
+;武器解除
+W:0 = CFLAG:A:550
+CALL EQUIP_GET
+CFLAG:A:550 = -1
+;指輪解除
+W:0 = CFLAG:A:551
+CALL EQUIP_GET
+CFLAG:A:551 = -1
+;指輪解除
+W:0 = CFLAG:A:552
+CALL EQUIP_GET
+CFLAG:A:552 = -1
+
+LV = CFLAG:A:9
+
+X = NO:A + 199
+FLAG:X = 1
+
+;前回の助手・調教対象だった場合はフラグを空に
+SIF FLAG:1 == TARGET
+	FLAG:1 = -1
+SIF FLAG:2 == TARGET
+	FLAG:2 = -1
+
+;前回の助手・調教対象より前だった場合はフラグを減算
+SIF FLAG:1 > TARGET
+	FLAG:1 -= 1
+SIF FLAG:2 > TARGET
+	FLAG:2 -= 1
+
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+CALL PARTY_CHAR_DEL, A
+
+DELCHARA A
+
+CALL NAME_RESET
+
+
+FLAG:80 += 1
+
+LV += 1
+LV *= 50
+
+EXP:0:80 += LV
+PRINTFORMW 《봉인한 용자의 힘을 흡수한 당신은 {LV}의 경험치를 얻었다！》
+
+TARGET = -1
+RETURN 0
+

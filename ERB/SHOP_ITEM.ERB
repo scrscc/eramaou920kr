@@ -1,0 +1,690 @@
+﻿;=================================================
+;아이템 구입용 스크립트
+;=================================================
+;eratohoRR1317계열 스크립트를 유용하게 개조
+;>복수 조교와 대인원 대응을 합성。복수조교용 케릭터 카드 체크를 삭제
+;>명령 메뉴 및 조건을 변경
+;>｢@SELECT_TARGET｣를 삭제
+;>｢@SHOW_CHALADATA｣＝스테이더스 표시
+;>｢@CHARA_SALE｣＝케릭터 매각
+;>｢@SALEITEM_CHECK｣｢@USE_ITEM｣＝아이템 구입과 사용
+
+;eraIM@S에서 유용（eramaou）
+
+;=================================================
+;아이템 구입・매각 처리 화면
+;=================================================
+@ITEM_SHOP
+#DIM ICOUNT_A
+#DIM ICOUNT_B
+DRAWLINE
+PRINTL 어둠의 상인
+PRINTL 《조교에 사용하는 아이템을 구입할 수 있습니다》
+DRAWLINE
+PRINTV DAY+1
+PRINT 일째 
+IF TIME == 0
+	PRINTL  오전
+ELSE
+	PRINTL  오후
+ENDIF
+
+PRINTFORML [소지금:{MONEY}포인트]
+
+SETCOLORBYNAME LightSalmon
+PRINTFORML [기교Lv:{ABL:MASTER:12}]
+PRINTL [조교 상품 목록]
+RESETCOLOR
+ICOUNT_B = 0
+FOR ICOUNT_A,0,24
+	SIF ITEM:ICOUNT_A == 0
+		CONTINUE
+	PRINTFORM [%ITEMNAME:ICOUNT_A,16,LEFT%]
+	ICOUNT_B += 1
+	SIF ICOUNT_B % 5 == 0
+		PRINTL 
+NEXT
+SIF ICOUNT_B % 5 > 0
+	PRINTL 
+SETCOLORBYNAME LightSalmon
+PRINTL [소비형 조교 상품 목록]
+RESETCOLOR
+ICOUNT_B = 0
+FOR ICOUNT_A,24,36
+	SIF ITEM:ICOUNT_A == 0
+		CONTINUE
+	SIF ICOUNT_A >= 29 && ICOUNT_A <= 31
+		CONTINUE
+	PRINTFORM [%ITEMNAME:ICOUNT_A + @"(소지:{ITEM:ICOUNT_A})"%]
+	ICOUNT_B += 1
+	SIF ICOUNT_B % 5 == 0
+		PRINTL 
+NEXT
+SIF ICOUNT_B % 5 > 0
+	PRINTL 
+DRAWLINE
+
+CALL SALEITEM_CHECK
+;소지 포인트를 임시저장
+TFLAG:15 = MONEY
+
+$INPUT_LOOP
+;이하로 자동적으로 무기가 표시됨
+PRINT_SHOPITEM
+
+PRINTL 《구입하는 아이템의 번호를 입력해 주세요》
+
+DRAWLINE
+PRINT [998] - 함정　
+PRINTL [999] - 돌아온다
+;
+;=================================================
+;아이템 구입 시에 호출되는 함수
+;=================================================
+@EVENTBUY
+;구매 확인
+;복수로 가질 수 있는 아이템
+IF BOUGHT == 24 || BOUGHT == 25 || BOUGHT == 26 || BOUGHT == 27 || BOUGHT == 28 || BOUGHT == 34 || BOUGHT == 35 || BOUGHT == 53 || BOUGHT == 55 || BOUGHT >= 60 && BOUGHT != 90
+	CALL BUY_PLURAL
+	RETURN 1
+;그 자리에서 사용하는 아이템
+ELSEIF BOUGHT == 29 || BOUGHT == 30 || BOUGHT == 31 || BOUGHT == 32 || BOUGHT == 33 || BOUGHT == 40 || BOUGHT == 41
+	CALL USE_ITEM
+	ITEM:BOUGHT = 0
+	RETURN 1
+ENDIF
+
+$INPUT_LOOP
+PRINTFORML %조사선택(ITEMNAME:BOUGHT, "를")% 구입합니까？
+PRINTL [0] - 네
+PRINTL [1] - 아니요
+INPUT
+IF RESULT == 1
+	ITEM:BOUGHT -= 1
+	BOUGHT = 0
+	;退避していたポイントを戻す
+	MONEY = TFLAG:15
+	RETURN 0
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML 《%조사선택(ITEMNAME:BOUGHT, "를")% 구입했습니다》
+
+;소질 아이템・러브다이나믹스
+IF BOUGHT == 38
+	PRINTFORML 《%NAME:MASTER%은【%TALENTNAME:91%】(을)를 몸에 익혔다》
+	TALENT:MASTER:91 = 1
+	ITEM:BOUGHT = 0
+ENDIF
+;소질 아이템【비밀지식】
+IF BOUGHT == 39
+	TALENT:MASTER:325 = 1
+	ITEM:BOUGHT = 0
+ENDIF
+;소질 아이템【조합지식】
+IF BOUGHT == 42
+	TALENT:MASTER:55 = 1
+	ITEM:BOUGHT = 0
+ENDIF
+;소질 아이템【기교LV】
+IF BOUGHT == 52
+	CALL TECHNIQUE_OF_MASTER_UP
+	;EASYなら1つで1Lv上がる
+	;IF FLAG:5 == 1
+	;	CALL TECHNIQUE_OF_MASTER_UP
+	;NORMAL/EXTRAならLv3までは1つで1Lv上がり、それ以降は技巧Lv-1分必要になる
+	;ELSEIF FLAG:5 == 2 || FLAG:5 == 9
+	;	IF ABL:MASTER:12 >= 3
+	;		F = ABL:MASTER:12 - 1
+	;		CALL TECHNIQUE_OF_MASTER
+	;	ELSE
+	;		CALL TECHNIQUE_OF_MASTER_UP
+	;	ENDIF
+	;HARDならLv2までは1つで1Lv上がり、それ以降は技巧Lv*2分必要になる
+	;ELSEIF FLAG:5 == 3
+	;	IF ABL:MASTER:12 >= 2
+	;		F = ABL:MASTER:12
+	;		F *= 2
+	;		CALL TECHNIQUE_OF_MASTER
+	;	ELSE
+	;		CALL TECHNIQUE_OF_MASTER_UP
+	;	ENDIF
+	;POWERFULならLv1までは1つで1Lv上がり、それ以降は技巧Lv*5分必要になる
+	;ELSEIF FLAG:5 == 4
+	;	IF ABL:MASTER:12 >= 1
+	;		F = ABL:MASTER:12
+	;		F *= 5
+	;		CALL TECHNIQUE_OF_MASTER
+	;	ELSE
+	;		CALL TECHNIQUE_OF_MASTER_UP
+	;	ENDIF
+	;PHANTASM以上なら技巧Lv*100分必要になる
+	;ELSE
+	;	F = ABL:MASTER:12
+	;	F *= 100
+	;	CALL TECHNIQUE_OF_MASTER
+	;ENDIF
+ENDIF
+
+
+;소질 아이템【음마지식】
+IF BOUGHT == 54
+	TALENT:MASTER:327 = 1
+	ITEM:BOUGHT = 0
+	ITEMSALES:54 = 0
+	PRINTL * 음마의 함정이 추가되었습니다 *
+ENDIF
+
+;素質アイテム【마충지식】
+IF BOUGHT == 56
+	TALENT:MASTER:328 = 1
+	ITEM:BOUGHT = 0
+	ITEMSALES:56 = 0
+	PRINTL * 몇 개의 함정이 강화되었습니다 *
+ENDIF
+
+
+WAIT
+
+RETURN 1
+;
+;-------------------------------------------------
+;아이템 출현 조건
+;-------------------------------------------------
+@SALEITEM_CHECK
+;초기상태에서 판매되고 있는 아이템
+REPEAT 24
+	ITEMSALES:COUNT = 1
+REND
+
+;에이프런、전극플러그、본디지 슈트
+ITEMSALES:19 = 1
+ITEMSALES:21 = 1
+ITEMSALES:23 = 1
+
+;영양제는【조합지식】소지로 EXTRA에서만
+ITEMSALES:30 = 0
+M = 0
+IF TALENT:MASTER:55
+	M = 1
+ENDIF
+REPEAT CHARANUM
+	SIF COUNT == 0
+		CONTINUE
+	IF CFLAG:COUNT:1 >= 1 && ISASSI:COUNT == 1
+		SIF TALENT:COUNT:55
+			M = 1
+	ENDIF
+REND
+IF M == 1
+	ITEMSALES:30 = 1
+ENDIF
+
+;비디오카메라・착유기・애널비즈
+ITEMSALES:6 = 1
+ITEMSALES:17 = 1
+ITEMSALES:20 = 1
+
+;もう持っている非消耗アイテムを消す
+REPEAT 24
+	SIF ITEM:COUNT == 1
+		ITEMSALES:COUNT = 0
+REND
+
+;소모형 아이템을 추가
+ITEMSALES:24 = 1
+ITEMSALES:25 = 1
+ITEMSALES:34 = 1
+ITEMSALES:35 = 1
+;비디오 카메라가 있으면 비디오 테이프를 판매
+SIF ITEM:6
+	ITEMSALES:28 = 1
+
+;주인이나 조수 중 누구든지【조합지식】을 가지고 있다면
+;약품 계 아이템 추가
+ITEMSALES:26 = 0
+ITEMSALES:27 = 0
+ITEMSALES:29 = 0
+ITEMSALES:31 = 0
+ITEMSALES:40 = 0
+ITEMSALES:41 = 0
+M = 0
+IF TALENT:MASTER:55
+	M = 1
+ENDIF
+REPEAT CHARANUM
+	SIF COUNT == 0
+		CONTINUE
+	IF CFLAG:COUNT:1 >= 1 && ISASSI:COUNT == 1
+		SIF TALENT:COUNT:55
+			M = 1
+	ENDIF
+REND
+IF M == 1
+	ITEMSALES:26 = 1
+	ITEMSALES:27 = 1
+	ITEMSALES:29 = 1
+	ITEMSALES:31 = 1
+	ITEMSALES:40 = 1
+	ITEMSALES:41 = 1		
+ENDIF
+
+;お香はHARDでは1日3個、POWERFULでは1個まで
+;SIF (FLAG:5 == 3 && FLAG:61 >= 3) || (FLAG:5 == 4 && FLAG:61 >= 1)
+;	ITEMSALES:31 = 0
+
+;主人か조수の誰かが【秘密知識】を持っているなら
+;秘密アイテム追加
+ITEMSALES:33 = 0
+M = 0
+IF TALENT:MASTER:325
+	M = 1
+ENDIF
+REPEAT CHARANUM
+	SIF COUNT == 0
+		CONTINUE
+	IF CFLAG:COUNT:1 >= 1 && ISASSI:COUNT == 1
+		SIF TALENT:COUNT:325
+			M = 1
+	ENDIF
+REND
+IF M == 1
+	ITEMSALES:33 = 1
+ENDIF
+
+;콘돔、로션、미약、이뇨제、ビデオテープ、피어스링、観戦チケットは99個まで
+SIF ITEM:24 >= 99
+	ITEMSALES:24 = 0
+SIF ITEM:25 >= 99
+	ITEMSALES:25 = 0
+SIF ITEM:26 >= 99
+	ITEMSALES:26 = 0
+SIF ITEM:27 >= 99
+	ITEMSALES:27 = 0
+SIF ITEM:28 >= 99
+	ITEMSALES:28 = 0
+SIF ITEM:34 >= 99
+	ITEMSALES:34 = 0
+SIF ITEM:35 >= 99
+	ITEMSALES:35 = 0
+	
+;러브스코프
+ITEMSALES:37 = 1
+SIF ITEM:37
+	ITEMSALES:37 = 0
+
+
+;素質アイテム「ラブダイナミックス」
+;ITEMSALES:38 = 1
+;SIF TALENT:MASTER:91 == 1
+;	ITEMSALES:38 = 0
+;ラブダイナミックスはHARD・POWERFULでは販売しない
+;SIF FLAG:5 == 3 || FLAG:5 == 4
+;	ITEMSALES:38 = 0
+
+;素質アイテム【秘密知識】
+ITEMSALES:39 = 1
+SIF TALENT:MASTER:325 == 1
+	ITEMSALES:39 = 0
+
+;素質アイテム【조합지식】
+ITEMSALES:42 = 1
+SIF TALENT:MASTER:55 == 1
+	ITEMSALES:42 = 0
+
+;素質アイテム【기교Lv】
+ITEMSALES:52 = 1
+;技巧Lvの上限は10、また堕とした人数+2までしか上げられない
+SIF ABL:MASTER:12 >= 10 || ABL:MASTER:12 > FLAG:30 + 1
+	ITEMSALES:52 = 0
+;素質アイテム【경험치】
+ITEMSALES:53 = 1
+;-------------------------------------------------
+;複数個所持可能なアイテムの処理
+;-------------------------------------------------
+@BUY_PLURAL
+;現在の購入可能数、Bは所持可能最大数（現在100個）、Cは所持金によるもの
+;Aはアイテムの単価、DはBとCのうち小さい方、EはB<=Cであれば0、B>Cであれば1
+;罠の値段はDUNGEON_TRAP参照
+SIF BOUGHT == 24
+	A = 100
+SIF BOUGHT == 25
+	A = 200
+SIF BOUGHT == 26
+	A = 2000
+SIF BOUGHT == 27
+	A = 1000
+SIF BOUGHT == 28
+	A = 500
+SIF BOUGHT == 34
+	A = 5000
+SIF BOUGHT == 35
+	A = 700
+SIF BOUGHT == 53
+	A = 1000
+SIF BOUGHT == 55
+	A = 5000
+
+IF BOUGHT >= 60 && BOUGHT < 90
+	P = BOUGHT
+	CALL TRAP_PRICE
+	A = RESULT
+ENDIF
+
+SIF BOUGHT == 91
+	A = 100
+B = 100-ITEM:BOUGHT
+C = MONEY/A+1
+IF B <= C && BOUGHT != 53
+	D = B
+	E = 0
+ELSE
+	D = C
+	E = 1
+ENDIF
+
+SIF BOUGHT == 55 && (FLAG:85+D > CFLAG:0:9)
+	D = CFLAG:0:9 - FLAG:85
+
+DRAWLINE
+PRINTFORM %조사선택(ITEMNAME:BOUGHT, "를")% 몇 개 구입합니까？ （1-
+PRINTV D
+PRINTL 、0으로 돌아온다）
+PRINTFORM [0] - [1] - [5] - [10] - [20] - [
+
+;全財産の半分を費やす
+IF D/2 > 20
+	PRINTV D/2
+	PRINT ] - [
+ENDIF
+
+PRINTV D
+PRINTL ] 살 수 있는만큼 산다
+
+$INPUT_LOOP
+INPUT
+IF RESULT == 0
+	ITEM:BOUGHT -= 1
+	;払い戻し
+	MONEY += A
+	RETURN 0
+ELSEIF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT > D
+	IF RESULT > D && E == 0
+		PRINTL 그렇게 많이 가질 수 없습니다
+	ELSEIF RESULT > D && E == 1
+		PRINTL 돈이 부족합니다
+	ENDIF
+	DRAWLINE
+	PRINTFORM %조사선택(ITEMNAME:BOUGHT, "를")% 몇 개 구입합니까？ （1-
+	PRINTV D
+	PRINTL 、0으로 돌아온다）
+	PRINTFORM [0] - [1] - [5] - [10] - [20] - [
+	PRINTV D
+	PRINTL ] 살수 있는만큼 산다
+	GOTO INPUT_LOOP
+ELSEIF RESULT == 1
+	PRINTFORML 《%조사선택(ITEMNAME:BOUGHT, "를")% 구입했습니다》
+	WAIT
+ELSE
+	PRINTFORML 《%조사선택(ITEMNAME:BOUGHT, "를")% {RESULT}개 구입했습니다》
+	WAIT
+	ITEM:BOUGHT += RESULT-1
+	MONEY -= A*(RESULT-1)
+ENDIF
+
+IF BOUGHT == 53
+	;経験値強化アイテム
+	ITEM:BOUGHT = 0
+	ITEMSALES:BOUGHT = 1
+	E = RESULT * 10
+	
+	$INPUT_LOOP_2
+	
+	PRINTFORML %조사선택(ITEMNAME:BOUGHT, "를")% 누구에게 사용합니까？
+	
+	PRINTL [0] 당신（던전을 강화할 수 있습니다）
+	CALL LIFE_LIST
+	
+	INPUT
+	
+	SIF RESULT < 0 || RESULT >= CHARANUM
+		GOTO INPUT_LOOP_2
+	SIF CFLAG:RESULT:1 != 0
+		GOTO INPUT_LOOP_2
+	EXP:RESULT:80 += E
+	PRINTFORMW 경험치를 {E} 얻었습니다
+ENDIF
+
+;소질 아이템【함정LV】
+IF BOUGHT == 55
+	LOCAL = FLAG:85 + RESULT
+	IF LOCAL <= CFLAG:0:9
+		PRINTFORML 《함정 Lv이 {RESULT} 올랐습니다》
+		FLAG:85 = LOCAL
+	ELSE
+		PRINTL *마왕의 레벨을 좀 더 올릴 필요가 있다！*
+		ITEM:BOUGHT -= 1
+		BOUGHT = 0
+		;退避していたポイントを戻す
+		MONEY = TFLAG:15
+		RETURN 0
+	ENDIF
+	ITEM:BOUGHT = 0
+	ITEMSALES:BOUGHT = 1
+ENDIF
+
+
+IF BOUGHT == 91
+	;指輪
+	ITEM:BOUGHT = 0
+	ITEMSALES:BOUGHT = 1
+	ITEM:300 += RESULT
+	IF ITEM:300 > 99
+		X = ITEM:300 - 99
+		MONEY += X * 100
+		ITEM:300 = 99
+		PRINTW 남은 반지를 반품했습니다
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;-------------------------------------------------
+;その場で使用するアイテムの処理
+;-------------------------------------------------
+@USE_ITEM
+DRAWLINE
+;アイテムの効果を表示する
+SIF BOUGHT == 29
+	PRINTFORML %ITEMNAME:BOUGHT%:기생으로부터 회복시킵니다
+SIF BOUGHT == 30
+	PRINTFORML %ITEMNAME:BOUGHT%:체력을 회복시킵니다
+SIF BOUGHT == 31
+	PRINTFORML %ITEMNAME:BOUGHT%:부정의 구슬을 반감합니다
+SIF BOUGHT == 33
+	PRINTFORML %ITEMNAME:BOUGHT%:세계의 역사를 바꾼 에너지원입니다
+SIF BOUGHT == 40
+	PRINTFORML %ITEMNAME:BOUGHT%:임신 확률을 높입니다
+SIF BOUGHT == 41
+	PRINTFORML %ITEMNAME:BOUGHT%:음모를 육성시킵니다
+$INPUT_LOOP
+
+PRINTFORML %조사선택(ITEMNAME:BOUGHT, "를")% 누구에게 사용합니까？
+
+CALL LIFE_LIST
+
+PRINTL [100] - 돌아온다
+
+INPUT
+
+IF RESULT == 100
+	ITEM:BOUGHT = 0
+	;払い戻し
+	SIF BOUGHT == 29
+		MONEY += 500
+	SIF BOUGHT == 30
+		MONEY += 1000
+	;払い戻し
+	SIF BOUGHT == 31
+		MONEY += 3000
+	;払い戻し
+	SIF BOUGHT == 33
+		MONEY += 100000
+	;払い戻し
+	SIF BOUGHT == 40
+		MONEY += 2000
+	;払い戻し
+	SIF BOUGHT == 41
+		MONEY += 1000
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;主人公は排除
+ELSEIF  RESULT == 0
+	GOTO INPUT_LOOP
+;売却済み・臨死中のキャラは排除
+ELSEIF  BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;体力ＭＡＸのキャラにパワビタは使えない
+ELSEIF BOUGHT == 30 && BASE:RESULT:0 == MAXBASE:RESULT:0
+	PRINTFORML 벌써 %NAME:RESULT%의 체력은 ＭＡＸ입니다
+	WAIT
+	GOTO INPUT_LOOP
+;否定の珠を持ってないキャラにお香は使えない
+ELSEIF BOUGHT == 31 && JUEL:RESULT:100 < 1
+	PRINTFORML %NAME:RESULT%(은)는 %PALAMNAME:100%의 구슬을 가지고 있지 않습니다
+	WAIT 
+	GOTO INPUT_LOOP
+;【애정】持ちかつ寿命持ちでないとWGバッテリーは使えない
+ELSEIF BOUGHT == 33 && (BASE:RESULT:10 == 0 || TALENT:RESULT:85 == 0)
+	PRINTFORML %NAME:RESULT%에게 WG배터리를 사용할 필요는 없습니다
+	WAIT 
+	GOTO INPUT_LOOP
+;妊娠中・育児中のキャラに排卵促進剤は使えない
+ELSEIF BOUGHT == 40 && TALENT:RESULT:153 || TALENT:RESULT:154
+	PRINTFORM %NAME:RESULT%는 
+	IF TALENT:RESULT:153
+		PRINTL 벌써 임신하고 있습니다
+	ELSEIF TALENT:RESULT:154
+		PRINTL 육아중 입니다
+	ENDIF
+	WAIT 
+	GOTO INPUT_LOOP
+ENDIF
+
+;寄生回復
+IF BOUGHT == 29
+	CALL ITEM_DETOX,RESULT
+	WAIT
+;体力回復
+ELSEIF BOUGHT == 30
+	PRINTFORML 《%SAVESTR:RESULT% 의 체력이 회복했습니다》
+	BASE:RESULT:0 += 300
+	SIF BASE:RESULT:0 > MAXBASE:RESULT:0
+		BASE:RESULT:0 = MAXBASE:RESULT:0
+	WAIT
+;否定の珠半減
+ELSEIF BOUGHT == 31
+	PRINTFORML 《%SAVESTR:RESULT% 의 부정의 구슬이 절반이 되었습니다》
+	PRINTFORML  부정의 구슬:{JUEL:RESULT:100} -> {JUEL:RESULT:100 / 2}
+	JUEL:RESULT:100 /= 2
+	FLAG:61 += 1
+	WAIT
+;寿命制限削除
+ELSEIF BOUGHT == 33
+	PRINTFORML 《%SAVESTR:RESULT% 의 수명 제한이 없어졌습니다》
+	BASE:RESULT:10 = 0
+	WAIT
+;排卵促進
+ELSEIF BOUGHT == 40
+	PRINTFORML 《%조사선택(SAVESTR:RESULT, "는")% 임신하기 쉬워졌습니다》
+	CFLAG:RESULT:109 = 1
+	WAIT
+;강모제
+ELSEIF BOUGHT == 41
+	IF TALENT:RESULT:311 > 200
+		PRINTFORMW …더 이상은 발라도 효과가 없는 것 같다
+		TALENT:RESULT:311 = 201
+	ELSE
+		PRINTFORML 《%SAVESTR:RESULT% 의 음모의 성장 한계가 증가했습니다》
+		TALENT:RESULT:311 += 50
+	;パイパンを消す
+	TALENT:RESULT:125 = 0
+	ENDIF
+	WAIT
+ENDIF
+
+
+;-------------------------------------------------
+;素質アイテム【기교Lv】処理
+;-------------------------------------------------
+@TECHNIQUE_OF_MASTER
+IF FLAG:33 == F - 1
+	CALL TECHNIQUE_OF_MASTER_UP
+ELSE
+	FLAG:33 += 1
+	PRINTL 
+	PRINTFORML 기교LV을 올리기 위해서는 나머지 {F - FLAG:33} 개 필요합니다
+	PRINTL 나머지를 정리해 구입합니까？
+	PRINTL  [0] - 네
+	PRINTL  [1] - 아니요
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 0
+		IF MONEY < (F - FLAG:33) * 5000
+			PRINTL 돈이 부족합니다
+		ELSE
+			MONEY -= (F - FLAG:33) * 5000
+			CALL TECHNIQUE_OF_MASTER_UP
+		ENDIF
+	ELSEIF RESULT == 1
+		RETURN 0
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+ENDIF
+
+@TECHNIQUE_OF_MASTER_UP
+ABL:MASTER:12 += 1
+FLAG:33 = 0
+ITEM:BOUGHT = 0
+PRINTFORML 《%NAME:MASTER%의 기교가 LV{ABL:MASTER:12}이 되었다》
+
+;-------------------------------------------------
+;販売アイテムフラグ全削除処理
+;-------------------------------------------------
+@CLEAR_SHOP
+
+;一旦購入可能アイテムを空に
+REPEAT 100
+	ITEMSALES:COUNT = 0
+REND
+
+;-------------------------------------------------
+;구충제
+;-------------------------------------------------
+@ITEM_DETOX,ARG
+
+PRINTFORML 《%SAVESTR:ARG%의 기생상태가 회복되었습니다》
+SIF TALENT:ARG:190
+	PRINTFORM *V기생이 회복* 
+SIF TALENT:ARG:191
+	PRINTFORM *A기생이 회복* 
+SIF TALENT:ARG:192
+	PRINTFORM *V기생이 회복* 
+SIF TALENT:ARG:193
+	PRINTFORM *A기생이 회복* 
+TALENT:ARG:190 = 0
+TALENT:ARG:191 = 0
+TALENT:ARG:192 = 0
+TALENT:ARG:193 = 0
+
+PRINTL  
+
+RETURN 0
+
+;
+;

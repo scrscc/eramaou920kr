@@ -1,0 +1,2088 @@
+﻿;-------------------------------------------------
+;매각 말로 구상
+;S는 매각치
+;처음엔 반발 각인３、음란、애정、기타에서 분기、다음 가격（100만 이상、50만 이상、10만 이상、10만 미만）에 따라 분기
+;그리고 팔리는 곳은 직업에 따라 ４분기
+;売られた先によって要求TALENT、PALAMが違って最終的な末路が表示される。
+;기본패턴은 매각 가격、매각처*4、정부 판정 *2의 32패턴
+;반발 3은 매각 가격과 매각처를 2개나 줄여서 8 패턴 売却値段と売却先を２つにまで減らして8パターン
+;通常売却は売却値段を３つにまで減らして12パターン
+;最후에魔族とその他の*2で…64（애정）+64（음란）+8（反発３）+24（통상）으로 160 패턴…뭐、그럼
+;이하메모
+;基本的に魔族以外の扱いは悪い
+;200,전사,;物理戦闘が得意な職業
+;201,마술사,;魔法によって敵を一掃する火力型
+;202,신관,;산 제물
+;203,도적,;パワーではなく技で物理戦闘を有利に進める
+;204,육변기,;용사 함락의 상징
+;205,기사,;ピンチに強い
+;206,무녀,;火力のもう一つの形
+;207,닌자,;マルチスキルで真価を発揮…のはずが地味
+;208,궁사,;物理の強職業。魔法と組んだ方が強いけど
+;別にlocal関数使う必要ないですよね
+;40万ポイントも投資して魔族にしてるんだからもうちょっと考えた方がよかったかなぁ…
+;いちいち各口上から呼び出すよりもSELL_CHARA.ERBから呼び出すようにした方がスマートでトラブルが起きにくいかも
+;-------------------------------------------------
+;汎用末路分岐点として利用します
+;すでにマオ口上でオリジナル末路を実装しているので
+;口上から呼び出す形を継承しました
+@SELL_MATURO_K0
+#DIMS MATURO
+#DIM FAMILY,3
+
+;分岐を追加します
+;俺の末路はこうなんだ！という熱い主張がある場合
+;気軽に気安くどんどん分岐を増やして大丈夫です
+
+;強制牝犬ルート！
+IF TALENT:136
+	CALL SELL_MATURO_K2
+	RETURN 0
+ENDIF
+
+PRINTL 매각할 시장을 선택해주십시오
+PRINTL [0] 마계의 암시장
+PRINTL [1] 마계의 이종족 교역 시장
+PRINTL [999] 말로를 확인하지 않고 판매한다
+
+$INPUT_LOOP_1
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP_1
+ELSEIF RESULT == 999
+	RETURN 0
+ELSEIF RESULT >= 2 && RESULT != 999
+	GOTO INPUT_LOOP_1
+ELSEIF RESULT == 1
+	CALL SELL_MATURO_K1
+	RETURN 0
+;拡張用に
+;ELSEIF RESULT == 3
+;	CALL SELL_MATURO_K3
+;	RETURN 0
+;ELSEIF RESULT == 4
+;	CALL SELL_MATURO_K4
+;	RETURN 0
+ENDIF
+
+FAMILY = CFLAG:TARGET:605
+FAMILY:1 = FAMILY % 10
+CALL SEARCH_FAMILY, TARGET
+FAMILY:2 = RESULT
+
+	;反発刻印Lv3
+	IF MARK:3 == 3
+		;마족
+		IF TALENT:TARGET:314 == 9
+			;마족은 판매 가격이 10만 이상입니다.
+			IF S >= 100000
+				IF rand:2 == 0
+					LOCALS = 마계의 중앙 노예 시장
+					LOCAL = 1
+				ELSE
+					LOCALS = 마계의 중앙 노예 시장
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%으로 이송된 %SAVESTR:TARGET% 는 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;
+					IF LOCAL == 1
+						;레벨 50이상
+						IF CFLAG:9 >= 50
+							PRINTFORMW 콜로세움의 글라디에이터로서 싸움을 하고 있다는 것 같습니다..
+							PRINTFORMW 꽤 강해서 죽지 않고 아직도 싸우고 있다고 합니다.
+							PRINTFORMW 주최자에게 미움받지 않는다면 엉뚱한 사고로 죽을 일은 없을 것입니다.
+							MATURO = 콜로세움의 검투사
+						ELSE
+							PRINTFORMW 노예는 배에 팔렸습니다 %조사선택(SAVESTR:TARGET, "는")% 노예들을 선동해서 반란을 일으키려고 했지만
+							PRINTFORMW 봉기하기 직전에 동료의 노예의 배반에 의해 시원스럽게 진압되고
+							PRINTFORMW 벌을 받아 스퀼라의 먹이로 산 채로 바다에 던져 졌다고 선원에게 들었습니다.……
+							MATURO = 스퀼라의 먹이
+						ENDIF
+					;
+					ELSEIF LOCAL == 0
+						;신관＆무녀
+						IF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+							PRINTFORMW 새롭게 만들어지는 신전의 제물로서 선택된 듯합니다.
+							PRINTFORMW 늙은 신관이 이것을 듣고는 안심이라면서 신관들과 같이 %조사선택(SAVESTR:TARGET, "를")% 보고 있습니다 
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 제물이 되면,그 자리에는 반드시 훌륭한 신전이 세워질 것입니다
+							MATURO = 신전의 제물
+						ELSE
+							PRINTFORMW 원래 용자인 %조사선택(SAVESTR:TARGET, "는")% 양 팔 양 다리에 쇠사슬이 채워진 채로 항구도시로 운반되고 있는 것 같다.
+							PRINTFORMW 때때로 반항적인 태도를 보여서 등 뒤에는 채찍의 생긴 무수한 상처가 있다고 한다.
+							PRINTFORMW 그 생활로부터 빠져나가는 일은 영원히 없을 것이다 ……
+							MATURO = 노동노예
+						ENDIF
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				IF RAND:2 == 0
+					LOCALS = 마계 지방 노예 시장
+					LOCAL = 1
+				ELSE
+					LOCALS = 마계 지방 노예 시장
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%으로 이송된 %조사선택(SAVESTR:TARGET, "는")% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					IF LOCAL == 1
+						IF RAND:2 == 0
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 노예 오두막으로부터 이송되는 타이밍에 탈주를 하려고 한 것 같다.
+							PRINTFORMW 당연히 곧바로 잡혀 %조사선택(SAVESTR:TARGET, "는")% 무거운 형벌을 받게 되었다.
+							PRINTFORMW 양 쪽 눈을 뽑히고 그대로 싼 가격에 팔려나갔다고 한다.
+							SETCOLOR 153,0,0
+							PRINTFORMW 「거기 가시는 주인님…이 아이 어떻습니까?  눈이 안 보이기 때문에 탈주할 위험은 전혀 없어요」
+							RESETCOLOR
+							MATURO = 장님노예
+						ELSE
+							SETCOLOR 153,0,0
+							PRINTFORMW 「탈주 노예가 어떻게 되는지 알고 있냐? 뭐 몰라? 조금 있으면 알게 될 거야」
+							RESETCOLOR
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 노예 오두막으로부터 이송되는 타이밍에 탈주를 하려고 한 것 같다.
+							PRINTFORMW 당연히 곧바로 잡혀 %조사선택(SAVESTR:TARGET, "는")% 벌을 받게 되었다.
+							PRINTFORMW 오른쪽 다리의 아킬레스건을 절단되었다. 그리고 그 모습을 다른 노예들에게 보여주며 탈주하면 이렇게 된다고 말하고 있다.
+							SETCOLOR 153,0,0
+							PRINTFORMW 「이것으로 도망가지 못하게 됐군…」
+							RESETCOLOR
+							MATURO = 걸을수 없는 노예
+						ENDIF
+					ELSEIF LOCAL == 0
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 반항적인 %조사선택(SAVESTR:TARGET, "는")% 시장에서 난동을 부렸고, 시찰하러 온 지방 영주의 얼굴에 상처를 내버렸다.
+							PRINTFORMW 보통이라면 채찍질 정도로 해결되지만 상대가 나빴다.
+							PRINTFORMW 악랄한 새디스트로 유명했던 지방 영주는 그녀를 매입하자 그대로 도살장으로 데리고 간 듯 하다.……
+							PRINTFORMW 
+							PRINTFORMW 「크큭, 이 고기를 팔러 왔는데?」
+							PRINTFORMW 이렇게 해서 %조사선택(SAVESTR:TARGET, "는")% 100g당 100포인트 가격으로 고기로 팔렸다……
+							MATURO = 고기
+						ELSE
+							SETCOLOR 153,0,0
+							PRINTFORMW 「탈주 노예 어떻게 되는지는 알고 있냐? 뭐 몰라도 곧바로 알게 될 거야」
+							RESETCOLOR
+							PRINTFORMW 탈주에 실패한 %조사선택(SAVESTR:TARGET, "는")% 수술대에 구속되어 있었다. 지금부터 다른 노예들에게 보내는 경고의 메시지로서 %조사선택(SAVESTR:TARGET, "는")% 개조된다. 
+							PRINTFORMW 수 시간 후, 그녀의 양 팔 양 다리는 절단되고 토르소로서 팔리게 되었다.
+							PRINTFORMW 그리고 그 토르소는 엽기 아이템을 좋아하는 컬렉터에게 팔렸다.
+							MATURO = 생체 박제
+						ENDIF
+					ENDIF
+			ENDIF
+		;それ以外の種族
+		ELSE
+			;それ以外の種族売値10万以上
+			IF S >= 100000
+				;種族ドラゴン
+				IF TALENT:TARGET:314 == 5
+					LOCALS = 마계의 중앙 노예 시장
+					LOCAL = 2
+				;전사＆도적
+				ELSEIF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 중앙 노예 시장
+					LOCAL = 1
+				ELSE
+					LOCALS = 마계의 중앙 노예 시장
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 이송된 %SAVESTR:TARGET% 는 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;種族ドラゴン
+					IF LOCAL == 2
+						SETCOLOR 153,0,0
+						PRINTFORMW 「아 , 거기 멋진 주인님 , 좋은 물건이 들어왔는데 한번 보고 가시겠습니까?」
+						RESETCOLOR
+						PRINTFORMW 주인님이라고 불린 상인은 안면이 있는 판매원이 열어준 천막 안으로 들어간다.
+						PRINTFORMW 그 중에는 당장 날아올듯한 포즈를 취하는 용족 아가씨가 있었다.
+						PRINTFORMW 그러나 그 눈동자에 생명의 흔적은 보이지 않는다. 왜냐하면 그것은 박제이기 때문에…
+						SETCOLOR 153,0,0
+						PRINTFORMW 「여기서만 하는 이야기입니다만… 이 여자는 혀를 깨물고 자살해버렸습니다…그렇게나 노예가 되는 것이 싫었을까요………」
+						RESETCOLOR
+						MATURO = 剥製
+					ELSEIF LOCAL == 1
+						;전사＆도적
+						PRINTFORMW 콜로세움의 글라디에이터로서 계속 싸움을 했지만 
+								;레벨 100이상
+								IF CFLAG:9 >= 100
+									PRINTFORMW 결국 다른 노예들과 함께 반란을 일으켰으나 곧바로 진압되었다고 한다.
+									PRINTFORMW 주모자 %조사선택(SAVESTR:TARGET, "는")% 행방불명인 채 반란의 둿정리가 끝난 것 같다.
+									PRINTFORMW 생존자들은 콜로세움에 모여져 맹수들의 먹이가 되었다고 한다…
+								ELSE
+									PRINTFORMW 결국 다른 노예들과 함께 반란을 일으켰지만 곧바로 진압되었다고 한다.
+									PRINTFORMW 주모자 %조사선택(SAVESTR:TARGET, "는")% 벌로서 산 채로
+									PRINTFORMW 콜로세움의 챔피언인 대형 키메라에게 먹혀버렸다고 한다…
+								ENDIF
+								MATURO = 콜로세움의 검투사
+					ELSEIF LOCAL == 0
+						;신관＆무녀
+						IF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+							PRINTFORMW 새로이 만들어지는 신전의 제물로서 선택된 듯 합니다.
+							PRINTFORMW 늙은 신관이 이것을 듣고는 안심이라며 신관들과 함께 %조사선택(SAVESTR:TARGET, "를")% 보고 있다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 제물이 되면,그 자리에는 반드시 훌륭한 신전이 세워질 것이다
+							MATURO = 신전의 제물
+						ELSE
+							PRINTFORMW 갤리어스 선의 노를 젓는 노예로 팔려 발에는 쇠사슬이 연결되어 있었다고 한다.
+							PRINTFORMW 하지만 어느 날 폭풍우에 말려들어 배는 난파해버린 것 같다.
+							PRINTFORMW 그것 뿐으로 %SAVESTR:TARGET%의 소식을 아는 것은 없다……
+							MATURO = 갤리선의 노
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				IF RAND:2 == 0
+					LOCALS = 마계 지방 노예 시장
+					LOCAL = 1
+				ELSE
+					LOCALS = 마계 지방 노예 시장
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 이송된 %SAVESTR:TARGET% 는 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					IF LOCAL == 1
+						IF RAND:2 == 0
+							SETCOLOR 153,0,0
+							PRINTFORMW 「아아, 역시 너는 입 다물고 있는 편이 귀엽다고 생각한다」
+							RESETCOLOR
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 수술한 남자는 그렇게 웃고는 실을 뽑고 있다.
+							PRINTFORMW 그녀는 벌써 팔꿈치와 무릎 위쪽의 팔다리를 절단당하고 금속제의 커버가 붙여져 있었다.
+							PRINTFORMW 무엇인가 항의를 하려고 하지만 그 혀는 벌써 뽑혀진 듯 하다.
+							SETCOLOR 153,0,0
+							PRINTFORMW 「음음, 이 테이블이라면, 좋은 가격에 팔릴 것 같군………」
+							RESETCOLOR
+							MATURO = 생체 테이블
+						ELSE
+							SETCOLOR 153,0,0
+							PRINTFORMW 「아아 , 역시 너는 입 다물고 있는 편이 귀엽다고 생각한다」
+							RESETCOLOR
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 수술한 남자는 그렇게 웃고는 실을 뽑고 있다.
+							PRINTFORMW 그녀는 벌써 양 팔과 양 다리가 절단 되어 인간 의자로서 개조되어버렸다,
+							PRINTFORMW 혀는 뽑혀지고 남은 손발은 의자의 장식품으로서 사용되고 있다…
+							SETCOLOR 153,0,0
+							PRINTFORMW 「음음, 이 의자라면,  좋은 가격에 팔릴 것 같군……」
+							RESETCOLOR
+							MATURO = 생체 의자
+						ENDIF
+					ELSEIF LOCAL == 0
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 반항적인 %조사선택(SAVESTR:TARGET, "는")% 시장에서 난동을 부리다가 시찰하러 온 지방 영주의 얼굴에 상처를 내버렸다.
+							PRINTFORMW 보통이라면 채찍질로 해결되는 정도였지만 상대가 나빴다.
+							PRINTFORMW 악랄한 새디스트로 유명했던 지방 영주는 그녀를 매입하자 그대로 도살장으로 데리고 간 듯 하다.…
+							PRINTFORMW 
+							PRINTFORMW 「크큭, 이 고기를 팔러 왔는데?」
+							PRINTFORMW 이렇게 해서 %조사선택(SAVESTR:TARGET, "는")% 100g당 100포인트에 팔리게 되었다.
+							MATURO = 고기
+						ELSE
+							SETCOLOR 153,0,0
+							PRINTFORMW 탈주 노예가 어떻게 되는지는 알고 있어? 뭐 몰라도 곧바로 알게 될 거야
+							RESETCOLOR
+							PRINTFORMW 탈주에 실패한 %조사선택(SAVESTR:TARGET, "는")% 수술대에 구속되어 있었다. 지금부터 다른 노예들에게 보내는 경고의 메시지로서 %조사선택(SAVESTR:TARGET, "는")% 개조된다. 
+							PRINTFORMW 수 시간 후, 그녀의 양 팔 양 다리는 절단되어 토르소로서 팔리게 되었다.
+							PRINTFORMW 그리고 그 토르소는 엽기 아이템을 좋아하는 컬렉터에게 팔렸다.
+							MATURO = 살아있는 박제
+						ENDIF
+					ENDIF
+			ENDIF
+		ENDIF
+	;애정
+	ELSEIF TALENT:85
+		;마족
+		IF TALENT:TARGET:314 == 9
+			;마족의 판매가 100만 이상입니다.
+			IF S >= 1000000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 장군
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 귀족
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신관장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 거상
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%의 음부는 아무리 난폭하게 다루어도 쾌감밖에는 느끼지 않고 장군의 커다란 자지도 손쉽게 보지로 단단히 물고 있는 것 같다.
+							PRINTFORMW 매혹적인 몸매와 원래 용자라는 경력에 장군도 몹시 마음에 들어하고 있는 것 같다.
+							PRINTFORMW 성노예로서 팔렸을 텐데, 지금은 애인과 같은 사이가 되어 있다고 한다
+						ELSE
+							PRINTFORMW 장군의 육변기로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 꽤 난폭하게 다루어진 것 같다
+							PRINTFORMW 성노예로서 매일 밤 범해지고 있지만 조금만 더 하면 망가질 것 같다고 하는 이야기다
+							PRINTFORMW 전 용자답게 내구력은 있지만 정말로 망가지는 것도 시간 문제일 것이다.
+						ENDIF
+						MATURO = 성노예
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 새로운 주인에게 팔린 %조사선택(SAVESTR:TARGET, "는")% 매일 밤 매일 밤 집요하게 가슴을 만져저, 침대 안에서 허덕이고 있다고 한다.
+							PRINTFORMW 그런 그녀도 당신에게 단련받은 기술로 마음껏 즐기고 있는 것 같다
+							PRINTFORMW 주인의 애완동물로서 길러지고 있는 %조사선택(SAVESTR:TARGET, "는")% 그 나름대로 행복하다고 한다.
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%)는 저택의 메이드 겸 애인이 되어 있다는 것 같다.
+							PRINTFORMW 주인의 변덕으로 불려가 그 자리에서 안기는 것이 일상이라고 한다.
+							PRINTFORMW 조만간에 주인의 아이를 임신하겠지만 용서 없이 낙태하게 될 것이다.
+						ENDIF
+						MATURO = 마계귀족의 애인
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 신관장을 가까이서 모심으로써 타락신의 신전에서 일하고 있다는 것 같다..
+							PRINTFORMW 타락신의 은총을 받기 위해서 신관장에게 애널을 범해지고 있는 것 같다.
+							PRINTFORMW 그 감도가 좋은 점 때문에 한층 더 애널이 확장되어 지금은 트롤의 페니스도 손쉽게 삼키고 있는 것 같다.
+							MATURO = 애널 노예 여신관
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 신관장의 5번째 애인으로서 매일 밤 불려가고 있는 듯 하다
+							PRINTFORMW 일찍이 신에게 시중들고 있었던 %조사선택(SAVESTR:TARGET, "는")% 타락신의 이름을 주창하고
+							PRINTFORMW 타락신에게 욕망 가득한 목소리를 계속 바치고 있는 것 같다
+							MATURO = 성노예 여신관
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;話術LV5以上
+						IF ABL:15 >= 5
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "와")%의 잠자리에서의 이야기 중 그 화술의 교묘함을 깨달은 거상은 그녀를 비서로서 사용할 것을 결심했다고 한다.
+							PRINTFORMW 교묘한 화술과 경우에 따라서는 신체도 사용한 교섭으로 인해 호걸들에게 새로운 이익을 가져오고 있다는 것 같다.
+							PRINTFORMW 매일 밤, 주인과 손님에 의해 귀여운 목소리가 응접실로부터 끊이는 일이 없다고 한다.
+							MATURO = 거래인
+						ELSE
+							PRINTFORMW 거상의 8번째 애인으로서 팔린 %조사선택(SAVESTR:TARGET, "는")%, 부지런하게 따라다니고 있다고 한다.
+							PRINTFORMW 그 상냥한 성격은 마족에게 어울리는 것은 아니지만, 거상의 수많은 아이들에게 사랑 받고 있는 것 같다.
+							PRINTFORMW 그리고 거상의 아들중 성인인 아들에게 구애받아 매일 밤 안기고 있다고 한다.
+							MATURO = 호상의 애인
+						ENDIF
+					ENDIF
+			;魔族売値50万以上
+			ELSEIF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마피아의 보스
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 지방 영주
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신전
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 대상인
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;도적
+						IF TALENT:TARGET:203 == 1
+							PRINTFORMW 마계에서도 다섯 손가락 안에 들어오는 도시에서 ,%조사선택(SAVESTR:TARGET, "는")% 뒷사회의 일원이 되어 있었다.
+							PRINTFORMW 그녀는 원래 도적 길드에 소속해 있었던 덕분인지 곧바로 악마의 세계의 마피아에도 친숙해진 것 같다.
+							PRINTFORMW 그리고 보스의 애인으로서 안기는 생활도 상당히 익숙해진 상태라고 한다
+							MATURO = 마피아의 애인
+						ELSE
+							PRINTFORMW 마계에서도 다섯 손가락안에 들어오는 도시에서 ,%조사선택(SAVESTR:TARGET, "는")% 뒷사회의 일원이 되어 있었다.
+							PRINTFORMW 원래의 전사로서의 기량을 전망되었는지 경호원 같은 생활을 하고 있다는 것 같다.
+							PRINTFORMW 그리고 보스의 애인으로서 매일 안기고 있다고 한다.
+							MATURO = 마피아의 애인
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 메이드로서 저택에서 일하게 되었다고 한다.
+							PRINTFORMW 메이드복은 항상 가슴을 드러내고 있는 타입의 옷으로 추잡한 디자인으로 인해 남들로부터 성희롱을 듣고 있다고 한다
+							PRINTFORMW 밤에는 영주에게 철저하게 범해지는 생활을 하고 있다는 것 같다.
+							MATURO = 지방영주의 메이드
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 어려서... 아직 아이라고 생각되어 영주의 장난감으로서 곁에 있는 것 같다.
+							PRINTFORMW 매일 아이들 장난감의 일종과 같은 취급을 받고 있다고 한다
+							PRINTFORMW 주인이 질리는 일이 없는 한 생활이 계속될 것이다.
+							MATURO = 지방영주의 애완인형
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 신전에 새로이 배치된 %조사선택(SAVESTR:TARGET, "는")% 타락신의 공물로서 애널 노예가 되었다.
+							PRINTFORMW 신도들에게 애널을 몇 번이나 범해지면서도 기쁨에 소리를 높인 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 타락신을 많이 기쁘게 하고 있는 것 같다.
+							MATURO = 사교신전의 애널노예
+						ELSE
+							PRINTFORMW 신전에 새로이 배치된 그녀는 타락신의 공물로서 신도들에게 끝없이 범해지는 것이었다.
+							PRINTFORMW 또, 그렇게 해서 출생한 아이는 신전에서 소중히 자라게 된다.
+							PRINTFORMW 이전에는 이교의 신을 믿었던 %SAVESTR:TARGET%도 머잖아 마음속까지 타락신의 신도가 될 것이다.
+							MATURO = 사교신전의 성노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 종업원들의 육변기로서 팔린 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 그렇게 수십 년 동안 누구의 자식인지도 모르는 아이들을 계속 낳았다고 한다.
+							PRINTFORMW 출생한 아이들은 곧바로 다른 곳에 팔려서 %SAVESTR:TARGET%의 유지비에 포함되었다고 한다.
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW 애인으로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 주인을 얌전히 따르고 있다고 한다.
+							PRINTFORMW 매일밤 레즈비언인 본처와 함께 남편에게 사랑을 받아 애인이라기보다는 상인 부부의 애완동물 같은 관계라고 한다.
+							PRINTFORMW 임신했을 때는, 아이도 애완동물로서 길러질 거라 말해졌다고 한다.
+							MATURO = 애인
+						ENDIF
+					ENDIF
+			;魔族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 사관
+					LOCAL = 3
+				;기사＆마술사
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:201 == 1
+					LOCALS = 마계의 학원
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 대농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 상인
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 사관은 공훈을 세운 포상금으로 %조사선택(SAVESTR:TARGET, "를")% 손에 넣은 것 같다.
+							PRINTFORMW 아직 나이가 젊은 사관에게 밀려 쓰러트려졌을 때 %조사선택(SAVESTR:TARGET, "는")% 간신히 자신이 팔린 것을 자각했다고 한다.
+							PRINTFORMW 사관은 %SAVESTR:TARGET%의 살살 녹아내리는 음부의 쾌락에 빠져들었다고 한다.
+						ELSE
+							PRINTFORMW 사관은 공훈을 세운 포상금으로 %조사선택(SAVESTR:TARGET, "를")% 손에 넣은 것 같다.
+							PRINTFORMW 아직 나이가 젊은 사관에게 밀려 쓰러트려졌을 때 %조사선택(SAVESTR:TARGET, "는")% 간신히 자신이 팔린 것을 자각했다고 한다.
+							PRINTFORMW 범해져서 눈물을 흘리는 노예를 보고, 마계의 젊은 사관은 어른이 되었다.
+						ENDIF
+						MATURO = 마계사관의 성노예
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;巨乳or爆乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 매력적인 유방을 가지고 있었기 때문에, 학원에서 개발한 약이 주사된 결과
+							PRINTFORMW 비대화한 유방으로부터는 항상 모유가 나오게 되어, 식당에서 항상 우유를 제공하는 젖소가 되어 있다는 것 같다.
+							PRINTFORMW 이전의 두 배 이상으로 비대화된 유방은 학생들의 완구로서 매일 실신할 때까지 주물럭거려지며 돌려진다고 한다
+							MATURO = 밀크 서버
+						ELSE
+							PRINTFORMW 학생들의 성욕 해소를 위해 팔린 %SAVESTR:TARGET%였지만, 그것에만 머무르지 않고
+							PRINTFORMW 교배 실험이라고 해서 키메라와 실험동물에게 교배당하고 있다는 것 같다.
+							PRINTFORMW 조만간에 새로운 생물이 만들어져 당신의 마법진으로 소환되게 될 것이다.
+							MATURO = 이종교배 실험체
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 대농장의 주인은 다른 농노를 사는 김에 %조사선택(SAVESTR:TARGET, "를")% 산 것 같다
+							PRINTFORMW 최초로 맛보기를 했을 때 애널의 쾌감에 가버리고는 매일 밤 농장에서 귀여워하고 있다고 한다.
+							PRINTFORMW 거대한 페니스에 몇 번이나 범해진 결과, 애널은 벌써 벌려져 있는 상태로 침대에 애액을 가득 흘리고 있다는 것 같다.
+						ELSE
+							PRINTFORMW 대농장의 주인은 다른 농노를 사는 김에 %조사선택(SAVESTR:TARGET, "를")% 산 것 같다
+							PRINTFORMW 도대체 어디가 마음에 들었는지 모르겠지만, 마치 아내를 상대라도 하듯이 상냥하게 다루고 있다고 한다.
+							PRINTFORMW 벌써 주인의 정액에 의해 임신해, 출산도 가까워진 듯 하다
+						ENDIF
+						MATURO = 대농장주의 성노예
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 육변기로서 가게의 화장실에 묶여 있다는 것 같다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 손님뿐만 아니라 종업원의 육변기로서도 사용되고 있어 한때는 종업원의 사용을 금지하는 일도 있었다고 한다.
+							PRINTFORMW 드디어 임신해버렸으므로 ”육변기의 출산 쇼” 를 한다는 것 같지만, 한계까지 아슬아슬하게 화장실에 방치됐던 듯 하다
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW 소재로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 요술사에 의해 한층 더 개조가 된 것 같다
+							PRINTFORMW 거기서 고객의 취미도 약간 포함되어 개조된 듯한 %조사선택(SAVESTR:TARGET, "는")% 부가가치가 붙어
+							PRINTFORMW 다른 고객에게 팔렸다고 한다.
+							MATURO = 마개조 고깃덩이
+						ENDIF
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS =마계의 광산 주인
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 싸구려 주점
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 농장
+					LOCAL = 1
+				;기타
+				ELSE
+					LOCALS = 거리의 공중 변소
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개로서 길러지고 있는 것 같다.
+							PRINTFORMW 몇 번이고 범해져도 굽히지 않던 모습은, 더 이상 보이지 않았다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개로서 길러지고 있는 것 같다.
+							PRINTFORMW 범해질 때마다 울부짖으며 몇 번이고 범해졌다고 한다.
+						ENDIF
+						MATURO = 광산노예의 성노예
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 웨이트리스를 했지만 지나친 가슴의 크기 덕분에
+							PRINTFORMW 「당신에게 어울리는 제복은 없어!」라고 말을 들어 토플리스로 접객하게 된 것 같다
+							PRINTFORMW 매일밤 팁은 많이 받고 있는 것 같지만 자신의 몸을 되사려면 상당한 시간이 걸릴 것이다.
+							MATURO = 가정주점의 웨이트레스
+						ELSE
+							PRINTFORMW 점주가 손님을 알선해서, %조사선택(SAVESTR:TARGET, "는")% 창녀와 같은 흉내를 하게 된 것 같다.
+							PRINTFORMW 원래 용자도 저속해지는 질만큼 저속해진 것이다.
+							MATURO = 가정주점의 웨이트레스
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 농노로서 지내고 있지만
+							PRINTFORMW 농장 주인이 맛보기를 했을 때 그 애널의 쾌감에 빠져 버렸기 때문에
+							PRINTFORMW 전용 성노예가 되어 버렸다고 한다.
+							MATURO = 농장주의 성노예
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 농노로서 지내고 있지만
+							PRINTFORMW 다른 농노를 놓치지 않기 위해 농노들의 공동 아내로서 무리하게 매일밤 노리개감이 되어 있는 것 같다.
+							MATURO = 농노의 공동아내
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 원래 육변기였던 덕분인가
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 상당히 장기간, 공중 변기로서 시민들에게 사랑받고 있었다.
+							PRINTFORMW 정액에 빠져 죽기 전에 낳은 아이들의 수는 100을 넘었다고 한다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 시민의 공중 육변기로서 밤낮을 가리지 않고 사용된 것 같다.
+							PRINTFORMW 그녀는 지나친 혹사에 정신이 붕괴 직전까지 갔지만
+							PRINTFORMW 마지막 끝까지 완전히 망가지는 일은 없었다고 한다.
+						ENDIF
+						MATURO = 육변기
+					ENDIF
+			ENDIF
+		;それ以外の種族
+		ELSE
+			;それ以外の種族売値100万以上
+			IF S >= 1000000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 장군
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 귀족
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신관장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 거상
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %SAVESTR:TARGET%의 음부는 아무리 난폭하게 다루어도 쾌감 밖에 낳지 않고 장군의 커다란 자지도 손쉽게 보지로 단단히 물고 있는 것 같다.
+							PRINTFORMW 매혹적인 신체와 원래 용자라는 경력에 장군도 몹시 마음에 들고 있는 것 같다.
+							PRINTFORMW 장군이 손수 밥을 먹여줄 정도로, 이종족의 성 노예로 생각할수 없을 정도의 좋은 대우를 해주는것 같다.
+						ELSE
+							PRINTFORMW 장군의 육변로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 꽤 난폭하게 다루어진 것 같다.
+							PRINTFORMW 성 노예로서 매일밤 용서 없이 범해져 얼마있으면 망가질 것 같다고 하는 이야기다.
+							PRINTFORMW 만약 망가져 버리면 장군의 방에 박제가 또 하나 증가하게 될 것이다.
+						ENDIF
+						MATURO = 마계장군의 성노예
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 그 거유로 주목을 받은 것 같다。
+							PRINTFORMW 가죽의 구속 도구로 가슴을 쥐어짜지고 거기에 다이아몬드가 달린 귀걸이나 바늘을 찔러 예쁘게 꾸며져 있다
+							PRINTFORMW 주인의 보석을 두는 보관함으로서 훌륭한 인체 가구가 되어 있는 것 같다.
+							MATURO = 인체가구
+						ELSE
+							PRINTFORMW 주인 전용의 애완 동물이 된 %조사선택(SAVESTR:TARGET, "는")% 주인을 해하지 않도록 구속 도구를 입고
+							PRINTFORMW 항상 네 발로 개처럼 끌려 다니고 있다
+							PRINTFORMW 완전히 애완 동물로서의 자각이 싹트고, 즉시 암컷 모체로서 다른 애완 동물과 교배를 시작하는 것이였다.
+							MATURO = 귀족의 애완동물
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 다른 신을 시중들고 있던 존재들을 타락신에게 전향 시키는 것도 신관장의 소중한 임무라고 한다.
+							PRINTFORMW %SAVESTR:TARGET% 는 애널을 신관장의 페니스에 꿰뚫어진 상태로 하루종일 설법을 듣고 있는 것 같다
+							PRINTFORMW 한번은 당신에게 함락된 %조사선택(SAVESTR:TARGET, "는")%, 타락 신에게로 신앙을 전향하는 것도 시간 문제일 것이다.
+							MATURO = 애널노예 여신관
+						ELSE
+							PRINTFORMW 신관장의 노예가 된 %SAVESTR:TARGET% 는 밤마다 야릇한 의식에 참석하고 있다
+							PRINTFORMW 제대로 된 신을 섬기고 있던 사람들에게는 부정해야 할만한 더러운 의식이지만
+							PRINTFORMW 이미 당신에게 함락된 %SAVESTR:TARGET%에게 있어 매력적인 의식이라고 생각되었는지 적극적으로 참가하고 있는 것 같다.
+							MATURO = 성노예 여신관
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;話術LV5以上
+						IF ABL:15 >= 5
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 단순한 성노예로서 구입되었던 것이었지만, 생각했던 것보다 쓸만하다는 것을 깨달은 거상은
+							PRINTFORMW 협상을 유리하게 만들기 위한 밤의 도구로서 그녀를 사용하기 시작했다고 한다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 주인이 원하는 대로 모든 남자에게 안기며 몇 번이나 임신과 출산을 반복했다고 한다.
+							MATURO = 성노예 교섭인
+						ELSE
+							PRINTFORMW 거상의 애완동물로서 길러 지고 있던 %조사선택(SAVESTR:TARGET, "는")%, 그런 취급에도 상관없이 온순하게 따르고 있다고 한다.
+							PRINTFORMW 거상의 수 많은 아이들에게도 사랑을 받고 애완견처럼 임신과 출산을 반복하는 것 같다.
+							PRINTFORMW 그런 그녀는 애완동물로서 행복을 즐기고 있다고 한다.
+							MATURO = 호상의 애완동물
+						ENDIF
+					ENDIF
+			;それ以外の種族売値50万以上
+			ELSEIF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마피아의 두령
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계 지방의 영주
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신전
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 대상인
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;도적
+						IF TALENT:TARGET:203 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 온순한 애완동물로서 주인에게 오로지 충성을 다하고 있는 것 같다.
+							PRINTFORMW 몇 번이나 탈주를 꾀했지만, 노예의 증거인 목걸이에 구속되어 있고 팔찌 역시 자신의 마법으로는 절대로 해제할 수 없단 사실이 밝혀지고 난 후 완전히 얌전하게 된 것 같다.
+							PRINTFORMW 주인은 그런 %조사선택(SAVESTR:TARGET, "를")% 매우 귀여워해서 비교적 자유롭게 지내게 하고 있다고 한다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 온순한 애완동물로서 주인에게 오로지 충성을 다하고 있는 것 같다.
+							PRINTFORMW 벌써 자신이 용자인 것조차 기억나지 않을 만큼 타락한 신체가 되어버린 %SAVESTR:TARGET%에게 있어
+							PRINTFORMW 주인에게 발길질당하여 짓밟히는 것조차도 쾌감에 지나지 않았던 것 같다.
+						ENDIF
+						MATURO = 마피아의 온순한 애완동물
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 모유가 나오도록 개량된 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 밀크메이드로서 저택에서 놓여져 있는 것 같다.
+							PRINTFORMW 티타임 때는 스스로의 손으로 밀크를 짜서 주인에게 제공하고 있다고 한다.
+							MATURO = 밀크 서버
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 손님용의 동침하는 여성으로 이불처럼 사용되고 있는 것 같다
+							PRINTFORMW 여러 종족의 수컷들에게 사용되어 각각에게 호평이라고 한다.
+							PRINTFORMW 벌써 아이도 몇 명인가 출생해 그 아이들은 저택의 하인 하녀로서 자라고 있는 것 같다.
+							MATURO = 손님용의 육이불
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 신전에 새롭게 배치된 %조사선택(SAVESTR:TARGET, "는")%, 타락신의 공물로서 애널 노예로 타락했다.
+							PRINTFORMW 이종족에 이교도인 자의 애널을 범하는 것은 공덕인 듯하여 %조사선택(SAVESTR:TARGET, "는")% 신도들에게 대인기인 것 같다.
+							PRINTFORMW 모든 페니스를 그 음란한 애널로 받아들인 결과, 타락신도 기뻐하는 훌륭한 항문보지가 되었다고 한다.
+							MATURO = 신전의 애널노예
+						ELSE
+							PRINTFORMW 신전에 새롭게 배치된 %조사선택(SAVESTR:TARGET, "는")%, 타락신의 공물로서 신자들에게 끝없이 범해지고 있다.
+							PRINTFORMW 이종족에 이교도인 여자를 범하는 것은 공덕인 듯하여 매일 장사진이라고 한다.
+							PRINTFORMW 일찍이는 이교의 신들을 믿고 있던 %SAVESTR:TARGET%도 머지않아 마음속까지 타락신의 신도가 될 것이다.
+							MATURO = 신전의 성노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 종업원들의 육변기로서 길러진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 그로부터 십수 년 동안 아버지가 누군지도 모르는 아이들을 계속 낳은 것 같다.
+							PRINTFORMW 출생한 아이들은 곧바로 팔려 육변기의 유지비에 포함 되었다고 한다.
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW 애완동물로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 주인을 얌전히 따르고 있다고 한다
+							PRINTFORMW 원래 용자로서의 자존심은 가루가 되었고 완전히 애완동물로서 예의범절을 배워 호평된 것 같다.
+							PRINTFORMW 좀 더 재주를 배우면 애완동물의 품평회에 나와도 좋을 것 같다고 주인은 말했다고 한다.
+							MATURO = 대상인의 애완동물
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 젊은사관
+					LOCAL = 3
+				;기사＆마술사
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:201 == 1
+					LOCALS = 마계의 학원
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 대농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 상인
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 사관의 첫 공로에 대한 보수로 주어진 %조사선택(SAVESTR:TARGET, "는")% 
+							PRINTFORMW 아직 젊은 사관에게 있어서는 성노예라고 하는 것보다도 사랑스러운 연인과 같이 생각된 것 같다.
+							PRINTFORMW 매일 밤 사관의 페니스를 받아들여 허덕이는 그녀를 보고서, 사관은 더욱 더 %조사선택(SAVESTR:TARGET, "가")% 사랑스러워졌다고 한다.
+						ELSE
+							PRINTFORMW 사관의 첫 공로에 대한 보수로 주어진 %조사선택(SAVESTR:TARGET, "는")% 
+							PRINTFORMW 아직 젊은 사관에게 있어서는 성노예라고 하는 것보다도 사랑스러운 연인과 같이 생각된 것 같다.
+							PRINTFORMW 그리고 좀처럼 흔들리지 않는 %조사선택(SAVESTR:TARGET, "를")% 무리하게 폭행하고 나서야 매일 그 지체를 맛보고 있다고 한다.
+						ENDIF
+						MATURO = 마계사관의 성노예
+					;기사＆마술사
+					ELSEIF LOCAL == 2
+						;巨乳or爆乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 매력적인 유방을 가지고 있었기에 그 학원에서 개발한 약을 주사했다
+							PRINTFORMW 유방은 음충의 산란처가 된 것 같다. 유방 안에서 꿈틀거리는 음충은 기묘한 체액을 분비해, 쾌락을 계속 주고 있다고 한다.
+							PRINTFORMW 이 실험이 제대로 성공하면 새로운 미약이 시장에 팔리게 될 것이다.
+							MATURO = 음충의 묘상
+						ELSE
+							PRINTFORMW 학생들의 성욕 해소를 위해 팔린 %조사선택(SAVESTR:TARGET, "는")% 매일 학생들에게 희롱되고 있는 것 같다
+							PRINTFORMW 어떤 종류의 학생들에게 있어서는 수업 중에 그녀를 범하는 것은 일종의 신분인 것 같겠지만
+							PRINTFORMW 이 때, 교사의 벌을 받는 것은 물론 「학생을 현혹시켜 수업의 진행을 방해한」 %조사선택(SAVESTR:TARGET, "가")%다
+							PRINTFORMW 교사의 채찍에 의해 %SAVESTR:TARGET%의 비명이 교실에 울려 퍼져, 학생들의 욕망은 더욱 더 자극되었다
+							MATURO = 학생의 장난감
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 대농장의 주인은 다른 농노를 사는 김에 %조사선택(SAVESTR:TARGET, "를")% 산 것 같다.
+							PRINTFORMW 몇 사람이나 있는 아들들에게 범해져 그대로 애널 노예로서 생활을 보내게 되었다.
+							PRINTFORMW 그 날부터 망가질 것 같은 수준으로 몇 번이고 범해져 애널은 항상 벌어져 있는 상태로 침대에 묶여 있는 것 같다.
+							MATURO = 농장주의 애널노예
+						ELSE
+							PRINTFORMW 대농장의 주인은 다른 농노를 사는 김에 %조사선택(SAVESTR:TARGET, "를")% 산 것 같다.
+							PRINTFORMW 이렇게 해서 아들들에게로의 간단한 선물이 된 %조사선택(SAVESTR:TARGET, "는")% 철저하게 능욕당해, 곧바로 임신해버렸다
+							PRINTFORMW 지금은 수많은 노예를 낳는 모체로서 귀여움을 받고 있다고 한다.
+							MATURO = 농장주의 성노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 전의 육변기는 망가져버렸으므로 대신할 새로운 육변기로서 가게의 화장실에 묶여있는 것 같다.
+							PRINTFORMW  손님 뿐만이 아니라 종업원들도 마음대로 사용하고 있다고 한다.
+							PRINTFORMW 마침내 출산 쇼까지 열려 그 때는 어떤 아이가 태어날까 내기까지 행해진 것 같다.
+						ELSE
+							PRINTFORMW 소재로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 요술사에 의해 개조된 것 같다
+							PRINTFORMW 원래는 용자라고 하는 소재를 어떻게 살릴까 고민하고 있다
+							PRINTFORMW 어느 쪽이든 고객 취미에 맞게 철저하게 개조되는 것은 틀림없을 것이다.
+						ENDIF
+						MATURO = 육변기
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 광산주인
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 싸구려주점
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 길거리의 공중 변소
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개감으로서 길러지고 있는 것 같다.
+							PRINTFORMW 몇 번이고 범해져도 굴하지 않아서 더욱 심하게 범해진 것 같다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개감으로서 길러지고 있는 것 같다.
+							PRINTFORMW 범해질 때 울부짖는 모습이 사랑스러웠기 때문에 인기가 높았다고 한다.
+						ENDIF
+						MATURO = 광산노예의 성노예
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 가슴의 크기에 주목받은 %조사선택(SAVESTR:TARGET, "는")% 토플리스로 접객을 하게 되었다.
+							PRINTFORMW 손님은 사양않고 계속 가슴을 만지작거렸지만, 노예인 그녀는 참을 수 밖에 없다.
+							PRINTFORMW  매일밤 팁은 받을 수 있는 것 같지만 그래서는 자신의 몸을 되사려면 꽤나 걸릴 것이다.
+						ELSE
+							PRINTFORMW 점주가 손님을 알선해, 창녀와 같은 흉내를 내게 하고 있는 것 같다.
+							PRINTFORMW 이종족 간의 성행위는 상당한 인기인 듯하지만 %조사선택(SAVESTR:TARGET, "가")% 번 돈은 주인의 수중에 들어가 거의 남지 않는다고 한다.
+						ENDIF
+						MATURO = 가정주점의 웨이트레스
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 비대화한 가슴이 눈에 들어 소 노예로서 마굿간에게 묶여 있다고 한다.
+							PRINTFORMW 소 계열의 마수에게 임신당한 뒤로 한층 더 유방은 비대화해, 매일 밀크를 짜내어지고 있다고 한다.
+							MATURO = 젖소 노예
+						ELSE
+							PRINTFORMW 신종의 가축을 만들기 위해서 모든 가축과 교배당하고 있는 것 같다.
+							PRINTFORMW 실험의 성과는 아직 나오지 않은 것 같지만, 조만간 생각지도 못한 신종이 생길 것이다.
+							MATURO = 이종교배 가축
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 원래부터 육변기였던 덕분일까?
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 상당히 장기간, 공중 육변기로서 시민에게 사랑받고 있었다.
+							PRINTFORMW 낳은 아이들의 수만 백 명이 넘는다고 한다
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 시민의 공중 육변기로서 밤낮을 가리지 앉고 사용된 것 같다
+							PRINTFORMW 그녀는 지나친 혹사에 정신 붕괴 직전까지 가고 있던 것 같지만
+							PRINTFORMW 먼젓번 주인의 이름을 몇 번이나 외치면서 마지막 끝까지 완전히 망가지진 않았다고 한다
+						ENDIF
+					ENDIF
+					MATURO = 육변기
+			ENDIF
+		ENDIF
+	;음란
+	ELSEIF TALENT:76
+		;魔族
+		IF TALENT:TARGET:314 == 9
+			;淫乱魔族売値100万以上
+			IF S >= 1000000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 첩보 기관
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 고급창관
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신관장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 대부호
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;レベル１００以上
+						IF CFLAG:9 >= 100
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 산간에 있는 소국의 군주와 결혼하게 된 것 같다.
+							PRINTFORMW 소문에는 정말로 어느날 하룻밤 둘이서 만나자 군주는 결혼을 결정했다고 한다.
+							PRINTFORMW 당신은 그 소국이 악마의 세계에서도 희소한 마석을 얻는 중요한 지역이란 것을 생각해냈다.
+							PRINTFORMW 가까운 장래, 그 나라에는 무엇인가 정변이 일어날지도 모르겠지만 그것은 이제 당신에게 있어서는 아무런 관계가 없는 이야기일 것이다.
+							MATURO = 마계의 첩보원
+						ELSE
+							PRINTFORMW 이미 음마로서 극상의 신체를 가지고 있는 %조사선택(SAVESTR:TARGET, "는")% 심문관으로서도 솜씨를 발휘하고 있는 것 같다.
+							PRINTFORMW 남자나 여자나 모두에게 죽기 직전까지 정기를 무리하게 빨아대는 모습은 심문에 익숙해 있는 동료조차 공포심이 달리는 것이라고 한다.
+							PRINTFORMW 그런 생활도 %SAVESTR:TARGET%에게 있어 행복한 것일 것이다.
+							MATURO = 첩보조직의 심문관
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%의 타락한 신체는 모든 손님을 기쁘게 했다고 한다. 남자 위에서 흐트러진 그 모습을 보면 일찍이 칼을 휘두르며 싸웠다는 것은 아무도 상상하지 못할 것이다.
+							PRINTFORMW 밤새 남자를 요구하는 그 모습은 무서운 분위기를 강요하는 것이 있어, 단골손님이 장난으로 부하의 소대에서 윤간 쇼를 시켰을 때는
+							PRINTFORMW 파이즈리만으로 전원의 정액을 다 짜냈다고 하는 일화가 남아 있는 것 같다.
+							MATURO = 파이즈리 창녀
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%의 타락한 신체는 모든 손님을 기쁘게 했다고 한다. 남자 위에서 흐트러진 그 모습을 보면 일찍이 칼을 휘두르며 싸웠다는 것은 아무도 상상하지 못할 것이다.
+							PRINTFORMW 그리고 어느 날 하룻밤 내내 남자를 요구해, 처음으로 온 손님을 무심코 짜 죽여버리는 일이 있었던 것 같다.
+							PRINTFORMW 그 소문이 퍼지면서 반대로 예약이 증가해버렸다고 한다.
+							MATURO = 고급창녀
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 완성된 음란마족의 육체는 타락신에게 바치는 최고의 제물 중 하나다.。
+							PRINTFORMW 신관장은 비술을 구사해 %조사선택(SAVESTR:TARGET, "를")% 제물로 하는 의식을 성공시켰다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 현세를 떠나 타락신의 곁에서 영원한 쾌락을 맛보게 되었다는 이야기이다.
+							MATURO = 타락신의 제물
+						ELSE
+							PRINTFORMW 신전 깊숙한 곳에는 %조사선택(SAVESTR:TARGET, "가")% 있는 것 같다.
+							PRINTFORMW 그곳에서는 신관장을 비롯한 신관들이 음란한 비술을 %SAVESTR:TARGET%에게 베풀고 있었다.
+							PRINTFORMW 「타락신이 강림한다」 「신전의 제물이 된다」 「묵시록이 시작된다」 라고 불온한 소문이 흐르고 있지만 멀리 떨어져 있는 마계는 지상에 있는 당신에게 상관없는 이야기…랄까
+							MATURO = 타락신의 무녀
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 주인은 얼마나 많은 돈으로 옥션에서 그녀를 손에 넣었는지 회장에서 손님들에게 말하면서, 손으로 신호를 해 %조사선택(SAVESTR:TARGET, "를")% 입실시켰다
+							PRINTFORMW 받침대에 실려나온 %SAVESTR:TARGET%의 복부는 부풀어 올라, 출산일이 가까워진 것을 알 수 있다.
+							PRINTFORMW 배란유발제로 다중 임신한 모체에는 한층 더 진통 유발제가 주사되고 있었다.
+							PRINTFORMW 오늘 밤의 출산 쇼에서는 몇 마리의 아이들이 태어날 것인가…
+							MATURO = 임신변기
+						ELSE
+							PRINTFORMW 주인이 얼마나 많은 돈으로 옥션에서 그녀를 손에 넣었는지 회장에서 손님들에게 말하면서, 손으로 신호를 해%조사선택(SAVESTR:TARGET, "를")% 입실시켰다
+							PRINTFORMW 손수레에 실려 나온 %SAVESTR:TARGET%의 사타구니에는 거대한 딜도가 두 개나 삽입되어 한계까지 벌리고 있다.
+							PRINTFORMW 육노예의 훌륭한 상태에 흥분한 손님은 주인에게 재촉받은대로 %SAVESTR:TARGET%에게 손을 뻗었다……
+							MATURO = 확장노예
+						ENDIF	
+					ENDIF
+			;淫乱魔族売値50万以上
+			ELSEIF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계군 고위 장교
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 고급 주점
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신전
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 호사가
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;レベル５０以上
+						IF CFLAG:9 >= 50
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 주인의 개인적인 보디가드 겸 애인과 같은 일을 하고 있는 것 같다.
+							PRINTFORMW 타락했어도 원래는 용자라고 할 만큼 강함에는 비평이 없다고 한다
+							PRINTFORMW 매일 밤 쑤시는 음란한 육체 역시 주인에게 진정받아 만족하고 있는 모양이다
+							MATURO = 고급장교의 보디가드
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 주인의 애인이 되어 있는 것 같다
+							PRINTFORMW 음란한 육체는 주인의 욕망 가득한 성욕을 받아들이는 것 같다.
+							PRINTFORMW 지금까지 주인은 몇 사람이나 노예를 부수어 왔지만 이번에야말로는 파트너로서 수습될 것 같다는 이야기다.
+							MATURO = 고급장교의 애인
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 호스티스라기 보다는 안기기 위해서 손님을 요구하는 창녀와 같았던 것 같다.
+							PRINTFORMW 그 풍만한 가슴의 골짜기에는 손님으로부터의 받은 팁이 모여 있으며 곧바로 손님과 함께 별실에 갔다고 한다.
+							PRINTFORMW 어딘가 부족해지면 몇 명 더 별실에 데리고 들어가 밤을 보낸 듯하다
+							MATURO = 고급주점의 호스테스
+						ELSE
+							PRINTFORMW 매일 밤 무대에서 %조사선택(SAVESTR:TARGET, "는")% 다양한 행사를 하고 있었다.
+							PRINTFORMW 스트립부터 윤간 쇼, 더욱 손님을 부르기 위해서 수간 쇼를 해 마지막 끝에 출산 신까지 보여주고 있었던 것 같다.
+							PRINTFORMW 지금은, 아이들에게 윤간되어 손자가 생긴 것 같지만 그런데도 여전히 요염한 육체를 유지하고 있다고 한다.
+							MATURO = 고급주점의 스트립퍼
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 신전에 메여진 %조사선택(SAVESTR:TARGET, "는")% 매일매일 신자들에게 범해진 것 같다.
+							PRINTFORMW 타락신의 가호인지 몰라도 임신하지 않아도 그 풍만한 젖으로부터는 모유가 항상 방울방울 떨어지고 있다고 한다.
+							PRINTFORMW 지금은, 끊임없는 쾌락에 빠져 완전히 타락신의 신도가 된 것 같다.
+							MATURO = 타락신의 신도
+						ELSE
+							PRINTFORMW 신전에 메여진 %조사선택(SAVESTR:TARGET, "는")% 매일매일 신자들에게 범해진 것 같다.
+							PRINTFORMW 인기가 있었는지 타락신의 신자들에게 둘러싸여 실컷 능욕되었다고 한다.
+							PRINTFORMW 하지만 그런 생활에도 매우 행복한 모습인 것 같다.
+							MATURO = 타락신의 성노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 저택의 화장실에 설치되어, 주인 뿐만이 아니라 고용인이나 손님,  남녀노소에게 사용당하는
+							PRINTFORMW 육변기가 된 %조사선택(SAVESTR:TARGET, "를")% 보살피기 위해 일부러 간사까지 고용했다고 한다.
+							PRINTFORMW 일회용이나 다름없는 육변기에 수고를 해야 하나 하고 주인은 생각하고 있는 것 같다.
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET%의 손발은 절단되어 주인의 안는 베개로서 사용되고 있다고 한다.
+							PRINTFORMW 안는 베개가 된 그녀를 돌보기 위한 메이드까지 고용하고 있다는 것 같다.
+							PRINTFORMW 그 안는 베개는 몇 번을 만져도 만족할 수 없을 정도의 보물이 되었다고 한다.
+							MATURO = 호사가의 다키마쿠라
+						ENDIF
+					ENDIF
+			;魔族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 마피아
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 창관
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 어둠의 주점
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 카지노
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;レベル３０以上
+						IF CFLAG:9 >= 30
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 뒷사회의 일원이 된 것 같다. 원래 용자로서 단련되고 있던 덕분인지 곧바로 경의를 표해지는 존재가 되었다고 한다.
+							PRINTFORMW 매일 밤 쑤시는 육체는 주어진 부하를 안는 것에 의해 해소하고 있는 덕분인지, 팀의 결속도 단단한 것 같다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 뒷사회에서 어떻게 살아갈지는 모르겠지만, 장수하도록 빌어주자……
+							MATURO = 마피아의 정부
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 뒷사회의 일원이 된 것 같다. 구성원들의 정부가 된 %조사선택(SAVESTR:TARGET, "는")% 매일 밤 다른 남자에게 안기고 있다고 한다.
+							PRINTFORMW 하루라도 섹스를 참을 수가 없는 그녀에게 있어서는 기쁜 환경일 것이다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 뒷사회에서 어떻게 살아갈지는 모르겠지만, 장수하도록 빌어주자……
+							MATURO = 마피아의 정부
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 진열창으로 손님을 끌어들이고 있는 것 같다. 창관 주인의 취미인지 큰 유방에 추잡한 문신을 새기고 유두에는 피어스를 하고 있다
+							PRINTFORMW 그 덕분인지 단골손님이 꽤 있는 것 같다. %조사선택(SAVESTR:TARGET, "는")% 항상 남자를 요구하는 음란한 몸을 갖고 있어서 돈보다는 매일 밤낮으로 해주는 남자가 중요할 것이다.
+							PRINTFORMW 이제 그녀는 섹스가 없는 생활 따위는 생각할 수 없을테니까
+							MATURO = 창관의 문신창녀
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 진열창으로 손님을 끌어들이고 있는 모양이다. 창관 주인의 취미인지 얼굴의 오른쪽 반에 추잡한 문신이 새겨넣어져 있다고 한다.
+							PRINTFORMW 그 덕분인지 매니악한 단골손님이 무심코 늘어버려, 매일 밤 그녀의 방에서는 비명이 끊이질 않는 것 같다.
+							PRINTFORMW 이미 남자가 없는 생활따위는 생각할 수 없는 %SAVESTR:TARGET%에게 있어, 그런 생활 역시 행복한 생활일 것이다.
+							MATURO = 창관의 문신창녀
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 마피아가 경영하는 어둠 주점에서는 마약인 듯한 것을 유통하고 있다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 특수한 과실을 먹는 것으로 그 유방으로부터 특수한 모유를 낼 수 있게 되었다.
+							PRINTFORMW 평상시라면  그 자리에서 글라스에 모유를 흘릴 뿐이겠지만, 특별한 손님에게는 직접 유방에 입을 대게 해 먹이고 있는 것 같다.
+							PRINTFORMW 그 모유는 강력한 미약 효과가 있어, 그 자리에서 손님에게 범해진다고 한다.
+							MATURO = 암주점의 젖노예
+						ELSE
+							PRINTFORMW 마피아가 경영하는 어둠의 주점에서는 마약인 듯한 것을 유통하고 있다.
+							PRINTFORMW %SAVESTR:TARGET%도 평상시에는 웨이트레스를 하고 있는 중이었지만, 알코올과 마약으로 완전히 만취한 손님에게 덮쳐져서 범해지는 날도 있다.
+							PRINTFORMW 그러나 그녀는 그런 해프닝도 즐기고 있다고 한다.
+							MATURO = 암주점의 웨이트레스
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 카지노에서 진 손님은 서비스의 일환으로서 육변기 방으로 안내되는 듯하다
+							PRINTFORMW 거기에 설치되어 있는 육변기 %조사선택(SAVESTR:TARGET, "는")% 손님에게 철저하게 장난감으로서 취급되어
+							PRINTFORMW 질이나 항문에 남은 카지노 동전을 쑤셔넣어진 적도 있었다고 한다
+							PRINTFORMW 카지노에서 지는 손님은 계속 있으므로 그녀는 지금부터 얼마든지 원하는대로 장난감으로서 계속 지낼 수 있을 것이다.
+							MATURO = 카지노의 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 카지노의 경품이 되어 있었다.
+							PRINTFORMW 입하된 그 날에는 큰 대박을 맞은 노름꾼의 물건이 된 듯했지만
+							PRINTFORMW 일주일 후에는 빚의 형태로서 카지노의 경품으로 돌아왔다. 그리고 그런 것을 몇 회 몇 번이나 반복하고 있는 것 같다.
+							PRINTFORMW 소문으로는 노름꾼의 생명을 빨아들이는 마녀라고 불린다는 이야기도 있다고 한다.
+							MATURO = 카지노의 경품
+						ENDIF
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 싸구려주점
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 거지
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 촉수 오두막
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 공중 변소
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;レベル２０以上
+						IF CFLAG:9 >= 20
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열리는 것 같다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 표적으로 한 신체 다트라고 한다, 마력으로 만들어진 다트는 아픔이 아니고 쾌감을 준다.
+							PRINTFORMW 우승자가 발정해서 %조사선택(SAVESTR:TARGET, "를")%  그 자리에서 범했지만  그녀는 반대로 우승자의 정액을 모두 짜내버리는 것 같다.
+							MATURO = 가정주점의 경품
+						ELSE
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열리는 것 같다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 표적으로 한 신체 다트라고 한다, 마력으로 만들어진 다트는 아픔이 아니고 쾌감을 준다.
+							PRINTFORMW 우승자가 발정해서 %조사선택(SAVESTR:TARGET, "를")% 그자리에서 범했지만, 다른 참가자들에 의해서 윤간이 되었다고 한다
+							MATURO = 가정주점의 경품
+						ENDIF
+					;기사
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 밤에는 주인의 보금자리에서 안기고, 낮에는 거지 동료에게 팔려 주인의 술값을 벌어오고 있는 듯하다 
+							PRINTFORMW 거리낌 없이 젖이 만져지자 음란한 육체의 쑤심에는 거역하지 못한다고 한다.
+							PRINTFORMW 그런 %조사선택(SAVESTR:TARGET, "는")%, 동료들의 애완동물과 같은 입장도 그것대로 기분 좋아하는 것 같다.
+							MATURO = 거지의 아내
+						ELSE
+							PRINTFORMW 밤에는 주인의 보금자리에서 귀여움 받고, 낮에는 거지 동료에게 팔려 주인의 술값을 벌어오고 있는듯 하다
+							PRINTFORMW 그런 %조사선택(SAVESTR:TARGET, "가")%지만, 동료들의 애완동물인 것 같은 입장은 그것대로 기분은 좋다고 한다
+							MATURO = 거지의 아내
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져넣어진 %조사선택(SAVESTR:TARGET, "는")% 
+							PRINTFORMW 촉수의 새끼들을 수 백 수 천씩 낳고 있는 것 같다
+							PRINTFORMW 특별히 두 배 이상으로 부푼 유방으로부터 출생하는 촉수는 꽤 가치가 높다고 한다.
+							MATURO = 촉수오두막의 묘상
+						ELSE
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져넣어진 %조사선택(SAVESTR:TARGET, "는")% 
+							PRINTFORMW 촉수의 새끼들을 수 백 수 천씩 낳고 있는 것 같다
+							PRINTFORMW 촉수의 모체로서 완전히 적응해버린 그녀는 수명이 다할 때까지 거기에 있을 것이다.
+							MATURO = 촉수오두막의 묘상
+						ENDIF
+						
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 쇠사슬로 공중 변소에 묶여진 %조사선택(SAVESTR:TARGET, "는")% 그 뒤로 쉴 세 없이 육변기로서의 사명을 해나갔다
+							PRINTFORMW 남자들에게 범해지는 것이 그녀에게 있어서는 일상에 지나지 않는 것 같다.
+							PRINTFORMW 후에 %조사선택(SAVESTR:TARGET, "가")% 육변기로부터 해방되는 그 날까지 몇 백의 아이들을 낳았다고 한다.
+							MATURO = 공중 변소
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 시민의 공중 육변기로서 밤낮을 가리지 앉고 사용된 것 같다
+							PRINTFORMW 그녀는 모든 남자들에게 범해질 때마다 큰 소리로 쾌락의 목소리를 내고
+							PRINTFORMW 당신에게 조교된 음란한 몸으로 시민들의 모든 욕망을 받아들였다고 한다.
+							MATURO = 공중 육변기
+						ENDIF
+						
+					ENDIF
+			ENDIF
+		;淫乱それ以外の種族
+		ELSE
+			;それ以外の種族売値100万以上
+			IF S >= 1000000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 스파이 양성 시설
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 고급창관
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신관장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 대부호
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;レベル１００以上
+						IF CFLAG:9 >= 100
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "가")% 인간계에서 보호되었다고 하는 뉴스를 당신은 보았다
+							PRINTFORMW 어떻게 도망갔는지는 모르지만, 악마의 세계로부터 탈출해 어떤 왕국에 몸을 의탁한듯 하다
+							PRINTFORMW 극진한 간호를 받아 회복 중이지만, 그녀는 마계로의 진군을 강하게 충고하고 있다고 한다.
+							PRINTFORMW 여론도 꽤 움직이고 있는 것 같아 상당한 대군이 편성될 것 같다고 하는 이야기다.
+							PRINTFORMW 그러나 당신이 아는 한, 진군할 듯한 목표는 악마의 세계에서도 상당한 격전구다, 그런 곳에 진격을 해도 인류에게 승산은 없을 것이다
+							PRINTFORMW 그것보다도 진군에 의해 그 나라가 비어버린다면
+							PRINTFORMW 당신은 그 왕국을 침략하는 플랜을 생각하기 시작했다……
+							MATURO = 마계의 스파이
+						ELSE
+							PRINTFORMW 지상의 정보를 모조리 말한 후 시설에서 산 교재로 사용되는 것 같다.
+							PRINTFORMW 전 용자를 훈련을 명목으로 가지고 놀고 있는 듯하지만, %조사선택(SAVESTR:TARGET, "는")% 그런 짓을 하는것이 감옥 생활속에서의 유일한 즐거움인것 같다。
+							PRINTFORMW 훈련생들도 그것을 알고 있는지, 능욕은 꽤나 철저한 것이 되어 있다는 것 같다……
+							MATURO = 스파이의 교재
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 완전히 교육이 끝난 노예라는 것으로 입하된 %조사선택(SAVESTR:TARGET, "는")% 곧바로 손님을 받아들이고 있다고 한다.
+							PRINTFORMW 최초의 손님에게 기념으로 가슴에 문신을 새겨 넣어져, 문신 서비스가 받아들여지게 되어
+							PRINTFORMW 여러가지 모양이 %SAVESTR:TARGET%의 풍부한 유방에 그려지게 되었다고 한다.
+							MATURO = 고급창녀
+						ELSE
+							PRINTFORMW 완전히 교육이 끝난 노예라는 것으로 입하된 %조사선택(SAVESTR:TARGET, "는")% 곧바로 손님을 받아들이고 있다고 한다.
+							PRINTFORMW 마치 진짜의 음마와 같이 손님으로부터 정액을 짜내는 그녀의 모습은 베테랑 창녀도 혀를 내두른다는 것 같다
+							PRINTFORMW 실제로 %SAVESTR:TARGET% 라면 당장이라도 제일 인기 있는 창녀로서 일할 수 있을것이다.
+							MATURO = 고급창녀
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 완성된 음란한 육체는 타락 신에게 바치는 최고의 제물 중 하나라고 한다
+							PRINTFORMW 그것이 다른 신을 믿고 있었다면 더욱 더 그러하다.
+							PRINTFORMW 신관장은 시간을 들여 %조사선택(SAVESTR:TARGET, "를")% 전향시켜서 완전히 타락시켜 타락신에게 귀의할 것을 맹세하게 했다고 한다.
+							PRINTFORMW 지금부터는 타락신의 신도로서 일생을 쾌락의 늪에서 살게 될 것이다.
+							MATURO = 타락신의 신도
+						ELSE
+							PRINTFORMW 신전의 깊은 곳에는 %조사선택(SAVESTR:TARGET, "가")% 있는 것 같다.
+							PRINTFORMW 그곳에서는 신관장을 비롯한 신관들이 음란한 비술을 베풀고 있다고 한다.
+							PRINTFORMW 소문에서는 수 백 년에 한 번 뿐인 의식의 준비를 하고 있는 것 같다, 밖으로 나오는 날은 그녀가 제물로 바쳐지는 그 날이자 최후의 날이라고 한다
+							MATURO = 타락신의 무녀
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 적절한 수술을 받은 %조사선택(SAVESTR:TARGET, "는")% 저택에서 육변기로서 설치되게 되었다.
+							PRINTFORMW 손발은 절단되고 몸은 철파이프에 용접되어 동작 하나 취하는 일조차 할 수 없다.
+							PRINTFORMW 보통이라면 머리를 개조하지만, 지능을 떨어뜨리지 않는 것을 원한다는 주인의 의뢰이므로 미개조한 것같다.
+							PRINTFORMW 일반적이라면 곧바로 발광하겠지만, 당신이 육체적으로도 정신적으로도 다 조교한 그녀라면 반드시 괜찮을 것이다
+							PRINTFORMW 주인이나 손님들의 오줌을 받으면서 %조사선택(SAVESTR:TARGET, "는")% 오늘도 행복한 듯 절정하고 있을 것이다.
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 대좌 위에 비치되어 집의 한 방에 설치되었다
+							PRINTFORMW 대좌에는 거대한 딜도가 두 개 박혀 있어 그녀의 애널과 비소가 그 딜도들을 모두 삼키고 있다.
+							PRINTFORMW 그 방에는 %조사선택(SAVESTR:TARGET, "와")% 같은 처지의 전 용자들이 몇 사람이나 같은 받침대에 설치되어 효수형을 당한 상태가 되어 있었다.
+							PRINTFORMW 그 대부호는 수집가인 듯 돈을 투입해 모으고 있다...
+							MATURO = 대부호의 콜렉션
+						ENDIF
+						
+					ENDIF
+			;それ以外の種族売値50万以上
+			ELSEIF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계 군 고위 장교
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 고급 주점
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신전
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 호사가
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 이후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;レベル50以上
+						IF CFLAG:9 >= 50
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 탁월한 테크닉으로 주인을 함락시켜 그 연줄로 마계군에 들어간 것 같다.
+							PRINTFORMW 전 용자로서의 실력도 있던 그녀는 순조롭게 부대를 지휘하는 입장이 되었다고 한다.
+							PRINTFORMW 그 부대에서 그녀는 육변기 형제를 늘려, 다른 부대에서조차도 무서워하는 가혹한 전투 방식을 사용하고 있다는 것 같다.
+							MATURO = 마계의 부대장
+						ELSE
+							PRINTFORMW 주인의 새로운 노예 중 한 사람으로서 저택에서 살게 된 것 같다.
+							PRINTFORMW 그 저택에서는 다른 종족의 노예들이 몇 사람이나 주인을 돌보고 있다고 한다.
+							PRINTFORMW 서로서로 위로하고 있는 동안 %조사선택(SAVESTR:TARGET, "는")% 리더로서의 재치가 있었는지 모두를 모아, 주인로부터 정식으로 노예장으로서 인정받았다고 한다.
+							MATURO = 고급장교의 노예
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 유두에 몇개의 바늘을 꽂고 가슴이 노출된 의상을 착용해 접객하고 있는 것 같다.
+							PRINTFORMW 요리를 부탁하자 그녀가 자신의 유두에서 바늘을 뽑아내, 포크를 대신해 찍어먹여 준다는 것 같다.
+							PRINTFORMW 그 서비스는 호평으로 상당한 인기가 있다고 한다.
+							MATURO = 고급주점의 웨이트리스
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 질이 나쁜 손님에게 접객으로서 돌려지는 일이 많은 것 같지만, 그런 손님들에게 범해지는 것이 %SAVESTR:TARGET%에게는 얼마 안되는 낙인 것 같다
+							PRINTFORMW 성희롱되는 것조차도 상당히 마음이 편하다고 한다. 완전히 색광이 된 그녀에게 있어서는 당연한 일일 것이다.
+							PRINTFORMW 지금은 그런 손님들을 위해 방 하나를 관리하고 있다는 듯 하다
+							MATURO = 고급주점의 웨이트리스
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 신전에서 살게 된 %조사선택(SAVESTR:TARGET, "는")% 매일매일 신자들에게 범해졌다는 것 같다.
+							PRINTFORMW 타락신의 가호에 의해 마족의 아이를 임신하자, 그 풍만한 유방으로부터는 모유가 방울방울 떨어지기 시작했다고 한다.
+							PRINTFORMW 그 출산한 아이는 신전의 아이로서 소중히 자란다는 것 같다.
+							MATURO = 신전의 성노예
+						ELSE
+							PRINTFORMW 신전에서 살게 된 %조사선택(SAVESTR:TARGET, "는")% 매일매일 신자들에게 범해졌다는 것 같다.
+							PRINTFORMW 잡다한 종족들의 지상의 신을 신앙 하던 그녀는 특히 인기가 높아 사람이 끊이지 않았다고 한다.
+							PRINTFORMW 지금은 타락 신을 믿게 되어서 성무녀로서 신전에서 지내고 있다는 것 같다.
+							MATURO = 타락신의 무녀
+					    ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 그녀는 저택의 마구간에 설치되어져 있는데, 하인 하녀들이 사용할 수 있도록 설치한 것 같다.
+							PRINTFORMW 말의 발정기가 되자 냄새가 심해져 %SAVESTR:TARGET%도 엉망이 된다고 한다.
+							PRINTFORMW 이따금씩 주인도 범하러 오고 있어서 오두막의 추잡스러운 분위기가 계속 이어질 듯 하다.
+							MATURO = 마구간의 육변기
+						ELSE
+							PRINTFORMW 호사가의 안는 베개로서 사용당하고 있다고 한다.
+							PRINTFORMW 손발이 방해이므로 절단한 뒤, 사랑스러운 커버를 달아준 듯 하다.
+							PRINTFORMW 그러나 주인의 잠버릇이 나쁜 것인지 아침이 되면 침대 아래에 떨어져있는 일이 자주 있다고 한다.
+							MATURO = 호사가의 다키마쿠라
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 마피아
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 창관
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 어둠 주점
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 카지노
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ感覚ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 마피아 간부의 정부로서 살고 있다고 한다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 간부를 그 손으로 타락시켜 원하는 대로 조종하고 있다는 듯하다
+							PRINTFORMW 지금은. 별장을 사서 거기서 매일 밤 남자들을 질질 끌어들이고 있다고 한다.
+							MATURO = 마피아의 정부
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 새디스트인 마피아 간부의 정부로서 살고 있다고 한다.
+							PRINTFORMW 최초의 무렵은 당황스러움도 있었지만 밤의 생활이 생각한 이상으로 충실하므로 만족한다고 한다.
+							PRINTFORMW 매일 밤의 과격한 플레이는 %SAVESTR:TARGET%에게 있어 즐거움 그 자체에 지나지 않을 것이다.
+							MATURO = 마피아의 정부
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 진열창으로 손님을 유혹하는 나날인 것 같다.
+							PRINTFORMW 창 밖으로 모습을 드러낸 그녀의 모습은 한 시기 유명했다고 한다, 드러난 가슴으로부터 보이는 것은 큰 유방에 새겨진 추잡한 문신, 유두에는 많은 피어스가 달려 있었으니까.
+							PRINTFORMW 클레임이 들어가 가슴은 숨기게 되었지만, 단골손님들 덕분에 곤란하지는 않은 것 같다.
+							MATURO = 진열창의 창녀
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 진열창에서 손님을 유혹하는 나날인 것 같다. 화장도 스스로 하는 것이 완전히 익숙해져 버린 모습이라고 한다.
+							PRINTFORMW 이종족의 여자는 단골이 생기기 쉽고, 월말이 되면 반드시 오는 마족 남자가 최근 마음에 들어하고 있다는 모양이다
+							PRINTFORMW 그 남자는 그녀를 하룻밤 전세내고 취해 차분히 그 몸을 괴롭히고 희롱하고, 몇 십 번씩 절정에 이르게 해버린다는 것 같다.
+							PRINTFORMW 그는 그녀를 사고 싶다고 전했지만 %조사선택(SAVESTR:TARGET, "는")% 그것을 거절했다고 한다.
+							MATURO = 진열창의 창녀
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 마피아가 경영하는 어둠의 주점에서는 마약인 듯한 것을 유통하고 있다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 특수한 과실을 먹는 것으로 그 큰 유방으로부터 특수한 모유를 낼 수 있게 되었다.
+							PRINTFORMW 강력한 효과가 있는 모유는 정기적으로 짜내지 않으면 모체가 미쳐버릴 정도로 효과가 있다는 것 같다.
+							PRINTFORMW 지금은 손님들에게 범해지면서 모유를 짜내지고 있다고 한다
+							MATURO = 암주점의 중독자
+						ELSE
+							PRINTFORMW 마피아가 경영하는 어둠의 주점에서는 마약인 듯한 것을 유통하고 있다.
+							PRINTFORMW 쾌락에 약해서 눈 깜짝할 순간 마약에 중독돼버린 %조사선택(SAVESTR:TARGET, "는")% 달콤하고 요염한 향기를 내면서
+							PRINTFORMW 오늘밤도 손님의 사타구니에 입을 가져다대고 정액을 졸라대고 있다고 한다.
+							MATURO = 암주점의 중독자
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 카지노에서 진 손님은 서비스의 일환으로서 육변기 방으로 안내되는 듯하다
+							PRINTFORMW 거기에 설치되어 있는 육변기 %조사선택(SAVESTR:TARGET, "는")% 손님에게 철저하게 장난감으로서 취급당해
+							PRINTFORMW 질이나 항문에 남은 카지노 동전을 쑤셔넣어진 적도 있었다고 한다
+							PRINTFORMW 카지노에서 지는 손님들이 있는 이상 그녀는 얼마든지 원하는대로 장난감으로서 계속 있을 것이다.
+							MATURO = 카지노의 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 카지노의 경품이 되어 있었다.
+							PRINTFORMW 입하된 그날 큰 대박을 맞춘 갬블러의 것이 되었지만 바로 수중을 떠나게 되었다
+							PRINTFORMW 왜냐하면 그 카지노에서는 노예도 팁으로서 취급되었기 때문이다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 벌써 몇 십 명의 노름꾼들 사이를 팁으로서 왔다 갔다 하고 있다는 것 같다
+							MATURO = 카지노의 경품
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 싸구려주점
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 거지
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 촉수 오두막
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 공중 변소
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ感覚ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열린다는 것 같다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 표적으로 한 신체 다트라고 한다, 마력으로 만들어진 다트는 상처는 남지 않지만 전격과 같은 아픔을 준다.
+							PRINTFORMW 가장 큰 비명을 지르게 한 것이 우승자이며 대회는 항상 재미있다고 한다.
+						ELSE
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열린다는 것 같다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 표적으로 한 신체 다트라고 한다, 마력으로 만들어진 다트는 상처는 남지 않지만 전격과 같은 아픔을 준다.
+							PRINTFORMW 바의 마스터가 능숙하게 투척하므로, 그녀는 기절하지 않는 채로 비명을 지르며 몇 시간이나 계속되는 쇼를 맡게 되는 것 이였다.
+						ENDIF
+						MATURO = 안주점의 경품
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 밤에는 주인의 보금자리에서 희롱당하면서 지내고, 낮에는 거지 동료에게 팔려 주인의 술값을 벌어오고 있다는 것 같다.
+							PRINTFORMW 거리낌 없이 젖을 만져지고 음탕한 육체의 욱씬거림에는 거역하지 못하고 되는대로 당하고 있다가 결국
+							PRINTFORMW 임신해서 가진 아이는 곧바로 팔아치워지니 타인에게 대여당하는 빈도는 한층 더 오른 것 같다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 밤에는 주인의 보금자리에서 희롱당하면서 지내고, 낮에는 거지 동료에게 팔려 주인의 술값을 벌어오고 있다는 것 같다.
+							PRINTFORMW 임신해서 가진 아이는 곧바로 팔아치워지니 타인에게 대여당하는 빈도는 한층 더 오른 것 같다.
+						ENDIF
+						MATURO = 거지의 아내
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져 넣어진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 몇 만이라고 하는 촉수들에게 범해져서 벌써 머리가 이상하게 되어버렸다는 것 같다.
+							PRINTFORMW 일찍이는 아름다운 부풀어 있던 거유도 이미 촉수의 배양장이다.
+						ELSE
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져 넣어진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 몇 만이라고 하는 촉수들에게 범해져서 벌써 머리가 이상하게 되어버렸다는 것 같다.
+							PRINTFORMW 질뿐만 아니라 장에서 오장육부까지 촉수들의 배양장이 되어 있으니 어쩔 도리가 없다
+						ENDIF
+						MATURO = 촉수오두막의 묘상
+						
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 쇠사슬에 묶여 공중 변소에 매여 있던 %조사선택(SAVESTR:TARGET, "는")% 그로부터 쉬는 날 없이 육변기로서의 사명을 다해나갔다.
+							PRINTFORMW 여러 가지 종족의 남자들에게 범해지는 것이 일상이었던 그녀에게 있어서는, 공중 변소로 사는 것 따윈 사실 문제가 아니었다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 후에 육변기 규제법안대로, 육변기로부터 해방될 때까지 몇 백의 아이들을 낳았다고 한다.
+						ELSE
+							PRINTFORMW 쇠사슬에 묶여 공중 변소에 매여 있던 %조사선택(SAVESTR:TARGET, "는")% 그로부터 쉬는 일 없이 육변기로서의 사명을 다해나갔다.
+							PRINTFORMW 여러 가지 종족의 남자들이 성욕 처리를 위해 그녀의 신체를 사용해갔다.
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 후에 육변기 규제법안대로, 육변기로부터 해방될 때까지 몇 백의 아이들을 낳았다고 한다.
+						ENDIF
+						MATURO = 공중 육변기
+					ENDIF
+			ENDIF
+		ENDIF
+	;それ以外
+	ELSE
+		;魔族
+		IF TALENT:TARGET:314 == 9
+			;魔族売値50万以上
+			IF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계 군 고위 장교
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계 지방의 영주
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신전
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 대상인
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 마족으로서 취급받고 있는듯한 %조사선택(SAVESTR:TARGET, "는")% 주인에게 매일 밤 상냥하게 다뤄지고 있다는 것 같다.
+							PRINTFORMW 그녀는 당신에게서는 느끼지 못했던 것을 주인에게 느끼고 있다고 한다.
+							PRINTFORMW 주인은 좋은 노예를 샀다고 매우 만족한 것 같다.
+							MATURO = 고급장교의 성노예
+						ELSE
+							PRINTFORMW 주인은 %조사선택(SAVESTR:TARGET, "를")% 애완동물로서 기르고 있다는 것 같다.
+							PRINTFORMW 손님 앞에서 전 용자가 어떻게 패배해서 마족에게까지 몸이 더럽혀졌는지에 대한 것을 그녀에게 말하게 하면 손님들은 많이 기뻐한다고 한다.
+							PRINTFORMW 주인은 좋은 애완동물을 샀다면서 매우 만족했다는 것 같다.
+							MATURO = 고급장교의 애완동물
+						ENDIF
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 저택에서 밀크 젖소가 되어 있다는 것 같다.
+							PRINTFORMW 그녀는 특수한 약을 먹게 되어 이전부터 컸던 유방은 한층 더 비대화해 모유가 항상 방울방울 떨어지고 있다고 한다.
+							PRINTFORMW 그리고 %SAVESTR:TARGET%의 밀크는 주인에게 매우 호평이라는 것 같다.
+							MATURO = 밀크 서버
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 새로운 완구로서 영주의 아들에게 주어졌다고 한다.
+							PRINTFORMW 그 아들은 트롤의 피를 잇고 있다는 소문이 있을 정도의 거인으로서 몇 사람이나 노예를 망가뜨린 것으로 유명한 것 같다
+							PRINTFORMW 그녀도 망가지지 않는다면 좋겠지만 그것도 시간 문제일 것이다.
+							MATURO = 영주의 장난감
+						ENDIF
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "를")% 신전의 일각에 있는 벽에 고정시키자 신도들이 모였다.
+							PRINTFORMW 새로운 노예가 신전의 아가씨가 되기 위해서 행해지는 의식의 하나다, 이렇게 해서 해가 질 때까지 신도들의 윤간은 계속된다.
+							PRINTFORMW 금기의 딸들은 막강하다만, 그 중에서도 %SAVESTR:TARGET%)는 그 아름답고 큰 유방 덕택에 제일 인기인 것 같다.
+							MATURO = 신전의 노예
+						ELSE
+							PRINTFORMW 이교 신들의 심볼을 숨겨서 가지고 있던 %조사선택(SAVESTR:TARGET, "는")% 곧바로 지하실에 연행된 것 같다.
+							PRINTFORMW 아직도 신앙을 가지고 있었던 그녀를 철저하게 희롱하고, 그 푸른 피부가 새하얗게 될 때까지 범하자
+							PRINTFORMW 그녀는 간신히 심볼을 스스로 밞아 부수고, 타락신에게 귀의할 것을 맹세했다고 한다.
+							MATURO = 타락신의 신도
+						ENDIF
+						
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 육변기로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 전용 상자에 담겨 팔렸다.
+							PRINTFORMW 협상을 위해 이동하는 일이 많은 주인을 위한 전용 육변기로서 사용되게 되었던 것이다.
+							PRINTFORMW 후에 「대상인의 육변기」라고 하면 %조사선택(SAVESTR:TARGET, "를")% 가리키는 말이 되었다는 것 같다.
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 주인의 다섯 번째 성노예로서 저택의 지하에서 살게 되었다.
+							PRINTFORMW 당신의 조교 덕분에 지하 생활에 익숙해 있는 그녀는 곧바로 적응했다.
+							PRINTFORMW 매일 밤 불려가 범해지는데도 곧바로 익숙해져버려서, 그녀에게 있어서는 단지 주인이 바뀌었을 뿐, 단지 그런 이야기일 뿐이다.
+							MATURO = 성노예
+						ENDIF
+					ENDIF
+			;魔族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 젊은사관
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 창관
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 대농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 카지노
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔린 %SAVESTR:TARGET% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 젊은 사관의 무훈의 포상으로서 주어졌다.
+							PRINTFORMW 젊고 아름다운 마족의 딸은 노예라고 해도 사관에게 있어서는 연인 같이 느껴졌으므로, 연인처럼 대해진 듯하다.
+							PRINTFORMW %SAVESTR:TARGET%도 그런 취급을 당하리라고는 생각 못했는지 그 나이대의 소녀 같은 얼굴을 해버린다는 것 같다
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 젊은 사관의 무훈의 포상으로서 주어졌다.
+							PRINTFORMW 그리고 사관은 젊고 아름다운 마족의 딸을 마음내키는대로 유린하고 희롱했다.
+							PRINTFORMW 사관이 전쟁터에서 돌아온 날에는 특히 더 무섭게 한다.
+						ENDIF
+						MATURO = 사관의 성노예
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 진열창으로 손님을 받는 일이 매일 있는 듯 하다. 창관 주인의 취미인지 큰 유방에 추잡한 문신을 넣어 유두에는 몇 개나 피어스를 하고 있다고 한다
+							PRINTFORMW 그 굴욕적인 모습에 %조사선택(SAVESTR:TARGET, "는")% 울부짖는다는 것 같다.
+							PRINTFORMW 그러나 지금은.그런 것을 잊었는지 매일 밤 손님에게 안겨 헐떡거리는 소리를 내고 있다고 한다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 진열창으로 손님을 받는 일이 매일 있는 듯 하다. 창관 주인의 취미인지 얼굴의 오른쪽 반에 추잡한 문신을 새기고 있다고 한다.
+							PRINTFORMW 그 굴욕적인 모습에 %조사선택(SAVESTR:TARGET, "는")% 울부짖는다는 것 같다.
+							PRINTFORMW 그러나 지금은.그런 것을 잊었는지 손님 위에 걸터앉아, 계속 헐떡거리는 소리를 내고 있다고 한다.
+						ENDIF
+						MATURO = 진영창의 창녀
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;애널狂い
+						IF TALENT:TARGET:77 == 1 
+							PRINTFORMW 대농장의 주인은 다른 농노를 사는 김에 아들들의 선물 대신 %조사선택(SAVESTR:TARGET, "를")% 산 것 같다.
+							PRINTFORMW 성격이 나쁜 아들들은 %SAVESTR:TARGET%의 애널이 민감한 것을 깨달고 거기를 철저하게 괴롭힌 듯 하다.
+							PRINTFORMW 지금 %조사선택(SAVESTR:TARGET, "는")% 애널 완구로서 희롱당하고 있다는 것 같다.
+						ELSE
+							PRINTFORMW 대농장의 주인은 다른 농노를 사는 김에 아들들의 선물 대신 %조사선택(SAVESTR:TARGET, "를")% 산 것 같다.
+							PRINTFORMW 성격이 나쁜 아들들은 %조사선택(SAVESTR:TARGET, "를")% 매일 밤 희롱했다고 한다.
+							PRINTFORMW 그녀는 곧바로 임신해, 지금은 누구의 아이인지 내기의 대상이 되어있다는 것 같다.
+						ENDIF
+						MATURO = 대농장의 장난감
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 카지노에서 진 손님은 서비스의 일환으로서 육변기 방으로 안내되는 듯 하다
+							PRINTFORMW 거기에 설치되어 있는 육변기 %조사선택(SAVESTR:TARGET, "는")% 손님에게 철저하게 장난감으로서 취급당해
+							PRINTFORMW 질이나 항문에 남은 카지노 동전을  쑤셔넣어진 적도  있었다고 한다
+							PRINTFORMW 카지노에서 지는 손님들은 얼마든지 있으므로 그녀는 바라는 대로 계속 장난감이 될 것이다.
+							MATURO = 카지노의 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 카지노의 경품이 되어 있다는 것 같다
+							PRINTFORMW 아름다운 단련된 마족의 노예인 그녀에게는 걸맞은 가격표가 붙어 있다고 한다.
+							PRINTFORMW 머잖아 새로운 주인에게 받아질 운명인 것이다.
+							MATURO = 카지노의 경품
+						ENDIF
+						
+					ENDIF
+			;魔族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 광산 주인
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 싸구려 주점
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 촉수 오두막
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 공중 변소
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW 어떤 %LOCALS%에게 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ感覚ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개감으로서 길러지고 있다는 것 같다.
+							PRINTFORMW 몇 번을 범해져도 굴복하지 않아서 많은 귀여움을 받았다고 한다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개 감으로서 길러지고 있다는 것 같다.
+							PRINTFORMW 범해질 때마다 울부짖는 것이 귀여워 한가득 사랑을 받았다고 한다..
+						ENDIF
+						MATURO = 광산노예의 노리겟감
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열린다는 것 같다.
+							PRINTFORMW %SAVESTR:TARGET%에 대한 신체 다트이며, 우승자는 참가비를 전부 싹쓸이한다는 연유로 많은 사람들이 참여하고 있다
+							PRINTFORMW 우승자가 정해질 무렵 그녀의 풍만한 가슴은 피와 대소변으로 범벅되어 있었다
+						ELSE
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열린다는 것 같다.
+							PRINTFORMW %SAVESTR:TARGET%에 대한 신체 다트이며, 우승자는 참가비를 전부 싹쓸이한다는 연유로 많은 사람들이 참여하고 있다
+							PRINTFORMW 결국 그녀의 몸 이곳저곳에는 동그란 구멍과 상처가 생겨 피가 흐르고 있었다
+						ENDIF
+						MATURO = 가정주점의 장난감
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져 넣어진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 촉수의 아이들을 수 백 수 천씩 낳고 있다는 것 같다
+							PRINTFORMW 특별히 두 배 이상으로 부푼 유방으로부터 출생하는 촉수는 꽤 가치가 높다고 한다.
+						ELSE
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져 넣어진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 촉수의 아이들을 수 백 수 천씩 낳고 있다는 것 같다
+							PRINTFORMW 촉수의 모체로서 완전히 적응해버린 그녀는 수명이 다할 때까지 거기에 있을 것이다.
+						ENDIF
+						MATURO = 촉수오두막의 묘상
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 원래부터 육변기였던 덕분일까?
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 상당히 장기간, 공중 육변기로서 시민에게 사랑받고 있었다.
+							PRINTFORMW 낳은 아이들의 수만 100이 넘었다고 한다
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 시민의 공중 육변기로서 밤낮을 가리지 앉고 사용된 것 같다
+							PRINTFORMW 그녀는 지나친 혹사에 반 년도 버티지 못하고 정신이 붕괴해버렸다고 한다.
+						ENDIF
+						MATURO = 공중 육변기
+						
+					ENDIF
+			ENDIF
+		;それ以外の種族
+		ELSE
+			;それ以外の種族売値50万以上
+			IF S >= 500000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 군 고위 장교
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 지방 영주
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 타락신의 신전
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 대상인
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;섹스광
+						IF TALENT:TARGET:75 == 1 
+							PRINTFORMW 주인은 그녀를 성노예로서 소중히 다루고 있는 것 같다.
+							PRINTFORMW 그러자 %SAVESTR:TARGET%도 주인에게 열심히 충성을 다하고 있다. 당신에게서 느끼지 못했던 상냥함을 주인에게서 느끼고 있다고 한다.
+							PRINTFORMW 자유는 없지만 매일 밤 충분히 사랑받는 그녀는 행복한 듯 보인다는 것 같다.
+							MATURO = 고급장교의 성노예
+						ELSE
+							PRINTFORMW 주인은 %조사선택(SAVESTR:TARGET, "를")% 애완동물로서 기르고 있는 것 같다.
+							PRINTFORMW 손님 앞에서 전 용자가 어떻게 패배해 마족의 노예로까지 몸을 굴복했는지를 그녀에게 말하게 하자 손님들은 매우 기뻐한다고 한다.
+							PRINTFORMW 그 다음은 손님들이 %조사선택(SAVESTR:TARGET, "를")% 희롱하는 것을 바라보며, 주인은 즐기고 있다는 것 같다………
+							MATURO = 고급장교의 애완동물
+						ENDIF
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %SAVESTR:TARGET%)는 저택에서 밀크 젖소가 되어 있다는 것 같다.
+							PRINTFORMW 그녀는 특수한 약을 정기적으로 먹게 되어 전전부터 컸던 유방이 한층 더 비대화해 모유를 항상 방울방울 떨어뜨리고 있다고 한다.
+							PRINTFORMW 주인은 그녀를 돌보는 메이드까지 고용할 정도로 열의를 넣고 있다.
+							MATURO = 밀크 서버
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 영주의 아들의 장난감이 되어 있다는 것 같다.
+							PRINTFORMW 그 아들은 트롤의 피가 들어가 있다고 하는 소문이 있을 정도의 거인으로서 %조사선택(SAVESTR:TARGET, "를")% 한 손으로 잡아 오나홀과 같이 사용한다고 한다.
+							PRINTFORMW 전 용자답게 튼튼한지 %조사선택(SAVESTR:TARGET, "는")% 아직도 망가지진 않은 것 같다.
+							MATURO = 영주의 장난감
+						ENDIF
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 신전의 아가씨가 되기 위해서 신도들에게 하루종일 희롱 당하고 있다고 한다
+							PRINTFORMW 인간계의 신들을 믿었던 만큼 좀처럼 타락 신에게 전향하지 않는 것 같다.
+							PRINTFORMW 그 아름답고 큰 유방은 짜내는 듯이 줄로 묶어 많은 신도들의 욕정을 한층 더 돋우게 하고 있다고 한다.
+							MATURO = 타락신의 성노예
+						ELSE
+							PRINTFORMW 이교 신들의 심볼을 숨겨서 가지고 있던 %조사선택(SAVESTR:TARGET, "는")% 곧바로 지하실로 연행된 듯 하다
+							PRINTFORMW 아직도 신앙을 가지고 있던 그녀를 철저하게 희롱하고 괴롭히며 그 피부가 새하얗게 될 때까지 범하자
+							PRINTFORMW 그녀는 심볼을 스스로 밞아 부수고, 타락신에게 귀의할 것을 맹세했다고 한다.
+							MATURO = 타락신의 신도
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 처음부터 육변기로서 팔린 %조사선택(SAVESTR:TARGET, "는")% 주인의 방에 고정되어 있었다.
+							PRINTFORMW 눈 돌아갈 시간조차 바쁘고 화장실에 갈 시간조차도 아까운 주인 전용의 변기다.
+							PRINTFORMW 육변기로서 조교된 %SAVESTR:TARGET%의 상태가 좋아 주인도 만족한 듯 하다.
+							MATURO = 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 주인의 애완동물로서 저택에서 살게 되었다。
+							PRINTFORMW 주인의 발 밑으로 기어가, 음란하게 응석부려 오는 그녀는 벌써 자신이 용자였다는 사실도 잊고 있을 것이다.
+							PRINTFORMW 그녀는 여기서 평생을 보내게 될 것이다.
+							MATURO = 대상인의 애완동물
+						ENDIF
+					ENDIF
+			;それ以外の種族売値10万以上
+			ELSEIF S >= 100000
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 젊은 사관
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 창관
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 마계의 대농장
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 마계의 카지노
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에 팔린 %조사선택(SAVESTR:TARGET, "는")% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ感覚ＬＶ5以上
+						IF ABL:2 >= 5
+							PRINTFORMW 젊은 장교는 포상금으로 %조사선택(SAVESTR:TARGET, "를")% 손에 넣었다.
+							PRINTFORMW 이종족이지만 아름다운 고분고분한 여자 노예를 밤마다 매우 귀여워하는 듯 하다
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 새로운 주인의 모든 욕망을 받아들이고 있다.
+						ELSE
+							PRINTFORMW 젊은 장교는 포상금으로 %조사선택(SAVESTR:TARGET, "를")% 손에 넣었다.
+							PRINTFORMW 이종족이지만 아름답고 고분고분한 여자 노예를 밤마다 매우 귀여워 하는 듯 하다
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 새로운 주인의 욕망에 비명소리를 내면서 응하고 있다고 한다.
+						ENDIF
+						MATURO = 사관의 여자노예
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 이종족만이 모인 창관의 창부가 되었다.
+							PRINTFORMW 도망 가지 못하도록 그 풍만한 젖가슴에는 낙인이 찍혀진 듯 하다.
+							PRINTFORMW 지금은 전 용자라고 하는 브랜드 덕분에 손님 문제로는 곤란하지 않다고 한다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 이종족만이 모인 창관의 노예가 되었다
+							PRINTFORMW 도망가지 못하도록 어깻죽지에 낙인이 찍혔다.
+							PRINTFORMW 지금은 전 용자라고 하는 브랜드 덕분에 손님 문제로 곤란하지는 않다고 한다.
+						ENDIF
+						MATURO = 이종간 전용 창녀
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 비대화한 가슴이 전망되어 소 노예로서 마굿간에 묶여있다는 것 같다.
+							PRINTFORMW 소 타입의 마수에 임신당한 뒤 주사에 의해 한층 더 유방은 비대화해, 매일 우유를 짜내고 있다고 한다.
+							PRINTFORMW 우유를 짜내지고 있을 때 %SAVESTR:TARGET%의 표정은 그 이상 없을 정도로 녹아내리고 있다고 한다
+							MATURO = 젖소노예
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 새로운 종의 가축을 만들기 위해 모든 가축들에게 교배당하고 있다는 것 같다.
+							PRINTFORMW 아직도 실험이 필요한 것 같지만, 조만간 새로운지 브랜드가 탄생할 느낌이다.
+							PRINTFORMW 마계 돼지와의 교배종은 고기가 연해 장래 유망한 식품이라고 한다
+							MATURO = 가축노예
+						ENDIF
+					;その他
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 카지노에서 진 손님은 서비스의 일환으로서 육변기 방으로 안내되는 듯 하다
+							PRINTFORMW 거기에 설치되어 있는 육변기 %조사선택(SAVESTR:TARGET, "는")% 손님에게 철저하게 장난감으로서 취급되어
+							PRINTFORMW 질이나 항문에 남은 카지노 동전을 쑤셔넣어진진 적도 있었다고 한다
+							PRINTFORMW 카지노에서 지는 손님들이 있는 이상 그녀는 얼마든지 바라는대로 장난감으로서 계속 있을 것이다.
+							MATURO = 카지노의 육변기
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 카지노 안에서 인간 도그 레이스의 노예가 되는 것 같다.
+							PRINTFORMW 조교된 그녀는 네 발로 엎드려서 코스를 달리고 있다.
+							PRINTFORMW 성적이 좋은 그녀를 머잖아 다른 수컷과 교미하게 해서 새로운 개를 출산시킨다고 한다
+							MATURO = 카지노의 경주용개
+						ENDIF
+						
+					ENDIF
+			;それ以外の種族売値10万未満
+			ELSE
+				;전사＆도적
+				IF TALENT:TARGET:200 == 1 || TALENT:TARGET:203 == 1
+					LOCALS = 마계의 광산 주인
+					LOCAL = 3
+				;기사＆닌자
+				ELSEIF TALENT:TARGET:205 == 1 || TALENT:TARGET:207 == 1
+					LOCALS = 마계의 싸구려주점
+					LOCAL = 2
+				;무녀＆신관
+				ELSEIF TALENT:TARGET:202 == 1 || TALENT:TARGET:206 == 1
+					LOCALS = 촉수 오두막
+					LOCAL = 1
+				;その他
+				ELSE
+					LOCALS = 공중 변소
+					LOCAL = 0
+				ENDIF
+				PRINTFORMW %LOCALS%에게 팔린 %SAVESTR:TARGET% 그 후………
+				PRINTFORMW ………
+				PRINTFORMW ……
+				PRINTFORMW …
+					;전사＆도적
+					IF LOCAL == 3
+						;Ｖ감각ＬＶ5이상
+						IF ABL:2 >= 5
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광산 노예들의 노리개감으로서 길러지고 있는 것 같다.
+							PRINTFORMW 몇번을 범해져서도 굴복하지 않아서 많은 귀여움을 받았다고 한다.
+						ELSE
+							PRINTFORMW %SAVESTR:TARGET% 는 광산 노예들의 노리개 감으로서 길러지고 있다는 것 같다.
+							PRINTFORMW 범해질 때마다 울부짖는 것이 귀여워 한가득 사랑을 받았다고 한다.
+						ENDIF
+						MATURO = 광산 노예의 노리겟감
+						
+					;기사＆닌자
+					ELSEIF LOCAL == 2
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열린다는 것 같다.
+							PRINTFORMW %SAVESTR:TARGET%에 대한 신체 다트이며, 우승자는 참가비를 전부 싹쓸이하기 때문에 많은 사람들이 참여하고 있다
+							PRINTFORMW 우승자가 정해질 무렵 그녀의 풍만한 가슴은 피와 대소변으로 범벅되어 있었다
+						ELSE
+							PRINTFORMW 주말에는 그 싸구려 주점에서  특별한 쇼가 열린다는 것 같다.
+							PRINTFORMW %SAVESTR:TARGET%에 대한 신체 다트이며, 우승자는 참가비를 전부 싹쓸이하기 때문에 많은 사람들이 참여하고 있다
+							PRINTFORMW 결국 그녀의 몸 이곳저곳에는 동그란 구멍과 상처가 생겨서 피가 흐르고 있었다
+						ENDIF
+						MATURO = 가정주점의 장난감
+						
+					;무녀＆신관
+					ELSEIF LOCAL == 1
+						;거유、폭유、超乳
+						IF TALENT:TARGET:110 == 1 || TALENT:TARGET:114 == 1 || TALENT:TARGET:119 == 1
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져넣어진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 촉수의 아이들을 수 백 수 천씩 낳고 있다는 것 같다
+							PRINTFORMW 특별히 두 배 이상으로 부푼 유방으로부터 출생하는 촉수는 꽤 가치가 높다고 한다.
+						ELSE
+							PRINTFORMW 촉수를 양산하기 위해 촉수 오두막에 던져넣어진 %조사선택(SAVESTR:TARGET, "는")%
+							PRINTFORMW 촉수의 아이들을 수 백 수 천씩 낳고 있다는 것 같다
+							PRINTFORMW 촉수의 모체로서 완전히 적응해버린 그녀는 수명이 다할 때까지 거기에 있을 것이다.
+						ENDIF
+						MATURO = 촉수오두막의 묘상
+						
+					;기타
+					ELSEIF LOCAL == 0
+						;육변기
+						IF TALENT:TARGET:204 == 1
+							PRINTFORMW 원래부터 육변기였던 덕분일까?
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 상당히 장기간, 공중 육변기로서 시민에게 사랑받고 있었다.
+							PRINTFORMW 낳은 아이들의 수가 100명은 넘었다고 한다.
+						ELSE
+							PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 시민의 공중 육변기로서 밤낮 없이 사용된 것 같다.
+							PRINTFORMW 그러나 그녀는 지나친 혹사에 반 년을 버티지 못하고 정신이 붕괴해버렸다고 한다.
+						ENDIF
+						MATURO = 공중 육변기
+					ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	SIF FAMILY:2 >= 0
+		CSTR:(FAMILY:2):5 = %MATURO%
+	
+	;마지막 글、특수한 글을 넣고 싶어지면 나중에 분기를 넣는다
+	PRINTFORML
+	PRINTFORMW 이렇게 해서 %NAME:MASTER%는 %조사선택(SAVESTR:TARGET, "를")% 두 번 다시 만날 일은 없을 것이다………
+	PRINTFORML
+RETURN 0
+
+
+

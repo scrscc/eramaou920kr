@@ -1,0 +1,1027 @@
+﻿;결혼생활의 일상
+
+;-----------------------------------
+@MARRIAGE_DAY,ARG
+#DIM MARRY_TYPE
+#DIM MARRY_CHARA
+#DIM NG_FLAG
+;-----------------------------------
+;ARGがキャラ
+
+NG_FLAG = 0
+
+;調教可以外はなし
+SIF CFLAG:(ARG):1 != 0
+	NG_FLAG = 1
+
+MARRY_TYPE = CFLAG:(ARG):601
+
+SIF MARRY_TYPE == 0
+	NG_FLAG = 1
+
+IF NG_FLAG > 0
+	;恋人はここで
+	SIF CFLAG:(ARG):606 == 0
+		CALL DUNGEON_TOWN_LOVER_CHARA_ENTER,ARG
+	SIF CFLAG:(ARG):606 == 200
+		CALL DUNGEON_TOWN_LOVER,ARG
+	RETURN 0
+ENDIF
+
+CFLAG:(ARG):602 += 1
+
+;남편이 없을 경우 스킵
+IF MARRY_TYPE < 900 && CFLAG:(ARG):609 == 0
+	X = MARRY_TYPE
+	SIF ITEM:X <= 0
+		RETURN 0
+ENDIF
+
+PRINTL
+DRAWLINE
+PRINTFORM *%SAVESTR:ARG%(와)과
+
+IF MARRY_TYPE == 902
+	;恋人
+	LOCAL:2 = CFLAG:(ARG):606
+	CALL NAME_LOVER,LOCAL:2,1
+ELSEIF CFLAG:(ARG):609 > 0
+	CALL SEARCH_FAMILY,ARG,"MARRIAGE"
+	MARRY_CHARA = RESULT
+	IF RESULT < 0
+		PRINT 노예
+	ELSE
+		PRINTFORM %SAVESTR:MARRY_CHARA%
+	ENDIF
+ELSEIF MARRY_TYPE < 900
+	CALL MONSTER_DATA, MARRY_TYPE, 5
+	LOCAL:1 = E:507
+	PRINTFORM %ITEMNAME:X%
+ELSEIF MARRY_TYPE == 900
+	PRINT 똥개
+ELSEIF MARRY_TYPE == 901
+	PRINT 당신
+ELSE
+	LOCAL:1 = 0
+	CALL SEARCH_FAMILY,ARG,"MARRIAGE"
+	MARRY_CHARA = RESULT
+	IF RESULT < 0
+		PRINT 노예
+	ELSE
+		PRINTFORM %SAVESTR:MARRY_CHARA%
+	ENDIF
+ENDIF
+
+PRINTFORMW 과의 결혼생활*
+
+;임신・育児の場合
+IF TALENT:(ARG):153
+	PRINTW 부부는 아이가 태어나기를 기대하고있다
+	RETURN 0
+ELSEIF TALENT:(ARG):154
+	PRINTW 부부는 아이를 잘 키우고있다
+	RETURN 0
+ENDIF
+
+Y = RAND:5 + 1
+CFLAG:(ARG):601 = MARRY_TYPE
+CFLAG:(ARG):107 = 0
+CFLAG:(ARG):112 = 0
+
+IF MARRY_TYPE == 900
+	CALL MARRIAGE_DAY_DOG,ARG
+ELSEIF MARRY_TYPE == 901
+	CALL MARRIAGE_DAY_YOU,ARG
+ELSEIF MARRY_TYPE == 902
+	CALL MARRIAGE_DAY_LOVERS,LOCAL:2,ARG
+ELSEIF CFLAG:(ARG):609 > 0 && MARRY_CHARA > 0
+	CALL MARRIAGE_DAY_SLAVE,ARG,MARRY_CHARA
+ELSEIF LOCAL:1 == 1
+	CALL ORC_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 2
+	CALL SLIME_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 3
+	CALL INSECT_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 4
+	CALL IVY_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 5
+	CALL SYOKUSYU_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 6
+	CALL FAILY_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 7
+	CALL GIANT_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 8
+	CALL MAN_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 9
+	CALL GIRL_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 10
+	CALL BEAST_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 11
+	CALL BRAIN_MARRIAGE_DAY,ARG
+ELSEIF LOCAL:1 == 12
+	CALL HORSE_MARRIAGE_DAY,ARG
+ELSE
+	CALL MARRIAGE_DAY_SLAVE,ARG,MARRY_CHARA
+ENDIF
+
+IF TALENT:(ARG):0 == 1 && EXP:(ARG):0 > 0 && TALENT:(ARG):273 == 0
+	IF CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37
+		;貞操帯
+	ELSE
+		PRINTW 【처녀상실】
+		TALENT:(ARG):0 = 0
+	ENDIF
+ENDIF
+
+;異種妊娠フラグ
+IF CFLAG:(ARG):107 != 0 && MARRY_TYPE != 900 && MARRY_TYPE != 901 && MARRY_TYPE != 902
+	CFLAG:(ARG):112 = X
+ENDIF
+
+
+
+BEGIN TURNEND
+RETURN 1
+
+;결혼 생활
+
+;-----------------------------------------
+@MARRIAGE_DAY_DOG,ARG
+;-----------------------------------------
+
+
+PRINTFORMW %SAVESTR:ARG%는 들개와 개집에서 살고 있다
+
+IF A == 0
+	;あなたの場合
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 들개를 껴안아 애널로 들개의 페니스를 받아들이고 있다
+		PRINTFORML A경험+{Y}
+		EXP:(ARG):1 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 들개를 껴안아 그의 페니스를 받아들이고 있다
+		PRINTFORML V경험+{Y}
+		EXP:(ARG):0 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+		CFLAG:(ARG):106 += Y
+	ENDIF
+ELSEIF TALENT:(ARG):136 == 1
+	;牝犬の場合
+	PRINTFORM %SAVESTR:ARG%는
+	;夫への親密
+	SIF CFLAG:(ARG):602 > 40
+		PRINT 기꺼이
+	;인랑
+	IF TALENT:(ARG):314 == 2
+		PRINT 꼬리를 흔들며,
+	ELSE
+		PRINT 엉덩이를 흔들며,
+	ENDIF
+	;露出癖3以上
+	SIF ABL:(ARG):17 >= 3
+		PRINT 눈치 채면 통로와 홀에서도 상관하지 않고
+	
+	SIF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINT 아날로
+	
+	PRINT 들개와
+	
+	IF RAND:3 == 0
+		PRINTW 담고있다
+	ELSEIF RAND:2 == 0
+		PRINTW 교미하고있다
+	ELSE
+		PRINTW 서로 사랑하고있다
+	ENDIF
+	
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		;애널
+		PRINTFORML A경험+{Y}
+		EXP:(ARG):1 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ELSE
+		PRINTFORML V경험+{Y}
+		EXP:(ARG):0 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+		CFLAG:(ARG):106 += Y
+	ENDIF
+ELSEIF ABL:(ARG):39 >= 1 || CFLAG:(ARG):602 > 40
+	;獣姦中毒Lv1以上, または結婚愛情40超
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 개와의 항문 교미에 사랑을 느끼고 있는 것 같다
+		PRINTFORML A경험+{Y}
+		EXP:(ARG):1 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 개와의 교미에 사랑을 느끼고 있는 것 같다
+		PRINTFORML V경험+{Y}
+		EXP:(ARG):0 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+		CFLAG:(ARG):106 += Y
+	ENDIF
+ELSEIF CFLAG:(ARG):602 > 20
+	;結婚愛情20超
+	IF TALENT:(ARG):11 == 1
+		;반항적
+		PRINTFORMW %SAVESTR:ARG%는 간신히 자신의 상황을 이해 한 것 같다……
+		
+	ELSEIF TALENT:(ARG):12 == 1
+		;굳건함
+		PRINTFORMW %SAVESTR:ARG%는 들개와 놀며, 사이가 깊어지고 있다……
+		
+	ELSEIF TALENT:(ARG):13 == 1 || TALENT:(ARG):317 == 12
+		;솔직・かわいい動物が好き
+		PRINTFORMW %SAVESTR:ARG%는 들개와 키스를 하고 있는 모습이 자주 볼수 있었다……
+		
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 들개에게 브러쉬 질을 해주고 있다……
+	ENDIF
+ELSE
+	IF TALENT:(ARG):11 == 1
+		;반항적
+		PRINTFORMW %SAVESTR:ARG%는 다가오는 들개를 손으로 뿌리치고 있다
+		
+	ELSEIF TALENT:(ARG):12 == 1
+		;굳건함
+		PRINTFORMW %SAVESTR:ARG%는 한가하기 때문에와 들개를 돌보고 있다
+		
+	ELSEIF TALENT:(ARG):13 == 1 || TALENT:(ARG):317 == 12
+		;솔직・かわいい動物が好き
+		PRINTFORMW %SAVESTR:ARG%는 한가하기 때문에 들개와 서로 재롱부리고 있다
+		
+	ELSE
+		PRINTFORMW 개를 바라보지 않으며 %SAVESTR:ARG%는 절망하고 있다……
+	ENDIF
+ENDIF
+
+
+RETURN 0
+
+
+;--------------------------------------------
+@MARRIAGE_DAY_YOU,ARG
+;--------------------------------------------
+
+PRINTFORML %SAVESTR:ARG%는 당신과 살고 있다.
+
+IF TALENT:(ARG):85 == 1
+	;애정
+	PRINTFORMW %SAVESTR:ARG%는 자랑스러운 모습으로 당신의 옆에서 시중들고 있다
+	
+ELSEIF TALENT:(ARG):76 == 1
+	;음란
+	PRINTFORM %SAVESTR:ARG%는 당신의 근처에서 음탕한 미소를 띄우며, 당신의
+	IF TALENT:(ARG):121 || TALENT:(ARG):122
+		;후타나리・남자
+		PRINT 페니스
+	ELSE
+		PRINT 신체
+	ENDIF
+	PRINTFORMW 를 문지르고 있다
+	
+ELSEIF ABL:(ARG):10 >= 3
+	;従順3以上
+	PRINTFORMW %SAVESTR:ARG%는 용사 함락의 상징으로서 당신의 옆에 시중 들고 있는 것을 참고 있다
+	
+ELSEIF MARK:(ARG):3 >= 1
+	;반발각인
+	PRINTFORMW %SAVESTR:ARG%는 쇠사슬로 속박되어, 당신에게 살의가 가득찬 눈으로 보고 있다
+	
+ELSE
+	PRINTFORMW %SAVESTR:ARG%는 쇠사슬로 속박되어, 단념한 것처럼 고개 숙이고 있다
+ENDIF
+
+
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@MARRIAGE_DAY_LOVERS,ARG:0,ARG:1
+;--------------------------------------------
+
+PRINTFORM %SAVESTR:(ARG:1)%는
+CALL NAME_LOVER,ARG:0,1
+PRINTL (와)과 살고 있다.
+
+CALL DUNGEON_TOWN_LOVER,ARG:1
+
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@MARRIAGE_DAY_SLAVE,ARG:0,ARG:1
+;--------------------------------------------
+
+PRINTFORM %SAVESTR:(ARG:0)%는
+IF ARG:1 < 0
+	PRINT 노예
+ELSE
+	PRINTFORM %SAVESTR:(ARG:1)%
+ENDIF
+PRINTL (와)과 살고 있다.
+
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@MARRIAGE_DAY_YOU,ARG,CHARA
+#DIM CHARA
+;--------------------------------------------
+
+;同じ場所にいないとダメ
+SIF CFLAG:ARG:1 != 0 || CFLAG:CHARA:1 != 0
+	RETURN 0
+
+PRINTFORML %SAVESTR:ARG%하%SAVESTR:CHARA%(와)과 살고 있다.
+
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@ORC_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 아인종과 동굴에서 살고 있다
+
+IF A == 0
+	;あなたの場合
+	IF RAND:2 == 0
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			PRINTFORMW %SAVESTR:ARG%는 아인종들의 정액 처리에 기쁨을 느끼고 있는 것 같다……
+			PRINTFORML A경험+{Y}
+			PRINTFORML 펠라경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			EXP:(ARG):0 += Y
+			EXP:(ARG):22 += Y
+			EXP:(ARG):20 += Y
+		ELSE
+			PRINTFORMW %SAVESTR:ARG%는 아인종들의 정액 처리에 기쁨을 느끼고 있는 것 같다……
+			PRINTFORML V경험+{Y}
+			PRINTFORML A경험+{Y}
+			PRINTFORML 펠라경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			EXP:(ARG):0 += Y
+			EXP:(ARG):1 += Y
+			EXP:(ARG):22 += Y
+			EXP:(ARG):20 += Y
+			CFLAG:(ARG):107 += Y
+		ENDIF
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 아인종들에게 사랑을 느끼고 있다……
+		PRINTFORML 펠라경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):22 += Y
+		EXP:(ARG):20 += Y
+	ENDIF
+ELSEIF CFLAG:(ARG):602 > 40
+	;40日後
+	IF RAND:2 == 0
+		;性交系
+		PRINTFORM %SAVESTR:ARG%는, 
+		;露出癖3以上
+		SIF ABL:(ARG):17 >= 3
+			PRINT 남편의 동료로 보면서
+		;60日後
+		SIF CFLAG:(ARG):602 > 60
+			PRINT 익숙한 모습으로
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			PRINT 아날
+		ELSE
+			PRINT 보지
+		ENDIF
+		PRINT 를 열고,  아인종 남편의
+		IF RAND:2 == 0
+			PRINT 성욕처리
+		ELSE
+			PRINT 정액 처리
+		ENDIF
+		PRINTW 로 기쁨을 느끼고 있었다……
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			PRINTFORML A경험+{Y}
+			PRINTFORML 펠라경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			EXP:(ARG):0 += Y
+			EXP:(ARG):22 += Y
+			EXP:(ARG):20 += Y
+		ELSE
+			PRINTFORML V경험+{Y}
+			PRINTFORML A경험+{Y}
+			PRINTFORML 펠라경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			EXP:(ARG):0 += Y
+			EXP:(ARG):1 += Y
+			EXP:(ARG):22 += Y
+			EXP:(ARG):20 += Y
+			CFLAG:(ARG):107 += Y
+		ENDIF
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 아인종들에게 사랑을 느끼고 있다……
+		PRINTFORML 펠라경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):22 += Y
+		EXP:(ARG):20 += Y
+	ENDIF
+ELSEIF ABL:(ARG):30 >= 1
+	;성교중독
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 아인종과의 항문 성교에 기쁨을 느끼고 있다……
+		PRINTFORML A경험+{Y}
+		PRINTFORML 펠라경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):1 += Y
+		EXP:(ARG):22 += Y
+		EXP:(ARG):20 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 아인종과의 성교에 기쁨을 느끼고 있다……
+		PRINTFORML V경험+{Y}
+		PRINTFORML 펠라경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):0 += Y
+		EXP:(ARG):22 += Y
+		EXP:(ARG):20 += Y
+		CFLAG:(ARG):107 += Y
+	ENDIF
+ELSE
+	PRINTFORMW %SAVESTR:ARG%는 무리하게 아인종들의 아내로서 정액 처리를 위해 끌려가고 있다……
+	PRINTFORML 펠라경험+{Y}
+	PRINTFORML 정액 경험+{Y}
+	EXP:(ARG):22 += Y
+	EXP:(ARG):20 += Y
+ENDIF
+
+
+WAIT
+RETURN 0
+
+;--------------------------------------------
+@SLIME_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 점액과 살고 있다
+PRINTFORML 치정의 구슬+{Y * 10}
+PRINTFORML 욕정의 구슬+{Y * 10}
+JUEL:(ARG):5 += Y * 10
+JUEL:(ARG):8 += Y * 10
+RETURN 0
+
+;--------------------------------------------
+@INSECT_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 벌레와 살고 있다
+PRINTFORML A경험+{Y}
+PRINTFORML 고통의 구슬+{Y * 10}
+PRINTFORML 공포의 구슬+{Y * 10}
+JUEL:(ARG):9 += Y * 10
+JUEL:(ARG):10 += Y * 10
+EXP:(ARG):1 += Y
+RETURN 0
+
+;--------------------------------------------
+@IVY_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 식물과 살고 있다
+PRINTFORML A경험+{Y}
+PRINTFORML 고통의 구슬+{Y * 10}
+PRINTFORML 공포의 구슬+{Y * 10}
+JUEL:(ARG):9 += Y * 10
+JUEL:(ARG):10 += Y * 10
+EXP:(ARG):1 += Y
+RETURN 0
+
+;--------------------------------------------
+@SYOKUSYU_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+	PRINTFORMW %SAVESTR:ARG%는 촉수와 살고 있다
+	PRINTFORML A경험+{Y}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:(ARG):5 += Y * 10
+	EXP:(ARG):1 += Y
+ELSE
+	PRINTFORMW %SAVESTR:ARG%는 촉수와 살고 있다
+	PRINTFORML A경험+{Y}
+	PRINTFORML V경험+{Y}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	JUEL:(ARG):5 += Y * 10
+	EXP:(ARG):0 += Y
+	EXP:(ARG):1 += Y
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@FAILY_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 요정과 살고 있다
+PRINTFORML 쾌C의 구슬+{Y * 10}
+PRINTFORML 욕정의 구슬+{Y * 10}
+JUEL:(ARG):0 += Y * 10
+JUEL:(ARG):5 += Y * 10
+RETURN 0
+
+;--------------------------------------------
+@GIANT_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 거인과 살고 있다
+
+IF A == 0
+	;あなたの場合
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 거인과의 항문 성교에 기쁨을 느끼고 있다……
+		PRINTFORML A경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		PRINTFORML A확장경험+1
+		EXP:(ARG):1 += Y
+		EXP:(ARG):20 += Y
+		EXP:(ARG):53 += 1
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 거인과의 성교에 기쁨을 느끼고 있다……
+		PRINTFORML V경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		PRINTFORML V확장경험+1
+		EXP:(ARG):0 += Y
+		EXP:(ARG):20 += Y
+		EXP:(ARG):52 += 1
+		CFLAG:(ARG):107 += Y
+	ENDIF
+ELSEIF TALENT:(ARG):76 == 1 || CFLAG:(ARG):602 > 50
+	;음란・または結婚50日以降
+	IF RAND:2 == 0
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			;항문광
+			IF TALENT:(ARG):77
+				PRINTFORML  %SAVESTR:ARG%는 한계까지 확장된 엉덩이 구멍으로 거인의 자지을 삼키고 있었다
+				Y += 1
+			ENDIF
+			PRINTFORMW %SAVESTR:ARG%는 거인의 페니스 케이스로서 행복한 나날을 보내고 있다……
+			PRINTFORML A경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			PRINTFORML A확장경험+1
+			EXP:(ARG):1 += Y
+			EXP:(ARG):20 += Y
+			EXP:(ARG):53 += 1
+		ELSE
+			PRINTFORMW %SAVESTR:ARG%는 거인의 페니스 케이스로서 행복한 나날을 보내고 있다……
+			PRINTFORML V경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			PRINTFORML V확장경험+1
+			EXP:(ARG):0 += Y
+			EXP:(ARG):20 += Y
+			EXP:(ARG):52 += Y
+			CFLAG:(ARG):107 += 1
+		ENDIF
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 거인의 흘러넘칠듯한 정액을 다 마시고 있다……
+		PRINTFORML 펠라경험+{Y*10}
+		PRINTFORML 정액 경험+{Y*10}
+		EXP:(ARG):22 += Y * 10
+		EXP:(ARG):20 += Y * 10
+	ENDIF
+ELSEIF ABL:(ARG):10 >= 2 || CFLAG:(ARG):602 > 30
+	;従順2以上または結婚30日以降
+	IF RAND:2 == 0
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			PRINTFORMW %SAVESTR:ARG%는 거인과의 항문 성교에 익숙해지기 위해, 거대한 딜도로 애널을 확장하고 있다……
+			PRINTFORML A경험+{Y}
+			PRINTFORML A확장 경험+{Y}
+			EXP:(ARG):1 += Y
+			EXP:(ARG):53 += Y
+		ELSE
+			PRINTFORMW %SAVESTR:ARG%는 거인과의 성교에 익숙해지기 위해, 거대한 딜도로 질내를 확장 하고 있다……
+			PRINTFORML V경험+{Y}
+			PRINTFORML V확장 경험+{Y}
+			EXP:(ARG):0 += Y
+			EXP:(ARG):52 += Y
+		ENDIF
+	ELSE
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			PRINTFORMW %SAVESTR:ARG%는 거인과의 항문 성교에 기쁨을 느끼고 있다……
+			PRINTFORML A경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			PRINTFORML A확장경험+1
+			EXP:(ARG):1 += Y
+			EXP:(ARG):20 += Y
+			EXP:(ARG):53 += 1
+		ELSE
+			PRINTFORMW %SAVESTR:ARG%는 거인과의 성교에 기쁨을 느끼고 있다……
+			PRINTFORML V경험+{Y}
+			PRINTFORML 정액 경험+{Y}
+			PRINTFORML V확장경험+1
+			EXP:(ARG):0 += Y
+			EXP:(ARG):20 += Y
+			EXP:(ARG):52 += 1
+			CFLAG:(ARG):107 += Y
+		ENDIF
+	ENDIF
+ELSE
+	PRINTFORMW %SAVESTR:ARG%는 무리하게 거인의 아내로서 정액 처리에 끌려가고 있다……
+	PRINTFORML 펠라경험+{Y*5}
+	PRINTFORML 정액경험+{Y*5}
+	EXP:(ARG):22 += Y * 5
+	EXP:(ARG):20 += Y * 5
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@MAN_MARRIAGE_DAY,ARG
+#DIM BONUS,10
+;--------------------------------------------
+
+FOR LOCAL,0,10
+	BONUS:LOCAL = 0
+NEXT
+
+;BONUS:0 = 치정
+;BONUS:1 = 고통
+
+;旦那の種類
+IF TALENT:(ARG):파더콘
+	LOCALS = 중년마족
+ELSEIF TALENT:(ARG):쇼타콘
+	LOCALS = 소년마족
+ELSE
+	LOCALS = 마족
+ENDIF
+
+
+PRINTFORMW %SAVESTR:ARG%는 %LOCALS%과 살고 있다
+
+IF A == 0
+	;あなたの場合
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 애널로 %LOCALS%의 페니스를 받아들였다
+		PRINTFORML 쾌A의 구슬+{Y}
+		PRINTFORML 온순의 구슬+{Y}
+		PRINTFORML A경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		JUEL:(ARG):2 += Y
+		JUEL:(ARG):4 += Y
+		EXP:(ARG):1 += Y
+		EXP:(ARG):20 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 질로 %LOCALS%의 페니스를 받아들였다
+		PRINTFORML 쾌V의 구슬+{Y}
+		PRINTFORML 온순의 구슬+{Y}
+		PRINTFORML V경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		JUEL:(ARG):1 += Y
+		JUEL:(ARG):4 += Y
+		EXP:(ARG):0 += Y
+		EXP:(ARG):20 += Y
+		CFLAG:(ARG):107 += Y
+	ENDIF
+ELSEIF TALENT:(ARG):76 == 1 || CFLAG:(ARG):602 > 50
+	;음란・または結婚50日以降
+	
+	;マゾっ気3以上
+	IF ABL:(ARG):21 >= 3
+		PRINT 온몸을 밧줄로 구속한 
+		BONUS:1 += Y
+	ENDIF
+	
+	PRINTFORM %SAVESTR:ARG%는
+	
+	;露出癖3以上
+	IF ABL:(ARG):17 >= 3
+		PRINT 친구들에게 보여지면서 
+		BONUS:0 += Y
+	ENDIF
+	
+	;サドっ気3以上
+	SIF ABL:(ARG):20 >= 3
+		PRINT 구속구를 하고있는 
+	
+	PRINTFORM %LOCALS%(와)과
+	
+	IF CFLAG:(ARG):602 > 80
+		PRINT 때때로 체위를 바꿔가면서 
+	ELSEIF CFLAG:(ARG):602 > 65
+		PRINT 정열적으로 끌어안고 
+	ELSE
+		PRINT 사이좋게 끌어안고 
+	ENDIF
+	
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW 항문 성교를 즐기고 있다
+		PRINTFORML 쾌A의 구슬+{Y}
+		PRINTFORML 온순의 구슬+{Y}
+		PRINTFORML A경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		JUEL:(ARG):2 += Y
+		JUEL:(ARG):4 += Y
+		EXP:(ARG):1 += Y
+		EXP:(ARG):20 += Y
+	ELSE
+		PRINTFORMW 아이 만들기에 힘쓰고있다
+		PRINTFORML 쾌V의 구슬+{Y}
+		PRINTFORML 온순의 구슬+{Y}
+		PRINTFORML V경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		JUEL:(ARG):1 += Y
+		JUEL:(ARG):4 += Y
+		EXP:(ARG):0 += Y
+		EXP:(ARG):20 += Y
+		CFLAG:(ARG):107 += Y
+	ENDIF
+	
+	IF BONUS:0 > 0
+		PRINTFORML 치정의 구슬+{BONUS:0}
+		JUEL:(ARG):8 += BONUS:0
+	ENDIF
+	
+	IF BONUS:1 > 0
+		PRINTFORML 고통의 구슬+{BONUS:1}
+		JUEL:(ARG):9 += BONUS:1
+	ENDIF
+	
+ELSEIF ABL:(ARG):10 >= 2 || CFLAG:(ARG):602 > 30
+	;従順2以上または結婚30日以降
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%(와)과 %LOCALS%는 애널로 하는 부부의 일에 익숙해진 것 같다
+		PRINTFORML 쾌A의 구슬+{Y}
+		PRINTFORML A경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		JUEL:(ARG):2 += Y
+		EXP:(ARG):1 += Y
+		EXP:(ARG):20 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%(와)과 %LOCALS%는 부부의 일에 익숙해진 것 같다
+		PRINTFORML 쾌V의 구슬+{Y}
+		PRINTFORML V경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		JUEL:(ARG):1 += Y
+		EXP:(ARG):0 += Y
+		EXP:(ARG):20 += Y
+		CFLAG:(ARG):107 += Y
+	ENDIF
+ELSE
+	;新婚
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 무리하게 애널을 범해지고 있다
+		PRINTFORML A경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):1 += Y
+		EXP:(ARG):20 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 무리하게 깔아눌러져 아기씨를 흘려 넣고 있다
+		PRINTFORML V경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):0 += Y
+		EXP:(ARG):20 += Y
+		CFLAG:(ARG):107 += Y
+	ENDIF
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@GIRL_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+;嫁の種類
+IF TALENT:(ARG):마더콘
+	LOCALS = 마족 숙녀
+ELSEIF TALENT:(ARG):로리콘
+	LOCALS = 마족 여자애
+ELSE
+	LOCALS = 여자마족
+ENDIF
+
+PRINTFORMW %SAVESTR:ARG%는 %LOCALS%(와)과 살고 있다
+
+IF TALENT:(ARG):122 || TALENT:(ARG):121
+	;남자・후타나리
+	IF TALENT:(ARG):318 == 2
+		;短小包茎
+		
+		;不倫判定（NTRフラグあり）
+		IF CFLAG:(ARG):603 == 0 && RAND:10 == 0 && (FLAG:5 & 128)
+			;浮気になる
+			CFLAG:(ARG):603 = 1
+		ELSEIF CFLAG:(ARG):603 == 1 && RAND:10 == 0
+			;不倫になる
+			CFLAG:(ARG):603 = 2
+		ELSEIF CFLAG:(ARG):603 == 1 && RAND:9 == 0
+			;浮気をやめてくれる
+			CFLAG:(ARG):603 = 0
+		ELSEIF CFLAG:(ARG):603 == 2 && RAND:10 == 0
+			;不倫相手の子供ができちゃった
+			CFLAG:(ARG):603 = 3
+		ELSEIF CFLAG:(ARG):603 == 2 && RAND:9 == 0
+			;不倫をやめてくれる
+			CFLAG:(ARG):603 = 0
+		ENDIF
+		
+		IF CFLAG:(ARG):603 == 2 || CFLAG:(ARG):603 == 3
+			;不倫中・不倫妊娠中
+			PRINTFORMW %LOCALS%는 단소 포경인 %SAVESTR:ARG%(와)과의 섹스에 질려 버린 것 같다
+		ELSEIF RAND:2 == 0
+			PRINTFORMW 단소 포경인 %SAVESTR:ARG%는 %LOCALS%를 만족 시키지 못하고,  몇차례 허리를 흔든 것만으로 끝나 버렸다
+		ELSE
+			PRINTFORMW 단소 포경인 %SAVESTR:ARG%는 %LOCALS%의 손으로 훑어진 것만으로 끝나 버렸다
+		ENDIF
+		
+	ELSEIF TALENT:(ARG):318 == 1
+		;巨根
+		IF RAND:2 == 0
+			PRINTFORMW 왕자지인 %SAVESTR:ARG%는 %LOCALS%와 밤새도록 계속 사랑했다
+		ELSE
+			PRINTFORMW 왕자지인 %SAVESTR:ARG%는 %LOCALS%에게 몇번이나 질내사정을 졸라졌다
+		ENDIF
+	ELSEIF TALENT:(ARG):318 == 4
+		;말
+		PRINTFORMW 말의 페니스를 가진 %SAVESTR:ARG%는 %LOCALS%를 망가질 만큼 계속 사랑했다
+	ELSE
+		;その他
+		IF RAND:2 == 0
+			PRINTFORMW %SAVESTR:ARG%는 육단지의 포로가 되어 있는 것 같다
+		ELSE
+			PRINTFORMW %SAVESTR:ARG%는 %LOCALS%에게 몇번이나 허리를 쳐박고 있었다
+		ENDIF
+	ENDIF
+ELSEIF ABL:(ARG):33 >= 1 || A == 0
+	IF RAND:2 == 0
+		PRINTFORMW %SAVESTR:ARG%는 %LOCALS%(와)과의 생활에 기쁨을 느끼고 있다
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 %LOCALS%(와)과의 사랑에 기쁨을 느끼고 있다……
+	ENDIF
+ELSEIF ABL:(ARG):22 >= 1
+	PRINTFORMW %SAVESTR:ARG%는 %LOCALS%에게 안기는 것이 그다지 싫지만은 아닌 듯 하다……
+ELSE
+	PRINTFORMW %SAVESTR:ARG%는 마음을 닫고 있다……
+ENDIF
+
+IF CFLAG:(ARG):603 == 1
+	;浮気
+	PRINTFORMW %SAVESTR:ARG%의 아내는 바람을 피우고 있는 것 같다……
+ELSEIF CFLAG:(ARG):603 == 2
+	;不倫
+	PRINTFORMW 문의 틈새로 들여다 보면 %SAVESTR:ARG%의 침대에서 마족의 아내가 낯선 남자와 섹스 하고 있는 것이 보였다
+	PRINTFORMW %SAVESTR:ARG%는 살그머니 그 자리를 뒤로 했다……
+ELSEIF CFLAG:(ARG):603 == 3
+	;不倫妊娠
+	PRINTFORMW 문의 틈새로 들여다 보면 %SAVESTR:ARG%의 침대에서 배가 부풀어 오른 마족의 아내가 낯선 남자와 섹스 하고 있는 것이 보였다
+	PRINTFORMW %SAVESTR:ARG%는 살그머니 그 자리를 뒤로 했다……
+ENDIF
+
+
+IF CFLAG:(ARG):603 == 2 || CFLAG:(ARG):603 == 3
+	;不倫中・不倫妊娠中
+	PRINTFORMW %SAVESTR:ARG%는 자위를 하며 보냈다……
+	PRINTFORML 쾌C의 구슬+10
+	PRINTFORML 욕정의 구슬+10
+	PRINTFORML 사정경험+1
+	JUEL:(ARG):0 += 10
+	JUEL:(ARG):5 += 10
+	EXP:(ARG):3 += 1
+ELSEIF TALENT:(ARG):122
+	;남자
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	PRINTFORML 사정경험+1
+	JUEL:(ARG):0 += Y * 10
+	JUEL:(ARG):5 += Y * 10
+	EXP:(ARG):3 += 1
+ELSEIF TALENT:(ARG):121
+	;후타나리
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	PRINTFORML 레즈경험+{Y}
+	PRINTFORML 사정경험+1
+	JUEL:(ARG):0 += Y * 10
+	JUEL:(ARG):5 += Y * 10
+	EXP:(ARG):40 += Y
+	EXP:(ARG):3 += 1
+ELSE
+	PRINTFORML 쾌C의 구슬+{Y * 10}
+	PRINTFORML 욕정의 구슬+{Y * 10}
+	PRINTFORML 레즈경험+{Y}
+	JUEL:(ARG):0 += Y * 10
+	JUEL:(ARG):5 += Y * 10
+	EXP:(ARG):40 += Y
+ENDIF
+
+IF CFLAG:(ARG):603 == 3 && RAND:10
+	;不倫妊娠出産
+	PRINTFORMW %SAVESTR:ARG%의 마족의 아내는 무사히 출산한 것 같다
+	;不倫状態に戻る
+	CFLAG:(ARG):603 = 2
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@BEAST_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 마수와 살고 있다
+
+IF TALENT:(ARG):136 == 1 || A == 0
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 기뻐듯 엉덩이를 흔들며 마수와 발정교미를 하고 있다
+		PRINTFORML A경험+{Y}
+		EXP:(ARG):1 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 기쁜듯 엉덩이를 흔들며 마수와 발정교미를 하고 있다
+		PRINTFORML V경험+{Y}
+		EXP:(ARG):0 += Y
+		CFLAG:(ARG):107 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ENDIF
+ELSEIF ABL:(ARG):39 >= 1 || CFLAG:(ARG):602 > 40
+	IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+		PRINTFORMW %SAVESTR:ARG%는 마수와의 항문 교미에 사랑을 느끼고 있는 것 같다
+		PRINTFORML A경험+{Y}
+		EXP:(ARG):1 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 마수와의 교미에 사랑을 느끼고 있는 것 같다
+		PRINTFORML V경험+{Y}
+		EXP:(ARG):0 += Y
+		CFLAG:(ARG):107 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ENDIF
+ELSE
+	PRINTFORMW 마수를 바라보지 않으며 %SAVESTR:ARG%는 절망하고 있다……
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@BRAIN_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 무서운 요마와 살고 있다
+
+RETURN 0
+
+;--------------------------------------------
+@HORSE_MARRIAGE_DAY,ARG
+;--------------------------------------------
+
+PRINTFORMW %SAVESTR:ARG%는 말과 마굿간에서 살고 있다
+
+IF TALENT:(ARG):136 == 1 || A == 0
+	IF RAND:2 == 0
+		IF TALENT:(ARG):273 == 1 || (CFLAG:(ARG):42 == 79 && (CFLAG:(ARG):40 & 64) && FLAG:37) || TALENT:(ARG):122 == 1
+			PRINTFORMW %SAVESTR:ARG%는 희희낙락해 하며 받침대에 걸쳐 말과 항문 교미에 빠지고 있다
+			PRINTFORML 고통의 구슬+{Y * 10}
+			PRINTFORML A경험+{Y}
+			PRINTFORML A확장 경험+{Y}
+			EXP:(ARG):1 += Y
+			EXP:(ARG):53 += Y
+			JUEL:(ARG):9 += Y * 10
+			PRINTFORMW 수간경험+{Y}
+			EXP:(ARG):56 += Y
+		ELSE
+			PRINTFORMW %SAVESTR:ARG%는 희희낙락 해 하며 받침대에 걸쳐 말과 교미에 빠지고 있다
+			PRINTFORML 고통의 구슬+{Y * 10}
+			PRINTFORML V경험+{Y}
+			PRINTFORML V확장 경험+{Y}
+			EXP:(ARG):0 += Y
+			EXP:(ARG):52 += Y
+			JUEL:(ARG):9 += Y * 10
+			CFLAG:(ARG):107 += Y
+			PRINTFORMW 수간경험+{Y}
+			EXP:(ARG):56 += Y
+		ENDIF
+	ELSE
+		PRINTFORMW %SAVESTR:ARG%는 말의 페니스로부터 넘쳐 나온 정액을 다 마시고 있다……
+		PRINTFORML 펠라경험+{Y}
+		PRINTFORML 정액 경험+{Y}
+		EXP:(ARG):22 += Y
+		EXP:(ARG):20 += Y
+		PRINTFORMW 수간경험+{Y}
+		EXP:(ARG):56 += Y
+	ENDIF
+ELSEIF ABL:(ARG):39 >= 1 || CFLAG:(ARG):602 > 40
+	PRINTFORMW %SAVESTR:ARG%는 말의 페니스를 정중하게 빨고 있다……
+	PRINTFORML 펠라경험+{Y}
+	PRINTFORML 정액 경험+{Y}
+	EXP:(ARG):22 += Y
+	EXP:(ARG):20 += Y
+	PRINTFORMW 수간경험+{Y}
+	EXP:(ARG):56 += Y
+ELSE
+	PRINTFORMW %SAVESTR:ARG%는 마굿간의 한쪽 구석에서 절망하고 있다……
+ENDIF
+
+RETURN 0

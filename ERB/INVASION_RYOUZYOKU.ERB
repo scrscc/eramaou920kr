@@ -1,0 +1,760 @@
+﻿;----------------------------------
+@INVASION_RYOUZYOKU, ARG:0, ARG:1
+;----------------------------------
+#DIM ID
+#DIM NUM
+#DIM RYOUZYOKU
+
+;侵攻ポイントを調整
+;基本的に0∼10の範囲に抑える
+ARG:1 /= 5000
+
+;戦争で陵辱
+REPEAT 3
+	X = (RAND:9 + 1) * 10 + 100 + RAND:5
+	CALL MONSTER_DATA, X, COUNT, 0, -1
+
+	RYOUZYOKU = COUNT * 100 + 7
+	NUM = COUNT * 100 + 99
+	IF E:NUM <= 0
+		E:RYOUZYOKU = 0
+	ENDIF
+	IF E:RYOUZYOKU > 0
+		ID = E:(COUNT*100)
+		PRINTFORMW %ITEMNAME:ID%의 능욕이 시작되었다
+	ENDIF
+	IF E:RYOUZYOKU == 1
+		;カタコト
+		CALL ORC_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 2
+		;슬라임
+		CALL SLIME_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 3
+		;곤충
+		CALL INSECT_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 4
+		;蔦촉수
+		CALL IVY_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 5
+		;촉수
+		CALL SYOKUSYU_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 6
+		;요정
+		CALL FAILY_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 7
+		;거인
+		CALL GIANT_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 8
+		;男
+		CALL MAN_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 9
+		;女
+		CALL GIRL_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 10
+		;야수
+		CALL BEAST_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 11
+		;뇌간
+		CALL BRAIN_INV, ARG:0, ARG:1
+	ELSEIF E:RYOUZYOKU == 12
+		;말
+		CALL HORSE_INV, ARG:0, ARG:1
+	ENDIF
+	PRINTL  
+REND
+
+RETURN 0
+
+
+
+;--------------------------------------------
+@ORC_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 간판 소녀
+	LOCALS:1 = 여기사
+	LOCALS:2 = 소녀
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 아가씨
+	LOCALS:1 = 엘프 여기사
+	LOCALS:2 = 엘프 소녀
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 간판 소녀
+	LOCALS:1 = 여자 용기사
+	LOCALS:2 = 용인 소녀
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 엔젤 나이트
+	LOCALS:2 = 천사 소녀
+ELSE
+	LOCALS:0 = 간판 소녀
+	LOCALS:1 = 여기사
+	LOCALS:2 = 소녀
+ENDIF
+
+IF RAND:5 == 0 && ARG:1 > 1
+	PRINTFORMW 아인의 무리에 포위된 %LOCALS:1%의 부대는 결단을 강요받고 있었다
+	PRINTFORMW 『더 이상은 구조를 기다릴 수 없다……그렇다면 아직 순결인 채로 죽을 수 밖에……』
+	PRINTFORMW 그 때, 진지 내에서 들릴 리가 없는 아인종의 목소리가 들렸다
+	PRINTFORMW 본진에는 백기가 내 걸 려져, 동료들은 차례차례로 무장해제 되어 간다
+	PRINTFORMW %LOCALS:1%(이)가 본 것은, 믿고 있던 단장이 아인종의 페니스에 아양을 떠는 모습이었다……
+ELSEIF RAND:4 == 0
+	PRINTFORMW %LOCALS:1%의 저항도 허무하게 차례차례로 거점은 공략되고 저항한 부대는 포로가 되었다
+	IF ARG:1 > 6
+		PRINTFORML 아인종의 군세는 기세가 멈출 줄을 몰라,  마치 파도에 휩쓸리는 것 같았다
+	ELSEIF ARG:1 > 2
+		PRINTFORML %LOCALS:1%의 부대는 중과부적으로, 변변찮은 저항조차 할 수 없었다
+	ENDIF
+	PRINTFORMW 「나라로 도라가,  아내루 할거다∼♪」
+	PRINTFORMW 이미 눈동자로부터 희망의 빛이 사라져, 무저항이 된 %LOCALS:1%들
+	PRINTFORMW 그녀들의 몸은 이미 임신촉진제에 의해서 아인종의 아이가 수태되어, 어느새 만삭처럼 부풀어 있었다
+	PRINTFORMW 『아아……아기가 움직이고 있어……아인종의 아이가……』
+	IF ARG:1 > 7
+		PRINTFORML %LOCALS:1%의 임신은 이미 세자리 수가 넘어, 동족과의 임신이 불가능하게 될 때까지 개조되고 있었다
+	ELSEIF ARG:1 > 3
+		PRINTFORML %LOCALS:1%의 임신은 이미 두자리 수를 넘고 있었다
+	ENDIF
+ELSEIF RAND:3 == 0
+	PRINTW 「빵 달라거. 대그믄… 이그다」
+	PRINTFORMW 아인종들은 빵집에 침입한 후 %LOCALS:0%를(을) 붙잡아 끌어눕히고 범했다
+	PRINTFORMW 『시, 싫어어어어! 그, 그, 그만해, 아아아아아아!』
+	PRINTFORMW %LOCALS:0%의 질내에 아인종의 진한 정액이 뿜어진다
+	IF ARG:1 > 6
+		PRINTFORML %LOCALS:0%(이)가 사는 거리는 아인종들의 공중 변소가 되었다
+		PRINTFORML 거리에는 육변기들이 허덕이는 교성이 울려 퍼졌다……
+	ELSEIF ARG:1 > 2
+		PRINTFORML %LOCALS:0%(이)가 살았던 거리는 완전히 파괴되어, 마을의 여자들은 모두 아인종의 변기가 되었다
+	ENDIF
+	PRINTFORMW 「매이르, 빵, 만둘구, 쎾쓰하자구」
+	IF ARG:1 > 7
+		PRINTFORML 변기인 %LOCALS:0%(은)는 빵을 구웠다
+		PRINTFORML 섹스방이 된 빵가게는 빵의 향기를 덮어 버릴 정도의 성취(性臭)로 가득 차 있었다……
+	ELSEIF ARG:1 > 3
+		PRINTFORML %LOCALS:0%(은)는 빵을 구우면서, 변기로서의 의무도 완수하지 않으면 안 된다……
+	ENDIF
+ELSEIF RAND:2 == 0
+	PRINTW 『이렇게 하급한 아인종에게… 증원만 오면… 이딴 것들은』
+	PRINTFORMW %LOCALS:1%(은)는 광장에서 공개처형을 당하고 있었다
+	PRINTFORMW 목과 손목을 고정하는 족쇄로 구속당해, 보기 흉하게 벌거숭이인 엉덩이를 내밀고 교대로 범해지고 있다
+	PRINTFORMW 「너, 주기지 아늠. 너, 모두의 것 된다. 개속 여기서, 버매진다」
+	PRINTFORMW %LOCALS:1%(은)는 이미 며칠 동안이나 광장에서 노리개가 되어 있었다. 마치 장식된 축하기념물인 것처럼
+	PRINTFORMW 『그만둬… 이제 범하지 말아줘… 그만해달라고오오오오!』
+	PRINTFORMW 통곡하는 %LOCALS:1%의 눈앞에, 아인의 페니스가 들이밀어졌다
+	PRINTFORMW 「머글거다, 마셔라」
+ELSE
+	PRINTW 「시니비다. 사이조케 지내라구」
+	PRINTFORMW 새로운 노예가 된 %LOCALS:2%(은)는,  노예 텐트에서 이상한 광경을 보았다
+	PRINTFORMW 사슬에 묶여 생기 없는 눈을 한 여자들이 전라로 봉사하고 있었던 것이다.  반 정도는 분명히 임신하고 있었다
+	PRINTFORMW 오래 사용되어 거무칙칙하게 변색된 성기, 내뻗쳐지고 떡진 머리카락과 음모, 정액을 줄줄 흘리는 항문…
+	PRINTFORMW 『이것이… 내… 미래…』
+	PRINTFORMW %LOCALS:2%(은)는 힘없이 무너져내렸다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@SLIME_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여자
+	LOCALS:1 = 젊은 아가씨
+	LOCALS:2 = 젊은 수녀
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 아가씨
+	LOCALS:1 = 엘프 여성
+	LOCALS:2 = 엘프 무녀
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 아가씨
+	LOCALS:1 = 용인 여성
+	LOCALS:2 = 용인 신관
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 천사 소녀
+	LOCALS:2 = 천사 신관
+ELSE
+	LOCALS:0 = 여자
+	LOCALS:1 = 젊은 아가씨
+	LOCALS:2 = 젊은 수녀
+ENDIF
+
+IF RAND:4 == 0 && ARG:1 > 1
+	PRINTFORMW 포로가 된 %LOCALS:2%(은)는 항문의 한계까지 슬라임으로 채워지고 있었다
+	PRINTFORMW 다른 %LOCALS:2%(이)가 지켜보는 가운데,  신탁서적 위에 알몸으로 올려졌다
+	PRINTFORMW 「쏘다지며느, 동료눈, 노예댄다」
+	PRINTFORMW 마물사육사인 오크가 %LOCALS:2%의 큰 엉덩이를 두들긴다
+	PRINTFORMW 이미 수시간동안 계속했던 애널 섹스로 인해 견딜 수 있을 리가 없었다……
+ELSEIF RAND:3 == 0
+	PRINTFORMW %LOCALS:2%들은 전쟁의 불길이 휘몰아치는 안에서 기도를 하고 있었다
+	PRINTFORMW 성당에 도망친 %LOCALS:2%들은 죽음을 각오 하고 있었다
+	PRINTFORMW 『……무슨 일인거죠,  몸이……움직이지 않……아……』
+	PRINTFORMW 배수구로부터 소리없이 다가온 것은 마비독의 슬라임이였다.
+	PRINTFORMW 슬라임으로부터  나온 휘발성 마비가스가 %LOCALS:2%들의 몸의 자유를 빼앗았다
+	PRINTFORMW 문밖에서는 무수한 발자국 소리와 꺼림칙한 억양의 저속한 외침소리. 
+	PRINTFORMW 그녀들에게는 죽음조차 허락되지 못했다
+ELSEIF RAND:2 == 0
+	PRINTFORMW %LOCALS:0%들은 간신히 쉘터로 숨어들었다. 바깥에서는 전투가 계속되고 있다
+	IF ARG:1 > 6
+		PRINTFORML %LOCALS:0%들이 살던 거리는 벌써 반이상의 오크의 마물사육사들에게 점령되고 있었다
+		PRINTFORML 붙잡힌다면 번식 노예로 쓰다 버릴 때까지 범해질 것이다……
+	ELSEIF ARG:1 > 2
+		PRINTFORML %LOCALS:0%(이)가 살던 거리는 오크의 마물사육사의 습격을 받아,  이미 방위 부대는 반파되었다
+	ENDIF
+	PRINTFORMW %LOCALS:0% 중 한 명이, 악취가 나는 것을 깨달았다
+	PRINTFORMW 『스, 슬라임!』
+	PRINTFORMW 공기 구멍으로 슬라임이 침입한 것이다!
+	PRINTFORMW 오크 전사가 쉘터의 문을 부쉈을 때, 이미 안에서 %LOCALS:0%들은 다 범해지고 있었다
+	IF ARG:1 > 7
+		PRINTFORML %LOCALS:0%들은 그 후에, 파괴된 거리에서 슬라임 배양 노예가 되었다
+		PRINTFORML 절정에 이르면서 애널로부터 슬라임을 분출하는 모습을,  불쌍히 여기는 자는 아무도 없었다……
+	ELSEIF ARG:1 > 3
+		PRINTFORML %LOCALS:0%들은 그 후에도, 슬라임을 애널로 배양 하는 것을 계속되었다고 한다……
+	ENDIF
+ELSE
+	PRINTFORMW 『그만! 용서해줘! 싫어어!』
+	PRINTFORMW 주둔지에서의 여흥으로서, %LOCALS:1%(이)가 슬라임 욕조에 들어간 것이다
+	PRINTFORMW 욕조의 반까지 채워진 슬라임은, 하반신이 벗겨진 여자가 들어가자 곧바로 침입을 개시했다
+	PRINTFORMW 질과 항문에 대량의 슬라임이 침입해, %LOCALS:1%(은)는 절규하는 소리를 냈다
+	PRINTFORMW 「조은 로션이쿠나. 이 뒤에 치밉시키자구」
+	PRINTFORMW 오크 중 한 명이 제안하자, 부대는 열광한다
+	PRINTFORMW 오직 %LOCALS:1%만이, 홀로 절망한 표정으로 새파랗게 질려 있었다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@INSECT_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+	LOCALS:1 = 여학생
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여성 
+	LOCALS:1 = 엘프 학생
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여성
+	LOCALS:1 = 용인 학생
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 천사 견습생
+ELSE
+	LOCALS:0 =여성
+	LOCALS:1 = 여학생
+ENDIF
+
+IF RAND:3 == 0 && ARG:1 > 1
+	PRINTFORMW 잡혀버린 %LOCALS:1%들은, 입으로부터 보라색의 애벌레를 먹게 되었다. 그리고 그녀들에게 바로 증상이 나타났다
+	PRINTFORMW 애벌레가 장 속에서 미약을 분비하자 이성이 파괴된 %LOCALS:1%들은 서로 몸을 얽혔다
+	PRINTFORMW %LOCALS:1%들은 섹스 밖에 생각하지 못하는 성노예로서 다시 태어났다
+	PRINTFORMW 남학생과 여학생 한 쌍이 되어 노예를 낳는 장치가 된것 이었다
+	PRINTFORMW 목에 쇠사슬로 연결된 두 사람의 얼굴은, 매우 행복한 것 같았다
+ELSEIF RAND:2 == 0
+	PRINTFORMW %LOCALS:1%들은 전장으로부터 피난하는 도중에 마충의 무리에게 습격당했다
+	PRINTFORMW 마충을 피리로 조종하는 것은 냄새나는 옷감으로 몸을 싼 오크 충사였다
+	IF ARG:1 > 6
+		PRINTFORML 노예가 된 %LOCALS:0%(이)가 오크 충사의 페니스에 뺨을 비빈다
+		PRINTFORML 오크의 페니스에 굴한 그녀가, 학생들의 피난처를 발설한 것이다
+	ELSEIF ARG:1 > 2
+		PRINTFORML 오크 충사에게는  페니스 케이스가 된 %LOCALS:0%(이)가 동여 매어져 있었다
+	ENDIF
+	PRINTFORMW 그 자리에서 알몸으로 벗겨졌던 %LOCALS:1%(은)는 마충이 끈적거리는 실로 얽어매진다
+	PRINTFORMW 불쌍한 %LOCALS:1%들은 마충의 둥지로 데리고 돌아가졌다
+	PRINTFORMW 새로운 마충의 알을 심기 위해,  새로운 마충을 위해, 오크 충사는 웃었다
+ELSE
+	PRINTFORMW 전장에서 붙잡힌 %LOCALS:0%들은,  마계의 곤충의 부화기가 되어 있었다
+	PRINTFORMW 움직이지 못하게 구속된 %LOCALS:0%들의 질과 항문에 곤충들은 알을 낳아 갔다
+	PRINTFORMW 『아아…아아아아아…아아아…』
+	PRINTFORMW %LOCALS:0%들은 절망하며 정신이 붕괴해 나갔다. 
+	PRINTFORMW 이윽고 %LOCALS:0%들은, 그녀들의 점막으로부터 양분을 흡수한 곤충의 유충을 질과 항문으로 배출하고 또다시 알이 심어졌다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@IVY_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+	LOCALS:1 = 여병사
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여성
+	LOCALS:1 = 엘프 레인져
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여성 
+	LOCALS:1 = 용인 여병사
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 천사 병사
+ELSE
+	LOCALS:0 = 여성
+	LOCALS:1 = 여병사
+ENDIF
+
+IF RAND:3 == 0 && ARG:1 > 1
+	PRINTFORMW 식물형 몬스터가 하룻밤 사이에 요새를 삼켜 %LOCALS:1%들은 모두 굵은 덩굴로 포박 되었다
+	PRINTFORMW 그리고는 보라색의 꽃이 피는 화원에 %LOCALS:1%들은 모아졌다
+	PRINTFORMW 그 꽃의 꽃가루에는 환각 작용이 있어서 %LOCALS:1%들과 요새의 남자들은 일사불란하게 섹스를 계속하였다
+	PRINTFORMW 『조아아……좀더……와줘……아기만들어……임신시켜줘어』
+	PRINTFORMW 태어난 아이는 노예로서 거래된다. 그럼에도 그녀들은 꽃에 유혹되어 교미를 계속하였다…….
+ELSEIF RAND:2 == 0
+	PRINTFORMW %LOCALS:1%들은 전장을 뒤덮은 식물 덩어리에 삼켜졌다
+	PRINTFORMW 손과 발은 덩굴에 얽매어지고 무방비한 애널에 뿌리가 내려졌다
+	PRINTFORMW 뿌리에서 분비되는 물질로 인해 %LOCALS:1%들은 곧바로 느끼는 얼굴을 보이며, 
+	PRINTFORMW 그대로 식물과 공생 상태가 되었다
+	IF ARG:1 > 5
+		PRINTFORML 귀에서 뇌까지 파고 들어간 뿌리로 인해 이미 쾌락 밖에 느껴지지 않도록 정신이 개조 되었다
+		PRINTFORML 식물의 양분으로 인해 %LOCALS:1%의 근육으로 탄탄했던 몸은 추잡한 육단지가 되어 버렸다
+	ELSEIF ARG:1 > 3
+		PRINTFORML %LOCALS:1%의 근육으로 탄탄했던 몸은 추잡한 육단지가 되어 버렸다
+	ENDIF
+	PRINTFORMW 『하아앗, 기붕조아아아아앗!엉덩이, 이상하게 되버려엇!엉덩이가 되어버려어어어어!』
+ELSE
+	PRINTFORMW 제압한 거점에는 마계의 식물이 심어져 그 양분으로서 %LOCALS:0%들은 꽤나 도움이 되었다
+	PRINTFORMW 산 채로 뿌리가 내려진 여자들은, 식물과 공생 상태가 되어 양질의 비료를 낳고 있었다
+	PRINTFORMW 「먹이다, 머거. 머거서, 똥싸는거가, 너히드르 일이다」
+	PRINTFORMW 때때로 남자나 아인종들이 움직일 수 없는 %LOCALS:0%들을 범해 갔다
+	PRINTFORMW 『범해줫! 좀더! 아앙! 좋앗! 좋아앙!』
+	PRINTFORMW 대변을 싸는 것 이외의 오락은 성교 밖에 없었기에, %LOCALS:0%들은 곧 창녀처럼 되었다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@SYOKUSYU_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+	LOCALS:1 = 시녀
+	LOCALS:2 = 여자 귀족
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여성
+	LOCALS:1 = 엘프 시녀
+	LOCALS:2 = 엘프 귀족
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여성
+	LOCALS:1 = 용인 시녀
+	LOCALS:2 = 용인 귀족
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 천사 하인
+	LOCALS:2 = 상위 천사
+ELSE
+	LOCALS:0 = 여성
+	LOCALS:1 = 시녀
+	LOCALS:2 = 귀족 여성
+ENDIF
+
+IF RAND:3 == 0 && ARG:1 > 1
+	PRINTFORMW %LOCALS:2%은(는) 붙잡힌 뒤,  촉수에 의해 정성스럽게 최면을 새겨넣었다
+	PRINTFORMW 몇일후, 웨딩 드레스 모습인 %LOCALS:2%이(가) 슬럼가로 걸어 갔다
+	PRINTFORMW 머리에는 촉수가 매달려 있고, 그녀의 눈은 장소에 맞지 않을 만큼 자애로 가득 차 있었다
+	PRINTFORMW 부랑자들이 모여 온다. 오늘은 %LOCALS:2%의 결혼식이다.  미천한 것들에게 고귀한 피를 나눠 주는 것이다
+	PRINTFORMW 『행복하게 되겠습니다아……모두의 신부가 되겠습니다아……잔뜩 아이를 낳습니다아……』
+ELSEIF RAND:2 == 0
+	PRINTFORMW 귀족의 시중을 들고 있던 %LOCALS:1%(은)는 주인 아가씨를 방에 숨겨 놓고, 혼자서 저항했다
+	PRINTFORMW 생포된 %LOCALS:1%(은)는 촉수에 의한 쾌락 고문을 받게 되었다
+	PRINTFORMW 촉수로 인해 클리토리스가 자지로 개조되어 후타나리가 된 그녀는,
+	PRINTFORMW 자지의 쾌락이 몸에 새겨지자 어이없게 함락 되어 주인 아가씨의 위치를 발설했다. 
+	PRINTFORMW 그리고 그녀가 입을 연 보수는……주인 아가씨의 처녀였다. 두사람은 그들의 노예가 된 것이다
+	PRINTFORMW 『아가씨……계속, 계소옥 사모하고 있었습니다! 아하앗! 내가 아가씨를……범하고 있엇! 최고로 기분 좋아요!』
+ELSE
+	PRINTFORMW 제압한 거점에, 몬스터 생산 공장이 가설되었다
+	PRINTFORMW 육벽에 끼어 넣어진 %LOCALS:0%들은 임신한 배를 보이고 있었다
+	PRINTFORMW 『싫어…낳고 싶지 않아…싫어…』
+	PRINTFORMW 위험일 안전일 구분 없이, 촉수는 %LOCALS:0%들의 질에 정액을 흘려 넣어 갔다
+	PRINTFORMW 『가앗!가버려엇!가고 싶지 않아아아아아!』
+	PRINTFORMW 촉수의 정액에 포함된 대량의 미약성분으로 인해 %LOCALS:0%들은 몇번이나 강제적으로 절정 하였다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@FAILY_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+	LOCALS:1 = 소녀
+	LOCALS:2 = 인간
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여성
+	LOCALS:1 = 엘프 소녀
+	LOCALS:2 = 엘프
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여성
+	LOCALS:1 = 용인 소녀
+	LOCALS:2 = 용인
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 천사 소녀
+	LOCALS:2 = 천사
+ELSE
+	LOCALS:0 = 여성
+	LOCALS:1 = 소녀
+	LOCALS:2 = 인간
+ENDIF
+
+IF RAND:3 == 0 && ARG:1 > 1
+	PRINTFORMW 도시의 학교가 요정들에 의해 점거되어 학생은 모두 구속되었다
+	PRINTFORMW 「너희들에게는, 요정님들의 노예를 잔뜩 낳게 해줄께∼」
+	PRINTFORMW %LOCALS:2%인 학생들은 요정의 미약이 투여되어 전원이 발정난 성수[性獸]가 되었다
+	PRINTFORMW 번식장이 된 학교는. 남학생들이 여학생들을 장소를 가리지 않고 범하고 있었다
+	PRINTFORMW %LOCALS:2%인 우등생이였던 여학생은, 5명의 아이을 낳아 노예중에서도 가장 우수한 노예라며 칭찬 되어지고 있었다
+ELSEIF RAND:2 == 0
+	PRINTFORMW %LOCALS:0%(은)는 구속되어 요정의 능욕을 받고 있었다
+	PRINTFORMW 마법으로 터질 것 같이 발기한 클리토리스는,  요정들의 질에 딱 맞는 페니스였다
+	PRINTFORMW 쾌락도 증폭되어 요정의 작은 허리의 움직임에 맞춰 허리를 흔드는 %LOCALS:0%
+	PRINTFORMW 『싫어엇……원래대로 돌려줘어……클리 이상하게 되어 버렸어』
+	PRINTFORMW 「무슨 말하는거야? 언니는 지금부터 죽을때 까지 클리 자지 노예라구♪」
+	SIF ARG:1 > 3
+		PRINTFORMW 그 후, %LOCALS:0%의 유두도 요정과 성교 할 수 있게 개조된 것 같다
+	SIF ARG:1 > 6
+		PRINTFORMW 발기한 클리토리스는 %LOCALS:0%(이)가 죽을 때까지 쇠약해지는 일 없이 요정들을 만족시켰다고 한다
+ELSE
+	PRINTFORMW 요정들은, 아이같은 순진함으로 %LOCALS:0%들을 파괴해 갔다
+	PRINTFORMW 「저기저기, 요도도 괴롭혀 보자!」
+	PRINTFORMW 『갸아아아아악!이제,  그만해줘어엇!』
+	PRINTFORMW 나란히 있던 %LOCALS:0%들은 차례 차례로 요정들이 떠올리는 장난들로 파괴되어 갔다
+	PRINTFORMW 「요도 섹스~!와~아 언니 기분 좋지!」
+	PRINTFORMW 그 모습을 다음 희생자인 %LOCALS:1%(이)가 절망한 얼굴로 바라보고 있었다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@GIANT_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성 노예
+	LOCALS:1 = 마도사
+	LOCALS:2 = 인간
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여성 노예
+	LOCALS:1 = 정령사
+	LOCALS:2 = 엘프
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여성 노예
+	LOCALS:1 = 용술사
+	LOCALS:2 = 드래곤
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사 노예
+	LOCALS:1 = 엔젤 나이트
+	LOCALS:2 = 천사
+ELSE
+	LOCALS:0 = 여성 노예
+	LOCALS:1 = 마도사
+	LOCALS:2 = 인간
+ENDIF
+
+IF RAND:4 == 0 && ARG:1 > 1
+	PRINTFORMW 거인들의 여흥으로서 붙잡힌 %LOCALS:0%들의 섹스 대회가 시작했다
+	PRINTFORMW 알몸으로 늘어놓여진 노예들이 남녀 페어가 되어 여러가지 경기를 한다
+	PRINTFORMW 지면 살해당할지도 모르기 때문에, 노예들은 필사적으로 꼴사나운 모습을 보여줬다
+	PRINTFORMW 그것을 보며 거인들은 크게 웃는다
+	PRINTFORMW 패배해 살해당하기 전에,  둘이서 추잡하고 천한 섹스를 보이면 살아남을 수도 있다고 말해졌었다
+ELSEIF RAND:3 == 0
+	PRINTFORMW 붙잡혀 노예가 된 %LOCALS:0%들은 마법이 걸려져 버렸다
+	PRINTFORMW 스스로의 의사로 %LOCALS:2%(을)를 그만두고 오나홀이 된다고 선언 한다면, 
+	PRINTFORMW 거인의 페니스에 딱 맞는 오나홀로 몸이 변화 되어 버리는 마법이였다
+	PRINTFORMW 처음에는 저항하는 %LOCALS:0%들이었으나, 몇 번이고 쾌락 마법에 걸려 연속 절정되자, 
+	PRINTFORMW 차례차례로 %LOCALS:2%(을)를 그만둬,  눈물과 침과 애액을 흩뿌리면서 오나홀이 되어 갔다
+	PRINTFORMW 『됩니다아!%LOCALS:2% 그만둡니다아!오나홀로 해 주세요!오나홀로 만들어서 좀더 가게 해줘엇!』
+ELSEIF RAND:2 == 0
+	PRINTFORMW 전장에서 붙잡힌 %LOCALS:0%들은, 먼저 세례를 받게 되었다
+	PRINTFORMW 거인들이 대량으로 모아둔 정액을 사용한 정액 목욕이다
+	PRINTFORMW 『뭐야 이거… 싫어…싫어어어어!』
+	PRINTFORMW 싫어하는 %LOCALS:0%(을)를 강제로 욕실에 넣는다
+	PRINTFORMW 반항적인 이는 머리를 붙들려 얼굴을 정액에 처넣어졌다
+	PRINTFORMW %LOCALS:0%들은 아직, 그 정액보다도 많은 양의 정액을 끼얹어지는 말로가 기다리고 있다는 것을 모른다
+ELSE
+	PRINTFORMW 거인을 압도한 %LOCALS:1%들도, 계속 이어진 전투에 의한 마력고갈로 쓰러졌다
+	PRINTFORMW 『이런… 비겁한 자식들… 대장!?』
+	PRINTFORMW 이미 대장은 남은 마력으로 스스로의 마음을 붕괴시켜버렸다
+	PRINTFORMW 『아프어어… 여기 어디야아…』
+	PRINTFORMW 『그만둬그만둬그만그만둬그만둬… 갸아아아아!』
+	PRINTFORMW 용사가 아닌 그녀들의 몸은, 거인의 능욕에 의해 삼 일도 버티지 못하고 망가져버리게 되는 것이였다
+	SIF ARG:1 > 3
+		PRINTFORMW 그럴 때마다 그녀들에게 마법을 사용하게 해 망가진 몸를 재생시켰다
+	SIF ARG:1 > 6
+		PRINTFORMW 마음의 망가졌던 %LOCALS:1%의 페니스 케이스인 보지를 한번 자지로 강하게 후벼내면, 헛소리처럼 재생 마법을 주창한다고 한다
+ENDIF
+RETURN 0
+
+
+;--------------------------------------------
+@MAN_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여신관
+	LOCALS:1 = 여전사
+	LOCALS:2 = 인간계의 법
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여신관
+	LOCALS:1 = 엘프 여전사
+	LOCALS:2 = 투항
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여신관
+	LOCALS:1 = 여성 용기사
+	LOCALS:2 = 투항
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 엔젤 나이트
+	LOCALS:2 = 투항
+ELSE
+	LOCALS:0 = 여신관
+	LOCALS:1 = 여전사
+	LOCALS:2 = 인간계의 법
+ENDIF
+
+IF RAND:4 == 0 && ARG:1 > 1
+	PRINTFORMW %LOCALS:1%(은)는 날카로운 눈초리로 마왕군의 병사들을 노려 봤다. 하지만 그 눈에는 눈물이 맺혀 있었다
+	PRINTFORMW %LOCALS:1%의 가랑이에는 아기자기한 페니스가 새끼 손가락 사이즈만하게 발기하고 있어 앞으로 젖혀 지고 있었다.
+	PRINTFORMW 「이 무슨 귀여운 자지인가요 후타나리 전사씨, 설마 동료이 강간당하는 모습을 보고 자지를 발딱 발기한 겁니까」
+	PRINTFORMW 눈앞에서 범해지고 있는 동료들은 반경멸의 눈으로 %LOCALS:1%를 보고 있다. 
+	PRINTFORMW 「그 결점 자지로 동료를 범한다면, 목숨만은 살려줄 수 있게 해줍니다」
+	PRINTFORMW 양 겨드랑이를 붙들려 동료의 가랑이 앞에 끌어내진 %LOCALS:1%. 
+	PRINTFORMW 그녀는 섹스를 기대하는 듯 허리를 흔들고 있었다.
+ELSEIF RAND:3 == 0
+	PRINTFORMW 생포된 %LOCALS:0%는 목숨과 맞바꿔 마왕군에 충성을 맹세하는 증거로 삼기위해
+	PRINTFORMW 그녀가 믿는 신의 석상을 향해 소변을 싸는 것을 강요당하고 있었다
+	PRINTFORMW 『하……할 수 없습니다!그런 것……할 수 없습니다……』
+	PRINTFORMW 「네 년의 동료들은 이미 우리들의 동료가 되겠다고 말하고 있다고? 」
+	PRINTFORMW 옆에서 함께 같은 신을 믿은 동료였던 %LOCALS:0%(이)가 신의 석상에 걸터앉아 남자와 허리를 흔들고 있었다
+	PRINTFORMW 그 지성이 느껴지지 않는 아헤가오를 보고는. 절망하며 %LOCALS:0%(은)는 드디어 소변을 발사했다……
+ELSEIF RAND:2 == 0
+	PRINTFORMW 「이제부터 자지에 기도를 바치는 거야, 신관씨」
+	PRINTFORMW 도시의 사원에서도 능욕은 이루어졌다
+	PRINTFORMW 『신이시여, 어째서 이런 시련을…』
+	PRINTFORMW 「시끄럽네에! 이게 똥구녕 신을 부르는 법이라고!」
+	PRINTFORMW 남성은 %LOCALS:0%의 애널에 커다란 그것을 처넣었다
+ELSE
+	PRINTFORMW 『싫엇, 시러, 아아아!』
+	PRINTFORMW 젊은 %LOCALS:1%(이)가 투항했지만, 물론 마왕군에게 %LOCALS:2%은 통하지 않았다
+	PRINTFORMW 곧바로 마왕군의 젊은이들에게 윤간당한다
+	PRINTFORMW 「좀 더 약 처넣으라고, 약」
+	PRINTFORMW 육변기가 된 %LOCALS:1%(은)는, 더는 아무 것도 생각할 수 없게 되어 있었다
+ENDIF
+RETURN 0
+
+;--------------------------------------------
+@GIRL_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성 사령관
+	LOCALS:1 = 부관
+	LOCALS:2 = 여성
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 전사장
+	LOCALS:1 = 종자
+	LOCALS:2 = 엘프 여성
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 여자 용기사
+	LOCALS:1 = 종자
+	LOCALS:2 = 용인 소녀
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 엔젤 나이트
+	LOCALS:1 = 종자
+	LOCALS:2 = 천사
+ELSE
+	LOCALS:0 = 여성 사령관
+	LOCALS:1 = 부관
+	LOCALS:2 = 여성
+ENDIF
+
+IF RAND:3 == 0
+	PRINTFORMW 거점이 함락되자 %LOCALS:0%(은)는 간신히 도망치는데 성공했지만
+	PRINTFORMW %LOCALS:0%의 %LOCALS:1%(이)가 여자 마족에게 붙잡혀져 버렸다
+	PRINTFORMW 「%LOCALS:0%(이)가 어디로 도망쳤는지 가르쳐주었으면 좋겠는데~」
+	PRINTFORMW 『말할것 같습니까!무슨 짓을 당해도 절대……』
+	PRINTFORMW 「우리들의 동료가 되어도, 그 말 또 할 수 있을까나? 」
+	PRINTFORMW %LOCALS:1%(은)는 여자 마족의 쾌락 고문을 참아 내지 못 할 것이다. 
+	PRINTFORMW 그리고 마족이 되는 것을 그녀 스스로 지원하게 될 것이다.
+	PRINTFORMW 여자 마족에게는 저항하는 %LOCALS:1%의 눈동자의 안에 있는
+	PRINTFORMW	%LOCALS:0%에게의 연모의 감정이 희미하게 보이고 있었다
+ELSEIF RAND:2 == 0
+	PRINTFORMW 최전선의 %LOCALS:0%(이)가 %LOCALS:1%와 함께 붙잡혔다
+	PRINTFORMW 「%LOCALS:1%씨, 거기 계시는 %LOCALS:0%님을 범한다면 목숨만은 살려줄게」
+	PRINTFORMW 마왕군의 여자가 두꺼운 페니스밴드를 내밀면서 말한다
+	PRINTFORMW 『그런… 그럴수가…』
+	PRINTFORMW 『저는 괜찮으니… 당신만이라도 살아남으세요…』
+	PRINTFORMW %LOCALS:1%(은)는 당황하면서도 페니스밴드를 장착하고, %LOCALS:0%의 비소를 쑤셔박았다
+	PRINTFORMW 『아악아아아아아! 너, 너무 두꺼…아아아아아아아!』
+	PRINTFORMW 『죄송해요… 죄송해요…!』
+	PRINTFORMW 마왕군의 여자에게는, 레즈비언 노예가 되어 서로를 탐하는 두 사람의 모습이 보이고 있었다
+ELSE
+	PRINTFORMW 『하음… 쭙… 하음…』
+	PRINTFORMW 「오~, 좋은 쿤니네, 레즈 변기가 잘 어울리게 됐잖아?」
+	PRINTFORMW 마왕군 여성들의 휴양을 위해, 레즈 변기는 존재했다
+	PRINTFORMW 「똥구멍까지 핥는 거야. 할 수 있지?」
+	PRINTFORMW 『네… 손님…』
+	PRINTFORMW 프라이드도 긍지도 붕괴해, 레즈 변기가 된 %LOCALS:2%(은)는 애널까지 혀로 애무했다
+ENDIF
+RETURN 0
+;--------------------------------------------
+@BEAST_INV, ARG:0, ARG:1
+;--------------------------------------------
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+	LOCALS:1 = 귀족의 딸
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여전사
+	LOCALS:1 = 엘프 족장의 딸
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 여자 용기사
+	LOCALS:1 = 용인 귀족
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 엔젤 나이트
+	LOCALS:1 = 천사 성녀
+ELSE
+	LOCALS:0 = 여성
+	LOCALS:1 = 귀족의 딸
+ENDIF
+
+IF RAND:2 == 0
+	PRINTFORMW 붙잡힌 %LOCALS:1%(은)는 강력한 최면 마법으로 인해 정신이 발정기의 짐승으로 바뀌어 버렸다
+	PRINTFORMW 너덜너덜해진 고귀한 의상이 방해라는 듯이, 네발로 엎드려 엉덩이를 흔드는 %LOCALS:1%(은)는
+	PRINTFORMW 마왕군의 마수를 위해, 성처리 가축 변기로서 활용된다
+	PRINTFORMW %LOCALS:1%(은)는 완전히 발정한 암컷의 얼굴로 군침을 늘어뜨리며 난폭한 숨을 내쉬고 있었다
+	PRINTFORMW 『학 학……학학……우오옹』
+	PRINTFORMW 마수와 격렬하게 교미하는 %LOCALS:1%(은)는 짐승 같은 소리를 내며 교미하고 있었다
+ELSE
+	PRINTFORMW 마왕군의 주둔지에서는 이따금 생포한 %LOCALS:0%의 포로를 구경거리로 하고 있었다
+	PRINTFORMW 야수가 한마리가 여자의 앞에 끌려 온다
+	PRINTFORMW 『뭐, 뭘 할 생각이야…? 설마…』
+	PRINTFORMW 「학수 고대하신, 수간쇼를 시작합니다~」
+	PRINTFORMW 남자들이 갈채를 보낸다 그 중에는 소수지만 여자도 있는 것 같다
+	PRINTFORMW 『거짓말…이지…』
+	PRINTFORMW %LOCALS:0%의 포로는, 자신이 짐승 이하라는 것을 깨달으면서, 암캐의 모습으로 짐승에게 범해졌다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@BRAIN_INV, ARG:0, ARG:1
+;--------------------------------------------
+;思いつかなかった
+;やってみた
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 여성 엘프
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 여성 용인
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+ELSE
+	LOCALS:0 = 여성
+ENDIF
+
+IF RAND:2 == 0
+	PRINTFORMW %LOCALS:0% 사령관에게 고문이 시작되었다. 적의 정보를 전부 발설하게 할 필요가 있다
+	PRINTFORMW 의자에 묶인 채, 뇌를 먹이로 하는 무서운 마물의 촉수가 귀에서 뇌까지 뻗어져 있었다
+	PRINTFORMW 질퍽……질퍽……물소리가 울리며, 때때로는 %LOCALS:0% 사령관의 짧은 허덕임 소리가 들렸다
+	PRINTFORMW 『앗……아헤엣……부대의 규모는……보급선은……아히잇』
+	PRINTFORMW 정보를 하나씩 말할 때마다 뇌에 직접 미약을 주입하였다
+	PRINTFORMW 의자에는 이미 소변과 애액이 섞인 오물로 물웅덩이가 되어 있었다
+ELSE
+	PRINTFORMW %LOCALS:0% 스파이에게 고문은 계속되고 있었다
+	PRINTFORMW 『어떻게 욕보여도…아무 소용 없다니까…』
+	PRINTFORMW 얻어맞아 부은 얼굴로 강한척 하는 스파이라도 브레인이터를 보자 무서워 했다
+	PRINTFORMW 자살을 위해 어금니에 박아 넣은 독약도, 이빨채로 빼내어 져서 의미가 없었다
+	PRINTFORMW 공포에 떠는 스파이의 머리를 브레인이터가 덥석 물었다
+	PRINTFORMW 『히…앗아우, 아아아아우우후우아아후우후』
+	PRINTFORMW 몇분 후, 뇌와 정보를 음미해진 그녀는, 스스로 흩뿌린 분뇨 위에 쓰러졌다
+	PRINTFORMW 그녀의 몸은 일품이였기 때문에, 창녀의 뇌를 끼워넣어 위안용으로서 재이용 되었다
+ENDIF
+
+RETURN 0
+
+;--------------------------------------------
+@HORSE_INV, ARG:0, ARG:1
+;--------------------------------------------
+
+;人間界侵略
+IF ARG == 1
+	LOCALS:0 = 여성
+	LOCALS:1 = 지방 여자영주
+;エルフの領域侵略
+ELSEIF ARG == 2
+	LOCALS:0 = 엘프 여성
+	LOCALS:1 = 엘프 여족장
+;ドラゴンの山侵略
+ELSEIF ARG == 3
+	LOCALS:0 = 용인 여성
+	LOCALS:1 = 용인 여족장
+;天界侵略
+ELSEIF ARG == 4
+	LOCALS:0 = 천사
+	LOCALS:1 = 여성 천사장
+ELSE
+	LOCALS:0 = 여성
+	LOCALS:1 = 지방 여자영주
+ENDIF
+
+IF RAND:2 == 0
+	PRINTFORMW 마왕군의 장군이 타는 말의 배 아래에, 이상한 고깃덩이가 매달려 있었다
+	PRINTFORMW 원래는 %LOCALS:1%였던 그것은, 지금은 말의 페니스 케이스였다
+	PRINTFORMW 마법으로 육포대로 바뀌어져서 말의 거근을 손쉽게 질에 납입하고 있었다
+	PRINTFORMW 그녀의 목에 걸려져 있는 것은, %LOCALS:1%이였을 무렵의 아름다운 초상화였다
+	PRINTFORMW 이지적이며 청초한 초상화의 모습은 이미 이 육포대에게는 없다
+	PRINTFORMW 그저 쾌락만을 탐내는, 천하고 야무지지 못한 절정에 이르는 얼굴만을 보일 뿐이였다
+ELSE
+	PRINTFORMW 『마간형…? 뭐야 그건…』
+	PRINTFORMW 목마에 알몸으로 고정된 %LOCALS:0% 레지스탕스는 말했다
+	PRINTFORMW 그러나, 한마리의 말이 페니스를 발기 시켜며 다가오자 모든걸 이해했다
+	PRINTFORMW 『거짓말…거짓말, 거짓말, 그만둬어어어어어어어!』
+	PRINTFORMW 말은 여자에게 올라타, 보지에 말의 왕자지를 쳐박았다
+	PRINTFORMW %LOCALS:0% 레지스탕스는 거품을 뿜어내며 실신해 버렸지만, 말은 멈추지 않고 흥분된 상태로 격렬하게 범해, 대량의 정액을 질내에 털어 놓았다
+ENDIF
+
+RETURN 0
+
+
+
+
+
+
+
+

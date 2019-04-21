@@ -1,0 +1,361 @@
+﻿;NTR관계
+;CFLAG:1=9 의 경우、당신의 손에서 떠나 있다
+;노예가 용사에가 패배하면 가끔 본국으로 데리고 감
+
+;-----------------------------------------
+@NTR_VIDEO
+;-----------------------------------------
+;광왕님의 메세지를 읽어주세요
+;캐릭터 설정은 TARGET
+
+;TARGET확인
+SIF TARGET < 0 && TARGET > CHARANUM
+	RETURN 0
+;NTR확인
+SIF CFLAG:1 != 9
+	RETURN 0
+
+PRINTL  
+
+;랜덤으로 NTR상태가 해제되어 침공해옴
+;妊娠中は侵攻しない
+IF RAND:6 == 0 && TALENT:153 == 0
+	PRINTFORML 광왕은 %SAVESTR:TARGET%에게 마왕을 봉인하도록 명령했다
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 던전으로 여행을 떠났습니다
+	CFLAG:1 = 2
+	
+	;침입 계층・침공도・침공 중・재기 포인트 설정
+	CFLAG:501 = 1
+	CFLAG:502 = 0
+	CFLAG:1 = 2
+	CFLAG:508 = 3
+	;카르마가 얼마정도 회복
+	SIF CFLAG:151 < -50
+		CFLAG:151 = -50
+	;호감도가 낮음
+	CFLAG:2 = 20
+	
+	RETURN 0
+ENDIF
+
+CALL NTR_PLAY
+
+;구슬에 따라서는 소질이 성장할 가능성이 있음
+
+;Ｖ감각의 구슬에 의한 여부（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+CALL DECIDE_ABLUP2
+IF I == 0 && RESULT == 1
+	ABL:2 += 1
+	JUEL:1 -= A
+	PRINTFORML %ABLNAME:2%의 레벨이 {ABL:2}가 되었습니다
+ENDIF
+
+;Ａ감각의 구슬에 의한 여부（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+CALL DECIDE_ABLUP3
+IF I == 0 && RESULT == 1
+	ABL:3 += 1
+	JUEL:2 -= A
+	PRINTFORML %ABLNAME:3%의 레벨이 {ABL:3}이 되었습니다
+ENDIF
+
+;욕정의 구슬에 의한 여부（I=0:可、I&1:구슬 부족、I&2:경험 부족）
+I = 0
+;이상경험이 필요한가
+E = 0
+CALL DECIDE_ABLUP11
+IF I == 0 && RESULT == 1
+	ABL:11 += 1
+	JUEL:5 -= A
+	PRINTFORML %ABLNAME:11%의 레벨이 {ABL:11}이 되었습니다
+ENDIF
+
+RETURN 0
+
+
+;------------------------------------------
+@NTR_PLAY
+;------------------------------------------
+;플레이 내용은 P지정。구상용으로
+;형식은 비디오 편지。수정공으로 보내옴
+
+PRINTW 광왕에게서 수정구가 보내져왔다
+PRINTFORM 수정구에는 %SAVESTR:TARGET%
+
+P = 0
+IF TALENT:0 == 1 && RAND:20 == 0
+	;처녀상실
+	PRINTW 의 처녀 상실장면이 비추어져 있었다…
+	P = 1
+
+	CALL NTR_KOUJO
+
+	PRINTL V경험+3
+	EXP:0 += 3
+	PRINTFORML %PALAMNAME:1%의 구슬＋{3*200}
+	PRINTFORMW %PALAMNAME:5%의 구슬＋{3*250}
+	JUEL:1 += 3*200
+	JUEL:5 += 3*250
+	PRINTFORMW 【처녀상실】
+	TALENT:0 = 0
+	TALENT:280 = 1
+	CFLAG:15 = 105
+	CSTR:(RAND:8 + 10) = 狂王の紋章
+	PRINTFORMW %SAVESTR:TARGET%は 완전히 광왕의 것이 되어 버렸다.
+	RETURN 0
+ELSEIF TALENT:0 == 1
+	;처녀 애널 플레이
+	PRINTL 이(가) 애널에
+	IF FLAG:500 == 0 || FLAG:500 == 2
+		PRINT 광왕의 거근
+	ELSE
+		PRINT 거대한 딜도
+	ENDIF
+	PRINTW 을(를) 삼키며 기뻐하고 있는 모습이 비쳐지고 있었다…
+	P = 2
+
+	CALL NTR_KOUJO
+
+	IF FLAG:500 == 1
+		PRINTL A경험+10
+		PRINTFORML %EXPNAME:40%+10
+		EXP:1 += 10
+		EXP:40 += 5
+		PRINTFORML %PALAMNAME:2%의 구슬＋{10*200}
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{10*250}
+		JUEL:2 += 10*200
+		JUEL:5 += 10*250
+	ELSE
+		PRINTL A경험+10
+		PRINTL 정액경험+10
+		EXP:1 += 10
+		EXP:20 += 10
+		PRINTFORML %PALAMNAME:2%의 구슬＋{10*200}
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{10*250}
+		JUEL:2 += 10*200
+		JUEL:5 += 10*250
+	ENDIF
+	RETURN 0
+ENDIF
+
+IF RAND:10 == 0 && ABL:39 > 0
+	;수간 쇼
+	PRINTL 이(가) 관객들에게 둘러싸인 무대 위로
+	PRINTW 개와 교미를 하고 있는 모습이 비추어져 있었다…
+	P = 3
+
+	CALL NTR_KOUJO
+
+	PRINTL V경험+20
+	PRINTL 정액경험+20
+	PRINTL 수간경험+20
+	EXP:0 += 20
+	EXP:20 += 20
+	EXP:56 += 20
+	PRINTFORML %PALAMNAME:1%의 구슬＋{20*200}
+	PRINTFORMW %PALAMNAME:5%의 구슬＋{20*250}
+	JUEL:1 += 20*200
+	JUEL:5 += 20*250
+	;妊娠フラグオン
+	SIF FLAG:5 & 4
+		CFLAG:106 = 10
+	RETURN 0
+ENDIF
+
+
+P = RAND:4 + 4
+
+IF P == 4
+	;V플레이
+	IF FLAG:500 == 0 || FLAG:500 == 2
+		PRINT 이(가) 광왕의 거근
+	ELSE
+		PRINT 이(가) 거대한 딜도
+	ENDIF
+	PRINTL 를 성기에 집어넣고 있는 모습이 비쳐지고 있었다…
+	PRINTFORMW %조사선택(SAVESTR:TARGET, "는")% 광왕을 껴안고 키스를 주고 받고 있다…
+	PRINTW 한순간 슬쩍 이 쪽을 보았지만、다시 열중해 허리를 흔들고 있었다
+
+	CALL NTR_KOUJO
+
+	IF FLAG:500 == 1
+		PRINTL V경험+5
+		PRINTFORML %EXPNAME:40%+5
+		EXP:0 += 5
+		EXP:40 += 5
+		PRINTFORML %PALAMNAME:1%의 구슬＋{5*200}
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{5*250}
+		JUEL:1 += 5*200
+		JUEL:5 += 5*250
+	ELSE
+		PRINTL V경험+5
+		PRINTL 정액경험+5
+		EXP:0 += 5
+		EXP:20 += 5
+		PRINTFORML %PALAMNAME:1%의 구슬＋{5*200}
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{5*250}
+		JUEL:1 += 5*200
+		JUEL:5 += 5*250
+		;妊娠フラグオン
+		SIF FLAG:5 & 4
+			CFLAG:108 = 10
+	ENDIF
+	
+	;퍼스트 키스
+		SIF CFLAG:16 == -1
+			CFLAG:16 = 993
+	
+ELSEIF P == 5
+	;VA난교 플레이 
+	IF FLAG:500 == 0
+		PRINT 은(는) 많은 남자들에게 둘러싸여 
+	ELSE
+		PRINT 은(는) 페니스 밴드를 붙인 여자들에게 둘러싸여 
+	ENDIF
+	PRINTL 양쪽 구멍 모두를 범해지고 있는 모습이 비쳐지고 있었다……
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 광왕에게 완전히 충성을 맹세한 듯해서
+	PRINTW 싫어하는 모습도 보이지 않고 교성을 내고 있었다…
+
+	CALL NTR_KOUJO
+
+	IF FLAG:500 == 1
+		PRINTL V경험+10
+		PRINTL A경험+10
+		PRINTFORML %EXPNAME:40%+10
+		EXP:0 += 10
+		EXP:1 += 10
+		EXP:40 += 5
+		PRINTFORML %PALAMNAME:1%의 구슬＋{10*200}
+		PRINTFORML %PALAMNAME:2%의 구슬＋{10*200}
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{10*250}
+		JUEL:1 += 10*200
+		JUEL:2 += 10*200
+		JUEL:5 += 10*250
+	ELSE
+		PRINTL V경험+10
+		PRINTL A경험+10
+		PRINTL 정액경험+10
+		EXP:0 += 10
+		EXP:1 += 10
+		EXP:20 += 10
+		PRINTFORML %PALAMNAME:1%의 구슬＋{10*200}
+		PRINTFORML %PALAMNAME:2%의 구슬＋{10*200}
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{10*250}
+		JUEL:1 += 10*200
+		JUEL:2 += 10*200
+		JUEL:5 += 10*250
+		;妊娠フラグオン
+		SIF FLAG:5 & 4
+			CFLAG:105 = 10
+	ENDIF
+	
+ELSEIF P == 6
+	;공중 변소녀
+	PRINTW 이(가) 성처리 변기가 되어 있는 모습이 비추어져 있었다…
+	PRINTL 몸에는「보○10G・애널 무료」따위의 낙서나
+	PRINTW 성교 회수가 쓰여져 있었다…
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 광왕에게 완정히 충성을 맹세한 듯해서
+	PRINTW 싫어하는 모습도 보이지 않고 변기가 되어 봉사를 하고 있었다…
+
+	CALL NTR_KOUJO
+
+	PRINTL V경험+20
+	PRINTL A경험+20
+	PRINTL 정액경험+20
+	EXP:0 += 20
+	EXP:1 += 20
+	EXP:20 += 20
+	PRINTFORML %PALAMNAME:1%의 구슬＋{20*200}
+	PRINTFORML %PALAMNAME:2%의 구슬＋{20*200}
+	PRINTFORMW %PALAMNAME:5%의 구슬＋{20*250}
+	JUEL:1 += 20*200
+	JUEL:2 += 20*200
+	JUEL:5 += 20*250
+	;妊娠フラグオン
+	SIF FLAG:5 & 4
+		CFLAG:105 = 10
+
+ELSEIF P == 7
+	;정액처리
+	PRINT 이(가) 광왕의
+	IF FLAG:500 == 1
+		PRINT 성기
+	ELSE
+		PRINT 페니스
+	ENDIF
+	PRINTW 에 봉사하고 있는 모습이 비추어져 있었다……
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 당신이 보고 있다는 사실을 광왕에게 듣고서는
+	PRINTW 이 쪽을 향해 음탕한 얼굴로 미소지었다……
+	PRINT 그 얼굴은
+	IF FLAG:500 == 1
+		PRINT 애액
+	ELSE
+		PRINT 정액
+	ENDIF
+	PRINTW 으로 흠뻑 더러워져있다……
+
+	CALL NTR_KOUJO
+
+	IF FLAG:500 == 1
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{5*250}
+		JUEL:5 += 5*250
+	ELSE
+		PRINTL 펠라경험+3
+		PRINTL 정액경험+3
+		EXP:22 += 3
+		EXP:20 += 3
+		PRINTFORMW %PALAMNAME:5%의 구슬＋{5*250}
+		JUEL:5 += 5*250
+		;ファーストキス
+		SIF CFLAG:16 == -1
+			CFLAG:16 = 993
+	ENDIF
+	
+ELSEIF P == 8
+	;그 중 플레이 확장
+ENDIF
+
+WAIT
+
+RETURN 0
+
+
+;------------------------------------------
+@NTR_CHILD_BIRTH
+;------------------------------------------
+PRINTL
+PRINTW 광왕에게서 수정 공이 도착했다.。
+;父が狂王
+IF CFLAG:102 == 7
+	PRINTFORMW 수정 공에는%조사선택(SAVESTR:TARGET, "가")% 광왕과 관객들 앞에서 공개 출산하는 모습이 담겨 있었다。
+	PRINTFORMW 마법의 약으로 임신을 촉성된 탓인지 피부도 털도 새하얀 아기가 태어났다。
+	PRINTFORMW 『이런 적자를 몇명이나 낳았지만, 10명부터 기억도 없고』과 광왕이 웃으며 말하자 주위의 관객들도 까르르 웃었다。
+;父が見ず知らずの男
+ELSEIF CFLAG:102 == 4
+	PRINTFORMW 수정 공엔%조사선택(SAVESTR:TARGET, "가")% 광왕와 관객들 앞에서 공개 출산하는 모습이 담겨 있었다。
+	PRINTFORMW 마법의 약으로 임신을 촉성된 탓인지 피부도 털도 새하얀 아기가 태어났다。
+	PRINTFORMW 『 아버지가 누군지도 모르는 이런 등신이라도 너의 아이라고 』과 광왕이 웃으며 말하자 주위의 관객들도 까르르 웃었다。
+;父が노예か조수
+ELSEIF CFLAG:102 == 2 || CFLAG:102 == 3
+	PRINTFORMW 수정 공엔%조사선택(SAVESTR:TARGET, "가")% 광왕와 관객들 앞에서 공개 출산하는 모습이 담겨 있었다。
+	PRINTFORMW 마법의 약으로 임신을 촉성된 탓인지 피부도 털도 새하얀 아기가 태어났다。
+	PRINTFORMW 『 용사끼리 곱하는 것은 마왕관가 아주 좋은 취미를 하고 있』과 광왕이 웃으며 말하자 주위의 관객들도 까르르 웃었다。
+ELSE
+	PRINTFORMW 수정 공엔%조사선택(SAVESTR:TARGET, "가")% 광왕와 관객들 앞에서 공개 출산하는 모습이 담겨 있었다。
+	PRINTFORMW 『 더럽혀지단 배에서는 괴물밖에 태어나지 않느냐 』과 주위의 관객들은 조소하고 있다。
+	IF RAND:3 == 0
+		PRINTFORMW 태어난 몬스터는 그 자리에 찔려서 죽고 분열됐다………
+	ELSEIF RAND:2 == 0
+		PRINTFORMW 태어난 몬스터는 광왕에 습격 하였지만 보복 당했다………
+	ELSE
+		PRINTFORMW 태어난 몬스터는 들어올려져 바닥에 몇번 두들겨 죽였다………
+	ENDIF
+ENDIF
+P = 20
+CALL NTR_KOUJO
+P = 0
+
+
+
+

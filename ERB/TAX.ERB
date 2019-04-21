@@ -1,0 +1,195 @@
+﻿
+;----------------------------------
+;税収
+;----------------------------------
+;10.20.30日に税収が発生する
+;その都度計算する
+
+@TAX_GET
+#DIM TAX,4
+
+;TAX変数に計算した税を入れていく
+;TAX:0は合計値
+
+;税収日
+IF DAY:2 == 10 || DAY:2 == 20 || DAY:2 == 30
+	PRINTW 오늘은 세수 일이다……
+ELSE
+	RETURN 0
+ENDIF
+
+TAX:0 = 0
+
+
+DRAWLINE
+PRINTL 
+PRINTL - - - 수입 - - -
+PRINTL 
+
+WAIT
+
+;--------------
+;魔界からの支援
+;--------------
+
+TAX:0 += 1000
+
+PRINTL 
+PRINTFORMW 마계로부터의 지원 {TAX:0}
+
+;--------------
+;土地税
+;--------------
+;侵攻度に応じて税が徴収される
+;함락するとボーナス
+;メイン収入源にしたい
+;TAX:1に合計値を格納
+
+;初期値
+TAX:1 = 0
+
+PRINTL *토지세*
+
+IF FLAG:82
+	PRINTFORML ├ 지상의 마계영토 1200
+	TAX:1 += 1200
+ELSEIF FLAG:81 > 10
+	PRINTFORML ├ 인간계의 식민지 {FLAG:81 / 10}
+	TAX:1 += FLAG:81 / 10
+ENDIF
+
+IF FLAG:87 == 1
+	PRINTFORML ├ 다크엘프의 영토 1200
+	TAX:1 += 1200
+ELSEIF FLAG:86 > 10
+	PRINTFORML ├ 엘프의 영토의 식민지 {FLAG:86 / 10}
+	TAX:1 += FLAG:86 / 10
+ENDIF
+
+IF FLAG:89 == 1
+	PRINTFORML ├ 카오스드래곤의 산 1200
+	TAX:1 += 1200
+ELSEIF FLAG:88 > 10
+	PRINTFORML ├ 용의 산의 식민지 {FLAG:88 / 10}
+	TAX:1 += FLAG:88 / 10
+ENDIF
+
+IF FLAG:91 == 1
+	PRINTFORML ├ 타천사의 음계 1200
+	TAX:1 += 1200
+ELSEIF FLAG:90 > 10
+	PRINTFORML ├ 천계의 식민지 {FLAG:90 / 10}
+	TAX:1 += FLAG:90 / 10
+ENDIF
+
+IF FLAG:92 == 15
+	PRINTFORML ├ 아르카나 나이트의 매춘 요새 1500
+	TAX:1 += 1500
+ENDIF
+
+;ダンジョンの収入
+;レベルによって増加量が変動する
+
+PRINTFORM └ 던전 
+IF CFLAG:0:9 < 20
+	PRINTFORML {CFLAG:0:9 * 50 + 100}
+	TAX:1 += CFLAG:0:9 * 50 + 100
+ELSEIF CFLAG:0:9 < 40
+	PRINTFORML {CFLAG:0:9 * 40 + 300}
+	TAX:1 += CFLAG:0:9 * 40 + 300
+ELSEIF CFLAG:0:9 < 80
+	PRINTFORML {CFLAG:0:9 * 30 + 700}
+	TAX:1 += CFLAG:0:9 * 30 + 700
+ELSEIF CFLAG:0:9 < 150
+	PRINTFORML {CFLAG:0:9 * 20 + 1500}
+	TAX:1 += CFLAG:0:9 * 20 + 1500
+ELSEIF CFLAG:0:9 < 300
+	PRINTFORML {CFLAG:0:9 * 10 + 3000}
+	TAX:1 += CFLAG:0:9 * 10 + 3000
+ELSE
+	PRINTFORML {CFLAG:0:9 * 5 + 4500}
+	TAX:1 += CFLAG:0:9 * 5 + 4500
+ENDIF
+
+
+
+PRINTL 
+PRINTFORMW 합계 {TAX:1}
+
+TAX:0 += TAX:1
+
+;--------------
+;肉便器税
+;--------------
+;肉便器処刑のひとたちも売り上げで貢献
+;あんまり稼げない方が肉便器っぽい
+;石像やはく製は観覧料
+;TAX:2に合計値を格納
+
+;初期値
+TAX:2 = 0
+
+PRINTL 
+PRINTL *육변기세*
+
+IF FLAG:84 > 0
+	PRINTFORML ├ 가구 관람세 {FLAG:84 * 3}
+	TAX:2 += FLAG:84 * 3
+ENDIF
+
+IF FLAG:83 > 0
+	PRINTFORML ├ 육변기 사용세 {FLAG:83 * 3}
+	TAX:2 += FLAG:83 * 3
+ENDIF
+
+
+;淫魔売春婦の収入
+;ITEM:143 윗치
+;ITEM:152 서큐버스
+;ITEM:182 릴리스
+;は売春してそうなのでカウント
+PRINTFORML └ 음마매춘세 {ITEM:143 + ITEM:152 + ITEM:182 + 20}
+TAX:2 += ITEM:143 + ITEM:152 + ITEM:182 + 20
+
+FOR LOCAL,1,10
+	;娼館街1個につきボーナス
+	SIF FLAG:(LOCAL + 349) == 507
+		TIMES TAX:2, 1.1
+NEXT
+
+PRINTL 
+PRINTFORMW 합계 {TAX:2}
+
+TAX:0 += TAX:2
+
+;--------------
+;税収補正
+;--------------
+
+PRINTL 
+PRINTL *마왕 특별세*
+
+TAX:3 = TAX:0 * (FLAG:9 + 100)
+TAX:3 /= 100
+TAX:3 -= TAX:0
+
+PRINTFORMW 합계 {TAX:3}
+
+TAX:0 += TAX:3
+
+FLAG:9 = 0
+
+;--------------
+;合計税収
+;--------------
+
+DRAWLINE
+PRINTL 
+
+PRINTFORMW 합계세수 {TAX:0}
+
+MONEY += TAX:0
+
+RETURN 0
+
+

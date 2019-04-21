@@ -1,0 +1,294 @@
+﻿@EVENTTURNEND
+#LATER
+;엔딩체크
+
+;グッドエンド
+@ENDING_1
+
+DRAWLINE
+PRINTL ┌────────────────────────────┐
+PRINTL ｜　　　　　마침내 마왕은 세계를 다시 장악했다　	 　	　　　｜
+PRINTL ｜　　　       그리고 마왕은 인간 측에 제안을 했다 	  		 　　　   ｜
+PRINTL ｜    용자를 마왕을 쓰러뜨리기 위해 던전으로 가도록 시키면		   ｜	
+PRINTL ｜　　　그것은 용자가 아닌 제물로서 보내지는 거라고…			   ｜
+PRINTL └────────────────────────────┘
+
+WAIT
+DRAWLINE
+PRINTL 게임을 계속합니까？
+
+PRINTL [0] - 네
+PRINTL [1] - 아니요
+$INPUT_LOOP
+INPUT
+IF RESULT == 1
+	QUIT
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP
+ENDIF
+FLAG:82 = 1
+RETURN 0
+
+;魔王城함락
+@ENDING_2
+
+DRAWLINE
+PRINTL ┌────────────────────────────┐
+PRINTL ｜     마침내 마왕의 던전은 새로운 여자용자의 손에 함락됐다        ｜
+PRINTL ｜        마왕은 자신을 쓰러트린 용자의 얼굴을 눈에 새기며 　　　｜
+PRINTL ｜          만족한 얼굴로 또다시 깊은 봉인으로 잠들었다………　   　｜
+PRINTL └────────────────────────────┘
+
+PRINTFORMW *용자%조사선택(SAVESTR:TARGET, "는")% 마왕을 봉인해, 전설의 용자로서 칭송받았다*
+PRINTL  
+PRINTL -------------------------------GAMEOVER---------------------------------
+INPUT
+QUIT
+
+;エルフの領域を制覇
+@ENDING_3
+DRAWLINE
+PRINTL ┌────────────────────────────┐
+PRINTL ｜　　　　　마침내 마왕은 엘프의 영역을 정복했다		　　　　｜
+PRINTL ｜　　　　그리고 마왕은 엘프의 일족에게 제안을 했다	　 　　   ｜
+PRINTL ｜　　　　일족의 비장의 엘프 아가씨를 내놓으라고………　		   ｜
+PRINTL └────────────────────────────┘
+
+WAIT
+DRAWLINE
+
+FLAG:87 = 1
+CALL CHAR_GIFT, 1, "엘프"
+
+RETURN 0
+
+;ドラゴンの山を制覇
+@ENDING_4
+DRAWLINE
+PRINTL ┌────────────────────────────┐
+PRINTL ｜　　　　　마침내 마왕은 드래곤의 산맥을 정복했다      　　 　｜
+PRINTL ｜　　　   그리고 마왕은 드래곤의 장로에게 제안을 했다　   　　｜
+PRINTL ｜　　　　　　   드래곤의 숫쳐녀를 바치라고………　          　　   ｜
+PRINTL └────────────────────────────┘
+
+WAIT
+DRAWLINE
+
+FLAG:89 = 1
+CALL CHAR_GIFT, 5, "드래곤"
+
+RETURN 0
+
+
+
+;天界の領域を制覇
+@ENDING_5
+DRAWLINE
+PRINTL ┌────────────────────────────┐
+PRINTL ｜　　　　　　　마침내 마왕은 천계를 정복했다 　　　　　　   ｜
+PRINTL ｜　　　　　      그리고 마왕은 천계에 제안을 했다 　　　　　　｜
+PRINTL ｜　　　　       차세대의 주신이 될 천사를 바치라고……       		   ｜
+PRINTL └────────────────────────────┘
+
+WAIT
+DRAWLINE
+
+FLAG:91 = 1
+CALL CHAR_GIFT, 6, "천사"
+
+RETURN 0
+
+;---------------------------------------------------------
+@CHAR_GIFT, ARG, ARGS
+#DIM CHARA, 1
+#DIM PERSONAL
+#DIM MOTHER
+#DIM MON_ID
+#DIM MOTHER_TYPE
+#DIM MOTHER_RACE
+;---------------------------------------------------------
+;ARG = 指定種族（100以上は指定母体）
+;ARGS = 贈呈元
+
+;母親フラグ
+MOTHER = -1
+MOTHER_RACE = -1
+MON_ID = 0
+MOTHER_TYPE = 0
+PERSONAL = 160
+
+IF ARG > 100
+	MOTHER = ARG - 100
+	ARG = 9
+	MON_ID = CFLAG:MOTHER:112
+	IF MON_ID == 171
+		;듀라한
+		ARG = 4
+	ELSEIF MON_ID == 172
+		;ヴァンパイアは吸血鬼
+		ARG = 3
+	ELSEIF MON_ID == 114 || MON_ID == 141
+		;좀비하운드・ヘルハウンドは人狼
+		ARG = 2
+	ELSEIF MON_ID == 193
+		;カオスドラゴンはドラゴン
+		ARG = 5
+	ELSEIF MON_ID == 191
+		;ダークメサイアは堕天使
+		ARG = 8
+	ENDIF
+	
+	;母親の性格記憶
+	FOR LOCAL,160,199
+		IF TALENT:MOTHER:LOCAL == 1
+			;モンスターIDと区別するため, 1000を追加する
+			MOTHER_TYPE = LOCAL + 1000
+			BREAK
+		ENDIF
+	NEXT
+	
+	MOTHER_RACE = TALENT:MOTHER:314
+	
+ENDIF
+
+;キャラのNOを選定
+$INPUT_LOOP_1
+CHARA = RAND(1, 17)
+;出産の場合, 特殊キャラ呼び出し
+SIF MOTHER >= 0
+	CHARA = 100
+ADDCHARA CHARA
+A = CHARANUM - 1
+
+TALENT:A:300 = LOCAL:300
+SIF TALENT:A:300 == 0
+	TALENT:A:300 = 1
+
+$INPUT_LOOP_2
+PRINTL 취향의 성격과 머리카락색을 설정해 주세요. 
+PRINTFORML [0] 성격 ： %TALENTNAME:PERSONAL%
+PRINT [1] 머리 색깔 ： 
+
+IF TALENT:A:300 == 1
+	PRINTL 금발
+ELSEIF TALENT:A:300 == 2
+	PRINTL 갈색
+ELSEIF TALENT:A:300 == 3
+	PRINTL 흑발
+ELSEIF TALENT:A:300 == 4
+	PRINTL 적발
+ELSEIF TALENT:A:300 == 5
+	PRINTL 은발
+ELSEIF TALENT:A:300 == 6
+	PRINTL 청발
+ELSEIF TALENT:A:300 == 7
+	PRINTL 녹발
+ENDIF
+
+DRAWLINE
+PRINTL [100] 결정
+
+INPUT
+
+IF RESULT == 0
+	PRINTL 취향의 성격을 선택해 주세요. 
+	PRINTL [0] - 자애로움　　[1] - 자신만만　[2] - 기가약함　　
+	PRINTL [3] - 고귀함　	　[4] - 냉철함　　[5] - 악녀　　
+	PRINTL [6] - 두뇌명석　　[7] - 비호자　
+	INPUT
+	IF RESULT >= 8
+		PERSONAL = 160
+		GOTO INPUT_LOOP_2
+	ELSEIF RESULT == 0
+		PERSONAL = 160
+	ELSEIF RESULT == 1
+		PERSONAL = 161
+	ELSEIF RESULT == 2
+		PERSONAL = 162
+	ELSEIF RESULT == 3
+		PERSONAL = 163
+	ELSEIF RESULT == 4
+		PERSONAL = 164
+	ELSEIF RESULT == 5
+		PERSONAL = 166
+	ELSEIF RESULT == 6
+		PERSONAL = 172
+	ELSEIF RESULT == 7
+		PERSONAL = 173
+	ELSEIF RESULT < 0
+		PERSONAL = 160
+		GOTO INPUT_LOOP_2
+	ENDIF
+	GOTO INPUT_LOOP_2
+
+ELSEIF RESULT == 1
+	PRINTL 좋아하는 머리색을 골라주세요. 
+	PRINTL [1] 금발  [2]갈색  [3]흑발  [4]적발  [5]은발  [6]청발  [7]녹발
+	INPUT
+	IF RESULT >= 1 && RESULT <= 7
+		TALENT:A:300 = RESULT
+		LOCAL:300 = RESULT
+	ENDIF
+	GOTO INPUT_LOOP_2
+ELSEIF RESULT == 100
+ELSE
+	GOTO INPUT_LOOP_2
+ENDIF
+
+CALL CHAR_MAKE, PERSONAL, ARG
+CFLAG:RESULT:1 = 0
+A = RESULT
+
+;種族年齢再設定
+IF GETBIT(FLAG:5,12) || GETBIT(FLAG:5,13)
+	CALL RACE_AGE_GENERATE, CFLAG:A:451, TALENT:A:314
+	CFLAG:A:452 = RESULT
+ENDIF
+
+;父親と母親記憶
+;貢物の場合, 0が入る
+SIF MOTHER_RACE > -1
+	TALENT:A:321 = MOTHER_RACE
+TALENT:A:322 = MON_ID
+TALENT:A:323 = MON_ID
+TALENT:A:324 = MOTHER_TYPE
+
+PRINTL *****************************************
+IF MOTHER >= 0
+	PRINT 예언의 마법이 소녀인
+	PRINTS SAVESTR:A
+	PRINTL 의 미래를 암시한다……
+ELSE
+	PRINTFORM %ARGS%의 
+	PRINTS SAVESTR:A
+	PRINT 가
+	SIF ARG == 1
+		PRINT 엘프왕
+	SIF ARG == 5
+		PRINT 드래곤의 장로
+	SIF ARG == 6
+		PRINT 천계
+	PRINTL (으)로부터 보내져 왔습니다………
+ENDIF
+PRINTL *****************************************
+;FLAG:87 = 2
+PRINTW
+CALL SHOW_CHARA_INFO, A
+IF MOTHER >= 0
+	PRINTL 이 미래를 부정합니까？
+ELSE
+	PRINTL 반환합니까？
+ENDIF
+PRINTL [1] 네  [2] 아니오
+INPUT
+IF RESULT == 1
+	A = CHARANUM - 1
+	CALL PARTY_CHAR_DEL, A
+	DELCHARA A
+	CALL NAME_RESET
+	GOTO INPUT_LOOP_1
+ELSE
+ENDIF
+
+
+RETURN 0

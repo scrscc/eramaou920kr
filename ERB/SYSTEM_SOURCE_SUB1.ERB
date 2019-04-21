@@ -1,0 +1,1796 @@
+﻿;eraIM@Sから流用しました
+
+;=================================================
+;@SOURCE_CHECK관련 함수군
+;=================================================
+;INDEX
+;@SOURCE_SEX_CHECK:동성일 경우 체크
+;;;@SOURCE_LESBIAN_SEX_CHECK:여성끼리일 경우 체크（SYSTEM_SOURCE_SUB2.ERBに記述）
+;;;@SOURCE_GAY_SEX_CHECK:남성끼리일 경우 체크（SYSTEM_SOURCE_SUB2.ERBに記述）
+;@PLAYER_SKILL_CHECK:조교자의 기술에 의한 체크
+;@MASTER_SKILL_CHECK:조교자의 기술에 의한 체크
+;@INCEST_SEX_CHECK:근친상간 체크
+;;;@INCEST:친족 관계의 판정（SYSTEM_SOURCE_SUB2.ERB에 기술）
+;@LOST_VIRGIN_CHECK:처녀 상실 체크
+;@TARGET_EJAC_CHECK:조교 대상 사정 체크
+;@TARGET_MILK_CHECK:조교 대상 분유 체크
+;@UP_TALENT_CVA_CHECK:소질 등에 의한 상하 처리（쾌락계）
+;@UP_TALENT_CHECK:소질 등에 의한 상하 처리
+;@MARK_GOT_CHECK:각인 취득 체크
+;@YOKUBO_UP_CHECK:욕망 상승에 의한 [억압][저항]의 소멸 체크
+;@JUJUN_UP_CHECK:순종 상승에 의한 [반항적]의 반전 체크
+;@EXP_GOT_CHECK:피학쾌락경험, 봉사쾌락경험 체크
+;@SOKUOCHI_CHECK:[즉각함락] 체크
+;@ECST_CHECK:정상시의 추가 처리
+;@PISSING_ECST_CHECK:정상시 오줌싸개 처리
+;@MASTER_FLAG_CHECK:주인에 의한 조교 경험치
+;=================================================
+;-------------------------------------------------
+;동성일 경우의 체크
+;-------------------------------------------------
+@SOURCE_SEX_CHECK
+;레즈
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	;여성끼리인 경우 체크
+	;함수는 SOURCE_SUB_SUB.ERB에 기술
+	CALL SOURCE_LESBIAN_SEX_CHECK
+ELSEIF TALENT:122 && TALENT:PLAYER:122
+	;남성끼리인 경우 체크
+	;함수는 SOURCE_SUB_SUB.ERB에 기술
+	CALL SOURCE_GAY_SEX_CHECK
+ENDIF
+;-------------------------------------------------
+;조교자의 기술에 의한 체크
+;-------------------------------------------------
+@PLAYER_SKILL_CHECK
+;조교자의 TALENT:해방을 본다
+IF TALENT:PLAYER:33
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:3 , 1.20
+	TIMES SOURCE:17 , 1.20
+ENDIF
+;조교자의 TALENT:小悪魔をみる
+IF TALENT:PLAYER:87
+	TIMES SOURCE:12 , 1.60
+ENDIF
+;조교자의 TALENT:魅惑をみる
+IF TALENT:PLAYER:91
+	TIMES SOURCE:8 , 0.50
+	TIMES SOURCE:14 , 0.50
+
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:5 , 1.20
+	TIMES SOURCE:17 , 1.20
+ENDIF
+;조교자의 TALENT:謎の魅力をみる
+IF TALENT:PLAYER:92
+	TIMES SOURCE:8 , 0.50
+	TIMES SOURCE:14 , 0.50
+
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:5 , 1.20
+	TIMES SOURCE:17 , 1.20
+ENDIF
+
+;調教者が【모성】か【유부녀】で調教対象が【마더콘】
+IF (TALENT:PLAYER:155 || TALENT:PLAYER:157) && TALENT:TARGET:140
+	TIMES SOURCE:8 , 0.50
+	TIMES SOURCE:14 , 0.50
+
+	TIMES SOURCE:3 , 1.20
+	TIMES SOURCE:5 , 1.20
+ENDIF
+
+;調教者が【부성】で調教対象が【브라콘】
+IF TALENT:PLAYER:156 && TALENT:TARGET:141
+	TIMES SOURCE:8 , 0.50
+	TIMES SOURCE:14 , 0.50
+
+	TIMES SOURCE:3 , 1.20
+	TIMES SOURCE:5 , 1.20
+ENDIF
+
+;調教者が【남자】ではなく【미숙】か【작은체형】で調教対象が【로리콘】
+IF TALENT:PLAYER:122 == 0 && (TALENT:PLAYER:100 || TALENT:PLAYER:135) && TALENT:TARGET:142
+	TIMES SOURCE:8 , 0.50
+	TIMES SOURCE:14 , 0.50
+
+	TIMES SOURCE:3 , 1.20
+	TIMES SOURCE:5 , 1.20
+ENDIF
+
+;調教者が【남자】であり【미숙】か【작은체형】で調教対象が【쇼타콘】
+IF TALENT:PLAYER:122 && (TALENT:PLAYER:100 || TALENT:PLAYER:135) && TALENT:TARGET:143
+	TIMES SOURCE:8 , 0.50
+	TIMES SOURCE:14 , 0.50
+
+	TIMES SOURCE:3 , 1.20
+	TIMES SOURCE:5 , 1.20
+ENDIF
+
+;調教者が【로리콘】で調教対象が【미숙】か【작은체형】かつ【남자】ではない
+IF TALENT:PLAYER:142 && (TALENT:TARGET:100 || TALENT:TARGET:135) && TALENT:TARGET:122 == 0
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:17 , 1.20
+		
+	TIMES SOURCE:14 , 0.80
+ENDIF
+
+;調教者が【쇼타콘】で調教対象が【미숙】か【작은체형】かつ【남자】である
+IF TALENT:PLAYER:143 && (TALENT:TARGET:100 || TALENT:TARGET:135) && TALENT:TARGET:122
+	TIMES SOURCE:0 , 1.20
+	;TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:17 , 1.20
+		
+	TIMES SOURCE:14 , 0.80
+ENDIF
+
+;調教者のABL:기교
+IF ABL:PLAYER:12 == 0
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:1 , 0.50
+	TIMES SOURCE:2 , 0.50
+	TIMES SOURCE:17 , 0.50
+ELSEIF ABL:PLAYER:12 == 1
+	TIMES SOURCE:0 , 0.80
+	TIMES SOURCE:1 , 0.80
+	TIMES SOURCE:2 , 0.80
+	TIMES SOURCE:17 , 0.80
+ELSEIF ABL:PLAYER:12 == 2
+	TIMES SOURCE:0 , 1.00
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+	TIMES SOURCE:17 , 1.00
+ELSEIF ABL:PLAYER:12 == 3
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:17 , 1.20
+ELSEIF ABL:PLAYER:12 == 4
+	TIMES SOURCE:0 , 1.50
+	TIMES SOURCE:1 , 1.50
+	TIMES SOURCE:2 , 1.50
+	TIMES SOURCE:17 , 1.50
+ELSEIF ABL:PLAYER:12 >= 5
+	TIMES SOURCE:0 , 2.00
+	TIMES SOURCE:1 , 2.00
+	TIMES SOURCE:2 , 2.00
+	TIMES SOURCE:17 , 2.00
+ENDIF
+;-------------------------------------------------
+;主人による調教のボーナス
+;-------------------------------------------------
+@MASTER_SKILL_CHECK
+;主人による調教経験
+IF ASSIPLAY == 0
+	IF CFLAG:2 >= 500
+		TIMES SOURCE:8 , 0.70
+		TIMES SOURCE:14 , 0.70
+
+		TIMES SOURCE:0 , 1.20
+		TIMES SOURCE:1 , 1.20
+		TIMES SOURCE:2 , 1.20
+		TIMES SOURCE:3 , 1.30
+		TIMES SOURCE:17 , 1.20
+	ELSEIF CFLAG:2 >= 300
+		TIMES SOURCE:8 , 0.80
+		TIMES SOURCE:14 , 0.80
+
+		TIMES SOURCE:0 , 1.10
+		TIMES SOURCE:1 , 1.10
+		TIMES SOURCE:2 , 1.10
+		TIMES SOURCE:3 , 1.20
+		TIMES SOURCE:17 , 1.10
+	ELSEIF CFLAG:2 >= 100
+		TIMES SOURCE:8 , 0.90
+		TIMES SOURCE:14 , 0.90
+
+		TIMES SOURCE:3 , 1.10
+	ENDIF
+ENDIF
+
+;음란
+;主人経験との重複前提で計算
+IF TALENT:76 && ASSIPLAY == 0
+	TIMES SOURCE:0 , 1.80
+	TIMES SOURCE:1 , 1.80
+	TIMES SOURCE:2 , 1.80
+	TIMES SOURCE:17 , 1.80
+ENDIF
+
+;애정
+;主人経験との重複前提で計算
+IF TALENT:85 && ASSIPLAY == 0
+	TIMES SOURCE:0 , 1.30
+	TIMES SOURCE:1 , 1.30
+	TIMES SOURCE:2 , 1.30
+	TIMES SOURCE:3 , 1.80
+	TIMES SOURCE:17 , 1.30
+ENDIF
+;-------------------------------------------------
+;近親상간のチェック
+;-------------------------------------------------
+@INCEST_SEX_CHECK
+
+;親族関係の判定
+TFLAG:14 = 0
+CALL INCEST
+
+IF TFLAG:14 && TFLAG:19
+	IF TFLAG:14 == 1 && TALENT:PLAYER:122
+		PRINTL 부녀상간
+	ELSEIF  TFLAG:14 == 1 && TALENT:PLAYER:122 == 0
+		PRINTL 모녀상간
+	ELSEIF  TFLAG:14 == 2 && TALENT:PLAYER:122
+		PRINTL 모자상간
+	ELSEIF  TFLAG:14 == 2 && TALENT:PLAYER:122 == 0
+		PRINTL 모낭상간
+	ELSEIF  TFLAG:14 == 3 && TALENT:PLAYER:122
+		PRINTL 남매상간
+	ELSEIF  TFLAG:14 == 3 && TALENT:PLAYER:122 == 0
+		PRINTL 자매상간
+	ELSEIF  TFLAG:14 == 4 && TALENT:PLAYER:122
+		PRINTL 자제상간
+	ELSEIF  TFLAG:14 == 4 && TALENT:PLAYER:122 == 0
+		PRINTL 자매상간
+	ELSEIF  TFLAG:14 == 5 && TALENT:PLAYER:122 == 0
+		PRINTL 종제상간
+	ELSEIF  TFLAG:14 == 6 && TALENT:PLAYER:122
+		PRINTL 종자상간
+	ENDIF
+
+	IF TFLAG:14 == 1 || TFLAG:14 == 2
+		TIMES SOURCE:3 , 2.00
+		TIMES SOURCE:14 , 2.00
+		TIMES SOURCE:16 , 2.00
+	ELSEIF TFLAG:14 == 3 || TFLAG:14 == 4
+		TIMES SOURCE:3 , 1.50
+		TIMES SOURCE:14 , 1.50
+		TIMES SOURCE:16 , 1.50
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;処女喪失のチェック
+;-------------------------------------------------
+@LOST_VIRGIN_CHECK
+;処女でないかＶ経験を伴うコマンドフラグが立ってなければそのまま終了
+;ニプルファックは除く
+SIF TALENT:0 == 0 || TFLAG:19 == 0 || SELECTCOM == 90
+	RETURN 0
+
+PRINTL 【처녀 상실】
+TALENT:0 = 0
+
+;処女喪失フラグ(今回のコマンド)
+TFLAG:3 = 1
+;処女喪失フラグ(今回の調教)
+TFLAG:31 = 1
+;処女喪失フラグ(ビデオ撮影)
+SIF TEQUIP:53
+	TFLAG:32 |= 1
+
+R = NO:PLAYER
+
+;親族関係の判定
+TFLAG:14 = 0
+CALL INCEST
+
+IF CFLAG:15 == 0
+	;初体験の相手を記録（初期値が0のため, +1して記録）
+	CFLAG:15 = NO:PLAYER + 1
+	CSTR:TARGET:3 = %SAVESTR:PLAYER%
+	;初体験が近親상간
+	;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+	IF TFLAG:14 == 1 && TALENT:PLAYER:122
+		CFLAG:15 = 300
+	ELSEIF TFLAG:14 == 1 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 301
+	ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122
+		CFLAG:15 = 304
+	ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 305
+	ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122
+		CFLAG:15 = 306
+	ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 307
+	ELSEIF TFLAG:14 == 5 && TALENT:PLAYER:122 == 0
+		CFLAG:15 = 308
+	ELSEIF TFLAG:14 == 6 && TALENT:PLAYER:122
+		CFLAG:15 = 309
+	ENDIF
+	;初体験がバイブの場合
+	SIF SELECTCOM == 11
+		CFLAG:15 = 101
+	;初体験が촉수生物の場合
+	SIF TEQUIP:90 && SELECTCOM == 101
+		CFLAG:15 = 102
+	;初体験が犬の場合
+	SIF TEQUIP:89
+		CFLAG:15 = 103
+	;初体験がコロシアムモンスターの場合
+	SIF TEQUIP:55 && ASSIPLAY == 0
+		CFLAG:15 = 104
+ENDIF
+
+;初体験の相手が主人で【애정】
+IF PLAYER == MASTER && TALENT:85
+	;反発刻印回避
+	TFLAG:150 = 1
+	TIMES SOURCE:3 , 2.00
+	TIMES SOURCE:15 , 0.30
+;初体験の時点で既に【음란】
+ELSEIF TALENT:76
+	;反発刻印回避
+	TFLAG:150 = 1
+	TIMES SOURCE:3 , 2.00
+	TIMES SOURCE:6 , 0.50
+	TIMES SOURCE:15 , 0.30
+;初体験の相手が조수で相性最高で親族でない
+ELSEIF ASSIPLAY && RELATION:R >= 200 && TFLAG:14 == 0
+	;反発刻印回避
+	TFLAG:150 = 1
+ENDIF
+;-------------------------------------------------
+;調教対象の사정チェック
+;-------------------------------------------------
+@TARGET_EJAC_CHECK
+SIF TALENT:121 == 0 && TALENT:122 == 0
+	RETURN 0
+SIF TALENT:135
+	RETURN 0
+
+LOCAL = UP:0 + UP:1 + UP:2 + UP:14
+
+;자제심
+SIF TALENT:20
+	LOCAL /= 2
+
+;쾌감에솔직
+SIF TALENT:70
+	TIMES LOCAL , 1.20
+
+;淫乱化
+SIF TALENT:76
+	TIMES LOCAL , 1.10
+
+;쾌감을부정
+SIF TALENT:71
+	TIMES LOCAL , 0.80
+
+;미약
+SIF TEQUIP:21
+	LOCAL *= 2
+
+;이뇨제
+SIF TEQUIP:22
+	LOCAL /= 2
+
+;調教対象がコンドーム装着
+SIF TEQUIP:37
+	LOCAL /= 2
+
+LOCAL = 1000+(LOCAL-1000)/2
+BASE:2 += LOCAL
+
+LOCAL = BASE:2
+EJAC = MAXBASE:2
+
+IF  LOCAL > EJAC * 2
+	LOCAL:1 = 2
+ELSEIF LOCAL > EJAC
+	LOCAL:1 = 1
+ELSE
+	LOCAL:1 = 0
+ENDIF
+
+;대량사정
+IF LOCAL:1 == 2
+	LOSEBASE:0 += 20
+	LOSEBASE:1 += 100
+
+	IF EXP:3 < EXPLV:1
+		SOURCE:12 += 20000
+		SOURCE:13 += 10000
+	ELSEIF EXP:3 < EXPLV:2
+		SOURCE:12 += 10000
+		SOURCE:13 += 8000
+	ELSEIF EXP:3 < EXPLV:3
+		SOURCE:12 += 7000
+		SOURCE:13 += 6000
+	ELSEIF EXP:3 < EXPLV:4
+		SOURCE:12 += 5000
+		SOURCE:13 += 4000
+	ELSEIF EXP:3 < EXPLV:5
+		SOURCE:12 += 3000
+		SOURCE:13 += 2000
+	ELSE
+		SOURCE:12 += 1800
+		SOURCE:13 += 1200
+	ENDIF
+
+	PRINTS SAVESTR:TARGET
+	PRINTL 대량사정
+	PRINTL 정액경험＋１
+	PRINTL 사정경험＋２
+	IF EXP:3 == 0 && TALENT:122 == 0
+		EXP:50 += 1
+		PRINTL 이상경험＋1
+	ENDIF
+	EXP:20 += 1
+	EXP:3 += 2
+
+	;Ｐ에 정액 더러움
+	STAIN:2 |= 4
+
+	BASE:2 -= EJAC*2
+	SIF BASE:2 >= EJAC
+		BASE:2 = EJAC-1
+
+	;조교대상이 사정 플래그
+	TFLAG:10 = 2
+	NOWEX:6 += 1
+	EX:6 += 1
+;通常の사정
+ELSEIF LOCAL:1 == 1
+	LOSEBASE:1 += 40
+
+	IF EXP:3 < EXPLV:1
+		SOURCE:12 += 10000
+		SOURCE:13 += 5000
+	ELSEIF EXP:3 < EXPLV:2
+		SOURCE:12 += 5000
+		SOURCE:13 += 4000
+	ELSEIF EXP:3 < EXPLV:3
+		SOURCE:12 += 2500
+		SOURCE:13 += 2000
+	ELSEIF EXP:3 < EXPLV:4
+		SOURCE:12 += 1600
+		SOURCE:13 += 1400
+	ELSEIF EXP:3 < EXPLV:5
+		SOURCE:12 += 800
+		SOURCE:13 += 500
+	ELSE
+		SOURCE:12 += 200
+		SOURCE:13 += 250
+	ENDIF
+
+	PRINTS SAVESTR:TARGET
+	PRINTL 사정
+	PRINTL 사정경험＋１
+	IF EXP:3 == 0 && TALENT:122 == 0
+		EXP:50 += 1
+		PRINTL 이상경험＋1
+	ENDIF
+	EXP:3 += 1
+
+	;Ｐに精液汚れ
+	STAIN:2 |= 4
+
+	BASE:2 -= EJAC
+	SIF BASE:2 >= EJAC
+		BASE:2 = EJAC-1
+
+	;調教対象が사정フラグ
+	TFLAG:10 = 1
+	NOWEX:6 += 1
+	EX:6 += 1
+ENDIF
+
+;-------------------------------------------------
+;調教対象の噴乳チェック
+;-------------------------------------------------
+@TARGET_MILK_CHECK
+SIF TALENT:130 == 0
+	RETURN 0
+
+LOCAL = UP:0 / 5 + UP:1 / 5 + UP:2 / 5 + UP:14 * 3
+
+;자제심
+SIF TALENT:20
+	LOCAL /= 2
+
+;쾌감에솔직
+SIF TALENT:70
+	TIMES LOCAL , 1.20
+
+;淫乱化
+SIF TALENT:76
+	TIMES LOCAL , 1.10
+
+;쾌감을부정
+SIF TALENT:71
+	TIMES LOCAL , 0.80
+
+;B敏感
+SIF TALENT:108
+	TIMES LOCAL , 1.50
+
+;미약
+SIF TEQUIP:21
+	LOCAL *= 2
+
+;調教者が幼児退行
+SIF TALENT:PLAYER:131
+	LOCAL *= 2
+
+;調教者が幼稚
+SIF TALENT:PLAYER:132
+	LOCAL *= 2
+
+;빈유
+SIF TALENT:109
+	TIMES LOCAL , 0.50
+
+;절벽
+SIF TALENT:116
+	TIMES LOCAL , 0.20
+
+LOCAL = 1000+(LOCAL-1000)/2
+BASE:3 += LOCAL
+
+LOCAL = BASE:3
+EJAC = MAXBASE:3
+
+IF  LOCAL > EJAC * 2
+	LOCAL:1 = 2
+ELSEIF LOCAL > EJAC
+	LOCAL:1 = 1
+ELSE
+	LOCAL:1 = 0
+ENDIF
+
+;大量噴乳
+IF LOCAL:1 == 2
+	LOSEBASE:0 += 20
+	LOSEBASE:1 += 100
+
+	IF EXP:54 < EXPLV:1
+		SOURCE:12 += 20000
+		SOURCE:13 += 10000
+	ELSEIF EXP:54 < EXPLV:2
+		SOURCE:12 += 10000
+		SOURCE:13 += 8000
+	ELSEIF EXP:54 < EXPLV:3
+		SOURCE:12 += 7000
+		SOURCE:13 += 6000
+	ELSEIF EXP:54 < EXPLV:4
+		SOURCE:12 += 5000
+		SOURCE:13 += 4000
+	ELSEIF EXP:54 < EXPLV:5
+		SOURCE:12 += 3000
+		SOURCE:13 += 2000
+	ELSE
+		SOURCE:12 += 1800
+		SOURCE:13 += 1200
+	ENDIF
+
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 유두에서 대량의 모유가 분출했다. 
+	PRINTL 분유경험＋２
+	IF EXP:54 == 0
+		EXP:50 += 1
+		PRINTL 이상경험＋1
+	ENDIF
+	EXP:54 += 2
+	;Ｂに母乳汚れ
+	STAIN:5 |= 16
+
+	BASE:3 -= EJAC*2
+	SIF BASE:3 >= EJAC
+		BASE:3 = EJAC-1
+
+	;調教対象が噴乳フラグ
+	TFLAG:11 += 2
+	;搾乳器で母乳が集められているかチェック
+	SIF TEQUIP:16 && TEQUIP:90 == 0
+		TFLAG:35 += 2
+
+	NOWEX:5 += 1
+	EX:5 += 1
+;通常の噴乳
+ELSEIF LOCAL:1 == 1
+	LOSEBASE:1 += 40
+
+	IF EXP:54 < EXPLV:1
+		SOURCE:12 += 10000
+		SOURCE:13 += 5000
+	ELSEIF EXP:54 < EXPLV:2
+		SOURCE:12 += 5000
+		SOURCE:13 += 4000
+	ELSEIF EXP:54 < EXPLV:3
+		SOURCE:12 += 2500
+		SOURCE:13 += 2000
+	ELSEIF EXP:54 < EXPLV:4
+		SOURCE:12 += 1600
+		SOURCE:13 += 1400
+	ELSEIF EXP:54 < EXPLV:5
+		SOURCE:12 += 800
+		SOURCE:13 += 500
+	ELSE
+		SOURCE:12 += 200
+		SOURCE:13 += 250
+	ENDIF
+
+	PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 유두에서 모유가 흘러나왔다. 
+	PRINTL 분유경험＋１
+	IF EXP:54 == 0
+		EXP:50 += 1
+		PRINTL 이상경험＋1
+	ENDIF
+	EXP:54 += 1
+	;Ｂに母乳汚れ
+	STAIN:5 |= 16
+
+	BASE:3 -= EJAC
+	SIF BASE:3 >= EJAC
+		BASE:3 = EJAC-1
+
+	;조교 대상이 분유플래그
+	TFLAG:11 += 1
+	;搾乳器で母乳が集められているかチェック
+	SIF TEQUIP:16 && TEQUIP:90 == 0
+		TFLAG:35 += 1
+
+	NOWEX:5 += 1
+	EX:5 += 1
+ENDIF
+
+;-------------------------------------------------
+;素質などによる上下の処理（快楽系）
+;-------------------------------------------------
+@UP_TALENT_CVA_CHECK
+;미약
+IF TEQUIP:21
+	TIMES UP:0 , 2.00
+	TIMES UP:1 , 2.00
+	TIMES UP:2 , 2.00
+	TIMES UP:14 , 2.00
+ENDIF
+
+;이뇨제
+IF TEQUIP:22
+	TIMES UP:0 , 0.70
+	TIMES UP:1 , 0.70
+	TIMES UP:2 , 0.70
+	TIMES UP:14 , 0.70
+ENDIF
+
+;실신중
+IF TFLAG:899 > 0
+	TIMES UP:0 , 0.20
+	TIMES UP:1 , 0.20
+	TIMES UP:2 , 0.20
+	TIMES UP:14 , 0.20
+ENDIF
+
+;자제심
+IF TALENT:20
+	TIMES UP:0 , 0.30
+	TIMES UP:1 , 0.50
+	TIMES UP:2 , 0.70
+	TIMES UP:14 , 0.30
+ENDIF
+
+;남자
+IF TALENT:122
+	TIMES UP:2 , 1.30
+ENDIF
+
+;성호
+IF TALENT:272
+	TIMES UP:0 , 1.20
+	TIMES UP:1 , 1.20
+	TIMES UP:2 , 1.20
+	TIMES UP:14 , 1.20
+ENDIF
+
+;-------------------------------------------------
+;素質などによる上下の処理
+;-------------------------------------------------
+@UP_TALENT_CHECK
+
+;미약
+IF TEQUIP:21
+	TIMES UP:4 , 1.20
+	TIMES UP:5 , 2.00
+	TIMES UP:6 , 1.20
+	TIMES UP:11 , 0.75
+	TIMES UP:12 , 0.50
+ENDIF
+
+;이뇨제
+IF TEQUIP:22
+	TIMES UP:4 , 0.80
+	TIMES UP:5 , 1.50
+	TIMES UP:6 , 0.80
+	TIMES UP:11 , 0.50
+	TIMES UP:12 , 1.20
+	TIMES UP:13 , 1.50
+	;TIMES UP:14 , 2.00
+	TIMES UP:15 , 1.20
+ENDIF
+
+;失神中
+IF TFLAG:899 > 0
+	TIMES UP:4 , 0.50
+	TIMES UP:5 , 0.75
+	TIMES UP:6 , 0.10
+	TIMES UP:8 , 0.10
+	TIMES UP:10 , 0.00
+	TIMES UP:11 , 0.00
+	TIMES UP:12 , 0.10
+	TIMES UP:13 , 0.00
+ENDIF
+
+;겁쟁이
+IF TALENT:10
+	TIMES UP:10 , 2.00
+	TIMES UP:11 , 0.50
+	TIMES UP:13 , 0.25
+ENDIF
+;반항적
+IF TALENT:11
+	TIMES UP:4 , 0.25
+	TIMES UP:5 , 0.50
+	TIMES UP:11 , 1.50
+ENDIF
+;굳건함
+IF TALENT:12
+	TIMES UP:4 , 0.30
+	TIMES UP:5 , 0.75
+	TIMES UP:10 , 0.80
+	TIMES UP:11 , 2.00
+	TIMES UP:13 , 2.00
+ENDIF
+;솔직
+IF TALENT:13
+	TIMES UP:4 , 2.00
+	TIMES UP:11 , 0.60
+ENDIF
+;얌전함
+IF TALENT:14
+	TIMES UP:11 , 0.30
+ENDIF
+;프라이드높음
+IF TALENT:15
+	TIMES UP:6 , 0.50
+	TIMES UP:10 , 0.60
+	TIMES UP:11 , 1.20
+ENDIF
+;프라이드낮음
+IF TALENT:17
+	TIMES UP:6 , 2.00
+	TIMES UP:10 , 1.50
+	TIMES UP:11 , 0.80
+ENDIF
+
+;무관심
+IF TALENT:21
+	TIMES UP:4 , 0.50
+	TIMES UP:5 , 0.50
+	TIMES UP:6 , 0.50
+	TIMES UP:10 , 0.80
+	TIMES UP:11 , 0.80
+ENDIF
+;감정부족
+IF TALENT:22
+	TIMES UP:4 , 0.60
+	TIMES UP:5 , 0.60
+	TIMES UP:6 , 0.60
+	TIMES UP:8 , 0.60
+	TIMES UP:10 , 0.60
+	TIMES UP:11 , 0.60
+	TIMES UP:12 , 0.60
+	TIMES UP:13 , 0.60
+ENDIF
+;호기심
+SIF TALENT:23
+	TIMES UP:7 , 1.20
+
+;보수적
+SIF TALENT:24
+	TIMES UP:7 , 0.80
+
+;낙관적
+SIF TALENT:25
+	TIMES UP:13 , 0.30
+
+;비관적
+SIF TALENT:26
+	TIMES UP:13 , 2.50
+
+;억압
+IF TALENT:32
+	TIMES UP:5 , 0.50
+	TIMES UP:11 , 2.00
+	TIMES UP:13 , 1.50
+ENDIF
+;해방
+IF TALENT:33
+	TIMES UP:5 , 2.00
+	TIMES UP:6 , 2.00
+ENDIF
+;저항
+IF TALENT:34
+	TIMES UP:5 , 0.50
+	TIMES UP:11 , 2.00
+ENDIF
+
+;아픔에약함
+IF TALENT:40
+	TIMES UP:10 , 2.00
+	TIMES UP:11 , 1.50
+ENDIF
+;아픔에강함
+IF TALENT:41
+	TIMES UP:10 , 0.50
+	TIMES UP:11 , 0.75
+ENDIF
+
+;습득빠름
+SIF TALENT:50
+	TIMES UP:7 , 2.00
+;습득느림
+SIF TALENT:51
+	TIMES UP:7 , 0.50
+
+;헌신적
+SIF TALENT:63
+	TIMES UP:6 , 2.00
+
+;쾌감에솔직
+SIF TALENT:70
+	TIMES UP:5 , 2.00
+;쾌감을부정
+SIF TALENT:71
+	TIMES UP:5 , 0.50
+
+;애정
+IF TALENT:85 && ASSIPLAY == 0
+	TIMES UP:4 , 1.20
+	TIMES UP:6 , 2.00
+	TIMES UP:11 , 0.50
+	TIMES UP:12 , 0.50
+ENDIF
+
+;망신
+IF TALENT:86
+	TIMES UP:6 , 4.00
+	TIMES UP:11 , 0.50
+ENDIF
+
+;調教者がTALENT:위압감
+IF TALENT:PLAYER:93
+	TIMES UP:10 , 2.00
+	TIMES UP:11 , 0.50
+ENDIF
+
+;성호
+IF TALENT:272
+	TIMES UP:5 , 1.20
+ENDIF
+
+;항시발정
+IF TALENT:271
+	TIMES UP:5 , 1.20
+	TIMES UP:3 , 1.20
+ENDIF
+
+;膣内사정による妊娠への恐怖（コンドーム使用中か【애정】持ちもしくは相性最高なら平気）
+IF TFLAG:2 && (SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 22 || SELECTCOM == 23 || SELECTCOM == 34)
+	IF ASSIPLAY == 0 && TEQUIP:35 == 0 && TFLAG:2 && TALENT:85 == 0
+		TIMES UP:10 , 2.00
+	ELSEIF ASSI > 0 && ASSIPLAY && TEQUIP:36 == 0 
+		R = NO:ASSI
+		SIF RELATION:TARGET:R < 200
+			TIMES UP:10 , 2.00
+	ENDIF
+ENDIF
+
+;반발각인
+IF MARK:3 == 3
+	TIMES UP:4 , 0.10
+ELSEIF MARK:3 == 2
+	TIMES UP:4 , 0.40
+ELSEIF MARK:3 == 1
+	TIMES UP:4 , 0.70
+ENDIF
+
+;-------------------------------------------------
+;刻印取得のチェック
+;-------------------------------------------------
+@MARK_GOT_CHECK
+;-------------------------------------------------
+;반발각인
+;------------------------------------------------- 
+
+;PALAM:반감+PALAM:不快の上昇量に応じて反発刻印를 취득
+LOCAL = UP:11 + UP:12
+IF LOCAL >= 500 && LOCAL < 1200 && MARK:4 <= 0 && TFLAG:150 == 0
+	MARK:3 = 1
+	MARK:4 = 1
+	TFLAG:21 = 1
+	PRINTL 반발각인LV1을 취득
+ELSEIF LOCAL >= 1200 && LOCAL < 3000 && MARK:4 <= 1 && TFLAG:150 == 0
+	MARK:3 = 2
+	MARK:4 = 2
+	TFLAG:21 = 2
+	PRINTL 반발각인LV2를 취득
+	;感情乏しいの場合は反発刻印による従順ダウンはなし
+	IF ABL:10 == 1 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV0로 내려갔다
+		ABL:10 = 0
+	ELSEIF ABL:10 == 2 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV1로 내려갔다
+		ABL:10 = 1
+	ENDIF
+ELSEIF LOCAL >= 3000 && MARK:4 <= 2 && TFLAG:150 == 0
+	MARK:3 = 3
+	MARK:4 = 3
+	TFLAG:21 = 3
+	PRINTL 반발각인 LV3를 취득
+	;感情乏しいの場合は反発刻印による従順ダウンはなし
+	IF ABL:10 > 0 && ABL:10 <= 2 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV0로 내려갔다
+		ABL:10 = 0
+	ELSEIF ABL:10 == 3 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV2로 내려갔다
+		ABL:10 = 2
+	ENDIF
+ENDIF
+TFLAG:150 = 0
+;-------------------------------------------------
+;고통각인
+;-------------------------------------------------
+;PALAM:苦痛の上昇量に応じて反発刻印를 취득
+IF UP:9 >= 500 && UP:9 < 1500 && MARK:0 <= 0
+	MARK:0 = 1
+	TFLAG:22 = 1
+	PRINTL 고통각인 LV1을 취득
+ELSEIF UP:9 >= 1500 && UP:9 < 3000 && MARK:0 <= 1
+	MARK:0 = 2
+	TFLAG:22 = 2
+	PRINTL 고통각인 LV2를 취득
+	;굳건함・感情乏しいの場合は고통각인 による従順アップはなし
+	IF ABL:10 == 0 && TALENT:12 == 0 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV1이 되었다
+		ABL:10 = 1
+		CALL JUJUN_UP_CHECK
+	ENDIF
+ELSEIF UP:9 >= 3000 && MARK:0 <= 2
+	MARK:0 = 3
+	TFLAG:22 = 3
+	PRINTL 고통각인 LV3를 취득
+	;굳건함・感情乏しいの場合は고통각인 による従順アップはなし
+	IF ABL:10 == 0 && TALENT:12 == 0 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV1이 되었다
+		ABL:10 = 1
+		CALL JUJUN_UP_CHECK
+	ENDIF
+	IF TALENT:PLAYER:83
+		;PRINTL （【새드】の조수）
+		PRINTFORML %EXPNAME:50%＋１
+		EXP:50 += 1
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;쾌락각인 
+;-------------------------------------------------
+;PALAM:快ＣＶＡＢの上昇量に応じて쾌락각인 를 취득
+LOCAL = UP:0 + UP:1 + UP:2 + UP:14
+
+IF LOCAL >= 500 && LOCAL < 1500 && MARK:1 <= 0
+	MARK:1 = 1
+	TFLAG:23 = 1
+	PRINTL 쾌락각인 LV1을 취득
+ELSEIF LOCAL >= 1500 && LOCAL < 3000 && MARK:1 <= 1
+	MARK:1 = 2
+	TFLAG:23 = 2
+	PRINTL 쾌락각인 LV2를 취득
+ELSEIF LOCAL >= 3000 && MARK:1 <= 2
+	MARK:1 = 3
+	TFLAG:23 = 3
+	PRINTL 쾌락각인 LV3를 취득
+	;자제심・感情乏しいの場合は쾌락각인 による従順アップはなし
+	IF ABL:10 == 0 && TALENT:20 == 0 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV1이 되었다
+		ABL:10 = 1
+		CALL JUJUN_UP_CHECK
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;굴복각인
+;-------------------------------------------------
+;プレイ中の行為に応じて굴복각인 를 취득
+IF TFLAG:200 == 1 && MARK:2 <= 0
+	MARK:2 = 1
+	TFLAG:24 = 1
+	PRINTL 굴복각인 LV1을 취득
+ELSEIF TFLAG:200 == 2 && MARK:2 <= 1
+	MARK:2 = 2
+	TFLAG:24 = 2
+	PRINTL 굴복각인 LV2를 취득
+	;感情乏しいの場合は굴복각인 による従順アップはなし
+	IF ABL:10 == 0 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV1이 되었다
+		ABL:10 = 1
+		CALL JUJUN_UP_CHECK
+	ENDIF
+ELSEIF TFLAG:200 == 3 && MARK:2 <= 2
+	MARK:2 = 3
+	TFLAG:24 = 3
+	PRINTL 굴복각인 LV3를 취득
+	;感情乏しいの場合は굴복각인 による従順アップはなし
+	IF ABL:10 <= 1 && TALENT:22 == 0
+		PRINTL 그리고 순종이 LV2이 되었다
+		ABL:10 = 2
+		CALL JUJUN_UP_CHECK
+	ENDIF
+ENDIF
+
+
+;-------------------------------------------------
+;欲望の上昇による[억압][저항]の消滅をチェック
+;-------------------------------------------------
+@YOKUBO_UP_CHECK
+IF ABL:11 >= 3 && (TALENT:32 || TALENT:34)
+	PRINTFORM %NAME:TARGET%(은)는 
+	IF TALENT:32
+		PRINTFORM 【%TALENTNAME:32%】
+		TALENT:32 = 0
+	ENDIF
+	IF TALENT:34
+		PRINTFORM 【%TALENTNAME:34%】
+		TALENT:34 = 0
+	ENDIF
+	PRINTL (을)를 잃었다
+	PRINTL 부정의 구슬이 절반이 되었다
+	JUEL:100 /= 2
+
+	TFLAG:25 = 1
+ENDIF
+
+;-------------------------------------------------
+;순종의 상승으로 [반항적]의 반전 체크反
+;-------------------------------------------------
+@JUJUN_UP_CHECK
+IF ABL:10 >= 4 && TALENT:11 && TALENT:18
+	PRINTFORM %NAME:TARGET%(은)는 【%TALENTNAME:11%】(을)를 잃고, 
+	PRINTFORML 【%TALENTNAME:13%】(을)를 얻었다
+	TALENT:11 = 0
+	TALENT:13 = 1
+ENDIF
+
+;-------------------------------------------------
+;봉사쾌락경험, 피학쾌락경험, Ａ快楽経験のチェック
+;-------------------------------------------------
+@EXP_GOT_CHECK
+
+LOCAL = UP:0 + UP:1 + UP:2 + UP:14
+
+;奉仕快楽経験のチェック
+LOCAL:1 = 0
+
+IF UP:7 < 100
+	LOCAL = 0
+ELSEIF UP:7 < 300
+	LOCAL *= 1
+ELSEIF UP:7 < 700
+	LOCAL *= 2
+ELSEIF UP:7 < 1500
+	LOCAL *= 3
+ELSE
+	LOCAL *= 4
+ENDIF
+
+IF TFLAG:100
+	IF LOCAL >= 12000
+		LOCAL:1 = 16
+		TIMES UP:11 , 0.65
+		TIMES UP:12 , 0.30
+	ELSEIF LOCAL >= 8000
+		LOCAL:1 = 12
+		TIMES UP:11 , 0.70
+		TIMES UP:12 , 0.40
+	ELSEIF LOCAL >= 5000
+		LOCAL:1 = 8
+		TIMES UP:11 , 0.75
+		TIMES UP:12 , 0.50
+	ELSEIF LOCAL >= 3000
+		LOCAL:1 = 4
+		TIMES UP:11 , 0.80
+		TIMES UP:12 , 0.60
+	ELSEIF LOCAL >= 2000
+		LOCAL:1 = 2
+		TIMES UP:11 , 0.85
+		TIMES UP:12 , 0.70
+	ELSEIF LOCAL >= 1000
+		LOCAL:1 = 1
+		TIMES UP:11 , 0.90
+		TIMES UP:12 , 0.80
+	ENDIF
+	IF LOCAL:1
+		PRINT 봉사쾌락경험+
+		PRINTVL LOCAL:1
+		EXP:21 += LOCAL:1
+		TFLAG:26 = LOCAL:1
+	ENDIF
+ENDIF
+
+
+;Ａ快楽経験のチェック
+LOCAL = UP:2
+LOCAL:1 = 0
+
+IF UP:2 < 300
+	LOCAL = 0
+ELSEIF UP:2 < 1000
+	LOCAL *= 1
+ELSEIF UP:2 < 5000
+	LOCAL *= 2
+ELSEIF UP:2 < 10000
+	LOCAL *= 3
+ELSE
+	LOCAL *= 4
+ENDIF
+
+IF LOCAL >= 12000
+	LOCAL:1 = 16
+	TIMES UP:11 , 0.80
+	TIMES UP:12 , 0.90
+	TIMES UP:6 , 1.20
+ELSEIF LOCAL >= 8000
+	LOCAL:1 = 12
+	TIMES UP:11 , 0.85
+	TIMES UP:12 , 0.90
+	TIMES UP:6 , 1.15
+ELSEIF LOCAL >= 5000
+	LOCAL:1 = 8
+	TIMES UP:11 , 0.85
+	TIMES UP:12 , 0.95
+	TIMES UP:6 , 1.10
+ELSEIF LOCAL >= 3000
+	LOCAL:1 = 4
+	TIMES UP:11 , 0.90
+	TIMES UP:12 , 0.95
+	TIMES UP:6 , 1.05
+ELSEIF LOCAL >= 2000
+	LOCAL:1 = 2
+	TIMES UP:11 , 0.90
+	TIMES UP:12 , 1.00
+	TIMES UP:6 , 1.00
+ELSEIF LOCAL >= 1000
+	LOCAL:1 = 1
+	TIMES UP:11 , 0.95
+	TIMES UP:12 , 1.00
+	TIMES UP:6 , 1.00
+ENDIF
+
+IF LOCAL:1
+	PRINT Ａ쾌락경험+
+	PRINTVL LOCAL:1
+	EXP:32 += LOCAL:1
+	TFLAG:28 = LOCAL:1
+ENDIF
+
+;被虐・嗜虐快楽経験のチェック
+LOCAL = UP:0 + UP:1 + UP:2 + UP:14
+SIF LOCAL == 0
+	LOCAL = UP:5
+
+LOCAL:1 = 0
+LOCAL:2 = 0
+IF LOCAL >= 3000 && UP:9 >= 2000
+	LOCAL:1 = 16
+	TIMES UP:11 , 0.65
+ELSEIF LOCAL >= 2500 && UP:9 >= 1500
+	LOCAL:1 = 12
+	TIMES UP:11 , 0.70
+ELSEIF LOCAL >= 1500 && UP:9 >= 1000
+	LOCAL:1 = 8
+	TIMES UP:11 , 0.75
+ELSEIF LOCAL >= 1000 && UP:9 >= 500
+	LOCAL:1 = 4
+	TIMES UP:11 , 0.80
+ELSEIF LOCAL >= 600 && UP:9 >= 300
+	LOCAL:1 = 2
+	TIMES UP:11 , 0.85
+ELSEIF LOCAL >= 300 && UP:9 >= 100
+	LOCAL:1 = 1
+	TIMES UP:11 , 0.90
+ENDIF
+IF LOCAL:1
+	PRINT 피학쾌락경험+
+	PRINTVL LOCAL:1
+	EXP:30 += LOCAL:1
+	TFLAG:27 = LOCAL:1
+	;조수の嗜虐快楽経験上昇
+	IF ASSIPLAY && ASSI > 0
+		IF ABL:ASSI:20 + TEQUIP:47 == 0
+			TIMES LOCAL:1 , 0.00
+			LOCAL:2 = 0
+		ELSEIF  ABL:ASSI:20 + TEQUIP:47 == 1
+			TIMES LOCAL:1 , 0.50
+			LOCAL:2 = 0
+		ELSEIF  ABL:ASSI:20 + TEQUIP:47 == 2
+			TIMES LOCAL:1 , 1.00
+			LOCAL:2 = LOCAL:1 / 2
+		ELSEIF  ABL:ASSI:20 + TEQUIP:47 == 3
+			LOCAL:2 = LOCAL:1 * 2
+		ELSEIF  ABL:ASSI:20 + TEQUIP:47 == 4
+			LOCAL:2 = LOCAL:1 * 10
+		ELSEIF  ABL:ASSI:20 + TEQUIP:47 >= 5
+			LOCAL:2 = LOCAL:1 * 50
+		ENDIF
+		IF LOCAL:1
+			PRINTFORML 가학쾌락경험+{LOCAL:1}(%SAVESTR:ASSI%)
+			EXP:ASSI:33 += LOCAL:1
+		ENDIF
+		IF LOCAL:2
+			PRINTFORML %PALAMNAME:5%の珠＋{LOCAL:2}(%SAVESTR:ASSI%)
+			JUEL:ASSI:5 += LOCAL:2
+		ENDIF
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;[즉각함락]のチェック
+;-------------------------------------------------
+@SOKUOCHI_CHECK
+
+SIF TALENT:73 == 0
+	RETURN 0
+
+IF !(TALENT:101 & 2)
+	IF UP:0 > 1 && ABL:0 < 1
+		ABL:0 = 1
+		PRINTFORML %ABLNAME:0%LV1이 되었다
+	ELSEIF UP:0 > 30 && ABL:0 < 2
+		ABL:0 = 2
+		PRINTFORML %ABLNAME:0%LV2이 되었다
+	ELSEIF UP:0 > 60 && ABL:0 < 3
+		ABL:0 = 3
+		PRINTFORML %ABLNAME:0%LV3이 되었다
+	ELSEIF UP:0 > 200 && ABL:0 < 4
+		ABL:0 = 4
+		PRINTFORML %ABLNAME:0%LV4이 되었다
+	ELSEIF UP:0 > 1000 && ABL:0 < 5
+		ABL:0 = 5
+		PRINTFORML %ABLNAME:0%LV5이 되었다
+	ENDIF
+ENDIF
+
+IF !(TALENT:103 & 2)
+	IF UP:1 > 1 && ABL:2 < 1
+		ABL:2 = 1
+		PRINTFORML %ABLNAME:2%LV1이 되었다
+	ELSEIF UP:1 > 30 && ABL:2 < 2
+		ABL:2 = 2
+		PRINTFORML %ABLNAME:2%LV2이 되었다
+	ELSEIF UP:1 > 60 && ABL:2 < 3
+		ABL:2 = 3
+		PRINTFORML %ABLNAME:2%LV3이 되었다
+	ELSEIF UP:1 > 200 && ABL:2 < 4
+		ABL:2 = 4
+		PRINTFORML %ABLNAME:2%LV4이 되었다
+	ELSEIF UP:1 > 1000 && ABL:2 < 5
+		ABL:2 = 5
+		PRINTFORML %ABLNAME:2%LV5이 되었다
+	ENDIF
+ENDIF
+
+IF !(TALENT:105 & 2)
+	IF UP:2 > 1 && ABL:3 < 1
+		ABL:3 = 1
+		PRINTFORML %ABLNAME:3%LV1이 되었다
+	ELSEIF UP:2 > 30 && ABL:3 < 2
+		ABL:3 = 2
+		PRINTFORML %ABLNAME:3%LV2이 되었다
+	ELSEIF UP:2 > 60 && ABL:3 < 3
+		ABL:3 = 3
+		PRINTFORML %ABLNAME:3%LV3이 되었다
+	ELSEIF UP:2 > 200 && ABL:3 < 4
+		ABL:3 = 4
+		PRINTFORML %ABLNAME:3%LV4이 되었다
+	ELSEIF UP:2 > 1000 && ABL:3 < 5
+		ABL:3 = 5
+		PRINTFORML %ABLNAME:3%LV5이 되었다
+	ENDIF
+ENDIF
+
+IF !(TALENT:107 & 2)
+	IF UP:14 > 1 && ABL:1 < 1
+		ABL:1 = 1
+		PRINTFORML %ABLNAME:1%LV1이 되었다
+	ELSEIF UP:14 > 30 && ABL:1 < 2
+		ABL:1 = 2
+		PRINTFORML %ABLNAME:1%LV2이 되었다
+	ELSEIF UP:14 > 60 && ABL:1 < 3
+		ABL:1 = 3
+		PRINTFORML %ABLNAME:1%LV3이 되었다
+	ELSEIF UP:14 > 200 && ABL:1 < 4
+		ABL:1 = 4
+		PRINTFORML %ABLNAME:1%LV4이 되었다
+	ELSEIF UP:14 > 1000 && ABL:1 < 5
+		ABL:1 = 5
+		PRINTFORML %ABLNAME:1%LV5이 되었다
+	ENDIF
+ENDIF
+
+IF UP:4 > 1 && ABL:10 < 1
+	ABL:10 = 1
+	PRINTFORML %ABLNAME:10%LV1이 되었다
+ELSEIF UP:4 > 30 && ABL:10 < 2
+	ABL:10 = 2
+	PRINTFORML %ABLNAME:10%LV2이 되었다
+ELSEIF UP:4 > 60 && ABL:10 < 3
+	ABL:10 = 3
+	PRINTFORML %ABLNAME:10%LV3이 되었다
+ELSEIF UP:4 > 200 && ABL:10 < 4
+	ABL:10 = 4
+	PRINTFORML %ABLNAME:10%LV4이 되었다
+ELSEIF UP:4 > 1000 && ABL:10 < 5
+	ABL:10 = 5
+	PRINTFORML %ABLNAME:10%LV5이 되었다
+ENDIF
+
+IF UP:5 > 1 && ABL:11 < 1
+	ABL:11 = 1
+	PRINTFORML %ABLNAME:11%LV1이 되었다
+ELSEIF UP:5 > 30 && ABL:11 < 2
+	ABL:11 = 2
+	PRINTFORML %ABLNAME:11%LV2이 되었다
+ELSEIF UP:5 > 60 && ABL:11 < 3
+	ABL:11 = 3
+	PRINTFORML %ABLNAME:11%LV3이 되었다
+ELSEIF UP:5 > 200 && ABL:11 < 4
+	ABL:11 = 4
+	PRINTFORML %ABLNAME:11%LV4이 되었다
+ELSEIF UP:5 > 1000 && ABL:11 < 5
+	ABL:11 = 5
+	PRINTFORML %ABLNAME:11%LV5이 되었다
+ENDIF
+
+IF UP:7 > 1 && ABL:12 < 1
+	ABL:12 = 1
+	PRINTFORML %ABLNAME:12%LV1이 되었다
+ELSEIF UP:7 > 30 && ABL:12 < 2
+	ABL:12 = 2
+	PRINTFORML %ABLNAME:12%LV2이 되었다
+ELSEIF UP:7 > 60 && ABL:12 < 3
+	ABL:12 = 3
+	PRINTFORML %ABLNAME:12%LV3이 되었다
+ELSEIF UP:7 > 200 && ABL:12 < 4
+	ABL:12 = 4
+	PRINTFORML %ABLNAME:12%LV4이 되었다
+ELSEIF UP:7 > 1000 && ABL:12 < 5
+	ABL:12 = 5
+	PRINTFORML %ABLNAME:12%LV5이 되었다
+ENDIF
+
+IF UP:6 > 1 && ABL:16 < 1 && ABL:0 >= 1
+	ABL:16 = 1
+	PRINTFORML %ABLNAME:16%LV1이 되었다
+ELSEIF UP:6 > 30 && ABL:16 < 2 && ABL:0 >= 2
+	ABL:16 = 2
+	PRINTFORML %ABLNAME:16%LV2이 되었다
+ELSEIF UP:6 > 60 && ABL:16 < 3 && ABL:0 >= 3
+	ABL:16 = 3
+	PRINTFORML %ABLNAME:16%LV3이 되었다
+ELSEIF UP:6 > 200 && ABL:16 < 4 && ABL:0 >= 4
+	ABL:16 = 4
+	PRINTFORML %ABLNAME:16%LV4이 되었다
+ELSEIF UP:6 > 1000 && ABL:16 < 5 && ABL:0 >= 5
+	ABL:16 = 5
+	PRINTFORML %ABLNAME:16%LV5이 되었다
+ENDIF
+
+IF UP:8 > 1 && ABL:17 < 1 && ABL:1 >= 1
+	ABL:17 = 1
+	PRINTFORML %ABLNAME:17%LV1이 되었다
+ELSEIF UP:8 > 30 && ABL:17 < 2 && ABL:1 >= 2
+	ABL:17 = 2
+	PRINTFORML %ABLNAME:17%LV2이 되었다
+ELSEIF UP:8 > 60 && ABL:17 < 3 && ABL:1 >= 3
+	ABL:17 = 3
+	PRINTFORML %ABLNAME:17%LV3이 되었다
+ELSEIF UP:8 > 200 && ABL:17 < 4 && ABL:1 >= 4
+	ABL:17 = 4
+	PRINTFORML %ABLNAME:17%LV4이 되었다
+ELSEIF UP:8 > 1000 && ABL:17 < 5 && ABL:1 >= 5
+	ABL:17 = 5
+	PRINTFORML %ABLNAME:17%LV5이 되었다
+ENDIF
+
+IF UP:9 > 1 && ABL:21 < 1 && ABL:11 >= 1
+	ABL:21 = 1
+	PRINTFORML %ABLNAME:21%LV1이 되었다
+ELSEIF UP:9 > 30 && ABL:21 < 2 && ABL:11 >= 2
+	ABL:21 = 2
+	PRINTFORML %ABLNAME:21%LV2이 되었다
+ELSEIF UP:9 > 60 && ABL:21 < 3 && ABL:11 >= 3
+	ABL:21 = 3
+	PRINTFORML %ABLNAME:21%LV3이 되었다
+ELSEIF UP:9 > 200 && ABL:21 < 4 && ABL:11 >= 4
+	ABL:21 = 4
+	PRINTFORML %ABLNAME:21%LV4이 되었다
+ELSEIF UP:9 > 1000 && ABL:21 < 5 && ABL:11 >= 5
+	ABL:21 = 5
+	PRINTFORML %ABLNAME:21%LV5이 되었다
+ENDIF
+
+IF EXP:40 > 1 && ABL:22 < 1 && ABL:11 >= 1
+	ABL:22 = 1
+	PRINTFORML %ABLNAME:22%LV1이 되었다
+ELSEIF EXP:40 > 5 && ABL:22 < 2 && ABL:11 >= 2
+	ABL:22 = 2
+	PRINTFORML %ABLNAME:22%LV2이 되었다
+ELSEIF EXP:40 > 20 && ABL:22 < 3 && ABL:11 >= 3
+	ABL:22 = 3
+	PRINTFORML %ABLNAME:22%LV3이 되었다
+ELSEIF EXP:40 > 40 && ABL:22 < 4 && ABL:11 >= 4
+	ABL:22 = 4
+	PRINTFORML %ABLNAME:22%LV4이 되었다
+ELSEIF EXP:40 > 100 && ABL:22 < 5 && ABL:11 >= 5
+	ABL:22 = 5
+	PRINTFORML %ABLNAME:22%LV5이 되었다
+ENDIF
+
+IF EXP:41 > 1 && ABL:23 < 1 && ABL:11 >= 1
+	ABL:23 = 1
+	PRINTFORML %ABLNAME:23%LV1이 되었다
+ELSEIF EXP:41 > 5 && ABL:23 < 2 && ABL:11 >= 2
+	ABL:23 = 2
+	PRINTFORML %ABLNAME:23%LV2이 되었다
+ELSEIF EXP:41 > 20 && ABL:23 < 3 && ABL:11 >= 3
+	ABL:23 = 3
+	PRINTFORML %ABLNAME:23%LV3이 되었다
+ELSEIF EXP:41 > 40 && ABL:23 < 4 && ABL:11 >= 4
+	ABL:23 = 4
+	PRINTFORML %ABLNAME:23%LV4이 되었다
+ELSEIF EXP:41 > 100 && ABL:23 < 5 && ABL:11 >= 5
+	ABL:23 = 5
+	PRINTFORML %ABLNAME:23%LV5이 되었다
+ENDIF
+
+;-------------------------------------------------
+;절정시 추가 처리
+;-------------------------------------------------
+@ECST_CHECK,ARG
+TFLAG:29 = ARG
+
+;-------------------------------------------------
+;절정시 오줌싸개 처리
+;-------------------------------------------------
+@PISSING_ECST_CHECK
+;超大量放尿
+IF TFLAG:29 >= 7 && TEQUIP:22 && TALENT:57
+	PRINTFORML %EXPNAME:31%＋５
+	EXP:31 += 5
+	TEQUIP:22 = 0
+	;노예のＶとＰに＜尿＞の汚れが発生
+	STAIN:2 |= 32
+	STAIN:3 |= 32
+	;着衣おもらし処理
+	CALL SOILING_CLOTH_NO1
+;大量放尿
+ELSEIF (TFLAG:29 >= 7 && TEQUIP:22) || (TFLAG:29 >= 5 && TEQUIP:22 && TALENT:57)
+	PRINTFORML %EXPNAME:31%＋４
+	EXP:31 += 4
+	TEQUIP:22 = 0
+	;노예のＶとＰに＜尿＞の汚れが発生
+	STAIN:2 |= 32
+	STAIN:3 |= 32
+	;着衣おもらし処理
+	CALL SOILING_CLOTH_NO1
+;방뇨
+ELSEIF (TFLAG:29 >= 7 && TALENT:57) || (TFLAG:29 >= 5 && TEQUIP:22) || (TFLAG:29 >= 3 && TEQUIP:22 && TALENT:57)
+	PRINTFORML %EXPNAME:31%＋３
+	EXP:31 += 3
+	TEQUIP:22 = 0
+	;노예のＶとＰに＜尿＞の汚れが発生
+	STAIN:2 |= 32
+	STAIN:3 |= 32
+	;着衣おもらし処理
+	CALL SOILING_CLOTH_NO1
+;失禁
+ELSEIF (TFLAG:29 >= 5 && TALENT:57) || (TFLAG:29 >= 3 && TEQUIP:22) || (TFLAG:29 >= 1 && TEQUIP:22 && TALENT:57)
+	PRINTFORML %EXPNAME:31%＋２
+	EXP:31 += 2
+	SIF TALENT:57 == 0
+		TEQUIP:22 = 0
+	;노예のＶとＰに＜尿＞の汚れが発生
+	STAIN:2 |= 32
+	STAIN:3 |= 32
+	;着衣おもらし処理
+	CALL SOILING_CLOTH_NO1
+;微量失禁
+ELSEIF (TFLAG:29 >= 3 && TALENT:57) || (TFLAG:29 >= 1 && TEQUIP:22)
+	PRINTFORML %EXPNAME:31%＋１
+	EXP:31 += 1
+	;노예のＶとＰに＜尿＞の汚れが発生
+	STAIN:2 |= 32
+	STAIN:3 |= 32
+ENDIF
+
+;-------------------------------------------------
+;主人による調教の経験値
+;-------------------------------------------------
+@MASTER_FLAG_CHECK
+;絶頂
+TFLAG:29 += TFLAG:10 + TFLAG:11
+Q = 0
+SIF NOWEX:0 > 0
+	Q += 1
+SIF NOWEX:1 > 0
+	Q += 1
+SIF NOWEX:2 > 0
+	Q += 1
+SIF NOWEX:3 > 0
+	Q += 1
+SIF TFLAG:10 > 0
+	Q += 1
+SIF TFLAG:11 > 0
+	Q += 1
+TFLAG:30 += TFLAG:29 * Q
+
+;사정
+REPEAT 5
+	SIF TFLAG:COUNT > 0 && EXP:20 >= EXPLV:3
+		TFLAG:30 += TFLAG:COUNT
+REND
+SIF TFLAG:9 > 0 && EXP:20 >= EXPLV:3
+	TFLAG:30 += TFLAG:9
+
+;主人と対象の能力を計算
+IF ASSIPLAY == 0 && TEQUIP:90 == 0
+	;ABL:従順をみる
+	R = ABL:10
+
+	;素質による増減
+	;반항적
+	SIF TALENT:11
+ 		R -= 1
+	;솔직
+	SIF TALENT:13
+		R += 1
+	;자제심
+	SIF TALENT:20
+		R -= 1
+	;무관심
+	SIF TALENT:21
+		R -= 1
+	;감정부족
+	SIF TALENT:22
+ 		R -= 1
+	;저항
+	SIF TALENT:34
+		R -= 1
+	;헌신적
+	SIF TALENT:63
+		R += 1
+	;쾌감에솔직
+	SIF TALENT:70
+		R += 1
+	;쾌감을부정
+	SIF TALENT:71
+		R -= 1
+	;선머슴
+	SIF TALENT:79 && TALENT:MASTER:122 == 0
+		R -= 1
+	;남성혐오
+	SIF TALENT:82 && TALENT:MASTER:122
+		R -= 1
+	;애정
+	SIF TALENT:85
+ 		R += 2
+	;망신
+	SIF TALENT:86
+		R += 2
+	;主人の魅惑
+	SIF TALENT:MASTER:91
+		R += 1
+	;主人の謎の魅力
+	SIF TALENT:MASTER:92
+		R += 1
+	;主人の魅力
+ 	SIF TALENT:MASTER:113
+		R += 1
+	;主人の人気
+ 	SIF TALENT:MASTER:126
+		R += 1
+
+	;結果が0以下の場合
+	SIF R <= 0
+		R = 1
+
+	R += TFLAG:30
+
+	;相性による修正
+	IF RELATION:MASTER != 0
+		R *= RELATION:MASTER
+		R /= 100
+	ENDIF
+
+	CFLAG:2 += R
+
+	;ラブスコープがあれば好感度表示
+	IF ITEM:37
+		PRINTFORML 호감도 상승:{R/10}.{R%10}％
+		PRINTFORML 호감도 합계:{(CFLAG:2)/10}％
+	ENDIF
+
+ENDIF
+R = 0
+TFLAG:30 = 0
+;
+;
+;
+;
+;---------------------------------------------
+@TARGET_WORMBABY_CHECK
+;---------------------------------------------
+;ワーム出産
+SIF TALENT:190 == 0 && TALENT:191 == 0
+	RETURN 0
+
+
+LOCAL = UP:0 + UP:1 + UP:2 + UP:14
+
+;자제심
+SIF TALENT:20
+	LOCAL /= 2
+
+;쾌감에솔직
+SIF TALENT:70
+	TIMES LOCAL , 1.20
+
+;淫乱化
+SIF TALENT:76
+	TIMES LOCAL , 1.10
+
+;쾌감을부정
+SIF TALENT:71
+	TIMES LOCAL , 0.80
+
+;미약
+SIF TEQUIP:21
+	LOCAL *= 2
+
+IF  LOCAL > 25000
+	LOCAL:1 = 2
+ELSEIF LOCAL > 10000
+	LOCAL:1 = 1
+ELSE
+	LOCAL:1 = 0
+ENDIF
+
+;대량 출산
+IF LOCAL:1 == 2
+	LOSEBASE:0 += 20
+	LOSEBASE:1 += 100
+
+	IF EXP:3 < EXPLV:1
+		SOURCE:12 += 20000
+		SOURCE:13 += 10000
+	ELSEIF EXP:3 < EXPLV:2
+		SOURCE:12 += 10000
+		SOURCE:13 += 8000
+	ELSEIF EXP:3 < EXPLV:3
+		SOURCE:12 += 7000
+		SOURCE:13 += 6000
+	ELSEIF EXP:3 < EXPLV:4
+		SOURCE:12 += 5000
+		SOURCE:13 += 4000
+	ELSEIF EXP:3 < EXPLV:5
+		SOURCE:12 += 3000
+		SOURCE:13 += 2000
+	ELSE
+		SOURCE:12 += 1800
+		SOURCE:13 += 1200
+	ENDIF
+
+	PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+	IF TALENT:190 == 1 && TALENT:191 == 1
+		PRINT 질과 항문으
+	ELSEIF TALENT:190 == 1
+		PRINT 질
+	ELSE
+		PRINT 항문으
+	ENDIF
+	PRINTW 로부터 대량의 웜의 유생을 낳았다
+	PRINTL 출산경험＋２
+	EXP:60 += 2
+;通常の사정
+ELSEIF LOCAL:1 == 1
+	LOSEBASE:1 += 40
+
+	IF EXP:3 < EXPLV:1
+		SOURCE:12 += 10000
+		SOURCE:13 += 5000
+	ELSEIF EXP:3 < EXPLV:2
+		SOURCE:12 += 5000
+		SOURCE:13 += 4000
+	ELSEIF EXP:3 < EXPLV:3
+		SOURCE:12 += 2500
+		SOURCE:13 += 2000
+	ELSEIF EXP:3 < EXPLV:4
+		SOURCE:12 += 1600
+		SOURCE:13 += 1400
+	ELSEIF EXP:3 < EXPLV:5
+		SOURCE:12 += 800
+		SOURCE:13 += 500
+	ELSE
+		SOURCE:12 += 200
+		SOURCE:13 += 250
+	ENDIF
+
+	PRINTFORM %조사선택(SAVESTR:TARGET, "는")% 
+	IF TALENT:190 == 1 && TALENT:191 == 1
+		PRINT 질과 항문으
+	ELSEIF TALENT:190 == 1
+		PRINT 질
+	ELSE
+		PRINT 항문으
+	ENDIF
+	PRINTW 로부터 웜의 유생을 낳았다
+	PRINTL 출산경험＋１
+	EXP:60 += 1
+ENDIF
+
+IF TALENT:190 == 1 && TALENT:191 == 1
+	;VA産卵
+	TFLAG:120 = LOCAL:1
+	TFLAG:121 = LOCAL:1
+ELSEIF TALENT:190 == 1
+	;V산란
+	TFLAG:120 = LOCAL:1
+ELSE
+	;A산란
+	TFLAG:121 = LOCAL:1
+ENDIF
+
+;-------------------------------------------------
+;自動調教回数による調教のボーナス
+;-------------------------------------------------
+@AUTO_NUM_CHECK
+
+FOR LOCAL,0,17
+	
+	SIF LOCAL >= 11 && LOCAL != 14
+		CONTINUE
+	
+	IF CFLAG:667 < 5
+		TIMES UP:LOCAL , 1.25
+	ELSEIF CFLAG:667 < 10
+		TIMES UP:LOCAL , 1.50
+	ELSEIF CFLAG:667 < 15
+		TIMES UP:LOCAL , 2.10
+	ELSEIF CFLAG:667 < 20
+		TIMES UP:LOCAL , 2.85
+	ELSEIF CFLAG:667 < 25
+		TIMES UP:LOCAL , 3.90
+	ELSEIF CFLAG:667 < 30
+		TIMES UP:LOCAL , 5.30
+	ELSEIF CFLAG:667 < 40
+		TIMES UP:LOCAL , 7.25
+	ELSE
+		TIMES UP:LOCAL , 9.90
+	ENDIF
+	
+NEXT
+
+RETURN 0
+
