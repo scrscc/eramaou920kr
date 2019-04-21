@@ -1,0 +1,78 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;스팽킹
+;SM系コマンド
+;-------------------------------------------------
+@COM40
+
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が後背位、후배위・가슴애무、서서후배위、後背位ＳＰだと後背位・スパンキングに
+	IF PREVCOM == 21 || PREVCOM == 131 || PREVCOM == 133 || PREVCOM == 134
+		CALL COM_ABLE132
+		SIF RESULT == 1
+			JUMP COM132
+	ENDIF
+	;***Gスポ・子宮口攻めからの分岐***
+	;前々回のコマンドが後背位、후배위・가슴애무、후배위・스팽킹、서서후배위、後背位SPで、前回の調教が挿入Ｇスポット攻めか挿入子宮口攻めだと後背位・スパンキングに
+	IF (TFLAG:59 == 21 || TFLAG:59 == 131 || TFLAG:59 == 132 || TFLAG:59 == 133 || TFLAG:59 == 134) && (PREVCOM == 120 || PREVCOM == 121)
+		CALL COM_ABLE132
+		SIF RESULT == 1
+			JUMP COM132
+	ENDIF
+ENDIF
+
+PRINTL 스팽킹
+;SAVESTR:22 = 스팽킹
+CALL TRAIN_MESSAGE_B
+
+;実際には苦痛があるためもっと体力気力をもっていかれる
+LOSEBASE:0 += 80
+LOSEBASE:1 += 40
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+SOURCE:12 = 200
+SOURCE:14 = 500
+
+;PALAM:苦痛をみる
+IF PALAM:9 < PALAMLV:1
+	SOURCE:6 = 300
+ELSEIF PALAM:9 < PALAMLV:2
+	SOURCE:6 = 500
+ELSEIF PALAM:9 < PALAMLV:3
+	SOURCE:6 = 800
+ELSEIF PALAM:9 < PALAMLV:4
+	SOURCE:6 = 1200
+ELSEIF PALAM:9 >= PALAMLV:4
+	SOURCE:6 = 1800
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +2
+	EXP:40 += 2
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +2
+	EXP:41 += 2
+ENDIF
+
+SIF ASSIPLAY == 0 && ABL:21 >= 1
+	TFLAG:30 += 1
+
+;애정경험
+E = 1
+IF CFLAG:2 >= 1000 && (ABL:21 >= 3 || TALENT:88) && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+RETURN 1
+;

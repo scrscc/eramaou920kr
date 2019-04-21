@@ -1,0 +1,92 @@
+﻿;eraWIZから流用
+
+@COM72
+;음모를민다
+PRINTL 음모를민다
+STR:0 = 음모를민다
+
+LOSEBASE:0 += 20
+LOSEBASE:1 += 60
+
+A = 500
+SOURCE:5 = 750
+SOURCE:7 = 500
+SOURCE:12 = 1000
+SOURCE:14 = 1200
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	SOURCE:6 = 600
+ELSEIF PALAM:3 < PALAMLV:2
+	SOURCE:6 = 250
+ELSEIF PALAM:3 < PALAMLV:3
+	SOURCE:6 = 100
+ELSEIF PALAM:3 < PALAMLV:4
+	SOURCE:6 = 30
+ENDIF
+
+;ABL:露出癖をみる
+IF ABL:7 == 0
+	TIMES A , 0.80
+ELSEIF ABL:7 == 1
+	TIMES A , 1.00
+ELSEIF ABL:7 == 2
+	TIMES A , 1.20
+ELSEIF ABL:7 == 3
+	TIMES A , 1.50
+ELSEIF ABL:7 == 4
+	TIMES A , 2.00
+ELSE
+	TIMES A , 2.60
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES A , 0.80
+ELSEIF ABL:21 == 1
+	TIMES A , 1.00
+ELSEIF ABL:21 == 2
+	TIMES A , 1.20
+ELSEIF ABL:21 == 3
+	TIMES A , 1.40
+ELSEIF ABL:21 == 4
+	TIMES A , 1.70
+ELSE
+	TIMES A , 2.00
+ENDIF
+
+SOURCE:7 += A
+SOURCE:11 += A
+SOURCE:12 += A
+
+;작은체형、小人体型以外
+;SIF TALENT:100 == 0 && TALENT:149 == 0
+;	TIMES SOURCE:12 , 2.50
+
+PRINTFORML %조사선택(SAVESTR:PLAYER, "는")% %SAVESTR:TARGET%의 음모를 깔끔하게 잘라냈다
+
+;死んでいなければリアクション
+IF BASE:0 > 0
+	PRINTFORM %SAVESTR:TARGET%は
+	IF ABL:17 < 2
+		PRINT 얼굴을 새빨갛게 하고 
+		IF TEQUIP:44
+			PRINTFORML %조사선택(SAVESTR:PLAYER, "와")% 시선을 마주치지 않도록 외면하고 있다…
+		ELSE
+			PRINTL 손으로 말끔하게 된 성기를 숨기려 하고 있다…
+		ENDIF
+	ELSEIF ABL:17 == 2
+		PRINTL 수줍은 듯 드러난 자신의 성기를 바라보고 있다…
+	ELSEIF ABL:17 == 3
+		PRINTL 조금 얼굴을 돌리고 있다…
+	ELSEIF ABL:17 == 4
+		PRINTL 성기가 전부 보이는 상태에 부끄러움을 느끼면서도、어딘지 모르게 즐기고 있는 것 같다…
+	ELSE
+		PRINTL 공기가 성기를 어루만지는 느낌을 매우 즐기고 있는 것 같다 …
+	ENDIF
+ENDIF
+
+TALENT:310 = 1
+PRINTW  
+ 
+RETURN 1

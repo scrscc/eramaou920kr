@@ -1,0 +1,192 @@
+﻿
+;--------------------------------------------------
+@CONFIG_FILTER_SETTING
+;--------------------------------------------------
+;各フィルタの設定を変更する
+SETCOLOR GETBIT(FLAG:25,0) ? 0x646464 # GETDEFCOLOR()
+PRINTFORML [0]애무계 필터 	 현재：\@ GETBIT(FLAG:25,0) ? ON # OFF \@
+SETCOLOR GETBIT(FLAG:25,1) ? 0x646464 # 0x6495ed
+PRINTFORML [1]기구형 필터	 현재：\@ GETBIT(FLAG:25,1) ? ON # OFF \@
+SETCOLOR GETBIT(FLAG:25,2) ? 0x646464 # 0xffa500
+PRINTFORML [2]Ｖ성교계 필터	 현재：\@ GETBIT(FLAG:25,2) ? ON # OFF \@
+SETCOLOR GETBIT(FLAG:25,3) ? 0x646464 # 0xdb7093
+PRINTFORML [3]Ａ성교계 필터	 현재：\@ GETBIT(FLAG:25,3) ? ON # OFF \@
+SETCOLOR GETBIT(FLAG:25,4) ? 0x646464 # 0xff6347
+PRINTFORML [4]ＳＭ형 필터	 현재：\@ GETBIT(FLAG:25,4) ? ON # OFF \@
+RESETCOLOR
+DRAWLINE
+PRINTL [100] 돌아온다
+
+INPUT
+IF RESULT == 100
+	RETURN 0
+ENDIF
+IF RESULT >= 0 && RESULT <= 4
+	INVERTBIT FLAG:25,RESULT
+ENDIF
+RESTART
+
+;--------------------------------------------------
+@CONFIG_SHOW_FILTER_STATUS
+;--------------------------------------------------
+;フィルタの状態を1行で記述するだけ
+SETCOLOR GETBIT(FLAG:25,0) ? 0x646464 # GETDEFCOLOR()
+PRINT 애무　
+SETCOLOR GETBIT(FLAG:25,1) ? 0x646464 # 0x6495ed
+PRINT 기구　
+SETCOLOR GETBIT(FLAG:25,2) ? 0x646464 # 0xffa500
+PRINT Ｖ계　
+SETCOLOR GETBIT(FLAG:25,3) ? 0x646464 # 0xdb7093
+PRINT Ａ계　
+SETCOLOR GETBIT(FLAG:25,4) ? 0x646464 # 0xff6347
+PRINT SM계　
+RESETCOLOR
+PRINTL
+
+;--------------------------------------------------
+@CONFIG_VIRGIN_CONCEDED_SETTING
+;--------------------------------------------------
+;処女献上の発生可否設定をする
+;英語の訳が間違っていても気にしてはいけない
+PRINTL [0]발생하지 않는다
+PRINTL [1]한사람당 한번만
+PRINTL [2]몇번이라도 발생
+DRAWLINE
+PRINTL [100] 돌아온다
+
+WHILE 1
+	INPUT
+	SELECTCASE RESULT
+		CASE 0 TO 2
+			FLAG:38 = RESULT - 1
+			RETURN 0
+		CASE 100
+			RETURN 0
+	ENDSELECT
+	CLEARLINE 1
+WEND
+
+;--------------------------------------------------
+@CONFIG_VIRGIN_CONCEDED_STATUS
+;--------------------------------------------------
+;処女献上の発生可否状態を記述
+;三項演算子で記述できないから直接CONFIG関数に入れると見栄えが悪くなるかなって…
+SELECTCASE FLAG:38
+	CASE IS <= -1
+		PRINT 발생하지 않는다
+	CASE 0
+		PRINT 한사람당 한번만
+	CASE IS >= 1
+		PRINT 몇번이라도 발생
+ENDSELECT
+PRINTL 
+
+;--------------------------------------------------
+@CONFIG_PENIS_YOU_SETTING
+;--------------------------------------------------
+
+PRINTFORML 당신의 페니스는 어떤 상태입니까？
+
+PRINTL  [0] - 보통
+PRINTL  [1] - 거근
+PRINTL  [2] - 단소포경
+PRINTL  [3] - 포경
+PRINTL  [4] - 말자지
+DRAWLINE
+PRINTL  [999] - 그만둔다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT >= 0 && RESULT <= 4
+	PRINT 당신의 페니스의 상태는
+	IF RESULT == 1
+		PRINTW 《거근》이다
+	ELSEIF RESULT == 2
+		PRINTW 《단소포경》이다
+	ELSEIF RESULT == 3
+		PRINTW 《포경》이다
+	ELSEIF RESULT == 4
+		PRINTW 《말자지》이다
+	ELSE
+		PRINTW 《보통》이다
+	ENDIF
+	TALENT:0:318 = RESULT
+ENDIF
+
+;--------------------------------------------------
+@CONFIG 
+#DIM PAGE
+;--------------------------------------------------
+
+PAGE = 0
+
+$PAGE_TOP
+
+IF PAGE == 0
+	PRINTFORML [0] 용자 투항후 능욕　　　　　현재：\@ GETBIT(FLAG:5,0) ? 허가 # 금지 \@
+	PRINTFORML [1] 용자 강화 플래그　　　　　현재：\@ GETBIT(FLAG:5,1) ? 새로운 용자가 날짜에 비례하여 강화된다 # 용자의 수준이 유지된다 \@
+	PRINTFORML [2] 임신 출산 기능　　　　　　현재：\@ GETBIT(FLAG:5,2) ? ON # OFF \@
+	PRINTFORML [3] 용자 자동 처형 기능 　　　현재：\@ GETBIT(FLAG:5,3) ? ON # OFF \@
+	PRINTFORML [4] 몬스터 요격 금지  　　　　현재：\@ GETBIT(FLAG:5,4) ? ON (+요격가는 노예가 괴물들의 훈련을 실시한다) # OFF \@
+	PRINTFORML [5] 전투 로그 표시　　　　　　현재：\@ GETBIT(FLAG:5,5) ? ON # OFF \@
+	PRINTFORML [6] 함정 자동 보충　　　　　　현재：\@ GETBIT(FLAG:5,6) ? ON # OFF \@
+	PRINTFORML [7] NTR가능   　　　　　　　　현재：\@ GETBIT(FLAG:5,7) ? ON # OFF \@
+	PRINTFORML [8] 소질 분류 표시　　　　　　현재：\@ GETBIT(FLAG:5,8) ? ON # OFF \@
+	PRINTFORML [9] 전투 로그에서 SKIP중단　　현재：\@ GETBIT(FLAG:5,9) ? ON # OFF \@
+	PRINTFORML [10] 임신시의 요격・만삭 조교　현재：\@ GETBIT(FLAG:5,10) ? 허가 # 금지 \@
+	PRINTFORML [11] 착의 시스템  　　　　　　현재：\@ (FLAG:37) ? ON # OFF \@
+	PRINTFORML [12] 빈사시 조교 자동 종료 현재：\@ (FLAG:35) ? ON # OFF \@
+	PRINT [13] 조교시 필터　　　　　	 현재：
+	CALL CONFIG_SHOW_FILTER_STATUS
+	PRINTFORML [14] 자기소개풍 캐릭터설정 표시 현재：\@ GETBIT(FLAG:5,11) ? ON # OFF \@
+	PRINTFORML [15] 연령/쓰리 사이즈의 표시  현재：\@ GETBIT(FLAG:5,12) ? ON # OFF \@/\@ GETBIT(FLAG:5,15) ? ON # OFF \@
+	PRINT [16] 조교후의 처녀 헌상 발생　　 현재：
+	CALL CONFIG_VIRGIN_CONCEDED_STATUS
+	PRINTFORM [17] 마왕의 페니스의 상태 　　　현재：
+	PRINTFORML %GET_LOOK_INFO(0, "페니스의상태")%
+ELSEIF PAGE == 1
+	PRINTFORML [18] 남자용사허가 　　　　　　현재：\@ GETBIT(FLAG:8,0) ? 허가 # 금지 \@
+	PRINTFORML [19] 용사출현시의 소질표시		현재：\@ GETBIT(FLAG:8,1) ? ON # OFF \@
+	PRINTFORML [20] 용자의 연애관계　　	　　 현재：\@ GETBIT(FLAG:8,2) ? 허가 # 금지 \@
+	PRINTFORML [21] 용자의 퀘스트 수주　	　　 현재：\@ GETBIT(FLAG:8,3) ? 금지 # 허가 \@
+ENDIF
+DRAWLINE
+PRINT [100] 돌아온다  
+PRINTL [101] 다음페이지
+
+INPUT
+LOCAL = RESULT
+IF LOCAL == 100
+	RETURN 0
+ELSEIF LOCAL == 101
+	PAGE += 1
+	PAGE %= 2
+	GOTO PAGE_TOP
+ELSEIF LOCAL >= 0 && LOCAL <= 10
+	INVERTBIT FLAG:5,LOCAL
+ELSEIF LOCAL >= 18 && LOCAL <= 21
+	LOCAL:1 = LOCAL - 18
+	INVERTBIT FLAG:8,LOCAL:1
+ELSEIF LOCAL == 11
+	FLAG:37 = !(FLAG:37)
+ELSEIF LOCAL == 12
+	FLAG:35 = !(FLAG:35)
+ELSEIF LOCAL == 13
+	CALL CONFIG_FILTER_SETTING
+ELSEIF LOCAL == 14
+	INVERTBIT FLAG:5,11
+ELSEIF LOCAL == 15
+	CALL CONFIG_AGE_SETTING
+ELSEIF LOCAL == 16
+	CALL CONFIG_VIRGIN_CONCEDED_SETTING
+ELSEIF LOCAL == 17
+	CALL CONFIG_PENIS_YOU_SETTING
+ENDIF
+
+GOTO PAGE_TOP
+
+
+
+

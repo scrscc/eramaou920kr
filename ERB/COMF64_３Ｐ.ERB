@@ -1,0 +1,673 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;３Ｐ
+;特殊系コマンド：主人と조수で、調教対象のヴァギナ・애널・口のいずれか二つを同時に責める
+;特定コマンドの連続選択で発動
+;-------------------------------------------------
+;３Ｐの発動条件
+;「前回と今回の調教者が別人」で、COM_ABLE64に記述されてる条件を満たした上で、
+;후배위애널⇔정상위（調教対象の前後から主人・조수が二本挿し）
+;후배위애널⇔후배위（調教対象の尻の後で主人・조수が重ね餅？）
+;フェラチオorイマラチオ⇔正常位or後背位（調教対象にフェラさせながらヴァギナに挿入）
+;フェラチオorイマラチオ⇔正常位애널or後背位애널（調教対象にフェラさせながら애널に挿入）
+;-------------------------------------------------
+@COM64
+
+;直接コマンドを指定した場合
+IF SELECTCOM == 64
+	;調教者が조수の場合、조수＝ヴァギナ、主人＝애널
+	IF ASSIPLAY
+		TFLAG:40 = 2
+		TFLAG:41 = 1
+	;調教者が主人の場合、조수＝애널、主人＝ヴァギナ
+	ELSE
+		TFLAG:40 = 1
+		TFLAG:41 = 2
+	ENDIF
+ELSE
+	SIF SELECTCOM == 20 || SELECTCOM == 21
+		A = 1
+	SIF SELECTCOM == 27
+		A = 2
+	SIF SELECTCOM == 31 || SELECTCOM == 80
+		A = 3
+	SIF PREVCOM == 20 || PREVCOM == 21
+		B = 1
+	SIF PREVCOM == 27
+		B = 2
+	SIF PREVCOM == 31 || PREVCOM == 80
+		B = 3
+	;前回コマンドが3Pでない
+	IF TFLAG:42 == 0
+		;今回調教者が조수=前回調教者が主人
+		IF ASSIPLAY
+			TFLAG:40 = B
+			TFLAG:41 = A
+		;今回調教者が主人=前回調教者が조수
+		ELSE
+			TFLAG:40 = A
+			TFLAG:41 = B
+		ENDIF
+	;前回コマンドが3Pである
+	ELSE
+		;今回調教者が조수=前回調教者が主人
+		IF ASSIPLAY
+			;조수の使用部位が前回の主人と同じ場合
+			SIF A == TFLAG:40
+				TFLAG:40 = TFLAG:41
+			TFLAG:41 = A
+		ELSE
+			;主人の使用部位が前回の조수と同じ場合
+			SIF A == TFLAG:41
+				TFLAG:41 = TFLAG:40
+			TFLAG:40 = A
+		ENDIF
+	ENDIF
+ENDIF
+
+PRINT ３Ｐ
+IF (TFLAG:40 == 1 && TFLAG:41 == 2) || ( TFLAG:40 == 2 && TFLAG:41 == 1)
+	PRINTL ・질＆애널 양구멍 삽입
+ELSEIF (TFLAG:40 == 1 && TFLAG:41 == 3) || (TFLAG:40 == 3 && TFLAG:41 == 1)
+	PRINTL ・섹스 동시 펠라
+ELSEIF (TFLAG:40 == 2 && TFLAG:41 == 3) || (TFLAG:40 == 3 && TFLAG:41 == 2)
+	PRINTL ・애널섹스 동시 펠라
+ELSE
+	PRINTL 　
+ENDIF
+SELECTCOM = 64
+SAVESTR:90 = 3P
+CALL TRAIN_MESSAGE_B
+
+;V経験を伴うコマンドのフラグ(処女膜再生対応)
+SIF TFLAG:40 == 1 || TFLAG:41 == 1
+	TFLAG:19 = 1
+
+;-------------------------------------------------
+;사정ゲージチェック１
+;-------------------------------------------------
+B = 0
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	B = 2700
+ELSEIF ABL:12 == 1
+	B = 2800
+ELSEIF ABL:12 == 2
+	B = 2900
+ELSEIF ABL:12 == 3
+	B = 3100
+ELSEIF ABL:12 == 4
+	B = 3200
+ELSE
+	B = 3300
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES B , 0.40
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES B , 0.70
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES B , 1.00
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES B , 1.30
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES B , 1.60
+ENDIF
+
+SIF TALENT:MASTER:121 || TALENT:MASTER:122
+	BASE:MASTER:2 += B
+
+;-------------------------------------------------
+;사정ゲージチェック２（후타나리）
+;-------------------------------------------------
+B = 0
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	B = 1500
+ELSEIF ABL:12 == 1
+	B = 1600
+ELSEIF ABL:12 == 2
+	B = 1800
+ELSEIF ABL:12 == 3
+	B = 2000
+ELSEIF ABL:12 == 4
+	B = 2400
+ELSE
+	B = 3000
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES B , 0.80
+ELSEIF ABL:10 == 1
+	TIMES B , 0.90
+ELSEIF ABL:10 == 2
+	TIMES B , 1.00
+ELSEIF ABL:10 == 3
+	TIMES B , 1.10
+ELSEIF ABL:10 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES B , 1.00
+ELSEIF ABL:11 == 1
+	TIMES B , 1.10
+ELSEIF ABL:11 == 2
+	TIMES B , 1.20
+ELSEIF ABL:11 == 3
+	TIMES B , 1.30
+ELSEIF ABL:11 == 4
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES B , 0.60
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES B , 0.80
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES B , 1.00
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES B , 1.20
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES B , 1.40
+ENDIF
+
+SIF TALENT:ASSI:121 || TALENT:ASSI:122
+	BASE:ASSI:2 += B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 160
+LOSEBASE:1 += 350
+
+SOURCE:11 = 1500
+SOURCE:12 = 2500
+SOURCE:14 = 1500
+
+SOURCE:1 = 0
+SOURCE:2 = 0
+SOURCE:3 = 0
+SOURCE:4 = 0
+SOURCE:5 = 0
+SOURCE:6 = 0
+SOURCE:13 = 0
+
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	;ABL:Ｖ感覚をみる
+	IF ABL:2 == 0
+		SOURCE:1 = 40
+		SOURCE:3 += 50
+	ELSEIF ABL:2 == 1
+		SOURCE:1 = 150
+		SOURCE:3 += 150
+	ELSEIF ABL:2 == 2
+		SOURCE:1 = 400
+		SOURCE:3 += 250
+	ELSEIF ABL:2 == 3
+		SOURCE:1 = 1000
+		SOURCE:3 += 350
+	ELSEIF ABL:2 == 4
+		SOURCE:1 = 1700
+		SOURCE:3 += 600
+	ELSE
+		SOURCE:1 = 2200
+		SOURCE:3 += 850
+	ENDIF
+
+	;EXP:Ｖ経験をみる
+	IF EXP:0 < EXPLV:1
+		TIMES SOURCE:1 , 0.20
+		SOURCE:6 += 20000
+		SOURCE:11 += 2000
+
+		IF TALENT:PLAYER:122 == 0
+			EXP:50 += 1
+			PRINTFORML %EXPNAME:50%＋１
+		ENDIF
+	ELSEIF EXP:0 < EXPLV:2
+		TIMES SOURCE:1 , 0.60
+		SOURCE:6 += 300
+	ELSEIF EXP:0 < EXPLV:3
+		TIMES SOURCE:1 , 1.00
+		SOURCE:6 += 50
+	ELSEIF EXP:0 < EXPLV:4
+		TIMES SOURCE:1 , 1.20
+		SOURCE:6 += 10
+	ELSEIF EXP:0 < EXPLV:5
+		TIMES SOURCE:1 , 1.40
+		SOURCE:6 += 0
+	ELSE
+		TIMES SOURCE:1 , 1.60
+		SOURCE:6 = 0
+	ENDIF
+ENDIF
+
+IF TFLAG:40 == 2 || TFLAG:41 == 2
+	;ABL:Ａ感覚をみる
+	IF ABL:3 == 0
+		SOURCE:2 = 10
+		SOURCE:3 += 10
+		SOURCE:13 = 100
+	ELSEIF ABL:3 == 1
+		SOURCE:2 = 30
+		SOURCE:3 += 30
+		SOURCE:13 = 700
+	ELSEIF ABL:3 == 2
+		SOURCE:2 = 500
+		SOURCE:3 += 100
+		SOURCE:13 = 1500
+	ELSEIF ABL:3 == 3
+		SOURCE:2 = 1000
+		SOURCE:3 += 200
+		SOURCE:13 = 3000
+	ELSEIF ABL:3 == 4
+		SOURCE:2 = 1700
+		SOURCE:3 += 450
+		SOURCE:13 = 5000
+	ELSE
+		SOURCE:2 = 2200
+		SOURCE:3 += 750
+		SOURCE:13 = 8000
+	ENDIF
+
+	;EXP:Ａ経験をみる
+	IF EXP:1 < EXPLV:1
+		TIMES SOURCE:2 , 0.10
+		SOURCE:6 += 5000
+		SOURCE:11 += 1000
+	ELSEIF EXP:1 < EXPLV:2
+		TIMES SOURCE:2 , 0.30
+		SOURCE:6 += 2000
+		SOURCE:11 += 1000
+	ELSEIF EXP:1 < EXPLV:3
+		TIMES SOURCE:2 , 0.50
+		SOURCE:6 += 2000
+		SOURCE:11 += 1000
+	ELSEIF EXP:1 < EXPLV:4
+		TIMES SOURCE:2 , 1.00
+		SOURCE:6 += 2000
+		SOURCE:11 += 1000
+	ELSEIF EXP:1 < EXPLV:5
+		TIMES SOURCE:2 , 1.40
+		SOURCE:6 += 1000
+		SOURCE:11 += 200
+	ELSE
+		TIMES SOURCE:1 , 1.60
+		SOURCE:6 += 600
+	ENDIF
+ENDIF
+
+IF TFLAG:40 == 3 || TFLAG:41 == 3
+	;ABL:奉仕精神をみる
+	IF ABL:16 == 0
+		SOURCE:4 = 420
+		SOURCE:5 = 150
+	ELSEIF ABL:16 == 1
+		SOURCE:4 = 500
+		SOURCE:5 = 300
+	ELSEIF ABL:16 == 2
+		SOURCE:4 = 580
+		SOURCE:5 = 600
+	ELSEIF ABL:16 == 3
+		SOURCE:4 = 660
+		SOURCE:5 = 900
+	ELSEIF ABL:16 == 4
+		SOURCE:4 = 740
+		SOURCE:5 = 1500
+	ELSE
+		SOURCE:4 = 820
+		SOURCE:5 = 2200
+	ENDIF
+
+	;ABL:技巧をみる
+	IF ABL:12 == 0
+		TIMES SOURCE:4 , 0.50
+		TIMES SOURCE:5 , 0.50
+	ELSEIF ABL:12 == 1
+		TIMES SOURCE:4 , 0.80
+		TIMES SOURCE:5 , 0.80
+	ELSEIF ABL:12 == 2
+		TIMES SOURCE:4 , 1.00
+		TIMES SOURCE:5 , 1.00
+	ELSEIF ABL:12 == 3
+		TIMES SOURCE:4 , 1.20
+		TIMES SOURCE:5 , 1.20
+	ELSEIF ABL:12 == 4
+		TIMES SOURCE:4 , 1.50
+		TIMES SOURCE:5 , 1.50
+	ELSE
+		TIMES SOURCE:4 , 2.00
+		TIMES SOURCE:5 , 2.00
+	ENDIF
+ENDIF
+
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES SOURCE:1 , 0.20
+	TIMES SOURCE:2 , 0.20
+	SOURCE:11 += 1000
+
+	SOURCE:6 += 1900
+	TIMES SOURCE:6 , 9.00
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES SOURCE:1 , 0.60
+	TIMES SOURCE:2 , 0.40
+	SOURCE:11 += 800
+
+	SOURCE:6 += 1250
+	TIMES SOURCE:6 , 3.00
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 0.60
+	SOURCE:11 += 600
+
+	SOURCE:6 += 1000
+	TIMES SOURCE:6 , 1.50
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES SOURCE:1 , 1.30
+	TIMES SOURCE:2 , 1.00
+	SOURCE:11 += 200
+
+	SOURCE:6 += 200
+	TIMES SOURCE:6 , 0.30
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES SOURCE:1 , 1.60
+	TIMES SOURCE:2 , 1.30
+
+	TIMES SOURCE:6 , 0.10
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES SOURCE:1 , 0.60
+	TIMES SOURCE:2 , 0.60
+	TIMES SOURCE:5 , 0.60
+	TIMES SOURCE:13 , 0.60
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES SOURCE:1 , 0.80
+	TIMES SOURCE:2 , 0.80
+	TIMES SOURCE:5 , 0.80
+	TIMES SOURCE:13 , 0.80
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+	TIMES SOURCE:5 , 1.00
+	TIMES SOURCE:13 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:5 , 1.20
+	TIMES SOURCE:13 , 1.20
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES SOURCE:1 , 1.40
+	TIMES SOURCE:2 , 1.40
+	TIMES SOURCE:5 , 1.40
+	TIMES SOURCE:13 , 1.40
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES SOURCE:1 , 0.50
+	TIMES SOURCE:2 , 0.70
+	TIMES SOURCE:3 , 0.60
+	TIMES SOURCE:4 , 0.60
+	TIMES SOURCE:11, 2.00
+ELSEIF ABL:10 == 1
+	TIMES SOURCE:1 , 0.80
+	TIMES SOURCE:2 , 0.90
+	TIMES SOURCE:3 , 0.80
+	TIMES SOURCE:4 , 0.80
+	TIMES SOURCE:11, 1.20
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+	TIMES SOURCE:3 , 1.00
+	TIMES SOURCE:4 , 1.00
+	TIMES SOURCE:11, 1.00
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.10
+	TIMES SOURCE:3 , 1.20
+	TIMES SOURCE:4 , 1.20
+	TIMES SOURCE:11, 0.60
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:1 , 1.40
+	TIMES SOURCE:2 , 1.20
+	TIMES SOURCE:3 , 1.40
+	TIMES SOURCE:4 , 1.40
+	TIMES SOURCE:11, 0.30
+ELSE
+	TIMES SOURCE:1 , 1.70
+	TIMES SOURCE:2 , 1.30
+	TIMES SOURCE:3 , 1.60
+	TIMES SOURCE:4 , 1.60
+	TIMES SOURCE:11, 0.10
+ENDIF
+
+
+;장신
+SIF TALENT:99
+	TIMES SOURCE:6 , 0.80
+;小柄体形
+SIF TALENT:100
+	TIMES SOURCE:6 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 4.00
+
+IF TFLAG:40 == 2 || TFLAG:41 == 2
+	;Ａ민감、鈍感をみる
+	;快Ａ自体のチェックは後でまとめてやる
+	IF TALENT:105
+		TIMES SOURCE:6 , 1.50
+		TIMES SOURCE:11 , 1.50
+		TIMES SOURCE:13 , 1.50
+		TIMES SOURCE:14 , 1.50
+	ELSEIF TALENT:106
+		TIMES SOURCE:6 , 0.60
+		TIMES SOURCE:11 , 0.60
+		TIMES SOURCE:13 , 0.60
+		TIMES SOURCE:14 , 0.60
+	ENDIF
+	EXP:1 += 5
+	PRINTL Ａ경험＋５
+	EXP:5 += 1
+	PRINTL 성교경험＋１
+ENDIF
+
+IF TFLAG:40 == 1 || TFLAG:41 == 1
+	;정조관념
+	IF TALENT:30
+		IF EXP:0 == 0
+			TIMES SOURCE:3 , 0.60
+			TIMES SOURCE:11, 5.00
+		ELSE
+			TIMES SOURCE:3 , 0.60
+			TIMES SOURCE:11, 1.80
+		ENDIF
+	;정조관부실
+	ELSEIF TALENT:31
+		IF EXP:0 == 0
+			TIMES SOURCE:11, 0.50
+		ELSE
+			TIMES SOURCE:11, 0.30
+		ENDIF
+	ENDIF
+
+	EXP:0 += 1
+	PRINTL Ｖ경험＋１
+	EXP:5 += 1
+	PRINTL 성교경험＋１
+ENDIF
+
+;-------------------------------------------------
+;사정チェック１
+;-------------------------------------------------
+S = BASE:MASTER:2
+EJAC = MAXBASE:MASTER:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+;대량사정
+IF E == 2
+	EXP:PLAYER:3 += 2
+	EXP:20 += 1
+	PRINTL 대량사정
+	PRINTL 정액경험＋１
+	;Ｐに精液汚れ
+	STAIN:MASTER:2 |= 4
+
+	BASE:MASTER:2 -= EJAC*2
+	SIF BASE:MASTER:2 >= EJAC
+		BASE:MASTER:2 = EJAC-1
+
+	;主人が사정フラグ
+	IF TFLAG:40 == 1 || TFLAG:40 == 2
+		TFLAG:2 = 2
+		;膣内사정フラグ
+		SIF TFLAG:40 == 1 && TEQUIP:35 == 0
+			TFLAG:38 = 2
+	ELSE
+		TFLAG:0 = 2
+	ENDIF
+;通常の사정
+ELSEIF E == 1
+	;Ｐに精液汚れ
+	PRINTL 사정
+	EXP:PLAYER:3 += 1
+	STAIN:MASTER:2 |= 4
+
+	BASE:MASTER:2 -= EJAC
+	SIF BASE:MASTER:2 >= EJAC
+		BASE:MASTER:2 = EJAC-1
+
+	;主人が사정フラグ
+	IF TFLAG:40 == 1 || TFLAG:40 == 2
+		TFLAG:2 = 1
+		;膣内사정フラグ
+		SIF TFLAG:40 == 1 && TEQUIP:35 == 0
+			TFLAG:38 = 1
+	ELSE
+		TFLAG:0 = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;사정チェック２
+;-------------------------------------------------
+S = BASE:ASSI:2
+EJAC = MAXBASE:ASSI:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+;대량사정
+IF E == 2
+	EXP:20 += 1
+	PRINTL 대량사정（조수）
+	PRINTL 정액경험＋１
+	;Ｐに精液汚れ
+	STAIN:ASSI:2 |= 4
+
+	BASE:ASSI:2 -= EJAC*2
+	SIF BASE:ASSI:2 >= EJAC
+		BASE:ASSI:2 = EJAC-1
+	;조수が사정フラグ
+	TFLAG:6 = 2
+	;조수が膣内사정フラグ
+	SIF TFLAG:41 == 1 && TEQUIP:36 == 0
+	TFLAG:38 = 2
+
+;通常の사정
+ELSEIF E == 1
+	;Ｐに精液汚れ
+	PRINTL 사정（조수）
+	STAIN:ASSI:2 |= 4
+
+	BASE:ASSI:2 -= EJAC
+	SIF BASE:ASSI:2 >= EJAC
+		BASE:ASSI:2 = EJAC-1
+	;조수が사정フラグ
+	TFLAG:6 = 1
+	;조수が膣内사정フラグ
+	SIF TFLAG:41 == 1 && TEQUIP:36 == 0
+	TFLAG:38 = 1
+ENDIF
+
+IF TFLAG:41 == 1
+	;노예のＶ⇔조수のＰの汚れが移動
+	IF TALENT:ASSI:121 || TALENT:ASSI:122
+		STAIN:3 |= STAIN:ASSI:2
+		STAIN:ASSI:2 |= STAIN:3
+	ENDIF
+ELSEIF TFLAG:41 == 2
+	;노예のＡ⇔조수のＰの汚れが移動
+	IF TALENT:ASSI:121 || TALENT:ASSI:122
+		STAIN:4 |= STAIN:ASSI:2
+		STAIN:ASSI:2 |= STAIN:4
+	ENDIF
+ELSEIF TFLAG:41 == 3
+	;노예の口⇔조수のＰの汚れが移動
+	IF TALENT:ASSI:121 || TALENT:ASSI:122
+		STAIN:0 |= STAIN:ASSI:2
+		STAIN:ASSI:2 |= STAIN:0
+	ENDIF
+ENDIF
+
+IF TFLAG:40 == 1
+	;노예のＶ⇔主人のＰの汚れが移動
+	IF TALENT:MASTER:121 || TALENT:MASTER:122
+		STAIN:3 |= STAIN:MASTER:2
+		STAIN:MASTER:2 |= STAIN:3
+	ENDIF
+ELSEIF TFLAG:40 == 2
+	;노예のＡ⇔主人のＰの汚れが移動
+	IF TALENT:MASTER:121 || TALENT:MASTER:122
+		STAIN:4 |= STAIN:MASTER:2
+		STAIN:MASTER:2 |= STAIN:4
+	ENDIF
+ELSEIF TFLAG:40 == 3
+	;노예の口⇔主人のＰの汚れが移動
+	IF TALENT:MASTER:121 || TALENT:MASTER:122
+		STAIN:0 |= STAIN:MASTER:2
+		STAIN:MASTER:2 |= STAIN:0
+	ENDIF
+ENDIF
+
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +10
+	EXP:40 += 10
+ENDIF
+
+TFLAG:100 = 1
+
+;屈服刻印２に相当
+TFLAG:200 = 2
+
+RETURN 1
+

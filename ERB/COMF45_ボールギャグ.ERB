@@ -1,0 +1,117 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;볼개그
+;SM系コマンド
+;-------------------------------------------------
+@COM45
+
+PRINTL 볼개그
+;SAVESTR:22 = 볼개그
+CALL TRAIN_MESSAGE_B
+
+;緊縛経験が高いと消費減少
+IF EXP:51 < EXPLV:3 / 2
+	LOSEBASE:0 += 80
+	LOSEBASE:1 += 100
+ELSEIF EXP:51 < EXPLV:4 / 2
+	LOSEBASE:0 += 60
+	LOSEBASE:1 += 80
+ELSE
+	LOSEBASE:0 += 40
+	LOSEBASE:1 += 60
+ENDIF
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+SOURCE:6 = 50
+SOURCE:7 = 50
+SOURCE:12 = 80
+SOURCE:13 = 150
+SOURCE:14 = 80
+SOURCE:16 = 80
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+EXP:51 += 2
+PRINTL 긴박경험＋２
+
+;ボールギャグの着脱
+TEQUIP:45 = 1 - TEQUIP:45
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;ボールギャグ装備中
+;-------------------------------------------------
+@EQUIP_COM45
+
+PRINTL ＜볼개그착용중＞
+
+;緊縛経験が高いと消費減少
+IF EXP:51 < EXPLV:3
+	LOSEBASE:0 += 50
+	LOSEBASE:1 += 100
+ELSEIF EXP:51 < EXPLV:4
+	LOSEBASE:0 += 40
+	LOSEBASE:1 += 80
+ELSE
+	LOSEBASE:0 += 30
+	LOSEBASE:1 += 60
+ENDIF
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	A = 40
+ELSEIF ABL:21 == 1
+	A = 120
+ELSEIF ABL:21 == 2
+	A = 250
+ELSEIF ABL:21 == 3
+	A = 450
+ELSEIF ABL:21 == 4
+	A = 600
+ELSE
+	A = 750
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES A , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES A , 1.20
+ENDIF
+
+SOURCE:12 += A
+SOURCE:13 += A
+SOURCE:14 += A
+SOURCE:16 += A
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+EXP:51 += 1
+PRINTL 긴박경험＋１
+

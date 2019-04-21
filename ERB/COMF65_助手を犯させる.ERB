@@ -1,0 +1,885 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;조수를범하게한다
+;조수系コマンド：調教対象に조수を犯させる
+;-------------------------------------------------
+@COM65
+
+;近親チェック
+TFLAG:14 = 0
+CALL INCEST
+
+PRINTL 조수를범하게한다
+
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:욕망
+IF ABL:11
+	SIF S
+		PRINT  + 
+	A += ABL:11 * 2
+	PRINTS ABLNAME:11
+	PRINTV 'LV,ABL:11,'(,ABL:11 * 2,')
+	S = 1
+ENDIF
+;ABL:봉사정신
+IF ABL:16
+	SIF S
+		PRINT  + 
+	A += ABL:16 * 4
+	PRINTS ABLNAME:16
+	PRINTV 'LV,ABL:16,'(,ABL:16 * 4,')
+	S = 1
+ENDIF
+
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 2
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 2,')
+	S = 1
+ENDIF
+
+
+;PALAM:욕정
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 2
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 2,')
+	S = 1
+ENDIF
+
+;수줍음
+IF TALENT:35
+	PRINT  - 
+	A -= 1
+	PRINTS TALENTNAME:35
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;헌신적
+IF TALENT:63
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:63
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;쾌감에솔직
+IF TALENT:70
+	SIF S
+		PRINT  + 
+	A += 2
+	PRINTS TALENTNAME:70
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;쾌감을부정
+IF TALENT:71
+	PRINT  - 
+	A -= 2
+	PRINTS TALENTNAME:71
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;선머슴
+IF TALENT:79 && TALENT:PLAYER:122 == 0
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:79
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;애정
+IF TALENT:85 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:85
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;조수が処女
+IF EXP:PLAYER:0 == 0
+	PRINT  - 
+	A -= 15
+	PRINT 조수가 처녀
+	PRINTV '(,15,')
+	S = 1
+ENDIF
+
+;조수が調教対象の肉親
+IF TFLAG:14 == 1
+	PRINT  - 
+	A -= 10
+	PRINT 조수가 모친
+	PRINTV '(,10,')
+	S = 1
+ELSEIF TFLAG:14 == 2
+	PRINT  - 
+	A -= 20
+	PRINT 조수가 딸
+	PRINTV '(,20,')
+	S = 1
+ELSEIF TFLAG:14 == 3
+	PRINT  - 
+	A -= 5
+	PRINT 조수가 언니
+	PRINTV '(,5,')
+	S = 1
+ELSEIF TFLAG:14 == 4
+	PRINT  - 
+	A -= 5
+	PRINT 조수가 여동생
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;合計を表示(40以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 40
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행값
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+;SAVESTR:22 = 조수를범하게한다
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+;조수の処女を奪うかどうかの確認
+$INPUT_LOOP_01
+IF TALENT:ASSI:0
+	PRINTFORML %SAVESTR:ASSI%의 처녀를 %SAVESTR:TARGET%에게 빼앗게 합니까？
+	PRINTL  [0] - 네
+	PRINTL  [1] - 아니오
+	INPUT
+	IF RESULT == 1
+		RETURN 0
+	ELSEIF RESULT != 0
+		GOTO INPUT_LOOP_01
+	ENDIF
+ENDIF
+;コンドームを使うかの確認
+CALL CONFIRM_CONDOM2
+SIF !RESULT
+	RETURN 0
+
+;-------------------------------------------------
+;사정ゲージチェック（ふたなりの場合）
+;-------------------------------------------------
+B = 0
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	B = 50
+ELSEIF ABL:12 == 1
+	B = 300
+ELSEIF ABL:12 == 2
+	B = 800
+ELSEIF ABL:12 == 3
+	B = 1500
+ELSEIF ABL:12 == 4
+	B = 2000
+ELSE
+	B = 3200
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES B , 0.80
+ELSEIF ABL:10 == 1
+	TIMES B , 0.90
+ELSEIF ABL:10 == 2
+	TIMES B , 1.00
+ELSEIF ABL:10 == 3
+	TIMES B , 1.10
+ELSEIF ABL:10 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	TIMES B , 0.50
+ELSEIF ABL:16 == 1
+	TIMES B , 0.80
+ELSEIF ABL:16 == 2
+	TIMES B , 1.20
+ELSEIF ABL:16 == 3
+	TIMES B , 1.50
+ELSEIF ABL:16 == 4
+	TIMES B , 1.80
+ELSE
+	TIMES B , 2.40
+ENDIF
+
+;조수のABL:V感覚をみる
+IF ABL:ASSI:2 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:2 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:2 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:2 == 3
+	TIMES B , 1.20
+ELSEIF ABL:ASSI:2 == 4
+	TIMES B , 1.50
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;조수のEXP:Ｖ経験をみる
+IF EXP:ASSI:0 < EXPLV:1
+	TIMES B , 0.20
+ELSEIF EXP:ASSI:0 < EXPLV:2
+	TIMES B , 0.50
+ELSEIF EXP:ASSI:0 < EXPLV:3
+	TIMES B , 0.80
+ELSEIF EXP:ASSI:0 < EXPLV:4
+	TIMES B , 1.00
+ELSEIF EXP:ASSI:0 < EXPLV:5
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.40
+ENDIF
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	TIMES B , 1.00
+ELSEIF ABL:0 == 1
+	TIMES B , 1.50
+ELSEIF ABL:0 == 2
+	TIMES B , 2.00
+ELSEIF ABL:0 == 3
+	TIMES B , 2.50
+ELSEIF ABL:0 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+SIF TALENT:PLAYER:121 || TALENT:PLAYER:122
+	BASE:PLAYER:2 += B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:1 += 40
+LOSEBASE:1 += 220
+
+SOURCE:13 = 1500
+SOURCE:14 = 800
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	SOURCE:0 = 800
+	SOURCE:4 = 1600
+	SOURCE:5 = 200
+ELSEIF ABL:16 == 1
+	SOURCE:0 = 1400
+	SOURCE:4 = 1900
+	SOURCE:5 = 400
+ELSEIF ABL:16 == 2
+	SOURCE:0 = 2000
+	SOURCE:4 = 2300
+	SOURCE:5 = 750
+ELSEIF ABL:16 == 3
+	SOURCE:0 = 2500
+	SOURCE:4 = 2700
+	SOURCE:5 = 1150
+ELSEIF ABL:16 == 4
+	SOURCE:0 = 2900
+	SOURCE:4 = 3100
+	SOURCE:5 = 1750
+ELSE
+	SOURCE:0 = 3200
+	SOURCE:4 = 3500
+	SOURCE:5 = 2500
+ENDIF
+
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 0.50
+	TIMES SOURCE:5 , 0.50
+ELSEIF ABL:12 == 1
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 0.80
+	TIMES SOURCE:5 , 0.80
+ELSEIF ABL:12 == 2
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 1.00
+	TIMES SOURCE:5 , 1.00
+ELSEIF ABL:12 == 3
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 1.50
+	TIMES SOURCE:5 , 1.50
+ELSEIF ABL:12 == 4
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 2.00
+	TIMES SOURCE:5 , 2.00
+ELSEIF ABL:12 == 5
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 2.50
+	TIMES SOURCE:5 , 2.50
+ELSEIF ABL:12 == 6
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 3.00
+	TIMES SOURCE:5 , 3.00
+ELSEIF ABL:12 == 7
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 3.50
+	TIMES SOURCE:5 , 3.50
+ELSE
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 4.00
+	TIMES SOURCE:5 , 4.00
+ENDIF
+
+;調教対象・조수が共に女ならABL:レズっ気をみる
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	IF ABL:22 == 0
+		TIMES SOURCE:4 , 0.20
+		TIMES SOURCE:5 , 0.20
+	ELSEIF ABL:22 == 1
+		TIMES SOURCE:4 , 0.40
+		TIMES SOURCE:5 , 0.40
+	ELSEIF ABL:22 == 2
+		TIMES SOURCE:4 , 0.60
+		TIMES SOURCE:5 , 0.60
+	ELSEIF ABL:22 == 3
+		TIMES SOURCE:4 , 0.80
+		TIMES SOURCE:5 , 0.80
+	ELSEIF ABL:22 == 4
+		TIMES SOURCE:4 , 1.00
+		TIMES SOURCE:5 , 1.00
+	ELSE
+		TIMES SOURCE:4 , 1.20
+		TIMES SOURCE:5 , 1.20
+	ENDIF
+ENDIF
+
+;調教対象・조수が共にオトコならABL:ホモっ気をみる
+IF TALENT:122 && TALENT:PLAYER:122
+	IF ABL:23 == 0
+		TIMES SOURCE:4 , 0.20
+		TIMES SOURCE:5 , 0.20
+	ELSEIF ABL:23 == 1
+		TIMES SOURCE:4 , 0.40
+		TIMES SOURCE:5 , 0.40
+	ELSEIF ABL:23 == 2
+		TIMES SOURCE:4 , 0.60
+		TIMES SOURCE:5 , 0.60
+	ELSEIF ABL:23 == 3
+		TIMES SOURCE:4 , 0.80
+		TIMES SOURCE:5 , 0.80
+	ELSEIF ABL:23 == 4
+		TIMES SOURCE:4 , 1.00
+		TIMES SOURCE:5 , 1.00
+	ELSE
+		TIMES SOURCE:4 , 1.20
+		TIMES SOURCE:5 , 1.20
+	ENDIF
+ENDIF
+
+;조수が処女
+IF TALENT:PLAYER:0 == 1
+	TIMES SOURCE:13 , 20.00
+	TIMES SOURCE:14 , 3.00
+	TALENT:PLAYER:0 = 0
+
+	PRINTL ＜조수가 처녀＞
+
+	EXP:50 += 1
+	PRINTFORML %EXPNAME:50%＋１
+
+	IF ABL:10 < 3
+		PRINTFORML 그리고%ABLNAME:10%가 3이 되었다
+		ABL:10 = 3
+	ENDIF
+
+	;조수の初体験を記録
+	IF CFLAG:PLAYER:15 == 0
+		CFLAG:PLAYER:15 = NO:TARGET + 1
+		CSTR:PLAYER:3 = %SAVESTR:TARGET%
+		;初体験が近親상간
+		;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+		IF TFLAG:14 == 2 && TALENT:122
+			CFLAG:PLAYER:15 = 300
+		ELSEIF TFLAG:14 == 2 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:122
+			CFLAG:PLAYER:15 = 306
+		ELSEIF TFLAG:14 == 3 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 307
+		ELSEIF TFLAG:14 == 4 && TALENT:122
+			CFLAG:PLAYER:15 = 304
+		ELSEIF TFLAG:14 == 4 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 305
+		ELSEIF TFLAG:14 == 5 && TALENT:122
+			CFLAG:PLAYER:15 = 309
+		ELSEIF TFLAG:14 == 6 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 308
+		ENDIF
+	ENDIF
+ENDIF
+
+;調教者（＝조수）のＶ経験と性交経験ＵＰ
+EXP:PLAYER:0 += 1
+EXP:PLAYER:5 += 1
+
+;조수が調教対象の肉親
+IF TFLAG:14 == 1 
+	IF TALENT:122
+		PRINTL ＜강제모자상간＞
+	ELSE
+		PRINTL ＜강제모녀상간＞
+	ENDIF
+ELSEIF TFLAG:14 == 2
+	IF TALENT:122
+		PRINTL ＜강제부녀상간＞
+	ELSE
+		PRINTL ＜강제모녀상간＞
+	ENDIF
+ELSEIF TFLAG:14 == 3
+	IF TALENT:122
+		PRINTL ＜강제남매상간＞
+	ELSE
+		PRINTL ＜강제자매상간＞
+	ENDIF
+ELSEIF TFLAG:14 == 4
+	IF TALENT:122
+		PRINTL ＜강제남매상간＞
+	ELSE
+		PRINTL ＜강제자매상간＞
+	ENDIF
+ELSEIF TFLAG:14 == 6
+	IF TALENT:122 == 0
+		PRINTL ＜강제사촌상간＞
+	ENDIF
+ENDIF
+;母や娘を自分の手で犯したら屈従と逸脱３倍
+IF TFLAG:14 == 1 || TFLAG:14 == 2
+	TIMES SOURCE:13 , 3.00
+	TIMES SOURCE:14 , 3.00
+	IF ABL:10 < 3
+		PRINTFORML 그리고 %ABLNAME:10%가 ３이 되었다
+		ABL:10 = 3
+	ENDIF
+;姉か妹を自分の手で犯したら屈従と逸脱２倍
+ELSEIF TFLAG:14 == 3 || TFLAG:14 == 4
+	TIMES SOURCE:13 , 2.00
+	TIMES SOURCE:14 , 2.00
+	IF ABL:10 < 2
+		PRINTFORML 그리고 %ABLNAME:10%가 ２가 되었다
+		ABL:10 = 2
+	ENDIF
+;従姉か従弟を自分の手で犯したら屈従と逸脱１．５倍
+ELSEIF TFLAG:14 == 5 || TFLAG:14 == 6
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+	IF ABL:10 < 2
+		PRINTFORML 그리고 %ABLNAME:10%가 ２가 되었다
+		ABL:10 = 2
+	ENDIF
+ENDIF
+
+;調教対象が童貞なら童貞喪失
+IF TALENT:1
+	TALENT:1 = 0
+	PRINTFORML 【동정상실】
+	;初体験の相手を記録
+	IF CFLAG:15 == 0
+		;初体験の相手を記録（初期値が0のため、+1して記録）
+		CFLAG:15 = NO:PLAYER + 1
+		CSTR:3 = %SAVESTR:PLAYER%
+		;初体験が近親상간
+		;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+		IF TFLAG:14 == 1 && TALENT:PLAYER:122
+			CFLAG:15 = 300
+		ELSEIF TFLAG:14 == 1 && TALENT:PLAYER:122 == 0
+			CFLAG:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122
+			CFLAG:15 = 304
+		ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122 == 0
+			CFLAG:15 = 305
+		ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122
+			CFLAG:15 = 306
+		ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122 == 0
+			CFLAG:15 = 307
+		ELSEIF TFLAG:14 == 5 && TALENT:PLAYER:122 == 0
+			CFLAG:15 = 308
+		ELSEIF TFLAG:14 == 6 && TALENT:PLAYER:122
+			CFLAG:15 = 309
+		ENDIF
+	ENDIF
+ENDIF
+
+TFLAG:14 = 0
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+S = BASE:PLAYER:2
+EJAC = MAXBASE:PLAYER:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+IF E
+;사정している
+	TIMES SOURCE:4 , 3.00
+
+	;ABL:精液中毒をみる
+	IF ABL:32 == 0
+		SOURCE:7 = 0
+		TIMES SOURCE:5 , 2.00
+		TIMES SOURCE:13, 2.00
+	ELSEIF ABL:32 == 1
+		SOURCE:7 = 50
+		TIMES SOURCE:5 , 2.50
+		TIMES SOURCE:13, 1.60
+	ELSEIF ABL:32 == 2
+		SOURCE:7 = 150
+		TIMES SOURCE:5 , 3.00
+		TIMES SOURCE:13, 1.00
+	ELSEIF ABL:32 == 3
+		SOURCE:7 = 300
+		TIMES SOURCE:5 , 4.50
+		TIMES SOURCE:13, 0.70
+	ELSEIF ABL:32 == 4
+		SOURCE:7 = 600
+		TIMES SOURCE:5 , 6.00
+		TIMES SOURCE:13, 0.40
+	ELSE
+		SOURCE:7 = 1200
+		TIMES SOURCE:5 , 8.00
+		TIMES SOURCE:13, 0.10
+	ENDIF
+ENDIF
+
+;대량사정
+IF E == 2
+	TIMES SOURCE:7 , 2.00
+	TIMES SOURCE:5 , 1.50
+
+	EXP:PLAYER:3 += 2
+	EXP:20 += 1
+	PRINTFORML %SAVESTR:PLAYER%대량사정
+	PRINTL 정액경험＋１
+	;精液汚れ
+	STAIN:PLAYER:2 |= 4
+
+	BASE:PLAYER:2 -= EJAC*2
+	SIF BASE:PLAYER:2 >= EJAC
+		BASE:PLAYER:2 = EJAC-1
+
+	;조수が사정フラグ
+	TFLAG:6 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:PLAYER:3 += 1
+	PRINTFORML %SAVESTR:PLAYER%사정
+	;精液汚れ
+	STAIN:PLAYER:2 |= 4
+
+	BASE:PLAYER:2 -= EJAC
+	SIF BASE:PLAYER:2 >= EJAC
+		BASE:PLAYER:2 = EJAC-1
+
+	;조수が사정フラグ
+	TFLAG:6 = 1
+ENDIF
+
+IF TALENT:119 || TALENT:121 || TALENT:122
+	;노예のＰ⇔調教者のＶの汚れが移動
+	STAIN:2 |= STAIN:PLAYER:3
+	STAIN:PLAYER:3 |= STAIN:2
+ENDIF
+
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +10
+	EXP:40 += 10
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +10
+	EXP:41 += 10
+ENDIF
+
+TFLAG:100 = 1
+
+;屈服刻印２に相当
+TFLAG:200 = 2
+
+RETURN 1
+
+;-------------------------------------------------
+;助手を犯させる自動
+;調教対象にモブを犯させる
+;-------------------------------------------------
+@COM65_AUTO
+
+PRINTL ≪여자를 범함≫
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:1 += 40
+LOSEBASE:1 += 220
+
+SOURCE:13 = 1500
+SOURCE:14 = 800
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	SOURCE:0 = 800
+	SOURCE:4 = 1600
+	SOURCE:5 = 200
+ELSEIF ABL:16 == 1
+	SOURCE:0 = 1400
+	SOURCE:4 = 1900
+	SOURCE:5 = 400
+ELSEIF ABL:16 == 2
+	SOURCE:0 = 2000
+	SOURCE:4 = 2300
+	SOURCE:5 = 750
+ELSEIF ABL:16 == 3
+	SOURCE:0 = 2500
+	SOURCE:4 = 2700
+	SOURCE:5 = 1150
+ELSEIF ABL:16 == 4
+	SOURCE:0 = 2900
+	SOURCE:4 = 3100
+	SOURCE:5 = 1750
+ELSE
+	SOURCE:0 = 3200
+	SOURCE:4 = 3500
+	SOURCE:5 = 2500
+ENDIF
+
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 0.50
+	TIMES SOURCE:5 , 0.50
+ELSEIF ABL:12 == 1
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 0.80
+	TIMES SOURCE:5 , 0.80
+ELSEIF ABL:12 == 2
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 1.00
+	TIMES SOURCE:5 , 1.00
+ELSEIF ABL:12 == 3
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 1.50
+	TIMES SOURCE:5 , 1.50
+ELSEIF ABL:12 == 4
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 2.00
+	TIMES SOURCE:5 , 2.00
+ELSEIF ABL:12 == 5
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 2.50
+	TIMES SOURCE:5 , 2.50
+ELSEIF ABL:12 == 6
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 3.00
+	TIMES SOURCE:5 , 3.00
+ELSEIF ABL:12 == 7
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 3.50
+	TIMES SOURCE:5 , 3.50
+ELSE
+	TIMES SOURCE:0 , 0.50
+	TIMES SOURCE:4 , 4.00
+	TIMES SOURCE:5 , 4.00
+ENDIF
+
+;調教対象が女ならABL:レズっ気をみる
+IF TALENT:122 == 0
+	IF ABL:22 == 0
+		TIMES SOURCE:4 , 0.20
+		TIMES SOURCE:5 , 0.20
+	ELSEIF ABL:22 == 1
+		TIMES SOURCE:4 , 0.40
+		TIMES SOURCE:5 , 0.40
+	ELSEIF ABL:22 == 2
+		TIMES SOURCE:4 , 0.60
+		TIMES SOURCE:5 , 0.60
+	ELSEIF ABL:22 == 3
+		TIMES SOURCE:4 , 0.80
+		TIMES SOURCE:5 , 0.80
+	ELSEIF ABL:22 == 4
+		TIMES SOURCE:4 , 1.00
+		TIMES SOURCE:5 , 1.00
+	ELSE
+		TIMES SOURCE:4 , 1.20
+		TIMES SOURCE:5 , 1.20
+	ENDIF
+ENDIF
+
+;調教対象が童貞なら童貞喪失
+IF TALENT:1
+	TALENT:1 = 0
+	PRINTFORML 【동정상실】
+	;初体験の相手を記録
+	IF CFLAG:15 == 0
+		;初体験の相手を記録（モブ）
+		CFLAG:15 = 100
+		CSTR:3 = 이름도 모르는 여자
+	ENDIF
+ENDIF
+
+TFLAG:14 = 0
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+S = BASE:PLAYER:2
+EJAC = MAXBASE:PLAYER:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+IF E
+;사정している
+	TIMES SOURCE:4 , 3.00
+
+	;ABL:精液中毒をみる
+	IF ABL:32 == 0
+		SOURCE:7 = 0
+		TIMES SOURCE:5 , 2.00
+		TIMES SOURCE:13, 2.00
+	ELSEIF ABL:32 == 1
+		SOURCE:7 = 50
+		TIMES SOURCE:5 , 2.50
+		TIMES SOURCE:13, 1.60
+	ELSEIF ABL:32 == 2
+		SOURCE:7 = 150
+		TIMES SOURCE:5 , 3.00
+		TIMES SOURCE:13, 1.00
+	ELSEIF ABL:32 == 3
+		SOURCE:7 = 300
+		TIMES SOURCE:5 , 4.50
+		TIMES SOURCE:13, 0.70
+	ELSEIF ABL:32 == 4
+		SOURCE:7 = 600
+		TIMES SOURCE:5 , 6.00
+		TIMES SOURCE:13, 0.40
+	ELSE
+		SOURCE:7 = 1200
+		TIMES SOURCE:5 , 8.00
+		TIMES SOURCE:13, 0.10
+	ENDIF
+ENDIF
+
+;대량사정
+IF E == 2
+	TIMES SOURCE:7 , 2.00
+	TIMES SOURCE:5 , 1.50
+
+	EXP:PLAYER:3 += 2
+	EXP:20 += 1
+	PRINTFORML %SAVESTR:PLAYER%대량사정
+	PRINTL 정액경험＋１
+	;精液汚れ
+	STAIN:PLAYER:2 |= 4
+
+	BASE:PLAYER:2 -= EJAC*2
+	SIF BASE:PLAYER:2 >= EJAC
+		BASE:PLAYER:2 = EJAC-1
+
+	;조수が사정フラグ
+	TFLAG:6 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:PLAYER:3 += 1
+	PRINTFORML %SAVESTR:PLAYER%사정
+	;精液汚れ
+	STAIN:PLAYER:2 |= 4
+
+	BASE:PLAYER:2 -= EJAC
+	SIF BASE:PLAYER:2 >= EJAC
+		BASE:PLAYER:2 = EJAC-1
+
+	;조수が사정フラグ
+	TFLAG:6 = 1
+ENDIF
+
+IF TALENT:119 || TALENT:121 || TALENT:122
+	;노예のＰ⇔調教者のＶの汚れが移動
+	STAIN:2 |= STAIN:PLAYER:3
+	STAIN:PLAYER:3 |= STAIN:2
+ENDIF
+
+IF TALENT:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +10
+	EXP:40 += 10
+ENDIF
+
+TFLAG:100 = 1
+
+;屈服刻印２に相当
+TFLAG:200 = 2
+
+RETURN 1
+
+;

@@ -1,0 +1,189 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;아이마스크
+;SM系コマンド
+;-------------------------------------------------
+@COM43
+
+PRINTL 아이마스크
+;SAVESTR:22 = 아이마스크
+CALL TRAIN_MESSAGE_B
+
+LOSEBASE:0 += 0
+;緊縛経験が高いと消費減少
+IF EXP:51 < EXPLV:3 / 2
+	LOSEBASE:1 += 150
+ELSEIF EXP:51 < EXPLV:4 / 2
+	LOSEBASE:1 += 120
+ELSE
+	LOSEBASE:1 += 90
+ENDIF
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+SOURCE:10 = 250
+SOURCE:12 = 1000
+SOURCE:14 = 500
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES SOURCE:10 , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES SOURCE:10 , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES SOURCE:10 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES SOURCE:10 , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES SOURCE:10 , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES SOURCE:10 , 0.40
+ELSEIF ABL:10 == 1
+	TIMES SOURCE:10 , 0.60
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:10 , 0.80
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:10 , 1.00
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:10 , 1.10
+ELSE
+	TIMES SOURCE:10 , 1.20
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES SOURCE:10 , 0.80
+ELSEIF ABL:21 == 1
+	TIMES SOURCE:10 , 1.00
+ELSEIF ABL:21 == 2
+	TIMES SOURCE:10 , 1.30
+ELSEIF ABL:21 == 3
+	TIMES SOURCE:10 , 1.60
+ELSEIF ABL:21 == 4
+	TIMES SOURCE:10 , 2.00
+ELSE
+	TIMES SOURCE:10 , 3.00
+ENDIF
+
+;도착적
+SIF TALENT:80
+	TIMES SOURCE:10 , 2.00
+;겁쟁이
+SIF TALENT:10
+	TIMES SOURCE:14 , 2.00
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+EXP:51 += 2
+PRINTL 긴박경험＋２
+
+;アイマスクの着脱
+TEQUIP:43 = 1 - TEQUIP:43
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;アイマスク장착중
+;-------------------------------------------------
+@EQUIP_COM43
+
+PRINTL ＜아이마스크장착중＞
+
+LOSEBASE:0 += 0
+;緊縛経験が高いと消費減少
+IF EXP:51 < EXPLV:3 / 2
+	LOSEBASE:1 += 100
+ELSEIF EXP:51 < EXPLV:4 / 2
+	LOSEBASE:1 += 80
+ELSE
+	LOSEBASE:1 += 60
+ENDIF
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+A = 250
+B = 1000
+C = 500
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES A , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES A , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES A , 0.40
+ELSEIF ABL:10 == 1
+	TIMES A , 0.60
+ELSEIF ABL:10 == 2
+	TIMES A , 0.80
+ELSEIF ABL:10 == 3
+	TIMES A , 1.00
+ELSEIF ABL:10 == 4
+	TIMES A , 1.10
+ELSE
+	TIMES A , 1.20
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES A , 0.80
+ELSEIF ABL:21 == 1
+	TIMES A , 1.00
+ELSEIF ABL:21 == 2
+	TIMES A , 1.30
+ELSEIF ABL:21 == 3
+	TIMES A , 1.60
+ELSEIF ABL:21 == 4
+	TIMES A , 2.00
+ELSE
+	TIMES A , 3.00
+ENDIF
+
+;도착적
+SIF TALENT:80
+	TIMES A , 2.00
+;겁쟁이
+SIF TALENT:10
+	TIMES C , 2.00
+
+SOURCE:10 += A
+SOURCE:12 += B
+SOURCE:14 += C
+
+UP:5 += A
+UP:10 += SOURCE:14
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+EXP:51 += 1
+PRINTL 긴박경험＋１
+;
+RETURN 1

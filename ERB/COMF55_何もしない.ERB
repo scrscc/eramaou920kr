@@ -1,0 +1,84 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;아무것도안한다
+;特殊系コマンド：何もしないで調教対象を焦らす
+;-------------------------------------------------
+@COM55
+
+PRINTL 아무것도안한다
+;SAVESTR:22 = 아무것도안한다
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 0
+LOSEBASE:1 += 10
+
+SOURCE:14 = 50
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	SOURCE:12 = 10
+ELSEIF PALAM:5 < PALAMLV:2
+	SOURCE:12 = 30
+ELSEIF PALAM:5 < PALAMLV:3
+	SOURCE:12 = 60
+ELSEIF PALAM:5 < PALAMLV:4
+	SOURCE:12 = 100
+ELSEIF PALAM:5 >= PALAMLV:4
+	SOURCE:12 = 150
+ENDIF
+
+;奉仕精神をみる
+IF ABL:16 == 0
+	SOURCE:3 = 0
+ELSEIF ABL:16 == 1
+	SOURCE:3 = 20
+ELSEIF ABL:16 == 2
+	SOURCE:3 = 40
+ELSEIF ABL:16 == 3
+	SOURCE:3 = 70
+ELSEIF ABL:16 == 4
+	SOURCE:3 = 110
+ELSE
+	SOURCE:3 = 150
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES SOURCE:3 , 0.80
+	TIMES SOURCE:12 , 0.80
+	SOURCE:10 = 0
+	SOURCE:11 = 0
+ELSEIF ABL:21 == 1
+	TIMES SOURCE:3 , 1.00
+	TIMES SOURCE:12 , 1.00
+	SOURCE:10 = 20
+	SOURCE:11 = 30
+ELSEIF ABL:21 == 2
+	TIMES SOURCE:3 , 1.30
+	TIMES SOURCE:12 , 1.20
+	SOURCE:10 = 40
+	SOURCE:11 = 70
+ELSEIF ABL:21 == 3
+	TIMES SOURCE:3 , 1.40
+	TIMES SOURCE:12 , 1.40
+	SOURCE:10 = 70
+	SOURCE:11 = 120
+ELSEIF ABL:21 == 4
+	TIMES SOURCE:3 , 1.70
+	TIMES SOURCE:12 , 1.50
+	SOURCE:10 = 110
+	SOURCE:11 = 180
+ELSE
+	TIMES SOURCE:3 , 2.00
+	TIMES SOURCE:12 , 1.70
+	SOURCE:10 = 150
+	SOURCE:11 = 250
+ENDIF
+
+SIF PALAM:5 >= PALAMLV:3
+	TFLAG:200 = 1
+
+RETURN 1

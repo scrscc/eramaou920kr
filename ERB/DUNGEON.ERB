@@ -1,0 +1,843 @@
+﻿;--------------------------------------------------
+@DUNGEON, ARG:0
+#DIM WALK
+#DIM TURN
+#DIM SIDEA
+#DIM SIDEB
+#DIM TURNEND
+#DIM FLOOR
+#DIM NO_BATTLE
+#DIM ROOM
+;--------------------------------------------------
+;A・ARG:0が攻略中のキャラ（リーダー）
+;D:20が侵攻度 D:1=1で帰還 D:4はトラップ試行回数
+;D:0は上書きされないように欠番
+;TURN      = 侵攻カウンタ
+;SIDEA     = 仲間A
+;SIDEB     = 仲間B
+;TURNEND   = 誰かが敗北して冒険が中断されるフラグ
+;FLOOR     = 現在階層
+;NO_BATTLE = 戦闘が発生しないフラグ
+
+;行動完了の場合飛ばす
+IF CFLAG:(ARG:0):530 == 1
+	;迎撃中の場合, 潜入行動
+	SIF CFLAG:(ARG:0):1 == 3
+		CALL DUNGEON_SPY, ARG:0
+	RETURN 0
+ENDIF
+
+
+SIDEA = CFLAG:(ARG:0):531
+SIDEB = CFLAG:(ARG:0):532
+
+TARGET = ARG:0
+D:20 = CFLAG:(ARG:0):502
+D:1 = 0
+IF FLAG:5 & 32
+	PRINTL  
+	DRAWLINE
+	IF CFLAG:(ARG:0):1 == 3 && CFLAG:(ARG:0):507 == 0
+		PRINTFORML %SAVESTR:(ARG:0)%의 파티가 용사 요격을 시작했다!!
+	;迎撃時体力が回復していると迎撃再開
+	ELSEIF CFLAG:(ARG:0):1 == 3 && CFLAG:(ARG:0):507 == 1
+		IF (BASE:(ARG:0):0 * 100 / MAXBASE:(ARG:0):0 > 80) && (BASE:(ARG:0):1 * 100 / MAXBASE:(ARG:0):1 > 80)
+			PRINTFORML 체력 회복한 %조사선택(SAVESTR:(ARG:0), "는")% 용사 요격을 재개했다! ! 
+			CFLAG:(ARG:0):507 = 0
+		ELSE
+			PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 방까지 회귀하고 있다
+		ENDIF
+	ELSEIF CFLAG:(ARG:0):507 == 1
+		PRINTFORML %SAVESTR:(ARG:0)%의 파티는 던전을 탈출하려 하고 있다
+	ELSE
+		PRINTFORML %SAVESTR:(ARG:0)%의 파티가 던전 공략하기 시작했다!!
+	ENDIF
+	DRAWLINE
+	
+	PRINTL  
+	;컨피그「戦闘ログでのSKIP中断」がONなら강제停止
+	IF GETBIT(FLAG:5,9)
+		FORCEWAIT
+	ELSE
+		WAIT
+	ENDIF
+ENDIF
+
+;플래그 OFF
+CFLAG:(ARG:0):503 = 0
+SIF SIDEA > 0
+	CFLAG:SIDEA:503 = 0
+SIF SIDEB > 0
+	CFLAG:SIDEB:503 = 0
+
+
+
+FOR TURN, 0, 5
+	;バランス調整のため侵攻は一回で終了
+	SIF TURN > 0
+		BREAK
+	
+	;戦闘が発生しないフラグ初期化
+	NO_BATTLE = 0
+	
+	IF FLAG:5 & 32
+		PRINTFORM %조사선택(SAVESTR:(ARG:0), "는")% 던전
+	ENDIF
+	
+	WALK = RAND:20
+	;速度UP
+	FOR LOCAL,0,6
+		WALK += RAND:10
+	NEXT
+	;引き返す
+	SIF CFLAG:(ARG:0):507 != 0
+		WALK *= -2
+	
+	;장비 효과(침공)
+	W:8 = 17
+	CALL EQUIP_CHECK
+	SIF RESULT > 0
+		WALK *= 2
+	
+	;장비 효과(시련)
+	W:8 = 19
+	CALL EQUIP_CHECK
+	SIF RESULT > 0
+		WALK /= 2
+	
+	;迷い状態
+	IF CFLAG:(ARG:0):509 == 1
+		IF RAND:3 == 0
+			;たまに回復
+			;ハメを防ぐため先に判定する
+			CFLAG:(ARG:0):509 = 0
+		ELSE
+			WALK = 0
+		ENDIF
+		
+		
+	ENDIF
+	
+	FLOOR = CFLAG:(ARG:0):501
+	IF FLAG:400
+		;イベントダンジョン
+		CALL CAMPAIGN_ROOM,FLOOR
+		ROOM = RESULT
+	ELSE
+		ROOM = FLAG:(FLOOR + 349)
+	ENDIF
+	
+	IF FLAG:5 & 32
+		IF ROOM == 507 && TALENT:(ARG:0):180
+			;娼館街かつ娼婦
+			PRINTL 에서 손님을 고르고 있다 ……
+			WALK = 0
+		ELSEIF WALK >= 1
+			PRINTL 을 헤쳐나가고 있다
+		ELSEIF WALK <= -1
+			PRINTL 을 급히 되돌아 나가고 있다
+		ELSE
+			PRINTL 에서 헤매고 있다
+		ENDIF
+		
+		WAIT
+		
+		PRINTL ----------------------
+		PRINTL    던전 심도(深度)
+		PRINTL ----------------------
+		
+		PRINTFORM 제{FLOOR}계층
+	ENDIF
+	IF CFLAG:(ARG:0):1 == 2 || CFLAG:(ARG:0):1 == 12
+		D:20 += WALK
+	ELSE
+		X *= 2
+		D:20 -= WALK
+	ENDIF
+	IF FLAG:5 & 32
+		BARL D:20,100,50
+	ENDIF
+	
+	;던전 침공도 체크
+	IF D:20 >= 100
+		;階層滞在カウントをリセット
+		CFLAG:(ARG:0):514 = 0
+		IF CFLAG:(ARG:0):1 == 2 || CFLAG:(ARG:0):1 == 12
+			IF FLAG:400 && CFLAG:(ARG:0):1 == 12
+				;イベント中は踏破できるか判定がある
+				CALL CAMPAIGN_QUEST,ARG:0
+				IF RESULT
+					;攻略成功
+					PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 이 계층을 답파했다! 
+				ELSE
+					;攻略失敗. 追い返される
+					PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 검색을 그만두고 걸어가기 시작했다
+					CFLAG:(ARG:0):507 = 1
+					D:20 = 95
+				ENDIF
+			ELSE
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 이 계층을 답파했다! 
+			ENDIF
+			
+			SIF FLAG:5 & 32
+				PRINTFORML 전리품을 찾고 있는 모양이다…
+			
+			CALL ADD_EX_ITEM, -1, ARG:0, 0
+			
+			SIF FLAG:5 & 32 && RESULT == 0
+				PRINTFORML 아무 것도 아이템은 발견되지 않은 모양이다
+			
+			IF FLAG:400 > 0 && FLOOR >= 6
+				PRINTL 여기가 던젼의 끝이다………
+				CALL CAMPAIGN_ENDING,ARG:0
+				D:20 = 0
+				BREAK
+			ELSEIF FLOOR >= 9
+				PRINTL 여기가 마왕의 방이다………
+					JUMP ENDING_2
+				D:20 = 0
+			ELSE
+				;体力が有り余っている場合、もう1階層冒険してみる
+				
+				IF CFLAG:(ARG:0):520 < FLOOR
+					LOCAL = 0
+					IF BASE:(ARG:0):0 * 100 / MAXBASE:(ARG:0):0 < 90
+						LOCAL++
+					ELSEIF BASE:(ARG:0):1 * 100 / MAXBASE:(ARG:0):1 < 90
+						LOCAL++
+					;仲間Aの体調も見る
+					ELSEIF SIDEA > 0 && BASE:SIDEA:0 * 100 / MAXBASE:SIDEA:0 < 90
+						LOCAL++
+					ELSEIF SIDEA > 0 && BASE:SIDEA:1 * 100 / MAXBASE:SIDEA:1 < 90
+						LOCAL++
+					;仲間Bの体調も見る
+					ELSEIF SIDEB > 0 && BASE:SIDEB:0 * 100 / MAXBASE:SIDEB:0 < 90
+						LOCAL++
+					ELSEIF SIDEB > 0 && BASE:SIDEB:1 * 100 / MAXBASE:SIDEB:1 < 90
+						LOCAL++
+					ENDIF
+					IF LOCAL == 0
+						PRINTFORML 기력과 체력이 모두 만전인 %SAVESTR:(ARG:0)%의 파티는 더욱 깊은 곳으로의 모험에 도전한다……
+						CFLAG:(ARG:0):520 = FLOOR
+					ENDIF
+				ENDIF
+				
+				IF CFLAG:(ARG:0):520 < FLOOR
+					PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 검색을 그만두고 걸어가기 시작했다
+					CFLAG:(ARG:0):507 = 1
+					;到達階層を記憶
+					SIF CFLAG:(ARG:0):521 < FLOOR
+						CFLAG:(ARG:0):521 = FLOOR
+					D:20 = 95
+				ELSE
+					CFLAG:(ARG:0):501 += 1
+					CFLAG:(ARG:0):508 += 1
+					FLOOR += 1
+					PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 제{FLOOR}계층 공략에 도전한다
+					D:20 = 0
+				ENDIF
+			ENDIF
+		ELSE
+			IF FLOOR >= 9
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 마왕의 방까지 돌아왔다
+				D:20 = 100
+				CFLAG:(ARG:0):507 = 0
+			ELSE
+				CFLAG:(ARG:0):501 += 1
+				FLOOR += 1
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% {FLOOR}계층까지 돌아왔다
+				D:20 = 10
+			ENDIF
+		CFLAG:(ARG:0):503 += 1
+		SIF SIDEA > 0
+			CFLAG:SIDEA:503 += 1
+		SIF SIDEB > 0
+			CFLAG:SIDEB:503 += 1
+		BREAK
+		ENDIF
+	ELSEIF D:20 <=0
+		;階層滞在カウントをリセット
+		CFLAG:(ARG:0):514 = 0
+		IF CFLAG:(ARG:0):1 == 2 || CFLAG:(ARG:0):1 == 12
+			SIF FLOOR == 5
+				FLOOR = 1
+			IF FLOOR <= 1
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 던전 밖까지 돌아왔다 
+				D:20 = 0
+				
+				;街でのイベント
+				CALL DUNGEON_TOWN,ARG:0
+				
+				BREAK
+			ELSE
+				CFLAG:(ARG:0):501 -= 1
+				FLOOR -= 1
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% {FLOOR}계층까지 돌아왔다
+				D:20 = 90
+			ENDIF
+			CFLAG:(ARG:0):503 += 1
+			SIF SIDEA > 0
+				CFLAG:SIDEA:503 += 1
+			SIF SIDEB > 0
+				CFLAG:SIDEB:503 += 1
+			
+		ELSE
+			PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 이 계층을 답파했다! 
+			
+			;拡張任務の失敗判定
+			IF CFLAG:(ARG:0):500 == 3
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 시설의 확장에 실패한 것 같다……
+				PRINTFORMW %조사선택(SAVESTR:(ARG:0), "를")% 귀환 마법으로 귀환시킵니다
+				CFLAG:(ARG:0):1 = 6
+				RETURN 0
+			ENDIF
+			
+			IF FLOOR <= 1
+				PRINTW 이 앞부터는 인간의 영역이다………
+				PRINTFORMW %조사선택(SAVESTR:(ARG:0), "를")% 귀환 마법으로 귀환시켰다
+				IF CFLAG:(ARG:0):505 > 0
+					CFLAG:(ARG:0):1 = 5
+				ELSE
+					CFLAG:(ARG:0):1 = 6
+				ENDIF
+				RETURN 0
+			ELSE
+				CFLAG:(ARG:0):501 -= 1
+				FLOOR -= 1
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 제{FLOOR}계층 탈환에 도전한다
+				D:20 = 90
+			ENDIF
+		ENDIF
+	ELSE
+		;階層移動がない分岐
+		;階層滞在カウントを+1
+		CFLAG:(ARG:0):514 += 1
+		
+		;奴隷の場合カウントが溜まると帰還する
+		IF CFLAG:(ARG:0):1 == 3 && CFLAG:(ARG:0):514 > 15
+			PRINTFORML %SAVESTR:(ARG:0)%는 장기체류로 인해 지친 것 같다……
+			PRINTFORMW %조사선택(SAVESTR:(ARG:0), "를")% 귀환 마법으로 귀환시킵니다
+			IF CFLAG:(ARG:0):505 > 0
+				CFLAG:(ARG:0):1 = 5
+			ELSE
+				CFLAG:(ARG:0):1 = 6
+			ENDIF
+			CFLAG:(ARG:0):514 = 0
+			RETURN 0
+		ENDIF
+		
+	ENDIF
+	
+	;시설 효과
+	;1/3の確率で受けるキャラが変わる
+	IF RAND:3 == 0 && SIDEA > 0
+		A = SIDEA
+	ELSEIF RAND:2 == 0 && SIDEB > 0
+		A = SIDEB
+	ELSE
+		A = ARG:0
+	ENDIF
+	CALL DUNGEON_ROOM,A
+	;戦闘なしなら1が加算される
+	NO_BATTLE += RESULT
+	
+	;함정 처리
+	;1/3の確率で受けるキャラが変わる
+	IF RAND:3 == 0 && SIDEA > 0
+		A = SIDEA
+	ELSEIF RAND:2 == 0 && SIDEB > 0
+		A = SIDEB
+	ELSE
+		A = ARG:0
+	ENDIF
+	
+	;장비 효과(함정 유발)
+	W:8 = 20
+	CALL EQUIP_CHECK
+	IF RESULT > 0
+		D:4 = RESULT
+		CALL DUNGEON_TRAP
+	ELSE
+		D:4 = 0
+		;장비 효과(함정 회피)
+		W:8 = 16
+		CALL EQUIP_CHECK
+		SIF RESULT < RAND:10
+			CALL DUNGEON_TRAP
+	ENDIF
+	
+	A = ARG:0
+	;シュートでPTが分断された時のためにここで一度SIDEA・SIDEBを再定義
+	;ちょっと乱暴だけどここはSIFで分岐させる必要はない…ハズ
+	SIDEA = CFLAG:(ARG:0):531
+	SIDEB = CFLAG:(ARG:0):532
+	
+	;전투 페이즈
+	
+	IF CFLAG:(ARG:0):1 == 2
+		IF FLAG:5 & 16
+			SIF FLAG:5 & 32
+				PRINTW 적이 없기 때문에 훈련을 한 것 같다（경험치 증가）
+			EXP:(ARG:0):80 += CFLAG:0:9
+			SIF SIDEA > 0
+				EXP:SIDEA:80 += CFLAG:0:9
+			SIF SIDEB > 0
+				EXP:SIDEB:80 += CFLAG:0:9
+		ELSEIF NO_BATTLE > 0
+			;戦闘未発生フラグ
+			SIF FLAG:5 & 32
+				PRINTW 적이 없기 때문에 훈련을 한 것 같다（경험치 증가）
+			EXP:(ARG:0):80 += CFLAG:0:9
+			SIF SIDEA > 0
+				EXP:SIDEA:80 += CFLAG:0:9
+			SIF SIDEB > 0
+				EXP:SIDEB:80 += CFLAG:0:9
+		ELSE
+			TURNEND = 0
+			CALL DUNGEON_PARTY_BATTLE, ARG:0
+			;함락 유무
+			IF CFLAG:(ARG:0):1 != 2 && CFLAG:(ARG:0):1 != 3
+				CALL GET_DOWN_ENEMY,ARG:0
+				;カルマが低いと, 仲間を売って助かろうとする
+				;そのうち口上も挟みたい……
+				IF CFLAG:(ARG:0):151 <= -50 && (SIDEA > 0 || SIDEB > 0)
+					PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 동료를 배신하고 그녀들의 행방을 낱낱이 불어대기 시작했다
+					PRINTFORMW 아첨하는 얼굴을 하고 동료를 팔아 필사적으로 살려달라고 애원하고 있다……
+					SIF SIDEA > 0 && CFLAG:SIDEA:1 == 2
+						CFLAG:SIDEA:1 = 0
+					SIF SIDEB > 0 && CFLAG:SIDEB:1 == 2
+						CFLAG:SIDEB:1 = 0
+				ENDIF
+				CALL PARTY_DEL, ARG:0
+				TURNEND += 1
+			ENDIF
+			
+			;仲間Aが함락したかどうか
+			IF SIDEA > 0 && CFLAG:SIDEA:1 != 2 && CFLAG:SIDEA:1 != 3
+				CALL GET_DOWN_ENEMY,SIDEA
+				CALL PARTY_DEL, SIDEA
+				TURNEND += 1
+			ENDIF
+			
+			;仲間Bが함락したかどうか
+			IF SIDEB > 0 && CFLAG:SIDEB:1 != 2 && CFLAG:SIDEB:1 != 3
+				CALL GET_DOWN_ENEMY,SIDEB
+				CALL PARTY_DEL, SIDEB
+				TURNEND += 1
+			ENDIF
+			
+			SIF TURNEND > 0
+				BREAK
+		ENDIF
+		
+		TURNEND = 0
+		
+		;카르마에 따라 마왕과 내통함
+		IF CFLAG:(ARG:0):151 <= -150 && CFLAG:(ARG:0):1 == 2
+			PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 사명을 저버리고 마왕군으로 돌아섰다……
+			CFLAG:(ARG:0):1 = 0
+			CALL GET_DOWN_ENEMY,ARG:0
+			IF SIDEA > 0 || SIDEB > 0
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 동료를 배신하고 그녀들의 행방을 낱낱이 불어대기 시작했다
+				PRINTFORMW 동료들을 간단한 선물로 배반하는 듯 하다 ……
+				SIF SIDEA > 0 && CFLAG:SIDEA:1 == 2
+					CFLAG:SIDEA:1 = 0
+				SIF SIDEB > 0 && CFLAG:SIDEB:1 == 2
+					CFLAG:SIDEB:1 = 0
+			ENDIF
+			CALL PARTY_DEL, ARG:0
+			
+			;仲間Aが함락したかどうか
+			IF SIDEA > 0 && CFLAG:SIDEA:1 != 2 && CFLAG:SIDEA:1 != 3
+				CALL GET_DOWN_ENEMY, SIDEA
+				CFLAG:SIDEA:1 = 0
+				CALL PARTY_DEL, SIDEA
+			ENDIF
+			
+			;仲間Bが함락したかどうか
+			IF SIDEB > 0 && CFLAG:SIDEB:1 != 2 && CFLAG:SIDEB:1 != 3
+				CALL GET_DOWN_ENEMY, SIDEB
+				CFLAG:SIDEB:1 = 0
+				CALL PARTY_DEL, SIDEB
+			ENDIF
+			TURNEND += 1
+		ENDIF
+		
+		IF SIDEA > 0 && CFLAG:SIDEA:151 <= -150 && CFLAG:SIDEA:1 == 2
+			PRINTFORML %SAVESTR:SIDEA%는 사명을 저버리고 마왕 군으로 돌아섰다……
+			CALL GET_DOWN_ENEMY, SIDEA
+			CALL PARTY_DEL, SIDEA
+			TURNEND += 1
+		ENDIF
+		
+		IF SIDEB > 0 && CFLAG:SIDEB:151 <= -150 && CFLAG:SIDEB:1 == 2
+			PRINTFORML %SAVESTR:SIDEB%는 사명을 저버리고 마왕 군으로 돌아섰다……
+			CALL GET_DOWN_ENEMY, SIDEB
+			CALL PARTY_DEL, SIDEB
+			TURNEND += 1
+		ENDIF
+		
+		SIF TURNEND > 0
+			BREAK
+	ELSEIF CFLAG:(ARG:0):1 == 12
+		;イベントダンジョン
+		IF NO_BATTLE > 0
+			;戦闘未発生フラグ
+			SIF FLAG:5 & 32
+				PRINTW 적이 없기 때문에 훈련을 한 것 같다（경험치 증가）
+			EXP:(ARG:0):80 += CFLAG:0:9
+			SIF SIDEA > 0
+				EXP:SIDEA:80 += CFLAG:0:9
+			SIF SIDEB > 0
+				EXP:SIDEB:80 += CFLAG:0:9
+		ELSE
+			TURNEND = 0
+			CALL DUNGEON_PARTY_BATTLE, ARG:0
+			;함락 유무
+			IF CFLAG:(ARG:0):1 != 2 && CFLAG:(ARG:0):1 != 3 && CFLAG:(ARG:0):1 != 12
+				PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 함락되었다…
+				CFLAG:(ARG:0):507 = 0
+				CALL PARTY_DEL, ARG:0
+				TURNEND += 1
+			ENDIF
+			
+			;仲間Aが함락したかどうか
+			IF SIDEA > 0 && CFLAG:SIDEA:1 != 2 && CFLAG:SIDEA:1 != 3 && CFLAG:SIDEA:1 != 12
+				PRINTFORML %SAVESTR:SIDEA%는 함락됐다…
+				CFLAG:SIDEA:507 = 0
+				CALL PARTY_DEL, SIDEA
+				TURNEND += 1
+			ENDIF
+			
+			;仲間Bが함락したかどうか
+			IF SIDEB > 0 && CFLAG:SIDEB:1 != 2 && CFLAG:SIDEB:1 != 3 && CFLAG:SIDEB:1 != 12
+				PRINTFORML %SAVESTR:SIDEB%는 함락됐다…
+				CFLAG:SIDEB:507 = 0
+				CALL PARTY_DEL, SIDEB
+				TURNEND += 1
+			ENDIF
+			
+			SIF TURNEND > 0
+				BREAK
+		ENDIF
+	;勇者と元勇者の戦闘
+	ELSE
+		CALL DUNGEON_BATTLE2_PARTY, ARG:0
+		;함락 유무
+		IF RESULT == 2
+			CALL GET_DOWN_ENEMY, B
+			CFLAG:(ARG:0):505 += 1
+			CALL PARTY_DEL, B
+		ELSEIF RESULT == 1
+			;NTR以外なら勇者討伐数をチェックしてご褒美の有無
+			CFLAG:(ARG:0):507 = 0
+			IF CFLAG:(ARG:0):1 == 0
+				IF CFLAG:(ARG:0):505 > 0
+					CFLAG:(ARG:0):1 = 5
+				ELSE
+					CFLAG:(ARG:0):1 = 6
+				ENDIF
+			ENDIF
+			;NTRれたなら勇者討伐数を０に
+			SIF CFLAG:(ARG:0):1 == 9
+				CFLAG:(ARG:0):505 = 0
+			CALL PARTY_DEL, ARG:0
+			TARGET = -1
+			RETURN 0
+		ENDIF
+	ENDIF
+	
+	IF CFLAG:(ARG:0):1 == 3 && FLAG:5 & 16 && CFLAG:0:9 > 0
+		SIF FLAG:5 & 32
+			PRINTW 몬스터들이 훈련에 어울려주었다（경험치 증가）
+		EXP:(ARG:0):80 += CFLAG:0:9
+		;訓練行動と合わせて1.5倍に増加
+		SIF CFLAG:(ARG:0):500 == 5
+			EXP:(ARG:0):80 += CFLAG:0:9 / 2
+	ELSEIF CFLAG:(ARG:0):1 == 3 && CFLAG:(ARG:0):500 == 5 && CFLAG:0:9 > 0
+		;迎撃時の訓練行動
+		SIF FLAG:5 & 32
+			PRINTW 몬스터들이 훈련에 어울려주었다（경험치 증가）
+		EXP:(ARG:0):80 += CFLAG:0:9
+	ENDIF
+	
+	;정조대 열쇠를 찾기
+	IF CFLAG:(ARG:0):1 == 3 && CFLAG:(ARG:0):49 == 1 && CFLAG:(ARG:0):50 == 0
+		PRINTL
+		PRINTFORMW 탐색하고 있던 중 던전의 구석에서 빛나는 것을 발견했다. %조사선택(SAVESTR:(ARG:0), "는")% 궁금해서 그것을 집어 봤다. 
+		IF RAND:2 == 0
+			PRINTFORMW ………낡은 메달이다, 이런 것에 가치는 없다. %조사선택(SAVESTR:(ARG:0), "는")% 그것을 집어 던졌다. 
+		ELSEIF RAND:2 == 0
+			PRINTFORMW ………오래 된 메달이었다, 이런 것에 가치가 없다. %조사선택(SAVESTR:(ARG:0), "는")% 그것을 던져 버렸다. 
+		ELSEIF RAND:2 == 0
+			PRINTFORMW ………찌그러진 반지였다, 몬스터에게 당한 희생자의 것이다. %조사선택(SAVESTR:(ARG:0), "는")% 그것을 던져 버렸다. 
+		ELSEIF RAND:2 == 0
+			PRINTFORMW ………통조림의 뚜껑이었다, 이런 것에 가치가 없다. %조사선택(SAVESTR:(ARG:0), "는")% 그것을 던져 버렸다. 
+		ELSEIF RAND:2 == 0
+			PRINTFORMW ………끈이 연결되어 있다는 것을 눈치채면.  그건 부비 트랩의 스위치였다!
+			PRINTFORMW 하지만 부비 트랩은 오래 전에 망가져서 움직이지 않는 것 같다. %조사선택(SAVESTR:(ARG:0), "는")% 욕 하면 그것을 던져 버렸다. 
+		ELSEIF RAND:2 == 0
+			PRINTFORMW ……… 더러워져 있지만 다이아몬드 반지였다. 그러나 %SAVESTR:(ARG:0)%에게 있어서는 필요 없는 것이다. 
+		ELSE
+			PRINTFORMW ………못 알아볼 리가 없는. 그 때의 %NAME:MASTER%에게 버려졌던 정조대의 열쇠다. %조사선택(SAVESTR:(ARG:0), "는")% 마침내 정조대의 열쇠를 찾아냈다!! 
+			PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 황홀한 얼굴을 하며 주머니에 소중하게 간수했다………(정조대의 열쇠는 %조사선택(SAVESTR:(ARG:0), "가")% 가지고 있습니다)
+			CFLAG:(ARG:0):50 = 1
+		ENDif
+	ENDIF
+	
+	;冒険の疲れ
+	BASE:(ARG:0):1 -= RAND:6
+	SIF SIDEA > 0
+		BASE:SIDEA:1 -= RAND:6
+	SIF SIDEB > 0
+		BASE:SIDEB:1 -= RAND:6
+	
+	
+	;귀환 여부
+	IF CFLAG:(ARG:0):507 == 1
+		;すでに帰還中である
+		PRINTFORML %SAVESTR:(ARG:0)%는 던전에서 귀환하고 있다（현재{FLOOR}층）
+	;帰還フラグを立てる判定
+	;帰還フラグを立て, 挫折した階層を記憶する
+	ELSEIF BASE:(ARG:0):0 * 100 / MAXBASE:(ARG:0):0 < 45
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 귀환을 결심했다（현재 {FLOOR}층）
+		CFLAG:(ARG:0):507 = 1
+		CFLAG:(ARG:0):520 = FLOOR - 2
+	ELSEIF BASE:(ARG:0):1 * 100 / MAXBASE:(ARG:0):1 < 45
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 귀환을 결심했다（현재 {FLOOR}층）
+		CFLAG:(ARG:0):507 = 1
+		CFLAG:(ARG:0):520 = FLOOR - 2
+	;仲間Aの体調も見る
+	ELSEIF SIDEA > 0 && BASE:SIDEA:0 * 100 / MAXBASE:SIDEA:0 < 45
+		PRINTFORML %SAVESTR:SIDEA%의 부상을 고려해 %조사선택(SAVESTR:(ARG:0), "는")% 귀환을 결심했다（현재 {FLOOR}층）
+		CFLAG:(ARG:0):507 = 1
+		CFLAG:(ARG:0):520 = FLOOR - 2
+	ELSEIF SIDEA > 0 && BASE:SIDEA:1 * 100 / MAXBASE:SIDEA:1 < 45
+		PRINTFORML %SAVESTR:SIDEA%의 컨디션을 고려해 %조사선택(SAVESTR:(ARG:0), "는")% 귀환을 결심했다（현재 {FLOOR}층）
+		CFLAG:(ARG:0):507 = 1
+		CFLAG:(ARG:0):520 = FLOOR - 2
+	;仲間Bの体調も見る
+	ELSEIF SIDEB > 0 && BASE:SIDEB:0 * 100 / MAXBASE:SIDEB:0 < 45
+		PRINTFORML %SAVESTR:SIDEB%의 부상을 고려해 %조사선택(SAVESTR:(ARG:0), "는")% 귀환을 결심했다（현재 {FLOOR}층）
+		CFLAG:(ARG:0):507 = 1
+		CFLAG:(ARG:0):520 = FLOOR - 2
+	ELSEIF SIDEB > 0 && BASE:SIDEB:1 * 100 / MAXBASE:SIDEB:1 < 45
+		PRINTFORML %SAVESTR:SIDEB%의 컨디션을 고려해 %조사선택(SAVESTR:(ARG:0), "는")% 귀환을 결심했다（현재 {FLOOR}층）
+		CFLAG:(ARG:0):507 = 1
+		CFLAG:(ARG:0):520 = FLOOR - 2
+	ELSE
+		;攻略を続ける
+		PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 던전공략을 한층 더 진행해나갔다……（현재{FLOOR}층）
+	ENDIF
+NEXT
+
+;戦闘後探索
+;1/3の確率で受けるキャラが変わる
+IF RAND:3 == 0 && SIDEA > 0
+	LOCAL = SIDEA
+ELSEIF RAND:2 == 0 && SIDEB > 0
+	LOCAL = SIDEB
+ELSE
+	LOCAL = ARG:0
+ENDIF
+CALL DUNGEON_BITCH(LOCAL)
+CALL GET_JUNK_ITEM(LOCAL)
+
+
+
+;宝箱を見つける
+SIF CFLAG:(ARG:0):1 == 2 && RAND:4 == 0
+	CALL EQUIP_SELECT
+IF SIDEA > 0 && CFLAG:SIDEA:1 == 2 && RAND:4 == 0
+	A = SIDEA
+	CALL EQUIP_SELECT
+ENDIF
+IF SIDEB > 0 && CFLAG:SIDEB:1 == 2 && RAND:4 == 0
+	A = SIDEB
+	CALL EQUIP_SELECT
+ENDIF
+
+A = ARG:0
+
+;아이템의 사용
+CALL USE_EX_ITEM,"전투후"
+IF SIDEA > 0
+	A = SIDEA
+	CALL USE_EX_ITEM,"전투후"
+ENDIF
+IF SIDEB > 0
+	A = SIDEB
+	CALL USE_EX_ITEM,"전투후"
+ENDIF
+
+A = ARG:0
+
+;이동을 반영
+CFLAG:(ARG:0):502 = D:20
+SIF SIDEA > 0
+	CFLAG:SIDEA:502 = D:20
+SIF SIDEB > 0
+	CFLAG:SIDEB:502 = D:20
+
+;階層を反映
+FLOOR = CFLAG:(ARG:0):501
+SIF SIDEA > 0
+	CFLAG:SIDEA:501 = FLOOR
+SIF SIDEB > 0
+	CFLAG:SIDEB:501 = FLOOR
+
+;휴식 페이즈
+
+;勇者に紛れ込んだ노예が暗躍します
+IF SIDEA > 0 && CFLAG:SIDEA:1 == 3
+	PRINTFORML %SAVESTR:SIDEA%는 모두가 고요해졌다 그리고 기묘한 의식을 시작했다……(동료의 카르마-1)
+	CALL KARMA, ARG:0, -1
+	SIF SIDEB > 0
+		CALL KARMA, SIDEB, -1
+ENDIF
+
+IF SIDEB > 0 && CFLAG:SIDEB:1 == 3
+	PRINTFORML %SAVESTR:SIDEB%는 모두가 고요해졌다 그리고 기묘한 의식을 시작했다……(동료의 카르마-1)
+	CALL KARMA, ARG:0, -1
+	SIF SIDEA > 0
+		CALL KARMA, SIDEA, -1
+ENDIF
+
+
+;장비 효과(야영)
+W:8 = 18
+CALL EQUIP_CHECK
+IF RESULT > 0
+	IF CFLAG:A:503 & 1
+	ELSE
+		CFLAG:A:503 += 1
+	ENDIF
+ENDIF
+
+IF SIDEA > 0
+	A = SIDEA
+	W:8 = 18
+	CALL EQUIP_CHECK
+	IF RESULT > 0
+		IF CFLAG:A:503 & 1
+		ELSE
+			CFLAG:A:503 += 1
+		ENDIF
+	ENDIF
+ENDIF
+IF SIDEB > 0
+	A = SIDEB
+	W:8 = 18
+	CALL EQUIP_CHECK
+	IF RESULT > 0
+		IF CFLAG:A:503 & 1
+		ELSE
+			CFLAG:A:503 += 1
+		ENDIF
+	ENDIF
+ENDIF
+
+A = ARG:0
+
+
+;장비 효과(야영 금지)
+W:8 = 19
+CALL EQUIP_CHECK
+SIF CFLAG:A:503 & 1 && RESULT > 0
+	CFLAG:A:503 -= 1
+IF SIDEA > 0
+	A = SIDEA
+	;장비 효과(야영 금지)
+	W:8 = 19
+	CALL EQUIP_CHECK
+	SIF CFLAG:A:503 & 1 && RESULT > 0
+		CFLAG:A:503 -= 1
+ENDIF
+IF SIDEB > 0
+	A = SIDEB
+	;장비 효과(야영 금지)
+	W:8 = 19
+	CALL EQUIP_CHECK
+	SIF CFLAG:A:503 & 1 && RESULT > 0
+		CFLAG:A:503 -= 1
+ENDIF
+
+A = ARG:0
+
+
+IF CFLAG:(ARG:0):1 == 2 && CFLAG:(ARG:0):503 & 1
+	IF FLAG:5 & 32
+		PRINTL  
+		DRAWLINE
+		PRINTFORMW %조사선택(SAVESTR:(ARG:0), "는")% 숨어서 휴식했다
+		DRAWLINE
+		PRINTL 
+	ENDIF
+ENDIF
+SIF FLAG:5 & 32
+	PRINTL  
+TARGET = -1
+RETURN 0
+
+
+
+;計算式の変更
+;基礎収入に勇者のレベルを影響させる
+;最終結果に現在の階層を影響させる
+;------------------------------------
+@GET_JUNK_ITEM,ARG
+;------------------------------------
+;手に入れる換金アイテム
+;ダンジョンレベルが高いほど高収入のチャンス
+;LOCAL = RAND:(CFLAG:0:9 + 1) + 100
+LOCAL = 100 + CFLAG:ARG:9 * RAND:(SQRT(CFLAG:0:9 + CFLAG:ARG:9 + 1))
+
+;好奇心ボーナス
+SIF TALENT:ARG:호기심
+	LOCAL += 10
+;金のためボーナス
+SIF TALENT:ARG:용자가된동기 == 2
+	LOCAL += 20
+;ホビットボーナス
+SIF TALENT:ARG:종족 == 10
+	LOCAL += 30
+;ドワーフボーナス
+SIF TALENT:ARG:종족 == 11
+	LOCAL += 30
+;盗賊は収入が多い（1.5倍）
+SIF TALENT:ARG:도적
+	LOCAL += LOCAL / 2
+
+LOCAL *= CFLAG:ARG:501
+
+SIF LOCAL < 1
+	LOCAL = 1
+SIF FLAG:5 & 32
+	PRINTFORML %SAVESTR:ARG%는{LOCAL}을 탐색해 가치가 있는 금품을 손에 넣었다
+
+CFLAG:ARG:581 += LOCAL
+
+RETURN 0
+
+;------------------------------------
+@GET_DOWN_ENEMY,ARG
+;------------------------------------
+;勇者陥落時の初期化や資金入手
+PRINTFORML %조사선택(SAVESTR:(ARG:0), "는")% 함락되었다…
+MONEY += CFLAG:(ARG:0):580 / 100
+PRINTFORML {CFLAG:(ARG:0):580 / 100}G를 입수！
+CFLAG:(ARG:0):580 = 0
+CFLAG:(ARG:0):506 = 1
+CFLAG:(ARG:0):507 = 0
+
+RETURN 0
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,480 @@
+﻿;eraIM@Sから導入しました(eramaou)
+;2011 8/8 입술、鼻ピアス追加
+;-------------------------------------------------
+;피어싱
+;過激なコマンド：調教対象の体にピアスを取り付ける
+;-------------------------------------------------
+@COM87
+
+PRINTL 피어싱
+
+;-------------------------------------------------
+;装着の確認
+;-------------------------------------------------
+$INPUT_LOOP
+PRINTFORM 현재 %SAVESTR:TARGET%의 신체에는  
+SIF CFLAG:7 & 1
+	PRINT 유두 
+SIF CFLAG:7 & 2
+	PRINT 배꼽 
+SIF CFLAG:7 & 4
+	PRINT 음순 
+IF CFLAG:7 & 8
+	IF TALENT:121 || TALENT:122
+		PRINT 페니스 
+	ELSE
+		PRINT 클리토리스 
+	ENDIF
+ENDIF
+SIF CFLAG:7 & 16
+	PRINT 혀 
+SIF CFLAG:7 & 32
+	PRINT 입술 
+SIF CFLAG:7 & 64
+	PRINT 코 
+IF (CFLAG:7 & 1) == 0 && (CFLAG:7 & 2) == 0 && (CFLAG:7 & 4) == 0 && (CFLAG:7 & 8) == 0 && (CFLAG:7 & 16) == 0 && (CFLAG:7 & 32) == 0 && (CFLAG:7 & 64) == 0
+	PRINTL 피어스는 장착되어 있지 않습니다
+ELSE
+	PRINTL 에 피어스가 장착되어 있습니다
+ENDIF
+IF ITEM:34
+	PRINTFORML 수중에 피어스 링이 {ITEM:34}개 있습니다
+ELSE
+	PRINTFORML 수중에 피어스링이 없습니다
+ENDIF
+
+SIF ITEM:34 && ((CFLAG:7 & 1) == 0 || (CFLAG:7 & 2) == 0 || (CFLAG:7 & 4) == 0 || (CFLAG:7 & 8) == 0 || (CFLAG:7 & 16) == 0 || (CFLAG:7 & 32) == 0 || (CFLAG:7 & 64) == 0)
+	PRINTL  [0] - 피어스를 단다
+SIF (CFLAG:7 & 1) || (CFLAG:7 & 2) || (CFLAG:7 & 4) || (CFLAG:7 & 8) || (CFLAG:7 & 16) || (CFLAG:7 & 32) || (CFLAG:7 & 64)
+	PRINTL  [1] - 피어스를 떼어낸다
+PRINTL  [10]- 그만둔다
+
+INPUT
+
+IF RESULT == 0
+	PRINTL どこにピアスを装着させますか？
+	SIF (CFLAG:7 & 1) == 0 && ITEM:34 >= 2
+		PRINTL  [0] - 유두(2개 소비)
+	SIF (CFLAG:7 & 2) == 0
+		PRINTL  [1] - 배꼽
+	SIF (CFLAG:7 & 4) == 0 && TALENT:122 == 0 && ITEM:34 >= 2
+		PRINTL  [2] - 음순(2개 소비)
+	IF (CFLAG:7 & 8) == 0 
+		IF TALENT:121 || TALENT:122
+			PRINTL  [3] - 페니스
+		ELSE
+			PRINTL  [3] - 클리토리스
+		ENDIF
+	ENDIF
+	SIF (CFLAG:7 & 16) == 0
+		PRINTL  [4] - 혀
+	SIF (CFLAG:7 & 32) == 0
+		PRINTL  [5] - 입술
+	SIF (CFLAG:7 & 64) == 0
+		PRINTL  [6] - 코
+	PRINTL  [10]- 그만둔다
+
+	INPUT
+
+	IF RESULT == 10
+		RETURN 0
+	ELSEIF (RESULT == 0 || RESULT == 2) && ITEM:34 < 2
+		GOTO INPUT_LOOP
+	ELSEIF RESULT < 0 || RESULT > 6
+		GOTO INPUT_LOOP
+	ELSEIF RESULT == 2 && TALENT:122
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF RESULT == 1
+	PRINTL 어느 피어스를 떼어냅니까？
+	SIF (CFLAG:7 & 1)
+		PRINTL  [0] - 유두
+	SIF (CFLAG:7 & 2)
+		PRINTL  [1] - 배꼽
+	SIF (CFLAG:7 & 4) && TALENT:122 == 0
+		PRINTL  [2] - 음순
+	IF (CFLAG:7 & 8) 
+		IF TALENT:121 || TALENT:122
+			PRINTL  [3] - 페니스
+		ELSE
+			PRINTL  [3] - 클리토리스
+		ENDIF
+	ENDIF
+	SIF (CFLAG:7 & 16)
+		PRINTL  [4] - 혀
+	SIF (CFLAG:7 & 32)
+		PRINTL  [5] - 입술
+	SIF (CFLAG:7 & 64)
+		PRINTL  [6] - 코
+	PRINTL  [10]- 그만둔다
+
+	INPUT
+
+	IF RESULT == 10
+		RETURN 0
+	ELSEIF RESULT < 0 || RESULT > 6
+		GOTO INPUT_LOOP
+	ELSEIF RESULT == 2 && TALENT:122
+		GOTO INPUT_LOOP
+	ENDIF
+ELSEIF RESULT == 10
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+
+IF RESULT == 0
+	P = 1
+ELSEIF RESULT == 1
+	P = 2
+ELSEIF RESULT == 2
+	P = 4
+ELSEIF RESULT == 3
+	P = 8
+ELSEIF RESULT == 4
+	P = 16
+ELSEIF RESULT == 5
+	P = 32
+ELSEIF RESULT == 6
+	P = 64
+ENDIF
+
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+;縄使用中なら自動成功
+SIF TEQUIP:44
+	GOTO SUCCESS_LOOP
+
+;外す際には自動成功
+SIF CFLAG:7 & P
+	GOTO SUCCESS_LOOP
+
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:욕망
+IF ABL:11
+	SIF S
+		PRINT  + 
+	A += ABL:11 * 3
+	PRINTS ABLNAME:11
+	PRINTV 'LV,ABL:11,'(,ABL:11 * 3,')
+	S = 1
+ENDIF
+;ABL:마조끼
+IF ABL:21
+	SIF S
+		PRINT  + 
+	A += ABL:21 * 4
+	PRINTS ABLNAME:21
+	PRINTV 'LV,ABL:21,'(,ABL:21 * 4,')
+	S = 1
+ENDIF
+;MARK:쾌락각인
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 3
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 3,')
+	S = 1
+ENDIF
+
+;PALAM:욕정
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;호기심
+IF TALENT:23
+	PRINT  - 
+	A -= 3
+	PRINTS TALENTNAME:23
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;보수적
+IF TALENT:24
+	PRINT  - 
+	A -= 3
+	PRINTS TALENTNAME:24
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;아픔에약함
+IF TALENT:40
+	PRINT  - 
+	A -= 3
+	PRINTS TALENTNAME:40
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;아픔에강함
+IF TALENT:41
+	SIF S
+		PRINT  + 
+	A += 3
+	PRINTS TALENTNAME:41
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;애정
+IF TALENT:85 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:85
+	PRINTV '(,5,')
+	S = 5
+ENDIF
+
+;しあわせ草
+IF TEQUIP:21
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINTS ITEMNAME:26
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+
+;마조
+IF TALENT:88
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:89
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+
+;合計を表示(40以上で実行)
+PRINT  = 
+PRINTV A
+
+;取り付け位置で難易度変化
+;ニプル
+IF P == 1
+	V = 36
+;へそ
+ELSEIF P == 2
+	V = 30
+;ラビア
+ELSEIF P == 4
+	V = 40
+;クリ
+ELSEIF P == 8
+	V = 44
+;舌
+ELSEIF P == 16
+	V = 36
+;입술
+ELSEIF P == 32
+	V = 34
+;鼻
+ELSEIF P == 64
+	V = 32
+ENDIF
+
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행값
+PRINTV V
+
+WAIT
+
+;実行できない
+IF A < V
+	PRINTW 저항이 격렬하여 장착시킬 수 없습니다
+	RETURN 0
+ENDIF
+
+$SUCCESS_LOOP
+
+;SAVESTR:22 = 피어싱
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 50
+LOSEBASE:1 += 100
+
+;ニプル
+IF P == 1
+	;対象のＢ⇔調教者の指の汚れが移動
+	STAIN:5 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:5
+;ラビア
+ELSEIF P == 4
+	;対象のＶ⇔調教者の指の汚れが移動
+	STAIN:3 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:3
+;クリ
+ELSEIF P == 8
+	;対象のＶ⇔調教者の指の汚れが移動
+	STAIN:3 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:3
+;舌
+ELSEIF P == 16
+	;対象の口⇔調教者の指の汚れが移動
+	STAIN:0 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:0
+;입술
+ELSEIF P == 32
+	;対象の口⇔調教者の指の汚れが移動
+	STAIN:0 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:0
+ENDIF
+
+SOURCE:6 = 3000
+SOURCE:13 = 1000
+SOURCE:14 = 3000
+
+;ニプル
+IF P == 1
+	LOSEBASE:0 += 50
+	SOURCE:6 += 4000
+	SOURCE:13 += 9000
+	SOURCE:14 += 12000
+;ラビア
+ELSEIF P == 4
+	LOSEBASE:0 += 50
+	LOSEBASE:1 += 50
+	SOURCE:6 += 2000
+	SOURCE:13 += 9000
+	SOURCE:14 += 12000
+;クリ
+ELSEIF P == 8
+	LOSEBASE:0 += 50
+	LOSEBASE:1 += 50
+	SOURCE:6 += 6000
+	SOURCE:13 += 9000
+	SOURCE:14 += 17000
+;舌
+ELSEIF P == 16
+	LOSEBASE:0 += 50
+	SOURCE:6 += 4000
+	SOURCE:13 += 2000
+;입술
+ELSEIF P == 32
+	LOSEBASE:0 += 40
+	SOURCE:6 += 3000
+	SOURCE:13 += 1500
+;鼻
+ELSEIF P == 64
+	LOSEBASE:0 += 20
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES SOURCE:13 , 1.00
+	TIMES SOURCE:14 , 1.00
+ELSEIF ABL:21 == 1
+	TIMES SOURCE:13 , 1.20
+	TIMES SOURCE:14 , 0.90
+ELSEIF ABL:21 == 2
+	TIMES SOURCE:13 , 1.40
+	TIMES SOURCE:14 , 0.80
+ELSEIF ABL:21 == 3
+	TIMES SOURCE:13 , 1.60
+	TIMES SOURCE:14 , 0.50
+ELSEIF ABL:21 == 4
+	TIMES SOURCE:13 , 1.80
+	TIMES SOURCE:14 , 0.30
+ELSEIF ABL:21 >= 5
+	TIMES SOURCE:13 , 2.00
+	TIMES SOURCE:14 , 0.10
+ENDIF
+
+;露出癖をみる
+IF ABL:17 == 2
+	TIMES SOURCE:14 , 0.90
+ELSEIF ABL:17 == 3
+	TIMES SOURCE:14 , 0.80
+ELSEIF ABL:17 == 4
+	TIMES SOURCE:14 , 0.70
+ELSEIF ABL:17 >= 5
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+;しあわせ草使用中なら痛み激減
+SIF TEQUIP:21
+	TIMES SOURCE:6 , 0.05
+
+;ビデオ촬영중
+IF TEQUIP:53
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ENDIF
+
+;過去に装着経験があれば痛み減
+IF CFLAG:7 & (P * 128)
+	TIMES SOURCE:6 , 0.30
+	TIMES SOURCE:13 , 0.20
+	TIMES SOURCE:14 , 0.50
+ENDIF
+
+;外す際にはダメージもパラメータ増減もなし
+IF CFLAG:7 & P
+	LOSEBASE:0 = 0
+	LOSEBASE:1 = 0
+	SOURCE:6 = 0
+	SOURCE:13 = 0
+	SOURCE:14 = 0
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;初めて付けたピアスがへそ以外なら異常経験＋１
+IF CFLAG:7 == 0 && P != 2
+	EXP:50 += 1
+	PRINTL 이상경험＋１
+ENDIF
+
+;-------------------------------------------------
+;装着処理
+;-------------------------------------------------
+IF CFLAG:7 & P
+	CFLAG:7 -= P
+ELSE
+	CFLAG:7 |= P
+	CFLAG:7 |= P * 128
+	ITEM:34 -= 1
+	SIF P == 1 || P == 4 
+		ITEM:34 -= 1
+ENDIF
+
+RETURN 1

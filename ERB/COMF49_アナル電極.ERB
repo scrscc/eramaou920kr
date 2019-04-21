@@ -1,0 +1,296 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;애널전극
+;SM系コマンド
+;-------------------------------------------------
+@COM49
+
+PRINTL 애널전극
+;SAVESTR:22 = 애널전극
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 100
+LOSEBASE:1 += 150
+
+;ABL:Ａ感覚をみる
+IF ABL:3 == 0
+	SOURCE:2 = 200
+	SOURCE:13 = 1000
+ELSEIF ABL:3 == 1
+	SOURCE:2 = 500
+	SOURCE:13 = 2000
+ELSEIF ABL:3 == 2
+	SOURCE:2 = 900
+	SOURCE:13 = 3000
+ELSEIF ABL:3 == 3
+	SOURCE:2 = 1800
+	SOURCE:13 = 5000
+ELSEIF ABL:3 == 4
+	SOURCE:2 = 2400
+	SOURCE:13 = 8000
+ELSE
+	SOURCE:2 = 3800
+	SOURCE:13 = 12000
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:1 < EXPLV:1
+	TIMES SOURCE:2 , 0.50
+	SOURCE:6 = 2000
+ELSEIF EXP:1 < EXPLV:2 / 2
+	TIMES SOURCE:2 , 1.00
+	SOURCE:6 = 300
+ELSEIF EXP:1 < EXPLV:3 / 2
+	TIMES SOURCE:2 , 1.10
+	SOURCE:6 = 50
+ELSEIF EXP:1 < EXPLV:4 / 2
+	TIMES SOURCE:2 , 1.20
+	SOURCE:6 = 10
+ELSEIF EXP:1 < EXPLV:5 / 2
+	TIMES SOURCE:2 , 1.40
+	SOURCE:6 = 0
+ELSE
+	TIMES SOURCE:2 , 1.60
+	SOURCE:6 = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES SOURCE:2 , 0.40
+	SOURCE:6 += 800
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES SOURCE:2 , 0.80
+	SOURCE:6 += 500
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES SOURCE:2 , 1.00
+	SOURCE:6 += 300
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES SOURCE:2 , 1.40
+	SOURCE:6 += 120
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES SOURCE:2 , 1.80
+	SOURCE:6 += 100
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES SOURCE:2 , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES SOURCE:2 , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES SOURCE:2 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES SOURCE:2 , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES SOURCE:2 , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES SOURCE:2 , 0.80
+ELSEIF ABL:10 == 1
+	TIMES SOURCE:2 , 0.90
+ELSEIF ABL:10 == 2
+	TIMES SOURCE:2 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES SOURCE:2 , 1.10
+ELSEIF ABL:10 == 4
+	TIMES SOURCE:2 , 1.20
+ELSE
+	TIMES SOURCE:2 , 1.30
+ENDIF
+
+;장신
+SIF TALENT:99
+	TIMES SOURCE:6 , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES SOURCE:6 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 2.00
+
+;Ａ민감、鈍感をみる
+;快Ａ自体のチェックは後でまとめてやる
+IF TALENT:105
+	TIMES SOURCE:6 , 1.50
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ELSEIF TALENT:106
+	TIMES SOURCE:6 , 0.60
+	TIMES SOURCE:13 , 0.60
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+IF EXP:0 == 0 && TALENT:30
+	SOURCE:13 /= 3
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+EXP:1 += 5
+PRINTL Ａ경험＋５
+
+;전극の着脱
+TEQUIP:49 = 1 - TEQUIP:49
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;애널전극挿入中
+;-------------------------------------------------
+@EQUIP_COM49
+
+PRINTL ＜애널전극삽입중＞
+
+LOSEBASE:0 += 80
+LOSEBASE:1 += 120
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;ABL:Ａ感覚をみる
+IF ABL:3 == 0
+	A = 250
+	B = 1000
+ELSEIF ABL:3 == 1
+	A = 600
+	B = 2000
+ELSEIF ABL:3 == 2
+	A = 1200
+	B = 3000
+ELSEIF ABL:3 == 3
+	A = 1900
+	B = 5000
+ELSEIF ABL:3 == 4
+	A = 2500
+	B = 8000
+ELSE
+	A = 3900
+	B = 12000
+ENDIF
+
+;EXP:Ａ経験をみる
+IF EXP:1 < EXPLV:1
+	TIMES A , 0.50
+	C = 2000
+ELSEIF EXP:1 < EXPLV:2
+	TIMES A , 1.00
+	C = 300
+ELSEIF EXP:1 < EXPLV:3
+	TIMES A , 1.10
+	C = 50
+ELSEIF EXP:1 < EXPLV:4
+	TIMES A , 1.20
+	C = 10
+ELSEIF EXP:1 < EXPLV:5
+	TIMES A , 1.40
+	C = 0
+ELSE
+	TIMES A , 1.60
+	C = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES A , 0.40
+	C += 800
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES A , 0.80
+	C += 500
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES A , 1.00
+	C += 300
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES A , 1.40
+	C += 120
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES A , 1.80
+	C += 100
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES A , 0.80
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES A , 0.90
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES A , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES A , 1.10
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES A , 1.20
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES A , 0.80
+ELSEIF ABL:10 == 1
+	TIMES A , 0.90
+ELSEIF ABL:10 == 2
+	TIMES A , 1.00
+ELSEIF ABL:10 == 3
+	TIMES A , 1.10
+ELSEIF ABL:10 == 4
+	TIMES A , 1.20
+ELSE
+	TIMES A , 1.30
+ENDIF
+
+;장신
+SIF TALENT:99
+	TIMES C , 0.80
+;작은체형
+SIF TALENT:100
+	TIMES C , 2.00
+;미숙
+SIF TALENT:135
+	TIMES C , 2.00
+
+;Ａ민감、鈍感をみる
+;快Ａ自体のチェックは後でまとめてやる
+IF TALENT:105
+	TIMES SOURCE:6 , 1.50
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ELSEIF TALENT:106
+	TIMES SOURCE:6 , 0.60
+	TIMES SOURCE:13 , 0.60
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+SOURCE:2 += A
+SOURCE:13 += B
+SOURCE:6 += C
+
+;処女で貞操観念
+IF EXP:0 == 0 && TALENT:30
+	SOURCE:13 /= 3
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+EXP:1 += 5
+PRINTL Ａ경험＋５
+
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+SIF TEQUIP:90
+	T += 1
+
+RETURN 1

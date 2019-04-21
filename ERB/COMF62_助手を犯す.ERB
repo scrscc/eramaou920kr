@@ -1,0 +1,554 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;조수를범한다
+;조수系コマンド：調教対象の目の前で조수とセックスをする。
+; 　　　　　　　　　「調教対象に조수を犯させる」の意味ではないのに注意
+;-------------------------------------------------
+@COM62
+
+;近親チェック
+TFLAG:14 = 0
+PLAYER = ASSI
+CALL INCEST
+PLAYER = MASTER
+
+PRINTL 조수를범한다
+
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:욕망
+IF ABL:11
+	SIF S
+		PRINT  + 
+	A += ABL:11 * 2
+	PRINTS ABLNAME:11
+	PRINTV 'LV,ABL:11,'(,ABL:11 * 2,')
+	S = 1
+ENDIF
+;ABL:봉사정신
+IF ABL:16
+	SIF S
+		PRINT  + 
+	A += ABL:16 * 4
+	PRINTS ABLNAME:16
+	PRINTV 'LV,ABL:16,'(,ABL:16 * 4,')
+	S = 1
+ENDIF
+
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 2
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 2,')
+	S = 1
+ENDIF
+
+
+;PALAM:욕정
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 2
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 2,')
+	S = 1
+ENDIF
+
+;수줍음
+IF TALENT:35
+	PRINT  - 
+	A -= 1
+	PRINTS TALENTNAME:35
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;헌신적
+IF TALENT:63
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:63
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;애정
+IF TALENT:85 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:85
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;조수が処女
+IF EXP:ASSI:0 == 0
+	PRINT  - 
+	A -= 15
+	PRINT 조수가 처녀
+	PRINTV '(,15,')
+	S = 1
+ENDIF
+
+;조수が調教対象の肉親
+IF TFLAG:14 == 1
+	PRINT  - 
+	A -= 10
+	PRINT 조수가 모친
+	PRINTV '(,10,')
+	S = 1
+ELSEIF TFLAG:14 == 2
+	PRINT  - 
+	A -= 20
+	PRINT 조수가 딸
+	PRINTV '(,20,')
+	S = 1
+ELSEIF TFLAG:14 == 3
+	PRINT  - 
+	A -= 5
+	PRINT 조수가 언니
+	PRINTV '(,5,')
+	S = 1
+ELSEIF TFLAG:14 == 4
+	PRINT  - 
+	A -= 5
+	PRINT 조수가 여동생
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;合計を表示(40以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 40
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행값
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+;SAVESTR:22 = 조수를범한다
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+;-------------------------------------------------
+;사정ゲージチェック
+;-------------------------------------------------
+B = 0
+
+;조수のABL:技巧をみる
+IF ABL:ASSI:12 == 0
+	B = 50
+ELSEIF ABL:ASSI:12 == 1
+	B = 300
+ELSEIF ABL:ASSI:12 == 2
+	B = 800
+ELSEIF ABL:ASSI:12 == 3
+	B = 1500
+ELSEIF ABL:ASSI:12 == 4
+	B = 2000
+ELSE
+	B = 3200
+ENDIF
+
+;조수のABL:従順をみる
+IF ABL:ASSI:10 == 0
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:10 == 1
+	TIMES B , 0.90
+ELSEIF ABL:ASSI:10 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:10 == 3
+	TIMES B , 1.10
+ELSEIF ABL:ASSI:10 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;조수のABL:性交技術をみる
+IF ABL:ASSI:14 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:14 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:14 == 2
+	TIMES B , 1.20
+ELSEIF ABL:ASSI:14 == 3
+	TIMES B , 1.50
+ELSEIF ABL:ASSI:14 == 4
+	TIMES B , 1.80
+ELSE
+	TIMES B , 2.40
+ENDIF
+
+;조수のABL:V感覚をみる
+IF ABL:ASSI:2 == 0
+	TIMES B , 0.50
+ELSEIF ABL:ASSI:2 == 1
+	TIMES B , 0.80
+ELSEIF ABL:ASSI:2 == 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:2 == 3
+	TIMES B , 1.20
+ELSEIF ABL:ASSI:2 == 4
+	TIMES B , 1.50
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;조수のEXP:Ｖ経験をみる
+IF EXP:ASSI:0 < EXPLV:1
+	TIMES B , 0.20
+ELSEIF EXP:ASSI:0 < EXPLV:2
+	TIMES B , 0.50
+ELSEIF EXP:ASSI:0 < EXPLV:3
+	TIMES B , 0.80
+ELSEIF EXP:ASSI:0 < EXPLV:4
+	TIMES B , 1.00
+ELSEIF EXP:ASSI:0 < EXPLV:5
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.40
+ENDIF
+
+;主人のABL:Ｃ感覚をみる
+IF ABL:MASTER:0 == 0
+	TIMES B , 1.00
+ELSEIF ABL:MASTER:0 == 1
+	TIMES B , 1.50
+ELSEIF ABL:MASTER:0 == 2
+	TIMES B , 2.00
+ELSEIF ABL:MASTER:0 == 3
+	TIMES B , 2.50
+ELSEIF ABL:MASTER:0 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+SIF TALENT:MASTER:121 || TALENT:MASTER:122
+	BASE:MASTER:2 += B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:1 += 40
+LOSEBASE:1 += 220
+
+SOURCE:3 = 1500
+SOURCE:14 = 800
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	SOURCE:10 = 200
+	SOURCE:13 = 1600
+ELSEIF ABL:11 == 1
+	SOURCE:10 = 400
+	SOURCE:13 = 1900
+ELSEIF ABL:11 == 2
+	SOURCE:10 = 750
+	SOURCE:13 = 2300
+ELSEIF ABL:11 == 3
+	SOURCE:10 = 1200
+	SOURCE:13 = 2700
+ELSEIF ABL:11 == 4
+	SOURCE:10 = 1700
+	SOURCE:13 = 3100
+ELSE
+	SOURCE:10 = 2500
+	SOURCE:13 = 3500
+ENDIF
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	TIMES SOURCE:3 , 0.10
+	TIMES SOURCE:10 , 0.50
+ELSEIF ABL:16 == 1
+	TIMES SOURCE:3 , 0.40
+	TIMES SOURCE:10 , 0.80
+ELSEIF ABL:16 == 2
+	TIMES SOURCE:3 , 0.70
+	TIMES SOURCE:10 , 1.00
+ELSEIF ABL:16 == 3
+	TIMES SOURCE:3 , 1.00
+	TIMES SOURCE:10 , 1.50
+ELSEIF ABL:16 == 4
+	TIMES SOURCE:3 , 1.60
+	TIMES SOURCE:10 , 2.00
+ELSE
+	TIMES SOURCE:3 , 2.00
+	TIMES SOURCE:10 , 2.50
+ENDIF
+
+;조수のＶ経験と性交経験ＵＰ
+EXP:ASSI:0 += 1
+EXP:ASSI:5 += 1
+
+;조수が調教対象の肉親
+IF TFLAG:14 == 1 
+	IF TALENT:122
+		PRINT ＜아들
+	ELSE
+		PRINT ＜딸
+	ENDIF
+	PRINTL 의 눈앞에서 모친과 섹스＞
+ELSEIF TFLAG:14 == 2
+	IF TALENT:122
+		PRINT ＜부친
+	ELSE
+		PRINT ＜모친
+	ENDIF
+	PRINTL 의 눈앞에서 딸과 섹스＞
+ELSEIF TFLAG:14 == 3
+	IF TALENT:122
+		PRINT ＜동생
+	ELSE
+		PRINT ＜여동생
+	ENDIF
+	PRINTL 의 눈앞에서 언니와 섹스＞
+ELSEIF TFLAG:14 == 4
+	IF TALENT:122
+		PRINT ＜오빠
+	ELSE
+		PRINT ＜언니
+	ENDIF
+	PRINTL 의 눈앞에서 여동생과 섹스＞
+ELSEIF TFLAG:14 == 5
+	IF TALENT:122
+		PRINT ＜사촌
+	ENDIF
+	PRINTL 의 눈앞에서 사촌과 섹스＞
+ENDIF
+;母か娘を目の前で犯されたら屈従と逸脱３倍
+IF TFLAG:14 == 1 || TFLAG:14 == 2
+	TIMES SOURCE:13 , 3.00
+	TIMES SOURCE:14 , 3.00
+	IF ABL:10 < 3
+		PRINTFORML 그리고 %ABLNAME:10%가 ３이 되었다
+		ABL:10 = 3
+	ENDIF
+;姉か妹を目の前で犯されたら屈従と逸脱２倍
+ELSEIF TFLAG:14 == 3 || TFLAG:14 == 4
+	TIMES SOURCE:13 , 2.00
+	TIMES SOURCE:14 , 2.00
+	IF ABL:10 < 2
+		PRINTFORML 그리고 %ABLNAME:10%가 ２가 되었다
+		ABL:10 = 2
+	ENDIF
+;従姉を目の前で犯されたら屈従と逸脱１．５倍
+ELSEIF TFLAG:14 == 5
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+	IF ABL:10 < 2
+		PRINTFORML 그리고 %ABLNAME:10%가 ２가 되었다
+		ABL:10 = 2
+	ENDIF
+ENDIF
+TFLAG:14 = 0
+
+;調教者と조수の親族関係の判定
+C = TARGET
+TARGET = ASSI
+TFLAG:14 = 0
+CALL INCEST
+;調教者が童貞なら童貞喪失
+IF TALENT:PLAYER:1
+	TALENT:PLAYER:1 = 0
+	IF CFLAG:PLAYER:15 == 0
+		CFLAG:PLAYER:15 = NO:ASSI + 1
+		CSTR:PLAYER:3 = %SAVESTR:ASSI%
+		;初体験が近親상간
+		;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+		IF TFLAG:14 == 2 && TALENT:ASSI:122
+			CFLAG:PLAYER:15 = 300
+		ELSEIF TFLAG:14 == 2 && TALENT:ASSI:122 == 0
+			CFLAG:PLAYER:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:ASSI:122
+			CFLAG:PLAYER:15 = 306
+		ELSEIF TFLAG:14 == 3 && TALENT:ASSI:122 == 0
+			CFLAG:PLAYER:15 = 307
+		ELSEIF TFLAG:14 == 4 && TALENT:ASSI:122
+			CFLAG:PLAYER:15 = 304
+		ELSEIF TFLAG:14 == 4 && TALENT:ASSI:122 == 0
+			CFLAG:PLAYER:15 = 305
+		ELSEIF TFLAG:14 == 4 && TALENT:ASSI:122
+			CFLAG:PLAYER:15 = 309
+		ENDIF
+	ENDIF
+ENDIF
+TARGET = C
+
+;조수が処女
+IF TALENT:ASSI:0 == 1
+	TIMES SOURCE:13 , 20.00
+	TIMES SOURCE:14 , 3.00
+	TALENT:ASSI:0 = 0
+
+	IF CFLAG:ASSI:15 == 0
+		;조수の初体験の相手を記録（初期値が0のため、+1して記録）
+		CFLAG:ASSI:15 = NO:PLAYER + 1
+		CSTR:ASSI:3 = %SAVESTR:PLAYER%
+		;조수の初体験が近親상간
+		;初体験の相手が自分の息子・娘という状況は生物学的にありえないので省く
+		IF TFLAG:14 == 1 && TALENT:PLAYER:122
+			CFLAG:ASSI:15 = 300
+		ELSEIF TFLAG:14 == 1 && TALENT:PLAYER:122 == 0
+			CFLAG:ASSI:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122
+			CFLAG:ASSI:15 = 304
+		ELSEIF TFLAG:14 == 3 && TALENT:PLAYER:122 == 0
+			CFLAG:ASSI:15 = 305
+		ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122
+			CFLAG:ASSI:15 = 306
+		ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122 == 0
+			CFLAG:ASSI:15 = 307
+		ELSEIF TFLAG:14 == 4 && TALENT:PLAYER:122 == 0
+			CFLAG:ASSI:15 = 308
+		ENDIF
+	ENDIF
+
+	PRINTL ＜조수가 처녀＞
+
+	EXP:50 += 1
+	PRINTFORML %EXPNAME:50%＋１
+
+	IF ABL:10 < 2
+		PRINTFORML 그리고 %ABLNAME:10%가 ２가 되었다
+		ABL:10 = 2
+	ENDIF
+ENDIF
+
+TFLAG:14 = 0
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+S = BASE:MASTER:2
+EJAC = MAXBASE:MASTER:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+IF E
+;사정している
+	;ABL:精液中毒をみる
+	IF ABL:32 == 0
+		TIMES SOURCE:13, 1.00
+	ELSEIF ABL:32 == 1
+		TIMES SOURCE:13, 1.20
+	ELSEIF ABL:32 == 2
+		TIMES SOURCE:13, 1.50
+	ELSEIF ABL:32 == 3
+		TIMES SOURCE:13, 2.00
+	ELSEIF ABL:32 == 4
+		TIMES SOURCE:13, 2.50
+	ELSE
+		TIMES SOURCE:13, 3.00
+	ENDIF
+ENDIF
+
+;대량사정
+IF E == 2
+	TIMES SOURCE:10 , 1.50
+
+	EXP:MASTER:3 += 2
+	EXP:20 += 1
+	PRINTL 대량사정
+	PRINTL 정액경험＋１
+	;精液汚れ
+	STAIN:MASTER:2 |= 4
+
+	BASE:MASTER:2 -= EJAC*2
+	SIF BASE:MASTER:2 >= EJAC
+		BASE:MASTER:2 = EJAC-1
+
+	;조수を犯すで사정したフラグ
+	TFLAG:7 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:MASTER:3 += 1
+	PRINTL 사정
+	;精液汚れ
+	STAIN:MASTER:2 |= 4
+
+	BASE:MASTER:2 -= EJAC
+	SIF BASE:MASTER:2 >= EJAC
+		BASE:MASTER:2 = EJAC-1
+
+	;조수を犯すで사정したフラグ
+	TFLAG:7 = 1
+ENDIF
+
+IF TALENT:MASTER:119 || TALENT:MASTER:122 || TALENT:MASTER:121
+	;主人のＰ⇔조수のＶの汚れが移動
+	STAIN:MASTER:2 |= STAIN:ASSI:3
+	STAIN:ASSI:3 |= STAIN:MASTER:2
+ENDIF
+
+IF TALENT:MASTER:122 == 0 && TALENT:ASSI:122 == 0
+	PRINTS EXPNAME:40
+	PRINT +10
+	PRINTFORML (%SAVESTR:ASSI%) 
+	EXP:ASSI:40 += 10
+ELSEIF TALENT:MASTER:122 == 1 && TALENT:ASSI:122 == 1
+	PRINTS EXPNAME:41
+	PRINT +10
+	PRINTFORML (%SAVESTR:ASSI%) 
+	EXP:ASSI:41 += 10
+ENDIF
+
+;애정경험
+E = 2
+IF CFLAG:ASSI:2 >= 1000
+	PRINTFORML %EXPNAME:23%+{E}(%SAVESTR:ASSI%)
+	EXP:ASSI:23 += E
+ENDIF
+E = 0
+
+TFLAG:100 = 1
+
+;屈服刻印２に相当
+TFLAG:200 = 2
+
+RETURN 1
+

@@ -1,0 +1,196 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;회화한다
+;-------------------------------------------------
+@COM56
+
+;ビデオ촬영중なら自己紹介に
+IF TEQUIP:53
+	PRINTL 자기소개
+ELSE
+	PRINTL 회화한다
+ENDIF
+;SAVESTR:22 = 회화한다
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+;愛の有無と従順のLvによって変化
+IF TALENT:85 == 1 && ABL:10 >= 5
+	LOSEBASE:0 += 0
+	LOSEBASE:1 += 10
+ELSEIF TALENT:85 == 1
+	LOSEBASE:0 += 10
+	LOSEBASE:1 += 10
+ELSEIF ABL:10 >= 3
+	LOSEBASE:0 += 10
+	LOSEBASE:1 += 30
+ELSE
+	LOSEBASE:0 += 20
+	LOSEBASE:1 += 50
+ENDIF
+
+;愛の有無と従順のLvによって上昇するソースが変化
+IF TALENT:85
+	SOURCE:16 = 60
+ELSEIF ABL:10 >= 5
+	SOURCE:15 = 10
+	SOURCE:16 = 50
+ELSEIF ABL:10 >= 4
+	SOURCE:15 = 20
+	SOURCE:16 = 40
+ELSEIF ABL:10 >= 3
+	SOURCE:15 = 30
+	SOURCE:16 = 30
+ELSEIF ABL:10 >= 2
+	SOURCE:15 = 40
+	SOURCE:16 = 20
+ELSE
+	SOURCE:15 = 50
+	SOURCE:16 = 10
+ENDIF
+
+;PALAM:恭順をみる
+IF PALAM:4 < PALAMLV:1
+	SOURCE:16 += 10
+ELSEIF PALAM:4 < PALAMLV:2
+	SOURCE:16 += 30
+ELSEIF PALAM:4 < PALAMLV:3
+	SOURCE:16 += 60
+ELSEIF PALAM:4 < PALAMLV:4
+	SOURCE:16 += 100
+ELSEIF PALAM:4 >= PALAMLV:4
+	SOURCE:16 += 150
+ENDIF
+
+;奉仕精神をみる
+IF ABL:16 == 0
+	SOURCE:16 += 0
+ELSEIF ABL:16 == 1
+	SOURCE:16 += 20
+ELSEIF ABL:16 == 2
+	SOURCE:16 += 40
+ELSEIF ABL:16 == 3
+	SOURCE:16 += 70
+ELSEIF ABL:16 == 4
+	SOURCE:16 += 110
+ELSE
+	SOURCE:16 += 150
+ENDIF
+
+;話術をみる
+IF ABL:15 == 0
+	TIMES SOURCE:16 , 0.90
+ELSEIF ABL:15 == 1
+	TIMES SOURCE:16 , 1.00
+ELSEIF ABL:15 == 2
+	TIMES SOURCE:16 , 1.10
+ELSEIF ABL:15 == 3
+	TIMES SOURCE:16 , 1.20
+ELSEIF ABL:15 == 4
+	TIMES SOURCE:16 , 1.30
+ELSE
+	TIMES SOURCE:16 , 1.40
+ENDIF
+
+;ビデオ촬영중だと自己紹介に
+IF TEQUIP:53
+	SOURCE:12 = 1000
+
+	;露出癖をみる
+	IF ABL:17 == 0
+		SOURCE:4 = 0
+	ELSEIF ABL:17 == 1
+		SOURCE:4 = 10
+	ELSEIF ABL:17 == 2
+		SOURCE:4 = 50
+	ELSEIF ABL:17 == 3
+		SOURCE:4 = 100
+	ELSEIF ABL:17 == 4
+		SOURCE:4 = 200
+		SOURCE:10 += 50
+	ELSEIF ABL:17 >= 5
+		SOURCE:4 = 400
+		SOURCE:10 += 100
+	ENDIF
+
+	;눈에띄고싶어함
+	IF TALENT:28
+		TIMES SOURCE:4 , 1.20
+		TIMES SOURCE:12 , 1.20
+	ENDIF
+
+	;노출광
+	IF TALENT:89
+		TIMES SOURCE:4 , 1.60
+		TIMES SOURCE:12 , 1.60
+		TIMES SOURCE:10 , 1.60
+	ENDIF
+
+	;自己紹介成功フラグを立てる
+	SIF TALENT:89 || TALENT:85 || ABL:10 >= 3 || ABL:11 >= 4 || ABL:17 >= 2
+		TFLAG:32 |= 2
+
+ENDIF
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;조교회화경험
+;PALAM:恭順をみる
+IF PALAM:4 < PALAMLV:1
+	E = 1
+ELSEIF PALAM:4 < PALAMLV:2
+	E = 1
+ELSEIF PALAM:4 < PALAMLV:3
+	E = 2
+ELSEIF PALAM:4 < PALAMLV:4
+	E = 2
+ELSE
+	E = 3
+ENDIF
+
+;애정
+SIF TALENT:85 && ASSIPLAY == 0
+	E *= 2
+
+;話し手の話術をみる
+IF ABL:PLAYER:15 == 0
+	E += 0
+ELSEIF ABL:PLAYER:15 == 1
+	E += 1
+ELSEIF ABL:PLAYER:15 == 2
+	E += 1
+ELSEIF ABL:PLAYER:15 == 3
+	E += 2
+ELSEIF ABL:PLAYER:15 == 4
+	E += 2
+ELSEIF ABL:PLAYER:15 >= 5
+	E += 3
+ENDIF
+
+PRINTFORML %EXPNAME:73%＋{E}
+EXP:73 += E
+
+;歌唱技術を見る
+IF ABL:71 > 1 && E > 2
+	PRINTFORML %EXPNAME:71%+{E+ABL:71-2}
+	EXP:71 += (E + ABL:71 - 3)
+ENDIF
+;舞踏技術を見る
+IF ABL:72 > 1 && TEQUIP:54 && E > 2
+	PRINTFORML %EXPNAME:72%+{E+ABL:72-2}
+	EXP:72 += (E + ABL:72 - 3)
+ENDIF
+
+;애정경험
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+
+E = 0
+
+RETURN 1

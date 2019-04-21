@@ -1,0 +1,379 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+@COM_ORDER
+
+;-------------------------------------------------
+;조교 대상의 능력
+;-------------------------------------------------
+;ABL:온순
+IF ABL:10
+	A += ABL:10 * 4
+	PRINTS ABLNAME:10
+	PRINTV 'LV,ABL:10,'(,ABL:10 * 4,')
+	S = 1
+ENDIF
+;ABL:마조끼
+IF ABL:21
+	SIF S
+		PRINT  + 
+	A += ABL:21*2
+	PRINTS ABLNAME:21
+	PRINTV 'LV,ABL:21,'(,ABL:21*2,')
+	S = 1
+ENDIF
+
+;-------------------------------------------------
+;레즈 조교의 경우
+;-------------------------------------------------
+IF TALENT:PLAYER:122 == 0 && TALENT:TARGET:122 == 0
+	;ABL:레즈끼
+	IF ABL:22
+		SIF S
+			PRINT  + 
+		A += ABL:22*3
+		PRINTS ABLNAME:22
+		PRINTV 'LV,ABL:22,'(,ABL:22*3,')
+		S = 1
+	ENDIF
+	;ABL:레즈 중독
+	IF ABL:33
+		SIF S
+			PRINT  + 
+		A += ABL:33*3
+		PRINTS ABLNAME:33
+		PRINTV 'LV,ABL:33,'(,ABL:33*3,')
+		S = 1
+	ENDIF
+	;TALENT:바이
+	IF TALENT:81
+		SIF S
+			PRINT  + 
+		A += 10
+		PRINTS TALENTNAME:81
+		PRINTV '(,10,')
+		S = 1
+	ENDIF
+	;호기심
+	IF TALENT:23
+		SIF S
+			PRINT  + 
+		A += 7
+		PRINTS TALENTNAME:23
+		PRINTV '(,7,')
+		S = 1
+	ENDIF
+	;보수적
+	IF TALENT:24
+		PRINT  - 
+		A -= 13
+		PRINTS TALENTNAME:24
+		PRINTV '(,13,')
+		S = 1
+	ENDIF
+ELSE
+	;호기심
+	IF TALENT:23
+		SIF S
+			PRINT  + 
+		A += 5
+		PRINTS TALENTNAME:23
+		PRINTV '(,5,')
+		S = 1
+	ENDIF
+	;보수적
+	IF TALENT:24
+		PRINT  - 
+		A -= 10
+		PRINTS TALENTNAME:24
+		PRINTV '(,10,')
+		S = 1
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;각인 검사
+;-------------------------------------------------
+IF MARK:0
+	SIF S
+		PRINT  + 
+	A += MARK:0 * 5
+	PRINTS MARKNAME:0
+	PRINTV 'LV,MARK:0,'(,MARK:0 * 5,')
+	S = 1
+ENDIF
+
+IF TALENT:15
+	T = 4
+ELSEIF TALENT:17
+	T = 1
+ELSE
+	T = 2
+ENDIF
+
+IF MARK:2
+	SIF S
+		PRINT  + 
+	A += MARK:2 * 3 * T
+	PRINTS MARKNAME:2
+	PRINTV 'LV,MARK:2,'(,MARK:2 * 3 * T,')
+	S = 1
+ENDIF
+IF MARK:3
+	PRINT  - 
+	A -= MARK:3 * 2 * T
+	PRINTS MARKNAME:3
+	PRINTV 'LV,MARK:3,'(,MARK:3 * 2 * T,')
+	S = 1
+ENDIF
+
+;-------------------------------------------------
+;조교 대상의 패러미터
+;-------------------------------------------------
+;PALAM:온순
+IF PALAM:4 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:4 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:4 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:4 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:4 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:4
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;PALAM:공포
+IF PALAM:10 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:10 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:10 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:10 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:10 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:10
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;-------------------------------------------------
+;조교 대상의 소질
+;-------------------------------------------------
+;반항적
+IF TALENT:11
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:11
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;굳건함
+IF TALENT:12
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:12
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;솔직
+IF TALENT:13
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:13
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;자존심
+IF TALENT:15
+	PRINT  - 
+	A -= 15
+	PRINTS TALENTNAME:15
+	PRINTV '(,15,')
+	S = 1
+ENDIF
+;프라이드낮음
+IF TALENT:17
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:17
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;눈에띄고싶어함
+IF TALENT:28
+	SIF S
+		PRINT  + 
+	A += 2
+	PRINTS TALENTNAME:28
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;억압
+IF TALENT:32
+	PRINT  - 
+	A -= 10
+	PRINTS TALENTNAME:32
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+;저항
+IF TALENT:34
+	PRINT  - 
+	A -= 10
+	PRINTS TALENTNAME:34
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+;약점
+IF TALENT:37
+	SIF S
+		PRINT  + 
+	A += 12
+	PRINTS TALENTNAME:37
+	PRINTV '(,12,')
+	S = 1
+ENDIF
+;즉각함락
+IF TALENT:73
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:73
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+
+;음란
+IF TALENT:76
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:76
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;망신
+IF TALENT:86
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINTS TALENTNAME:86
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+
+;-------------------------------------------------
+;조교자의 소질
+;-------------------------------------------------
+;매혹
+IF TALENT:PLAYER:91
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:91
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;수수께끼의매력
+IF TALENT:PLAYER:92
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:92
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;위압감
+IF TALENT:PLAYER:93
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:93
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;새드
+IF TALENT:PLAYER:83
+	SIF S
+		PRINT  + 
+	A += 3
+	PRINTS TALENTNAME:83
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;고무
+IF TALENT:PLAYER:118
+	SIF S
+		PRINT  + 
+	A += 1
+	PRINTS TALENTNAME:118
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+
+;-------------------------------------------------
+;궁합 체크
+;-------------------------------------------------
+R = NO:PLAYER
+IF RELATION:R > 0 && RELATION:R < 30
+	PRINT  - 
+	A -= 10
+	PRINT 궁합 최악
+	PRINTV '(,10,')
+	S = 1
+ELSEIF RELATION:R > 0 && RELATION:R < 70
+	PRINT  - 
+	A -= 6
+	PRINT 궁합 나쁨
+	PRINTV '(,6,')
+	S = 1
+ELSEIF RELATION:R > 0 && RELATION:R < 100
+	PRINT  - 
+	A -= 3
+	PRINT 궁합 보통
+	PRINTV '(,3,')
+	S = 1
+ELSEIF RELATION:R >= 100 && RELATION:R < 130
+	SIF S
+		PRINT  + 
+	A += 3
+	PRINT 궁합 약간 좋음
+	PRINTV '(,3,')
+	S = 1
+ELSEIF RELATION:R >= 100 && RELATION:R < 170
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINT 궁합 좋음
+	PRINTV '(,6,')
+	S = 1
+ELSEIF RELATION:R >= 100 && RELATION:R >= 170
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINT 궁합 최고
+	PRINTV '(,10,')
+	S = 1
+ENDIF

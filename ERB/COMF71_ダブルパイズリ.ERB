@@ -1,0 +1,614 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;더블파이즈리
+;奉仕系コマンド：調教対象と조수に同時にパイズリさせる
+;-------------------------------------------------
+@COM71
+
+;近親チェック
+TFLAG:14 = 0
+CALL INCEST
+IF (TFLAG:14 == 1 || TFLAG:14 == 2) && TALENT:122 == 0 && TALENT:ASSI:122 == 0
+	PRINT 모녀
+ELSEIF TFLAG:14 == 1 || TFLAG:14 == 2
+	PRINT 부자
+ELSEIF  (TFLAG:14 == 3 || TFLAG:14 == 4) && TALENT:122 == 0 && TALENT:ASSI:122 == 0
+	PRINT 자매
+ELSEIF  (TFLAG:14 == 3 || TFLAG:14 == 4) && TALENT:122 && TALENT:ASSI:122
+	PRINT 형제
+ELSEIF  TFLAG:14 == 3 || TFLAG:14 == 4
+	PRINT 남매
+ELSEIF  TFLAG:14 == 5 || TFLAG:14 == 6
+	PRINT 사촌간
+ENDIF
+PRINTL 더블파이즈리
+
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:욕망
+IF ABL:11
+	SIF S
+		PRINT  + 
+	A += ABL:11 * 1
+	PRINTS ABLNAME:11
+	PRINTV 'LV,ABL:11,'(,ABL:11 * 1,')
+	S = 1
+ENDIF
+;ABL:봉사정신
+IF ABL:16
+	SIF S
+		PRINT  + 
+	A += ABL:16 * 4
+	PRINTS ABLNAME:16
+	PRINTV 'LV,ABL:16,'(,ABL:16 * 4,')
+	S = 1
+ENDIF
+;ABL:정액중독
+IF ABL:32
+	SIF S
+		PRINT  + 
+	A += ABL:32 * 3
+	PRINTS ABLNAME:32
+	PRINTV 'LV,ABL:32,'(,ABL:32 * 3,')
+	S = 1
+ENDIF
+
+;쾌락각인
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 1
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 1,')
+	S = 1
+ENDIF
+
+
+;PALAM:욕정
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 1
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 1,')
+	S = 1
+ENDIF
+
+;수줍음
+IF TALENT:35
+	PRINT  - 
+	A -= 1
+	PRINTS TALENTNAME:35
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;악취둔감
+IF TALENT:61
+	SIF S
+		PRINT  + 
+	A += 1
+	PRINTS TALENTNAME:61
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;악취민감
+IF TALENT:62
+	PRINT  - 
+	A -= 3
+	PRINTS TALENTNAME:62
+	PRINTV '(,3,')
+	S = 1
+ENDIF
+;헌신적
+IF TALENT:63
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS TALENTNAME:63
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+;쾌감을부정
+IF TALENT:71
+	PRINT  - 
+	A -= 1
+	PRINTS TALENTNAME:71
+	PRINTV '(,1,')
+	S = 1
+ENDIF
+;남성혐오
+IF TALENT:82 && TALENT:MASTER:122
+	PRINT  - 
+	A -= 12
+	PRINTS TALENTNAME:82
+	PRINTV '(,12,')
+	S = 1
+ENDIF
+;애정
+IF TALENT:85 && ASSIPLAY == 0
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:85
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;調教者がふたなり
+IF TALENT:MASTER:121
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINTS TALENTNAME:121
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+
+Y = 0
+;愛液の汚れ
+SIF STAIN:MASTER:2 & 1
+	Y += 1
+;精液の汚れ
+SIF STAIN:MASTER:2 & 4
+	Y += 3
+;애널の汚れ
+SIF STAIN:MASTER:2 & 8
+	Y += 7
+;母乳の汚れ
+SIF STAIN:MASTER:2 & 16
+	Y += 1
+;尿の汚れ
+SIF STAIN:MASTER:4 & 32
+	Y += 3
+
+SIF TALENT:61
+	Y /= 3
+SIF TALENT:62
+	Y *= 2
+
+;더러움 있음
+IF Y
+	PRINT  - 
+	A -= Y
+	;악취둔감
+	IF TALENT:61
+		PRINT 더러움 있음、
+		PRINTS TALENTNAME:61
+	ELSEIF TALENT:62
+		PRINT 더러움 있음、
+		PRINTS TALENTNAME:62
+	ELSE
+		PRINT 더러움 있음
+	ENDIF
+	PRINTV '(,Y,')
+	S = 1
+ENDIF
+
+;合計を表示(34以上で実行)
+PRINT  = 
+PRINTV A
+
+V = 34
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행값
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+;SAVESTR:22 = 더블파이즈리
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+;ファーストキス
+;IF CFLAG:16 == -1
+;	CFLAG:16 = NO:PLAYER + 201
+;	CSTR:4 = %SAVESTR:PLAYER%
+;	TFLAG:13 = 1
+;ENDIF
+
+;조수のファーストキス
+;IF CFLAG:ASSI:16 == -1
+;	CFLAG:ASSI:16 = NO:PLAYER + 201
+;	CSTR:ASSI:4 = %SAVESTR:PLAYER%
+;ENDIF
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 10
+LOSEBASE:1 += 100
+
+SOURCE:13 = 1800
+SOURCE:14 = 900
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	SOURCE:4 = 420
+	SOURCE:5 = 150
+	SOURCE:8 = 400
+ELSEIF ABL:16 == 1
+	SOURCE:4 = 500
+	SOURCE:5 = 300
+	SOURCE:8 = 300
+ELSEIF ABL:16 == 2
+	SOURCE:4 = 580
+	SOURCE:5 = 600
+	SOURCE:8 = 150
+ELSEIF ABL:16 == 3
+	SOURCE:4 = 660
+	SOURCE:5 = 900
+	SOURCE:8 = 50
+ELSEIF ABL:16 == 4
+	SOURCE:4 = 740
+	SOURCE:5 = 1500
+	SOURCE:8 = 20
+ELSE
+	SOURCE:4 = 820
+	SOURCE:5 = 2200
+	SOURCE:8 = 0
+ENDIF
+
+;ABL:Ｂ感覚をみる
+IF ABL:1 == 0
+	A = 100
+ELSEIF ABL:1 == 1
+	A = 200
+ELSEIF ABL:1 == 2
+	A = 400
+ELSEIF ABL:1 == 3
+	A = 800
+ELSEIF ABL:1 == 4
+	A = 1200
+ELSE
+	A = 1500
+ENDIF
+
+;거유
+IF TALENT:110
+	TIMES A , 1.20
+ENDIF
+;Ｂ민감
+IF TALENT:108
+	TIMES A , 1.20
+;Ｂ둔감
+ELSEIF TALENT:107
+	TIMES A , 0.70
+ENDIF
+
+SOURCE:17 += A
+;ABL:技巧をみる
+IF ABL:12 == 0
+	TIMES SOURCE:4 , 0.50
+	TIMES SOURCE:5 , 0.50
+ELSEIF ABL:12 == 1
+	TIMES SOURCE:4 , 0.80
+	TIMES SOURCE:5 , 0.80
+ELSEIF ABL:12 == 2
+	TIMES SOURCE:4 , 1.00
+	TIMES SOURCE:5 , 1.00
+ELSEIF ABL:12 == 3
+	TIMES SOURCE:4 , 1.20
+	TIMES SOURCE:5 , 1.20
+ELSEIF ABL:12 == 4
+	TIMES SOURCE:4 , 1.50
+	TIMES SOURCE:5 , 1.50
+ELSE
+	TIMES SOURCE:4 , 2.00
+	TIMES SOURCE:5 , 2.00
+ENDIF
+
+;조수のABL:Ｂ感覚をみる
+IF ABL:ASSI:1 == 0
+	TIMES SOURCE:4 , 0.80
+	TIMES SOURCE:5 , 0.50
+ELSEIF ABL:ASSI:1 == 1
+	TIMES SOURCE:4 , 0.90
+	TIMES SOURCE:5 , 0.70
+ELSEIF ABL:ASSI:1 == 2
+	TIMES SOURCE:4 , 1.00
+	TIMES SOURCE:5 , 1.00
+ELSEIF ABL:ASSI:1 == 3
+	TIMES SOURCE:4 , 1.10
+	TIMES SOURCE:5 , 1.20
+ELSEIF ABL:ASSI:1 == 4
+	TIMES SOURCE:4 , 1.20
+	TIMES SOURCE:5 , 1.40
+ELSE
+	TIMES SOURCE:4 , 1.30
+	TIMES SOURCE:5 , 1.70
+ENDIF
+
+;-------------------------------------------------
+;사정ゲージチェック
+;-------------------------------------------------
+B = 0
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	B = 1200
+ELSEIF ABL:12 == 1
+	B = 1500
+ELSEIF ABL:12 == 2
+	B = 2000
+ELSEIF ABL:12 == 3
+	B = 2500
+ELSEIF ABL:12 == 4
+	B = 3000
+ELSE
+	B = 4000
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES B , 0.80
+ELSEIF ABL:10 == 1
+	TIMES B , 0.90
+ELSEIF ABL:10 == 2
+	TIMES B , 1.00
+ELSEIF ABL:10 == 3
+	TIMES B , 1.10
+ELSEIF ABL:10 == 4
+	TIMES B , 1.20
+ELSE
+	TIMES B , 1.30
+ENDIF
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	TIMES B , 0.50
+ELSEIF ABL:16 == 1
+	TIMES B , 0.80
+ELSEIF ABL:16 == 2
+	TIMES B , 1.20
+ELSEIF ABL:16 == 3
+	TIMES B , 1.50
+ELSEIF ABL:16 == 4
+	TIMES B , 1.80
+ELSE
+	TIMES B , 2.40
+ENDIF
+
+;ABL:精液中毒をみる
+IF ABL:32 == 0
+	TIMES B , 1.00
+ELSEIF ABL:32 == 1
+	TIMES B , 1.20
+ELSEIF ABL:32 == 2
+	TIMES B , 1.30
+ELSEIF ABL:32 == 3
+	TIMES B , 1.50
+ELSEIF ABL:32 == 4
+	TIMES B , 1.70
+ELSE
+	TIMES B , 2.00
+ENDIF
+
+;TALENT:舌使いをみる
+SIF TALENT:52
+	TIMES B , 2.00
+
+;조수のABL:技巧をみる
+IF ABL:ASSI:12 >= 2
+	TIMES B , 1.00
+ELSEIF ABL:ASSI:12 == 3
+	TIMES B , 1.20
+ELSEIF ABL:ASSI:12 == 4
+	TIMES B , 1.50
+ELSE
+	TIMES B , 1.80
+ENDIF
+
+;조수のTALENT:舌使いをみる
+SIF TALENT:ASSI:52
+	TIMES B , 2.00
+
+;プレイヤーのABL:Ｃ感覚をみる
+IF ABL:MASTER:0 == 0
+	TIMES B , 1.00
+ELSEIF ABL:MASTER:0 == 1
+	TIMES B , 1.50
+ELSEIF ABL:MASTER:0 == 2
+	TIMES B , 2.00
+ELSEIF ABL:MASTER:0 == 3
+	TIMES B , 2.50
+ELSEIF ABL:MASTER:0 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+
+SIF TALENT:MASTER:121 || TALENT:MASTER:122
+	BASE:MASTER:2 += B
+
+;-------------------------------------------------
+;사정チェック
+;-------------------------------------------------
+S = BASE:MASTER:2
+EJAC = MAXBASE:MASTER:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+IF E
+;사정している
+	TIMES SOURCE:4 , 3.00
+
+	;ABL:精液中毒をみる
+	IF ABL:32 == 0
+		SOURCE:7 = 0
+		TIMES SOURCE:5 , 2.00
+		TIMES SOURCE:13, 4.00
+	ELSEIF ABL:32 == 1
+		SOURCE:7 = 500
+		TIMES SOURCE:5 , 3.00
+		TIMES SOURCE:13, 3.00
+	ELSEIF ABL:32 == 2
+		SOURCE:7 = 1200
+		TIMES SOURCE:5 , 4.00
+		TIMES SOURCE:13, 2.50
+	ELSEIF ABL:32 == 3
+		SOURCE:7 = 3000
+		TIMES SOURCE:5 , 6.00
+		TIMES SOURCE:13, 2.00
+	ELSEIF ABL:32 == 4
+		SOURCE:7 = 6000
+		TIMES SOURCE:5 , 9.00
+		TIMES SOURCE:13, 1.50
+	ELSE
+		SOURCE:7 = 12000
+		TIMES SOURCE:5 , 15.00
+		TIMES SOURCE:13, 1.00
+	ENDIF
+ENDIF
+
+;대량사정
+IF E == 2
+	TIMES SOURCE:7 , 2.00
+	TIMES SOURCE:5 , 1.50
+
+	EXP:MASTER:3 += 2
+	EXP:40 += 6
+	PRINTL 대량사정
+	PRINTL 정액경험＋6
+	;精液汚れ
+	STAIN:MASTER:2 |= 4
+
+	BASE:MASTER:2 -= EJAC*2
+	SIF BASE:MASTER:2 >= EJAC
+		BASE:MASTER:2 = EJAC-1
+
+	;口で사정させたフラグ
+	TFLAG:0 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:MASTER:3 += 1
+	EXP:40 += 3
+	PRINTL 사정
+	PRINTL 정액경험＋3
+	;精液汚れ
+	STAIN:MASTER:2 |= 4
+
+	BASE:MASTER:2 -= EJAC
+	SIF BASE:MASTER:2 >= EJAC
+		BASE:MASTER:2 = EJAC-1
+
+	;口で사정させたフラグ
+	TFLAG:0 = 1
+ENDIF
+
+
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;노예のＢ⇔調教者のＰの汚れが移動
+STAIN:5 |= STAIN:MASTER:2
+STAIN:MASTER:2 |= STAIN:5
+
+;조수のＢ⇔調教者のＰの汚れが移動
+STAIN:ASSI:5 |= STAIN:MASTER:2
+STAIN:MASTER:2 |= STAIN:ASSI:5
+
+
+;奉仕精神ＬＶ２以上、技巧ＬＶ２以上なら汚れをなめ取る
+IF ABL:16 >= 2 && ABL:12 >= 2
+	STAIN:MASTER:2 = 2
+	SIF E >= 1
+		TFLAG:8 = 2
+	
+	;펠라경험
+	PRINTFORML %EXPNAME:22%+1
+	EXP:22 += 1
+	
+	;노예の口⇔調教者のＰの汚れが移動
+	STAIN:0 |= STAIN:MASTER:2
+	STAIN:MASTER:2 |= STAIN:0
+ENDIF
+
+;노예と조수が共に女性でどちらかが精液中毒を持っているとき、노예の口⇔조수の口の汚れが移動
+IF TALENT:122 == 0 && TALENT:ASSI:122 == 0 && (ABL:32 >= 1 || ABL:ASSI:32 >= 1)
+	STAIN:0 |= STAIN:ASSI:2
+	STAIN:ASSI:0 |= STAIN:0
+	SIF E >= 1
+		TFLAG:8 = 3
+ENDIF
+
+
+;-------------------------------------------------
+;経験の処理
+;-------------------------------------------------
+;マスターと노예のレズorホモ
+IF TALENT:122 == 0 && TALENT:MASTER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +7
+	EXP:40 += 7
+ELSEIF TALENT:122 == 1 && TALENT:MASTER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +7
+	EXP:41 += 7
+ENDIF
+
+;조수と노예のレズorホモ
+IF TALENT:122 == 0 && TALENT:ASSI:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +5
+	EXP:40 += 5
+ELSEIF TALENT:122 == 1 && TALENT:ASSI:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +5
+	EXP:41 += 5
+ENDIF
+
+;------------------------------------------------
+;その他の処理
+;------------------------------------------------
+;調教者がふたなり
+IF TALENT:MASTER:121
+	SOURCE:21 /= 2
+ENDIF
+
+TFLAG:100 = 1
+
+;屈服刻印２に相当
+TFLAG:200 = 2
+
+
+RETURN 1
+

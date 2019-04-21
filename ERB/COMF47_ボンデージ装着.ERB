@@ -1,0 +1,126 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;본디지착의
+;조수系コマンド
+;-------------------------------------------------
+@COM47
+
+PRINTL 본디지착의
+;SAVESTR:22 = 본디지착의
+CALL TRAIN_MESSAGE_B
+
+;終了時は修正なし
+IF TEQUIP:47
+	TEQUIP:47 = 0
+	RETURN 1
+ENDIF
+
+LOSEBASE:0 += 0
+;マゾっ気が高いと気力消費減少
+IF ABL:21 == 0
+	LOSEBASE:1 += 60
+ELSEIF ABL:21 <= 2 
+	LOSEBASE:1 += 45
+ELSE
+	LOSEBASE:1 += 30
+ENDIF
+
+;ボンデージルックの装着
+TEQUIP:47 = 1
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;ボンデージ장착중
+;-------------------------------------------------
+@EQUIP_COM47
+
+PRINTFORML ＜%SAVESTR:ASSI%본디지장착중＞
+
+;マゾっ気が高いと気力消費減少
+IF ABL:21 == 0
+	LOSEBASE:1 += 60
+ELSEIF ABL:21 <= 2 
+	LOSEBASE:1 += 45
+ELSE
+	LOSEBASE:1 += 30
+ENDIF
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+A = 300
+
+;PALAM:恐怖をみる
+IF PALAM:10 < PALAMLV:1
+	TIMES A , 1.00
+ELSEIF PALAM:10 < PALAMLV:2
+	TIMES A , 1.10
+ELSEIF PALAM:10 < PALAMLV:3
+	TIMES A , 1.20
+ELSEIF PALAM:10 < PALAMLV:4
+	TIMES A , 1.30
+ELSEIF PALAM:10 >= PALAMLV:4
+	TIMES A , 1.40
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	SOURCE:11 += 0
+	SOURCE:10 += 0
+	SOURCE:15 += 100
+	TIMES A, 0.60
+ELSEIF ABL:21 == 1
+	SOURCE:11 += 50
+	SOURCE:10 += 150
+	SOURCE:15 += 0
+	TIMES A, 1.00
+ELSEIF ABL:21 == 2
+	SOURCE:11 += 100
+	SOURCE:10 += 300
+	SOURCE:15 += 0
+	TIMES A, 1.60
+ELSEIF ABL:21 == 3
+	SOURCE:11 += 150
+	SOURCE:10 += 600
+	SOURCE:15 += 0
+ELSEIF ABL:21 == 4
+	SOURCE:11 += 200
+	SOURCE:10 += 1000
+	SOURCE:15 += 0
+ELSEIF ABL:21 >= 5
+	SOURCE:11 += 300
+	SOURCE:10 += 2000
+	SOURCE:15 += 0
+ENDIF
+
+;ASSIのABL:サドっ気をみる
+IF ABL:ASSI:20 == 0
+	TIMES A , 0.20
+ELSEIF ABL:ASSI:20 == 1
+	TIMES A , 0.50
+ELSEIF ABL:ASSI:20 == 2
+	TIMES A , 1.00
+ELSEIF ABL:ASSI:20 == 3
+	TIMES A , 1.50
+ELSEIF ABL:ASSI:20 == 4
+	TIMES A , 2.50
+ELSEIF ABL:ASSI:20 >= 5
+	TIMES A , 3.00
+ENDIF
+
+;겁쟁이
+SIF TALENT:10
+	TIMES A , 2.00
+
+SOURCE:14 += A
+
+UP:10 += SOURCE:14
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;
+RETURN 1

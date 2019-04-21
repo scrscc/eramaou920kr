@@ -1,0 +1,71 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;이뇨제
+;-------------------------------------------------
+@COM52
+
+PRINTL 이뇨제
+;SAVESTR:22 = 이뇨제
+CALL TRAIN_MESSAGE_B
+
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 120
+LOSEBASE:1 += 120
+;主人か조수に[조합지식]があれば体力・気力消費を抑える
+IF TALENT:MASTER:55
+	LOSEBASE:0 += 50
+	LOSEBASE:1 += 50
+ELSEIF ASSI >= 0
+	IF TALENT:ASSI:55
+		LOSEBASE:0 += 50
+		LOSEBASE:1 += 50
+	ENDIF
+ENDIF
+;薬物経験が多いほど消費体力は減っていく
+IF EXP:57 < EXPLV:1
+	LOSEBASE:0 += 120
+ELSEIF EXP:57 < EXPLV:2
+	LOSEBASE:0 += 30
+ELSEIF EXP:57 < EXPLV:3
+	LOSEBASE:0 += 0
+ELSEIF EXP:57 < EXPLV:5
+	LOSEBASE:0 -= 30
+ELSE
+	LOSEBASE:0 -= 40
+ENDIF
+
+SOURCE:14 = 2000
+;利尿剤効果で軽く変動
+SOURCE:15 = 150
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;レズ・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +1
+	EXP:40 += 1
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +1
+	EXP:41 += 1
+ENDIF
+
+;약물경험
+PRINTFORML %EXPNAME:57%+1
+EXP:57 += 1
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+;利尿剤使用フラグ
+TEQUIP:22 = 1
+
+;アイテム消費
+SIF TEQUIP:90 == 0
+	ITEM:27 -= 1
+
+RETURN 1

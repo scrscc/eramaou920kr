@@ -1,0 +1,203 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+@COM53
+;ビデオカメラ
+
+;SAVESTR:22 = 수정구
+CALL TRAIN_MESSAGE_B
+
+;カウントは10回とします
+LOCAL = 10
+
+IF TEQUIP:53
+;ビデオ撮影がされていれば終了させる
+;テープは終了時に数を減らす
+	TEQUIP:53 = 0
+	ITEM:28 -= 1
+ELSE
+;ビデオ撮影してなければ初期化して開始
+	TEQUIP:53 = 1
+	CFLAG:491 = 0
+	FOR LOCAL:1,0,LOCAL
+		LOCAL:2 = LOCAL:1 + 480
+		CFLAG:(LOCAL:2) = 0
+	NEXT
+	;撮影開始時の状態を記録
+	CFLAG:490 = 0
+	SIF TEQUIP:54
+		CFLAG:490 |= 1
+	SIF TEQUIP:58
+		CFLAG:490 |= 2
+	SIF TEQUIP:59
+		CFLAG:490 |= 4
+	SIF TEQUIP:44
+		CFLAG:490 |= 8
+	SIF TEQUIP:11
+		CFLAG:490 |= 16
+	SIF TEQUIP:13
+		CFLAG:490 |= 32
+	SIF TEQUIP:46
+		CFLAG:490 |= 64
+	SIF TEQUIP:89
+		CFLAG:490 |= 128
+	SIF TEQUIP:90
+		CFLAG:490 |= 256
+	SIF TEQUIP:18
+		CFLAG:490 |= 512
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;ビデオ촬영중･･･
+;-------------------------------------------------
+@EQUIP_COM53
+
+#DIM VIDEO_MAX
+#DIM SAVE_ID
+
+;カウントは10回とします
+VIDEO_MAX = 10 + 4 * CFLAG:499
+
+IF CFLAG:491 == 0
+;初回はカウントに入れない
+	CFLAG:491 += 1
+ELSEIF CFLAG:491 > 0 && CFLAG:491 <= VIDEO_MAX
+	SAVE_ID = CFLAG:491 + 459
+	CFLAG:SAVE_ID = SELECTCOM
+	SIF ASSIPLAY && TALENT:ASSI:122 == 0
+		CFLAG:SAVE_ID += 1000
+	SIF ASSIPLAY && TALENT:ASSI:122
+		CFLAG:SAVE_ID += 2000
+
+	PRINTFORML ＜수정구촬영중{CFLAG:491}/{VIDEO_MAX}＞
+
+	CFLAG:491 += 1
+
+	;パラメータ変化
+	;TODO バランス調整(ビデオによるパラメータ変化は考慮しないか？)
+	LOSEBASE:0 += 0
+	LOSEBASE:1 += 50
+
+	LOCAL:0 = 370
+	LOCAL:1 = 1750
+	LOCAL:2 = 700
+
+	;PALAM:欲情をみる
+	IF PALAM:5 < PALAMLV:1
+		TIMES LOCAL:0 , 0.80
+	ELSEIF PALAM:5 < PALAMLV:2
+		TIMES LOCAL:0 , 0.90
+	ELSEIF PALAM:5 < PALAMLV:3
+		TIMES LOCAL:0 , 1.00
+	ELSEIF PALAM:5 < PALAMLV:4
+		TIMES LOCAL:0 , 1.10
+	ELSEIF PALAM:5 >= PALAMLV:4
+		TIMES LOCAL:0 , 1.20
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES LOCAL:0 , 0.40
+	ELSEIF ABL:10 == 1
+		TIMES LOCAL:0 , 0.60
+	ELSEIF ABL:10 == 2
+		TIMES LOCAL:0 , 0.80
+	ELSEIF ABL:10 == 3
+		TIMES LOCAL:0 , 1.00
+	ELSEIF ABL:10 == 4
+		TIMES LOCAL:0 , 1.10
+	ELSE
+		TIMES LOCAL:0 , 1.20
+	ENDIF
+
+	;ABL:露出癖をみる
+	IF ABL:17 == 0
+		TIMES LOCAL:0 , 0.80
+		TIMES LOCAL:2 , 2.00
+	ELSEIF ABL:17 == 1
+		TIMES LOCAL:0 , 1.00
+		TIMES LOCAL:2 , 1.70
+	ELSEIF ABL:17 == 2
+		TIMES LOCAL:0 , 1.30
+		TIMES LOCAL:2 , 1.40
+	ELSEIF ABL:17 == 3
+		TIMES LOCAL:0 , 1.60
+		TIMES LOCAL:2 , 1.00
+	ELSEIF ABL:17 == 4
+		TIMES LOCAL:0 , 2.00
+		TIMES LOCAL:2 , 0.80
+	ELSE
+		TIMES LOCAL:0 , 3.00
+		TIMES LOCAL:2 , 0.60
+	ENDIF
+
+	;도착적
+	SIF TALENT:80
+		TIMES LOCAL:0 , 2.00
+	;눈에띄고싶어함
+	SIF TALENT:28
+		TIMES LOCAL:0 , 1.50
+	;겁쟁이
+	SIF TALENT:10
+		TIMES LOCAL:2 , 1.70
+	;노출광
+	IF TALENT:89
+		TIMES LOCAL:0 , 2.00
+		TIMES LOCAL:1 , 1.20
+		TIMES LOCAL:2 , 0.50
+	ENDIF
+
+	SOURCE:10 += LOCAL:0
+	SOURCE:12 += LOCAL:1
+	SOURCE:14 += LOCAL:2
+
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+IF ABL:17 >= 2 && CFLAG:491 > 1
+	EXP:70 += 1
+	PRINTL 피사경험＋１
+ENDIF
+
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+;テープ残量がなくなると강제的にEQUIPフラグを外す
+IF CFLAG:491 > VIDEO_MAX
+	PRINTL ＜마력의 잔량이 없어졌습니다. 촬영이 곧 종료됩니다＞
+	PRINTL 수정구에 마력을 충전합니까？
+	IF CFLAG:499 == 0
+		PRINTFORML 충전은 아직 1회도 되어있지 않습니다
+	ELSE
+		PRINTFORML 충전은 이미{CFLAG:499}회 되어있습니다
+	ENDIF
+	PRINTL 충전 비용은 500pt입니다
+	PRINTL [1] 충전한다
+	PRINTL [2] 그만둔다
+	INPUT
+	IF RESULT == 2
+		PRINTL ＜마력의 잔량이 없어졌습니다。수정구 촬영을 종료합니다＞
+	ELSEIF RESULT== 1
+		CFLAG:499 += 1
+		IF CFLAG:499 <= 5
+			MONEY -= 500
+			VIDEO_MAX = 10 + 4 * CFLAG:499
+			PRINTFORM 수정구의 마력이{VIDEO_MAX}회가 되었습니다
+			PRINTL
+		ELSE
+			TEQUIP:53 = 0
+			ITEM:28 -= 1
+			CFLAG:499 = 0
+			PRINTL ＜이 이상은 충전할수 없습니다＞
+			PRINTL ＜마력의 잔량이 없어졌습니다。수정구 촬영을 종료합니다＞
+		ENDIF
+	ENDIF
+ENDIF
+
+SIF ASSIPLAY == 0 && ABL:7 >= 3
+	TFLAG:30 += 1
+
+RETURN 1

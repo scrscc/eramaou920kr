@@ -1,0 +1,457 @@
+﻿;----------------------------------
+@DUNGEON_AFTER
+;----------------------------------
+;ミッションの結果. Aはキャラ
+
+IF CFLAG:A:1 == 5
+	CALL GOHOUBI
+	CFLAG:A:1 = 0
+ELSEIF CFLAG:A:1 == 6
+	CALL OSIOKI
+	CFLAG:A:1 = 0
+ENDIF
+
+RETURN 0
+
+
+;------------------------------------
+@GOHOUBI
+;------------------------------------
+PRINTL
+PRINTFORMW %조사선택(SAVESTR:A, "는")% 용사를 쓰러트리고 당신 곁으로 돌아와 승리 보고를 하였습니다.
+PRINTFORMW %SAVESTR:A%에게 포상을 주세요
+
+PRINTL [0] 아무것도 안한다
+PRINTL [1] 훈장 수여
+PRINTL [2] 약속한 물건
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 3
+	GOTO INPUT_LOOP
+ENDIF
+
+IF RESULT == 0
+	TFLAG:18 = 0
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 불만스러운 표정으로 자신의 방에 돌아갔다
+	CALL GOHOUBI_AFTER_KOUJO
+ELSEIF RESULT == 1
+	TFLAG:18 = 1
+	PRINTFORMW %SAVESTR:A%에게 훈장을 수여했다
+	SIF CFLAG:A:7&1 == 1
+		PRINTFORMW %SAVESTR:A%망설이지 않고 자신의 유두에 붙여진 피어싱과 교체 하였다
+	PRINTFORML %조사선택(SAVESTR:A, "는")% 자랑스럽게 훈장을 몸에 달고 있다
+	PRINTFORMW 훈장경험+1
+	EXP:A:81 += 1
+		CALL GOHOUBI_AFTER_KOUJO
+ELSEIF RESULT == 2
+	TFLAG:18 = 2
+	IF CFLAG:A:504 == 0
+		;お金を渡す
+		PRINTFORMW 당신은 %SAVESTR:A%에게 금화가 가득찬 자루를 하사 했다. 
+		PRINTFORMW 붙잡힌 용사는 그처럼 타락한 %SAVESTR:A%의 모습을 보고 충격을 받고있다………
+		CALL GOHOUBI_AFTER_KOUJO
+	ELSEIF CFLAG:A:504 == 1
+		;犬と獣姦
+		IF TALENT:A:0 == 1
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 알몸으로 항문을 벌리면서 개집 앞에서 개를 유혹했다
+			PRINTFORMW 개가 덮쳐 교미가 시작되면, %조사선택(SAVESTR:A, "는")% 짐승같은 교성을 울리며 항문으로 절정에 도달했다.
+			PRINTFORMW 전투로 인한 흥분이 남아있었는지, 교미는 평소보다 더 격렬하고 긴 시간동안 이루어졌다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌A의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL A경험+10
+			PRINTL 절정경험+5
+			PRINTW 수간경험+10
+			JUEL:A:2 += 500
+			JUEL:A:5 += 200
+			EXP:A:1 += 10
+			EXP:A:2 += 5
+			EXP:A:56 += 10
+		ELSE
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 알몸으로 엉덩이를 흔들며 개집 앞에서 개를 유혹했다
+			PRINTFORMW 개가 덮쳐 교미가 시작되면 %조사선택(SAVESTR:A, "는")% 짐승같은 교성을 울리며 절정에 도달했다. 
+			PRINTFORMW 전투로 인한 흥분이 남아있었는지, 교미는 평소보다 더 격렬하고 긴 시간동안 이루어졌다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌V의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL V경험+10
+			PRINTL 절정경험+5
+			PRINTW 수간경험+10
+			JUEL:A:1 += 500
+			JUEL:A:5 += 200
+			EXP:A:0 += 10
+			EXP:A:2 += 5
+			EXP:A:56 += 10
+		ENDIF
+	ELSEIF CFLAG:A:504 == 2
+		;豚と獣姦
+		IF TALENT:A:0 == 1
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 알몸으로 돼지우리에 뛰어들어 정신없이 돼지의 냄새나고 드릴처럼 생긴 페니스에 맹렬하게 달라붙었다 
+			PRINTFORMW 암퇘지가 등장하자 흥분한 돼지들은 줄줄이 기운차게 %조사선택(SAVESTR:A, "를")% 덮쳤다 
+			PRINTFORMW 부히 부히 호흡을 거칠게하면서 %조사선택(SAVESTR:A, "는")% 돼지와의 교미에 심취하고있다 ...
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌A의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL A경험+10
+			PRINTL 절정경험+5
+			PRINTW 수간경험+10
+			JUEL:A:2 += 500
+			JUEL:A:5 += 200
+			EXP:A:1 += 10
+			EXP:A:2 += 5
+			EXP:A:56 += 10
+		ELSE
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 알몸으로 돼지우리에 뛰어들어 정신없이 돼지의 냄새나고 드릴처럼 생긴 페니스에 맹렬하게 달라붙었다 
+			PRINTFORMW 암퇘지가 등장하자 흥분한 돼지들은 줄줄이 기운차게 %조사선택(SAVESTR:A, "를")% 덮쳤다 
+			PRINTFORMW 부히 부히 호흡을 거칠게하면서 %조사선택(SAVESTR:A, "는")% 돼지와의 교미에 심취하고있다 ...…
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌V의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL V경험+10
+			PRINTL 절정경험+5
+			PRINTW 수간경험+10
+			JUEL:A:1 += 500
+			JUEL:A:5 += 200
+			EXP:A:0 += 10
+			EXP:A:2 += 5
+			EXP:A:56 += 10
+		ENDIF
+	ELSEIF CFLAG:A:504 == 3
+		;馬と獣姦
+		IF TALENT:A:0 == 1
+			PRINTFORMW 엎드려서 사지를 받침에 고정하고 %조사선택(SAVESTR:A, "는")%  앞으로 일어날 비정상적인 섹스에 사타구니를 적시고 있었다 
+			PRINTFORMW 몸집이 작은 말이 끌려와 %SAVESTR:A%의 등에 올라탄다. 그 사타구니에는, 거대한 말의 페니스가 발기하고 있었다 
+			PRINTFORMW 이윽고 격렬한 교미가 시작되었다. 삐걱거리는 받침 위에서 %조사선택(SAVESTR:A, "는")% 거품 섞인 침을 흘리며 쾌락에 몸을 맡기고 있었다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌A의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL A경험+10
+			PRINTL 절정경험+5
+			PRINTL 수간경험+10
+			PRINTW A확장경험+10
+			JUEL:A:2 += 500
+			JUEL:A:5 += 200
+			EXP:A:1 += 10
+			EXP:A:2 += 5
+			EXP:A:53 += 10
+			EXP:A:56 += 10
+		ELSE
+			PRINTFORMW 엎드려서 사지를 받침에 고정하고 %조사선택(SAVESTR:A, "는")%  앞으로 일어날 비정상적인 섹스에 사타구니를 적시고 있었다 
+			PRINTFORMW 몸집이 작은 말이 끌려와 %SAVESTR:A%의 등에 올라탄다. 그 사타구니에는, 거대한 말의 페니스가 발기하고 있었다 
+			PRINTFORMW 이윽고 격렬한 교미가 시작되었다. 삐걱거리는 받침 위에서 %조사선택(SAVESTR:A, "는")% 거품 섞인 침을 흘리며 쾌락에 몸을 맡기고 있었다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌V의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL V경험+10
+			PRINTL 절정경험+5
+			PRINTL 수간경험+10
+			PRINTW V확장경험+10
+			JUEL:A:1 += 500
+			JUEL:A:5 += 200
+			EXP:A:0 += 10
+			EXP:A:2 += 5
+			EXP:A:52 += 10
+			EXP:A:56 += 10
+		ENDIF
+	ELSEIF CFLAG:A:504 == 4
+		;키스
+		PRINTFORMW 눈을 감은 채 %조사선택(SAVESTR:A, "는")% 손을 마주잡고 키스를 요구했다
+		PRINTFORMW 당신은 그손을 잡고, 부드럽게 %SAVESTR:A%에게 키스를 했다
+		CALL GOHOUBI_AFTER_KOUJO
+		PRINTW 애정경험+10
+		EXP:A:23 += 10
+	ELSEIF CFLAG:A:504 == 5
+		;セックス
+		PRINTFORMW 당신은 싸움에서 달아오른 %SAVESTR:A%의 신체를 안았다
+		IF ABL:A:2 > ABL:A:3
+			PRINTFORMW 질과 페니스로 상냥하게 서로 사랑했다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌V의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL V경험+10
+			PRINTL 성교경험+10
+			PRINTW 절정경험+5
+			JUEL:A:1 += 500
+			JUEL:A:5 += 200
+			EXP:A:0 += 10
+			EXP:A:5 += 10
+			EXP:A:2 += 5
+		ELSE
+			PRINTFORMW 쑤심이 멈추지 않는 애널을 페니스로 위로해 주었다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌A의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL A경험+10
+			PRINTL 성교경험+10
+			PRINTW 절정경험+5
+			JUEL:A:2 += 500
+			JUEL:A:5 += 200
+			EXP:A:1 += 10
+			EXP:A:5 += 10
+			EXP:A:2 += 5
+		ENDIF
+	ELSEIF CFLAG:A:504 == 6
+		;ザーメン
+		PRINTFORMW 당신은 무릎을 꿇은채 입을 벌리며 혀를 쑥 내밀고 정액을 조르는 %SAVESTR:A%의 입을 노리고 사정했다 
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 흘러 넘친 정액을 손가락으로 건져 핥으며, 사랑스럽다는 듯이 당신의 페니스를 핥고있다
+		CALL GOHOUBI_AFTER_KOUJO
+		PRINTL 욕정의 구슬+200
+		PRINTL 펠라경험+10
+		PRINTW 정액경험+5
+		JUEL:A:5 += 200
+		EXP:A:22 += 10
+		EXP:A:20 += 5
+	ELSEIF CFLAG:A:504 == 7
+		;乱交
+		IF TALENT:A:0 == 1
+			PRINTFORMW 몬스터와 마족들을 채워넣은, 난교 파티가 시작됐다 
+			PRINTFORMW 주역인 %조사선택(SAVESTR:A, "는")% 남자도 여자도 상관없이 안고, 정액과 애액이 몸에 스며들 정도로 마구 발랐다 
+			PRINTFORMW 마지막으로 전원이 %SAVESTR:A%에게 정액이나 소변을 퍼붓고, 파티는 끝났다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌A의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL A경험+10
+			PRINTW 절정경험+5
+			JUEL:A:2 += 500
+			JUEL:A:5 += 200
+			EXP:A:1 += 10
+			EXP:A:2 += 5
+		ELSE
+			PRINTFORMW 몬스터와 마족들을 채워넣은, 난교 파티가 시작됐다 
+			PRINTFORMW 주역인 %조사선택(SAVESTR:A, "는")% 남자도 여자도 상관없이 안고, 정액과 애액이 몸에 스며들 정도로 마구 발랐다 
+			PRINTFORMW 마지막으로 전원이 %SAVESTR:A%에게 정액이나 소변을 퍼붓고, 파티는 끝났다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌V의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL V경험+10
+			PRINTW 절정경험+5
+			JUEL:A:1 += 500
+			JUEL:A:5 += 200
+			EXP:A:0 += 10
+			EXP:A:2 += 5
+		ENDIF
+	ELSEIF CFLAG:A:504 == 8
+		;おしっこ
+		PRINTFORMW 페니스에 맹렬하게 달라붙는 %SAVESTR:A%의 입속에, 당신은 소변을 쌌다 
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 기쁜 듯이 꿀꺽꿀꺽 마시고, 
+		PRINTFORMW 바닥에 흘러넘친 것은 혀로 핥아 마셔나갔다
+		CALL GOHOUBI_AFTER_KOUJO
+		PRINTW 욕정의 구슬+200
+		JUEL:A:5 += 200
+	ELSEIF CFLAG:A:504 == 9
+		;童貞狩り
+		PRINTFORM %조사선택(SAVESTR:A, "는")% 선택된 동정의 마족을
+		IF ABL:A:2 > ABL:A:3
+			PRINTFORMW 질으로 물었다
+			PRINTFORMW 섹스의 기쁨을 가르쳐 주었다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌V의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL V경험+10
+			PRINTL 성교경험+10
+			PRINTW 절정경험+5
+			JUEL:A:1 += 500
+			JUEL:A:5 += 200
+			EXP:A:0 += 10
+			EXP:A:5 += 10
+			EXP:A:2 += 5
+		ELSE
+			PRINTFORMW 항문에서 넣었다
+			PRINTFORMW 항문으로 탈동정을 시켜 주었다
+			CALL GOHOUBI_AFTER_KOUJO
+			PRINTL 쾌A의 구슬+500
+			PRINTL 욕정의 구슬+200
+			PRINTL A경험+10
+			PRINTL 성교경험+10
+			PRINTW 절정경험+5
+			JUEL:A:2 += 500
+			JUEL:A:5 += 200
+			EXP:A:1 += 10
+			EXP:A:5 += 10
+			EXP:A:2 += 5
+		ENDIF
+	ELSE
+	ENDIF
+ENDIF
+
+;-------------------------------------
+@OSIOKI
+;-------------------------------------
+PRINTL
+PRINTFORMW %조사선택(SAVESTR:A, "는")% 용사를 찾아내지 못하고 한심하게 돌아 왔습니다
+PRINTFORMW %SAVESTR:A%에게 징계를 하시겠습니까?
+
+PRINT [0] 아무것도안한다　
+PRINT [1] 약한 전기의자 형
+PRINTL [2] 노상자위 형　
+PRINT [3] 노상탈분 형　
+PRINT [4] 채찍질 형　
+PRINTL [5] 인간 소변기 형
+PRINT [6] 화장실 청소 형
+PRINT [7] 밥 굶게하기 형　
+PRINTL [8] 미약 방치 형　
+$INPUT_LOOP
+INPUT
+IF RESULT < 0
+	GOTO INPUT_LOOP
+ELSEIF RESULT >= 9
+	GOTO INPUT_LOOP
+ENDIF
+
+IF RESULT == 0
+	TFLAG:18 = 0
+	;아무것도안한다
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 안심한 얼굴로 자기방으로 돌아갔다
+	CALL OSIOKI_KOUJO
+ELSEIF RESULT == 1
+	TFLAG:18 = 1
+	;弱電気椅子刑
+	PRINTFORMW %조사선택(SAVESTR:A, "를")% 전기의자에 묶어놓고 약한 전류를 가했다
+	IF ABL:A:21 >= 3
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 황홀한 표정으로, 전격의 아픔에 사타구니를 적시고있다
+		CALL OSIOKI_KOUJO
+		PRINTL 고통의 구슬+100
+		PRINTW 욕정의 구슬+100
+		JUEL:A:9 += 100
+		JUEL:A:5 += 100
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 전격의 아픔에 비명을 지르며 소변을 흘리고 있다
+		CALL OSIOKI_KOUJO
+		PRINTW 고통의 구슬+100
+		JUEL:A:9 += 100
+	ENDIF
+ELSEIF RESULT == 2
+	TFLAG:18 = 2
+	;路上自慰刑
+	PRINTFORMW %SAVESTR:A%에게 던전의 대로에 알몸으로 나가, 길 한복판에서 자위하도록 시켰다
+	IF ABL:A:17 >= 4
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 음란한 말을하며 길을 가는 마족들에게 치태를 보였다
+		CALL OSIOKI_KOUJO
+		PRINTL 욕정의 구슬+100
+		PRINTL 자위경험+3
+		PRINTW 조교자위경험+3
+		JUEL:A:5 += 100
+		EXP:A:10 += 3
+		EXP:A:11 += 3
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 새빨갛게 얼굴을 물들이고 부끄러운 듯이 조심조심 자위했다
+		CALL OSIOKI_KOUJO
+		PRINTL 치정의 구슬+100
+		PRINTL 자위경험+1
+		PRINTW 조교자위경험+1
+		JUEL:A:8 += 100
+		EXP:A:10 += 1
+		EXP:A:11 += 1
+	ENDIF
+ELSEIF RESULT == 3
+	TFLAG:18 = 3
+	;路上脱糞刑
+	PRINTFORMW %SAVESTR:A%에게 던전의 대로에 알몸으로 나가, 길 한복판에서 용변을 보도록 시켰다
+	IF ABL:A:17 >= 6
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 공중 배변의 해방감으로, 음란하게 자위까지 시작해 버렸다.
+		PRINTFORMW 길을 가는 마족들은 모멸의 표정으로 %조사선택(SAVESTR:A, "를")% 냉담하게 보고 있다
+		CALL OSIOKI_KOUJO
+		PRINTL 욕정의 구슬+100
+		PRINTW 자위경험+3
+		JUEL:A:5 += 500
+		EXP:A:10 += 3
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 얼굴을 새빨갛게하고 배변하고, 넘치는 수치심에 울기 시작해 버렸다
+		PRINTFORMW 길을 가는 마족들은 모멸의 표정으로 %조사선택(SAVESTR:A, "를")% 냉담하게 보고 있다
+		CALL OSIOKI_KOUJO
+		PRINTL 치정의 구슬+100
+		JUEL:A:8 += 500
+	ENDIF
+ELSEIF RESULT == 4
+	TFLAG:18 = 4
+	;鞭打ち刑
+	PRINTFORMW %조사선택(SAVESTR:A, "를")% 밧줄로 고정하고, 채찍으로 몇 번이나 내리쳤다
+	IF ABL:A:21 >= 3
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 황홀한 표정으로, 교성을 내지르며 채찍의 쾌감에 만취하고있다
+		CALL OSIOKI_KOUJO
+		PRINTL 고통의 구슬+100
+		PRINTW 욕정의 구슬+100
+		JUEL:A:9 += 100
+		JUEL:A:5 += 100
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 울부짖으면서 채찍의 고통으로 소변을 흘리고 있다
+		CALL OSIOKI_KOUJO
+		PRINTW 고통의 구슬+100
+		JUEL:A:9 += 100
+	ENDIF 
+ELSEIF RESULT == 5
+	TFLAG:18 = 5
+	;人間小便器刑
+	PRINTFORMW %조사선택(SAVESTR:A, "를")% 소변기에 고정해, 이용자에게 자유롭게 소변을 받게했다
+	IF TALENT:A:88 == 1 || TALENT:A:76 == 1
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 흥분하며, 소변을 입으로 받아 삼켰다 
+		PRINTFORMW 소변 투성이의 %조사선택(SAVESTR:A, "는")% 황홀한 표정으로 사타구니마저 적시고 있었다
+		CALL OSIOKI_KOUJO
+		PRINTL 고통의 구슬+100
+		PRINTW 욕정의 구슬+100
+		JUEL:A:9 += 100
+		JUEL:A:5 += 100
+	ELSE
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 비명을 지르며 싫어했지만, 이용자는 가차없이 그 얼굴에 소변을 마구 퍼부었다
+		PRINTFORMW 이윽고 소변 투성이의 %조사선택(SAVESTR:A, "는")% 절망한 표정으로 헛소리를 반복했다
+		CALL OSIOKI_KOUJO		
+		PRINTW 고통의 구슬+100
+		JUEL:A:9 += 100
+	ENDIF
+ELSEIF RESULT == 6
+	TFLAG:18 = 6
+	;トイレ掃除刑
+	PRINTFORMW %SAVESTR:A%에게 징벌로 화장실 청소를 명했다 
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 마지못해 화장실을 청소하고 있다
+	CALL OSIOKI_KOUJO
+ELSEIF RESULT == 7
+	TFLAG:18 = 7
+	;ご飯抜き刑
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 처벌로 밥을 굶게 되었다 
+	PRINTFORMW %조사선택(SAVESTR:A, "는")% 배가 고프다
+	CALL OSIOKI_KOUJO
+ELSEIF RESULT == 8
+	TFLAG:18 = 8
+	;미약 방치 형
+	PRINTFORMW %SAVESTR:A%의 몸을 고정하고, 위험치에 아슬아슬한 강력한 미약을 주사했다 
+	PRINTFORMW 효과는 곧바로 나타나, 온몸이 성감대가 되어 미칠정도의 쑤심이 찾아왔다 
+	PRINTFORMW 옆에는 젊은 레즈비언인 마족의 여자가 대기하고있고, 옆의 받침대에는 여러종류지 음구가 진열되어 있다 
+	PRINTFORMW %조사선택(SAVESTR:A, "가")% 미치지 않도록 이 여자가 이따금 상대를 해 주는 것이지만, 아슬아슬할때 까지 애태우도록 명령이 되어있다 
+	PRINTFORMW 여자는 시원스런 표정으로 움직이지 않으며 %SAVESTR:A%에게 몇번이고 굴욕적이며 음탕한 말을 하도록 강제했다
+	PRINTFORMW %SAVESTR:A%의 목소리에 필사적인 애원이 섞이는것을 들으면서, 당신은 방을 뒤로했다
+	CALL OSIOKI_KOUJO
+	PRINTL 고통의 구슬+100
+	PRINTL 욕정의 구슬+100
+	PRINTW 약물경험+10
+	JUEL:A:9 += 100
+	JUEL:A:5 += 100
+	EXP:A:57 += 10
+ELSEIF RESULT == 9
+	TFLAG:18 = 9
+	;
+	PRINTFORMW 
+ENDIF
+
+RETURN 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
