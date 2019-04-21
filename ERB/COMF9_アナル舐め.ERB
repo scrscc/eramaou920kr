@@ -1,0 +1,79 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;애널핥기
+;愛撫系コマンド：調教者が調教対象の애널を口で刺激
+;-------------------------------------------------
+@COM9
+
+PRINTL 애널핥기
+;SAVESTR:22 = 애널핥기
+CALL TRAIN_MESSAGE_B
+
+;애널핥기
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+SOURCE:10 = 50
+SOURCE:12 = 300
+SOURCE:14 = 500
+
+;ABL:Ａ感覚をみる
+IF ABL:3 == 0
+	SOURCE:2 = 5
+ELSEIF ABL:3 == 1
+	SOURCE:2 = 50
+ELSEIF ABL:3 == 2
+	SOURCE:2 = 200
+ELSEIF ABL:3 == 3
+	SOURCE:2 = 500
+ELSEIF ABL:3 == 4
+	SOURCE:2 = 1000
+ELSE
+	SOURCE:2 = 1800
+ENDIF
+
+;獣姦の場合はここで終了
+IF TEQUIP:89
+	EXP:1 += 1
+	PRINTL Ａ경험＋１
+	RETURN 1
+ENDIF
+
+;調教者のTALENT:舌使いをみる
+IF TALENT:PLAYER:52 || TEQUIP:89
+	TIMES SOURCE:2 , 2.00
+	SOURCE:16 += SOURCE:0/20
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;노예のＡ⇔調教者の口の汚れが移動
+STAIN:4 |= STAIN:PLAYER:0
+STAIN:PLAYER:0 |= STAIN:4
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;レズ・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +3
+	EXP:40 += 3
+ENDIF
+
+EXP:1 += 1
+PRINTL Ａ경험＋１
+
+;ファーストキス
+IF CFLAG:PLAYER:16 == -1
+	CFLAG:PLAYER:16 = NO:TARGET + 401
+	CSTR:PLAYER:4 = %SAVESTR:TARGET%
+ENDIF
+
+RETURN 1

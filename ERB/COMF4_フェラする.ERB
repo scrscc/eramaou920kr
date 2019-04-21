@@ -1,0 +1,117 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;펠라한다
+;愛撫系コマンド：調教者が調教対象のペニスを口で刺激
+;-------------------------------------------------
+@COM4
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;縄使用中や獣姦中でなく、でなく、前回の調教がフェラチオかクンニ강제かシックスナインだとシックスナインに
+	IF (PREVCOM == 31 || PREVCOM == 61 || PREVCOM == 69) && TEQUIP:44 == 0 && TEQUIP:89 == 0
+		CALL COM_ABLE69
+		SIF RESULT == 1
+			JUMP COM69
+	ENDIF
+ENDIF
+
+PRINTL 펠라한다
+;SAVESTR:22 = 펠라한다
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+SOURCE:12 = 220
+SOURCE:14 = 50
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 50
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 200
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 800
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 1600
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 2400
+ELSE
+	SOURCE:0 = 3200
+ENDIF
+
+;調教者のTALENT:舌使いをみる
+IF TALENT:PLAYER:52 || TEQUIP:89
+	TIMES SOURCE:0 , 2.00
+	SOURCE:16 += SOURCE:0/20
+ENDIF
+
+;獣姦の場合はここで終了
+SIF TEQUIP:89
+	RETURN 1
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;노예のＰ⇔調教者の口の汚れが移動
+STAIN:2 |= STAIN:PLAYER:0
+STAIN:PLAYER:0 |= STAIN:2
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;レズ・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +3
+	EXP:40 += 3
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +3
+	EXP:41 += 3
+ENDIF
+
+;調教者のファーストキス
+IF CFLAG:PLAYER:16 == -1
+	CFLAG:PLAYER:16 = NO:TARGET + 201
+	CSTR:PLAYER:4 = %SAVESTR:TARGET%
+ENDIF
+
+CALL EVENT_SEITSU
+
+;애정경험
+IF TALENT:122
+	E = 2
+ELSE
+	E = 1
+ENDIF
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+RETURN 1
+;
+;-------------------------------------------------
+;-------------------------------------------------
+;精通
+;-------------------------------------------------
+@EVENT_SEITSU
+A = NO:PLAYER
+;【남자】か【후타나리】であり【미숙】
+SIF (TALENT:121 == 0 && TALENT:122 == 0) || TALENT:135 == 0
+	RETURN 0
+;更に［Ｃ感度］５以上で촉수調教や獣姦でなく
+SIF ABL:0 <= 4 || TEQUIP:90 || TEQUIP:89
+	RETURN 0
+;「調教対象」から「調教者」への関係が150以上
+SIF RELATION:TARGET:A < 150
+	RETURN 0
+PRINTFORML %SAVESTR:PLAYER%에게 페니스를 빨리는 사이、%SAVESTR:TARGET%는 절정을 맞이했다…
+TALENT:135 = 0
+
+RETURN 1

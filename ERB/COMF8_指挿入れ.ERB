@@ -1,0 +1,186 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;손가락넣기
+;愛撫系コマンド：調教者が調教対象のヴァギナを手で刺激
+;-------------------------------------------------
+@COM8
+;処女を奪うかどうかの確認
+CALL CONFIRM_LOST_VIRGIN
+SIF RESULT == 0
+	RETURN 0
+
+;前回の調教が指挿入れかつプレイヤの技巧３以上だとＧスポット刺激に
+SIF PREVCOM == 8 && ABL:PLAYER:12 >= 3
+	JUMP COM84
+;前回の調教がGスポットならさらにＧスポット刺激に
+SIF PREVCOM == 84
+	JUMP COM84
+
+PRINTL 손가락넣기
+;SAVESTR:22 = 손가락넣기
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 30
+LOSEBASE:1 += 80
+
+SOURCE:12 = 300
+SOURCE:14 = 200
+
+;ABL:Ｖ感覚をみる
+IF ABL:2 == 0
+	SOURCE:1 = 10
+	SOURCE:13 = 150
+ELSEIF ABL:2 == 1
+	SOURCE:1 = 50
+	SOURCE:13 = 250
+ELSEIF ABL:2 == 2
+	SOURCE:1 = 250
+	SOURCE:13 = 400
+ELSEIF ABL:2 == 3
+	SOURCE:1 = 600
+	SOURCE:13 = 700
+ELSEIF ABL:2 == 4
+	SOURCE:1 = 1200
+	SOURCE:13 = 1300
+ELSE
+	SOURCE:1 = 1800
+	SOURCE:13 = 2000
+ENDIF
+
+;EXP:Ｖ経験をみる
+IF EXP:0 < EXPLV:1
+	TIMES SOURCE:1 , 0.20
+	TIMES SOURCE:13, 0.20
+	SOURCE:6 = 300
+ELSEIF EXP:0 < EXPLV:2
+	TIMES SOURCE:1 , 0.50
+	TIMES SOURCE:13, 0.50
+	SOURCE:6 = 180
+ELSEIF EXP:0 < EXPLV:3
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:13, 0.80
+	SOURCE:6 = 80
+ELSEIF EXP:0 < EXPLV:4
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:13, 1.00
+	SOURCE:6 = 30
+ELSEIF EXP:0 < EXPLV:5
+	TIMES SOURCE:1 , 1.60
+	TIMES SOURCE:13, 1.20
+	SOURCE:6 = 0
+ELSE
+	TIMES SOURCE:2 , 1.80
+	TIMES SOURCE:13, 1.50
+	SOURCE:6 = 0
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES SOURCE:1 , 0.10
+	SOURCE:6 += 700
+	TIMES SOURCE:6 , 3.00
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES SOURCE:1 , 0.20
+	SOURCE:6 += 200
+	TIMES SOURCE:6 , 1.00
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES SOURCE:1 , 0.60
+	TIMES SOURCE:6 , 0.80
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:6 , 0.50
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES SOURCE:1 , 2.00
+	TIMES SOURCE:6 , 0.10
+ENDIF
+
+;PALAM:欲情をみる
+IF PALAM:5 < PALAMLV:1
+	TIMES SOURCE:1 , 0.50
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES SOURCE:1 , 0.80
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES SOURCE:1 , 1.20
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES SOURCE:1 , 1.50
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES SOURCE:1 , 1.80
+ENDIF
+
+
+;Ｖ민감、鈍感をみる
+;快Ｖ自体のチェックは後でまとめてやる
+IF TALENT:103
+	TIMES SOURCE:6 , 1.50
+	TIMES SOURCE:13 , 1.50
+	TIMES SOURCE:14 , 1.50
+ELSEIF TALENT:104
+	TIMES SOURCE:6 , 0.60
+	TIMES SOURCE:13 , 0.60
+	TIMES SOURCE:14 , 0.60
+ENDIF
+
+;処女で貞操観念
+SIF EXP:0 == 0 && TALENT:30
+	TIMES SOURCE:13 , 2.00
+;미숙
+SIF TALENT:135
+	TIMES SOURCE:6 , 2.00
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+IF TEQUIP:90
+	;노예のＶに촉수の汚れがつく
+	STAIN:3 |= 2
+	STAIN:3 |= 4
+ELSE
+	;노예のＶ⇔調教者の指の汚れが移動
+	STAIN:3 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:3
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+S = 0
+;Ｖ感覚が高いほどＶ経験が入る
+IF ABL:2 <= 1
+	S = 1
+ELSEIF ABL:2 <= 4
+	S = 2
+ELSEIF ABL:2 <= 7
+	S = 3
+ELSE
+	S = 4
+ENDIF
+EXP:0 += S
+PRINTFORML Ｖ경험+{S}
+S = 0
+
+;레즈경험
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +4
+	EXP:40 += 4
+ENDIF
+
+;애정경험
+E = 1
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+;V経験を伴うコマンドのフラグ
+TFLAG:19 = 1
+
+RETURN 1

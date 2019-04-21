@@ -1,0 +1,167 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;가슴애무
+;愛撫系コマンド：調教者が調教対象の乳房を手と口で刺激
+;-------------------------------------------------
+@COM5
+
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が正常位、正常位キス、正常位SPだと正常位・胸愛撫に
+	IF PREVCOM == 20 || PREVCOM == 128 || PREVCOM == 130
+		CALL COM_ABLE129
+		SIF RESULT == 1
+			JUMP COM129
+	ENDIF
+	;***Gスポ・子宮口攻めからの分岐***
+	;前々回のコマンドが正常位、정상위・키스、정상위・가슴애무、正常位ＳＰで、前回の調教が挿入Ｇスポット攻めか挿入子宮口攻めだと正常位・胸愛撫に
+	IF (TFLAG:59 == 20 || TFLAG:59 == 128 || TFLAG:59 == 129 || TFLAG:59 == 130) && (PREVCOM == 120 || PREVCOM == 121)
+		CALL COM_ABLE129
+		SIF RESULT == 1
+			JUMP COM129
+	ENDIF
+ENDIF
+
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教が後背位、후배위・스팽킹、서서후배위、後背位ＳＰだと後背位・胸愛撫に
+	IF PREVCOM == 21 || PREVCOM == 132 || PREVCOM == 133 || PREVCOM == 134
+		CALL COM_ABLE131
+		SIF RESULT == 1
+			JUMP COM131
+	ENDIF
+	;***Gスポ・子宮口攻めからの分岐***
+	;前々回のコマンドが後背位、후배위・가슴애무、후배위・스팽킹、서서후배위、後背位SPで、前回の調教が挿入Ｇスポット攻めか挿入子宮口攻めだと後背位・胸愛撫に
+	IF (TFLAG:59 == 21 || TFLAG:59 == 131 || TFLAG:59 == 132 || TFLAG:59 == 133 || TFLAG:59 == 134) && (PREVCOM == 120 || PREVCOM == 121)
+		CALL COM_ABLE131
+		SIF RESULT == 1
+			JUMP COM131
+	ENDIF
+ENDIF
+
+PRINTL 가슴애무
+;SAVESTR:22 = 가슴애무
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+SOURCE:4 = 60
+SOURCE:8 = 20
+SOURCE:12 = 100
+
+;ABL:Ｂ感覚をみる
+IF ABL:1 == 0
+	SOURCE:17 = 20
+	SOURCE:3 = 50
+ELSEIF ABL:1 == 1
+	SOURCE:17 = 100
+	SOURCE:3 = 100
+ELSEIF ABL:1 == 2
+	SOURCE:17 = 500
+	SOURCE:3 = 160
+ELSEIF ABL:1 == 3
+	SOURCE:17 = 1200
+	SOURCE:3 = 200
+ELSEIF ABL:1 == 4
+	SOURCE:17 = 2000
+	SOURCE:3 = 230
+ELSE
+	SOURCE:17 = 2800
+	SOURCE:3 = 250
+ENDIF
+
+;콜로세움・獣姦の場合はここで終了
+SIF TEQUIP:89 || TEQUIP:55
+	RETURN 1
+
+;調教者が［유아퇴행］
+IF TALENT:PLAYER:131 && TEQUIP:89 == 0
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:3 , 1.20
+ENDIF
+
+;調教者が［유치］
+IF TALENT:PLAYER:132 && TEQUIP:89 == 0
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:3 , 1.20
+ENDIF
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+IF TEQUIP:90
+	;노예のＢに촉수の汚れがつく
+	STAIN:5 |= 2
+	STAIN:5 |= 4
+ELSE
+	;노예の胸の汚れがなければ口をつかう（愛液と母乳よごれはＯＫ、汚れ無視か조수調教時は問題なし）
+	IF STAIN:5 < 2 || STAIN:5 == 16 || STAIN:5 == 17 || ASSIPLAY == 1 || TALENT:MASTER:64 == 1
+		;調教者のTALENT:舌使いをみる
+		IF TALENT:PLAYER:52
+			TIMES SOURCE:17 , 1.40
+			SOURCE:16 += SOURCE:17/20
+		ENDIF
+
+		;노예のＢ⇔調教者の口の汚れが移動
+		STAIN:5 |= STAIN:PLAYER:0
+		STAIN:PLAYER:0 |= STAIN:5
+	ENDIF
+
+	;노예のＢ⇔調教者の指の汚れが移動
+	STAIN:5 |= STAIN:PLAYER:1
+	STAIN:PLAYER:1 |= STAIN:5
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;レズ・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +5
+	EXP:40 += 5
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +5
+	EXP:41 += 5
+ENDIF
+
+;애정경험
+E = 1
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+CALL EVENT_JUNYU
+
+RETURN 1
+
+;-------------------------------------------------
+;-------------------------------------------------
+;母乳体質への変化
+;-------------------------------------------------
+@EVENT_JUNYU
+A = NO:PLAYER
+;【모유체질】無しかつ【작은체형】で無し【빈유】無しかつ【남자】でない
+SIF TALENT:130  || TALENT:100 || TALENT:109 || TALENT:122
+	RETURN 0
+;更に［Ｂ感度］５以上かつ【거유】か【폭유】か【超乳】で触手調教や獣姦でなく
+SIF ABL:1 <= 4 || (TALENT:110 == 0 && TALENT:114 == 0 && TALENT:119 == 0) || TEQUIP:90 || TEQUIP:89
+	RETURN 0
+;調教者が【유치】か【유아퇴행】か【미숙】
+SIF TALENT:PLAYER:132 == 0 && TALENT:PLAYER:131 == 0 && TALENT:PLAYER:135 == 0
+	RETURN 0
+;「調教対象」から「調教者」への関係が150以上か主人プレイで愛
+SIF RELATION:TARGET:A < 150 && (ASSIPLAY || TALENT:85 == 0)
+	RETURN 0
+PRINTFORML %SAVESTR:PLAYER%에게 유방을 빨리는 사이、%SAVESTR:TARGET%는 모유가 나오게 됐다…
+TALENT:130 = 1
+
+RETURN 1

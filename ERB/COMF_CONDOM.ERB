@@ -1,0 +1,181 @@
+﻿;コンドーム関係をこのファイルに分離
+;あんまり至れり尽くせりにしてもしょうがないので
+;コンドームを持ってないなら基本的には生でしてしまう
+;-------------------------------------------------
+;CFLAG:61 = 케릭터 별 콘돔 자동 사용 설정
+;(0:사용할 때마다 확인,1:어느 정도 자동적으로 사용,2:사용하지 않음)
+;-------------------------------------------------
+;조교 메뉴 내・콘돔 설정
+;-------------------------------------------------
+@CONDOM_SETTINGS
+SIF TARGET < 1
+	RETURN 1
+PRINTFORML %조사선택(SAVESTR:TARGET, "와")%의 섹스에 콘돔을 사용합니까？
+PRINTFORML 현재：%LOCALS:(CFLAG:61)%
+DRAWLINE
+PRINTL [0] 매회 선택한다
+PRINTL [1] 콘돔이 있다면 사용한다
+PRINTL [2] 항상 생으로 한다
+PRINTL [9] 돌아온다
+$INPUT_LOOP_01
+INPUT
+SELECTCASE RESULT
+	CASE 9
+		RETURN 0
+	CASE 0
+		PRINTW 매회 확인합니다.
+		CFLAG:61 = 0
+	CASE 1
+		PRINTW 콘돔을 사용합니다.
+		CFLAG:61 = 1
+	CASE 2
+		PRINTFORMW %조사선택(SAVESTR:TARGET, "와")%는 생으로 합니다.
+		CFLAG:61 = 2
+	CASEELSE
+		GOTO INPUT_LOOP_01
+ENDSELECT
+RETURN 0
+
+;-------------------------------------------------
+;콘돔을 사용하는지 확인
+;-------------------------------------------------
+@CONFIRM_CONDOM
+;TEQUIP:35 = 마스터가 콘돔을 장착 
+;TEQUIP:36 = 조수가 콘돔을 장착
+;-------------------
+;RETURN 1:명령 속행
+;RETURN 0:중지
+;-------------------
+
+;콘돔을 쓰지 않도록 설정되었다면 속행
+SIF CFLAG:61 == 2
+	RETURN 1
+;수간일 경우 속행
+SIF TEQUIP:89
+	RETURN 1
+;コロシアムなら続行
+SIF TEQUIP:55
+	RETURN 1
+;조교자가 남자이거나 후타나리가 아니라면 속행
+SIF !TALENT:PLAYER:121 && !TALENT:PLAYER:122
+	RETURN 1
+;조교자가 이미 콘돔을 장착하고 있다면 속행
+SIF (!ASSIPLAY && TEQUIP:35) || (ASSIPLAY && TEQUIP:36)
+	RETURN 1
+
+;毎回確認かつコンドーム所持の場合、確認する
+IF CFLAG:61 == 0 && ITEM:24
+	IF !ASSIPLAY
+		PRINTL 콘돔을 사용합니까?
+		PRINTL  [0] - 사용한다
+		PRINTL  [1] - 생으로 한다
+	ELSE
+		PRINTL 콘돔을 사용하게 합니까?
+		PRINTL  [0] - 사용하게 한다
+		PRINTL  [1] - 생으로 시킨다
+	ENDIF
+	PRINTL  [2] - 향후도 쭉 생으로
+	PRINTL  [3] - 향후도 있다면 사용한다
+
+	$INPUT_LOOP_01
+	INPUT
+	SELECTCASE RESULT
+		CASE 0
+			ITEM:24 -= 1
+			IF !ASSIPLAY
+				PRINTFORML %조사선택(SAVESTR:PLAYER, "는")% 콘돔을 장착했다.
+				TEQUIP:35 = 1
+			ELSE
+				PRINTFORML %SAVESTR:PLAYER%에게 콘돔을 장착시켰다.
+				TEQUIP:36 = 1
+			ENDIF
+			RETURN 1
+		CASE 1
+			RETURN 1
+		CASE 2
+			PRINTFORML 향후 %조사선택(SAVESTR:TARGET, "와")%(과)는 생으로 섹스 합니다
+			CFLAG:61 = 2
+			RESTART
+		CASE 3
+			PRINTFORML 향후 콘돔이 있을 경우엔 사용합니다.
+			CFLAG:61 = 1
+			RESTART
+		CASEELSE
+			GOTO INPUT_LOOP_01
+	ENDSELECT
+ENDIF
+
+;自動で使う場合
+IF CFLAG:61 == 1
+	;コンドームがあるか
+	IF ITEM:24 > 0
+		;あるなら使う
+		ITEM:24 -= 1
+		IF !ASSIPLAY
+			PRINTFORML %조사선택(SAVESTR:PLAYER, "는")% 콘돔을 장착했다.
+			TEQUIP:35 = 1
+		ELSE
+			PRINTFORML %SAVESTR:PLAYER%에게 콘돔을 장착시켰다.
+			TEQUIP:36 = 1
+		ENDIF
+		RETURN 1
+	ELSE
+		;ない場合、魔王さまの技巧Lvが5未満だと生でしてしまう
+		;理由:その方がバカっぽいので
+		IF ABL:MASTER:12 > 4
+			PRINTFORM 콘돔이 없습니다만、생으로
+			IF !ASSIPLAY
+				PRINTFORML 하시겠습니까？
+			ELSE
+				PRINTFORML 하게 합니까？
+			ENDIF
+			PRINTL  [0] - 네(다음에도 확인)
+			PRINTL  [1] - 네(앞으론 쭉 생으로)
+			PRINTL  [2] - 아뇨
+			
+			$INPUT_LOOP_02
+			INPUT
+			SELECTCASE RESULT
+				CASE 0
+					RETURN 1
+				CASE 1
+					PRINTFORML 앞으로는 %조사선택(SAVESTR:TARGET, "와")%(과)의 섹스에선 확인을 실시하지 않습니다.
+					CFLAG:61 = 2
+					RETURN 1
+				CASE 2
+					RETURN 0
+				CASEELSE
+					GOTO INPUT_LOOP_02
+			ENDSELECT
+		ELSE
+			PRINTL 콘돔이 없으므로 생으로 삽입
+			RETURN 1
+		ENDIF
+	ENDIF
+ENDIF
+
+;全パターン拾えてなかったら申し訳程度のメッセージを出す
+;PRINTW ※COMF_CONDOM.ERB/@CONFIRM_CONDOM/分岐漏れ
+RETURN 1
+
+;-------------------------------------------------
+;콘돔을 사용하는 지 확인2
+;COM65「조수를범하게한다」를 위한 것
+;-------------------------------------------------
+@CONFIRM_CONDOM2
+$INPUT_LOOP_02
+IF TEQUIP:37 == 0 && ITEM:24 && (TALENT:TARGET:121 || TALENT:TARGET:122)
+	PRINTFORML %SAVESTR:TARGET%에게 콘돔을 쓰게합니까？
+	PRINTL  [0] - 쓰게한다
+	PRINTL  [1] - 생으로한다
+	INPUT
+	IF RESULT == 0
+		PRINTFORML %조사선택(SAVESTR:TARGET, "는")% 콘돔을 장착했다
+		ITEM:24 -= 1
+		TEQUIP:37 = 1
+	ELSEIF RESULT != 1
+		GOTO INPUT_LOOP_02
+	ENDIF
+ENDIF
+RETURN 1
+

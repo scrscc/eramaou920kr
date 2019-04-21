@@ -1,0 +1,338 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;조개벌리기
+;愛撫系コマンド：調教対象自身が自分のヴァギナを手で開いてみせる
+;-------------------------------------------------
+@COM7
+;조개벌리기
+
+SIF TEQUIP:53
+	PRINT 공개
+
+PRINTL 보지 벌리기
+
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:욕망
+IF ABL:11
+	SIF S
+		PRINT  + 
+	A += ABL:11 * 3
+	PRINTS ABLNAME:11
+	PRINTV 'LV,ABL:11,'(,ABL:11 * 3,')
+	S = 1
+ENDIF
+;ABL:Ｖ감각
+IF ABL:2
+	SIF S
+		PRINT  + 
+	A += ABL:2 * 2
+	PRINTS ABLNAME:2
+	PRINTV 'LV,ABL:2,'(,ABL:2 * 2,')
+	S = 1
+ENDIF
+;ABL:봉사정신
+IF ABL:16
+	SIF S
+		PRINT  + 
+	A += ABL:16 * 4
+	PRINTS ABLNAME:16
+	PRINTV 'LV,ABL:16,'(,ABL:16 * 4,')
+	S = 1
+ENDIF
+;ABL:노출벽
+IF ABL:17
+	SIF S
+		PRINT  + 
+	A += ABL:17 * 3
+	PRINTS ABLNAME:17
+	PRINTV 'LV,ABL:17,'(,ABL:17 * 3,')
+	S = 1
+ENDIF
+;ABL:자위중독
+IF ABL:31
+	SIF S
+		PRINT  + 
+	A += ABL:31 * 3
+	PRINTS ABLNAME:31
+	PRINTV 'LV,ABL:31,'(,ABL:31 * 3,')
+	S = 1
+ENDIF
+
+;PALAM:윤활（の不足）
+IF PALAM:3 < PALAMLV:3
+	PRINT  - 
+	A -= 5
+	PRINT 윤활부족
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;PALAM:욕정
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;수줍음
+IF TALENT:35
+	PRINT  - 
+	A -= 2
+	PRINTS TALENTNAME:35
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;수치심없음
+IF TALENT:36
+	SIF S
+		PRINT  + 
+	A += 2
+	PRINTS TALENTNAME:36
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+
+;쾌감에솔직
+IF TALENT:70
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:70
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;쾌감을부정
+IF TALENT:71
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:71
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;노출광
+IF TALENT:89
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:89
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+
+;처녀
+IF TALENT:0
+	PRINT  - 
+	A -= 20
+	PRINTS TALENTNAME:0
+	PRINTV '(,20,')
+	S = 1
+ELSEIF EXP:0 < EXPLV:2
+	PRINT  - 
+	A -= 5
+	PRINTS EXPNAME:0
+	PRINT 부족
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;미약
+IF TEQUIP:21
+	SIF S
+		PRINT  + 
+	A += 6
+	PRINTS ITEMNAME:26
+	PRINTV '(,6,')
+	S = 1
+ENDIF
+
+;合計を表示(22以上で実行)
+PRINT  = 
+PRINTV A
+
+;難易度上昇
+;公開で+10
+V = 22
+SIF TEQUIP:53
+	V += 10
+
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행값
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+;SAVESTR:22 = 조개벌리기
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+LOSEBASE:0 += 10
+LOSEBASE:1 += 50
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+SOURCE:14 = 400
+
+;ABL:Ｖ感覚をみる
+IF ABL:2 == 0
+	SOURCE:12 = 1500
+	SOURCE:13 = 300
+ELSEIF ABL:2 == 1
+	SOURCE:12 = 1800
+	SOURCE:13 = 600
+ELSEIF ABL:2 == 2
+	SOURCE:12 = 2100
+	SOURCE:13 = 1000
+ELSEIF ABL:2 == 3
+	SOURCE:12 = 2400
+	SOURCE:13 = 1500
+ELSEIF ABL:2 == 4
+	SOURCE:12 = 2700
+	SOURCE:13 = 2100
+ELSE
+	SOURCE:12 = 3000
+	SOURCE:13 = 2800
+ENDIF
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	SOURCE:4 = 100
+	SOURCE:5 = 50
+ELSEIF ABL:16 == 1
+	SOURCE:4 = 150
+	SOURCE:5 = 100
+ELSEIF ABL:16 == 2
+	SOURCE:4 = 200
+	SOURCE:5 = 200
+ELSEIF ABL:16 == 3
+	SOURCE:4 = 250
+	SOURCE:5 = 300
+ELSEIF ABL:16 == 4
+	SOURCE:4 = 300
+	SOURCE:5 = 500
+ELSE
+	SOURCE:4 = 350
+	SOURCE:5 = 750
+ENDIF
+
+;ABL:露出癖をみる
+IF ABL:17 == 0
+	SOURCE:7 += 0
+	TIMES SOURCE:12, 1.00
+	TIMES SOURCE:5, 1.00
+ELSEIF ABL:17 == 1
+	SOURCE:7 += 100
+	TIMES SOURCE:12, 1.20
+	TIMES SOURCE:5, 1.20
+ELSEIF ABL:17 == 2
+	SOURCE:7 += 300
+	TIMES SOURCE:12, 1.40
+	TIMES SOURCE:5, 1.40
+ELSEIF ABL:17 == 3
+	SOURCE:7 += 800
+	TIMES SOURCE:12, 1.60
+	TIMES SOURCE:5, 1.60
+ELSEIF ABL:17 == 4
+	SOURCE:7 += 1500
+	TIMES SOURCE:12, 2.00
+	TIMES SOURCE:5, 2.00
+ELSE
+	SOURCE:7 += 2500
+	TIMES SOURCE:12, 3.00
+	TIMES SOURCE:5, 3.00
+ENDIF
+
+;TALENT:노출광
+IF TALENT:89
+	SOURCE:7 += 500
+	TIMES SOURCE:12, 1.50
+	TIMES SOURCE:5, 1.50
+ENDIF
+
+;陰毛を生やす設定で剃毛状態
+SIF TALENT:125 == 0 && TALENT:310 <= 20
+	TIMES SOURCE:12 , 2.00
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;노예の指⇔노예のＶの汚れが移動
+STAIN:1 |= STAIN:3
+STAIN:3 |= STAIN:1
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;露出癖Lv３以上で自慰経験に＋１
+IF ABL:17 >= 3 
+;ビデオ撮影時は経験にプラス
+	IF TEQUIP:53
+		EXP:10 += 2
+		PRINTL 자위경험＋２
+		EXP:11 += 2
+		PRINTL 조교자위경험＋２
+	ELSE
+		EXP:10 += 1
+		PRINTL 자위경험＋１
+		EXP:11 += 1
+		PRINTL 조교자위경험＋１
+	ENDIF
+	IF TEQUIP:53 && CFLAG:3 == 0
+		EXP:50 += 1
+		PRINTL 이상경험＋１
+		CFLAG:3 = 1
+	ENDIF
+ENDIF
+
+;레즈경험
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +2
+	EXP:40 += 2
+ENDIF
+
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+;屈服刻印１に相当
+TFLAG:200 = 1
+
+RETURN 1

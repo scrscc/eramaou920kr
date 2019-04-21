@@ -1,0 +1,1026 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;자위
+;愛撫系コマンド：調教対象自身が自分のヴァギナを手で刺激する
+;-------------------------------------------------
+;>佐藤敏作成 06/04/10
+;-------------------------------------------------
+@COM3
+
+;前回と今回の調教者が同じ
+IF (ASSIPLAY && TFLAG:50) || (ASSIPLAY == 0 && TFLAG:50 == 0)
+	;前回の調教がフェラかパイズリフェラかディープスロートか手コキフェラかバキュームフェラだとフェラ自慰に
+	IF PREVCOM == 31 || PREVCOM == 123 || PREVCOM == 124 || PREVCOM == 126 || PREVCOM == 127
+		CALL COM_ABLE125
+		SIF RESULT == 1
+			JUMP COM125
+	ENDIF
+ENDIF
+
+;자위
+;バイブ、애널バイブ、ビデオ撮影の時に内容変化
+
+;ビデオ촬영중なら公開オナニー
+;シャワー使用中ならシャワーオナニー
+;バイブ、애널バイブ、或いは両方装備でバイブオナニー
+SIF TEQUIP:53
+	PRINT 공개
+SIF TEQUIP:54
+	PRINT 야외
+SIF TEQUIP:18
+	PRINT 샤워
+IF TEQUIP:11 && TEQUIP:13
+	PRINT 양구멍 바이브
+ELSEIF TEQUIP:11
+	PRINT 바이브
+ELSEIF TEQUIP:13
+	PRINT 애널 바이브
+ENDIF
+
+IF TEQUIP:53 || TEQUIP:54 || TEQUIP:11 || TEQUIP:13 || TEQUIP:18
+	PRINTL 오나니
+ELSE
+	PRINTL 자위
+ENDIF
+
+;-------------------------------------------------
+;実行できるかの判定
+;-------------------------------------------------
+A = 0
+S = 0
+
+;すべての命令に共通の要素を考慮
+;(従順が高いと命令に従いやすいなど)
+CALL COM_ORDER
+
+;ABL:욕망
+IF ABL:11
+	SIF S
+		PRINT  + 
+	A += ABL:11 * 3
+	PRINTS ABLNAME:11
+	PRINTV 'LV,ABL:11,'(,ABL:11 * 3,')
+	S = 1
+ENDIF
+;ABL:노출벽
+IF ABL:17
+	SIF S
+		PRINT  + 
+	A += ABL:17 * 4
+	PRINTS ABLNAME:17
+	PRINTV 'LV,ABL:17,'(,ABL:17 * 4,')
+	S = 1
+ENDIF
+;ABL:자위중독
+IF ABL:31
+	SIF S
+		PRINT  + 
+	A += ABL:31 * 3
+	PRINTS ABLNAME:31
+	PRINTV 'LV,ABL:31,'(,ABL:31 * 3,')
+	S = 1
+ENDIF
+;MARK:쾌락각인
+IF MARK:1
+	SIF S
+		PRINT  + 
+	A += MARK:1 * 3
+	PRINTS MARKNAME:1
+	PRINTV 'LV,MARK:1,'(,MARK:1 * 3,')
+	S = 1
+ENDIF
+
+;PALAM:욕정
+IF PALAM:5 < PALAMLV:1
+	L = 0
+ELSEIF PALAM:5 < PALAMLV:2
+	L = 1
+ELSEIF PALAM:5 < PALAMLV:3
+	L = 2
+ELSEIF PALAM:5 < PALAMLV:4
+	L = 3
+ELSEIF PALAM:5 < PALAMLV:5
+	L = 4
+ELSE
+	L = 5
+ENDIF
+IF L
+	SIF S
+		PRINT  + 
+	A += L * 3
+	PRINTS PALAMNAME:5
+	PRINTV 'LV,L,'(,L * 3,')
+	S = 1
+ENDIF
+
+;자제심
+IF TALENT:20
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:20
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;수줍음
+IF TALENT:35
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:35
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;수치심없음
+IF TALENT:36
+	SIF S
+		PRINT  + 
+	A += 2
+	PRINTS TALENTNAME:36
+	PRINTV '(,2,')
+	S = 1
+ENDIF
+;자위쉬움
+IF TALENT:60
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:60
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;쾌감에솔직
+IF TALENT:70
+	SIF S
+		PRINT  + 
+	A += 5
+	PRINTS TALENTNAME:70
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+;쾌감을부정
+IF TALENT:71
+	PRINT  - 
+	A -= 5
+	PRINTS TALENTNAME:71
+	PRINTV '(,5,')
+	S = 1
+ENDIF
+
+;노출광
+IF TALENT:89
+	SIF S
+		PRINT  + 
+	A += 10
+	PRINTS TALENTNAME:89
+	PRINTV '(,10,')
+	S = 1
+ENDIF
+
+;しあわせ草
+IF TEQUIP:21
+	SIF S
+		PRINT  + 
+	A += 8
+	PRINTS ITEMNAME:26
+	PRINTV '(,8,')
+	S = 1
+ENDIF
+
+;合計を表示(33以上で実行)
+PRINT  = 
+PRINTV A
+
+;難易度上昇
+;公開で+10、バイブで+5、애널バイブで+5、シャワーで＋3
+V = 33
+SIF TEQUIP:53
+	V += 10
+SIF TEQUIP:18
+	V += 3
+SIF TEQUIP:11
+	V += 5
+SIF TEQUIP:13
+	V += 5
+
+SIF A < V
+	PRINT  < 
+SIF A == V
+	PRINT  = 
+SIF A > V
+	PRINT  > 
+PRINT 실행값
+PRINTV V
+
+WAIT
+
+;実行できない
+SIF A < V
+	RETURN 0
+
+;SAVESTR:22 = 자위
+CALL TRAIN_MESSAGE_B
+
+;-------------------------------------------------
+;実行決定
+;-------------------------------------------------
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+SOURCE:14 = 400
+A = 0
+B = 0
+C = 0
+D = 0
+
+;ビデオ촬영중
+IF TEQUIP:53
+	SOURCE:10 = 50
+	SOURCE:11 = 100
+ENDIF
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 15
+	SOURCE:12 = 2000
+	SOURCE:13 = 500
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 50
+	SOURCE:12 = 2300
+	SOURCE:13 = 800
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 300
+	SOURCE:12 = 2600
+	SOURCE:13 = 1200
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 700
+	SOURCE:12 = 2900
+	SOURCE:13 = 1900
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 1100
+	SOURCE:12 = 3200
+	SOURCE:13 = 2500
+ELSE
+	SOURCE:0 = 1600
+	SOURCE:12 = 3500
+	SOURCE:13 = 3000
+ENDIF
+
+;ABL:Ｂ感覚をみる
+IF ABL:1 == 0
+	SOURCE:17 = 15
+ELSEIF ABL:1 == 1
+	SOURCE:17 = 50
+ELSEIF ABL:1 == 2
+	SOURCE:17 = 300
+ELSEIF ABL:1 == 3
+	SOURCE:17 = 700
+ELSEIF ABL:1 == 4
+	SOURCE:17 = 1100
+ELSE
+	SOURCE:17 = 1600
+ENDIF
+
+;バイブ挿入中の場合
+IF TEQUIP:11
+	;ABL:Ｖ感覚をみる
+	IF ABL:2 == 0
+		A += 40
+		D += 150
+	ELSEIF ABL:2 == 1
+		A += 120
+		D += 400
+	ELSEIF ABL:2 == 2
+		A += 300
+		D += 700
+	ELSEIF ABL:2 == 3
+		A += 500
+		D += 900
+	ELSEIF ABL:2 == 4
+		A += 650
+		D += 1000
+	ELSE
+		A += 850
+		D += 1200
+	ENDIF
+
+	;EXP:Ｖ経験をみる
+	;処女はありえない
+	IF EXP:0 < EXPLV:2
+		TIMES A , 0.60
+		C += 150
+	ELSEIF EXP:0 < EXPLV:3
+		TIMES A , 1.00
+		C += 20
+	ELSEIF EXP:0 < EXPLV:4
+		TIMES A , 1.20
+		C += 0
+	ELSEIF EXP:0 < EXPLV:5
+		TIMES A , 1.40
+		C += 0
+	ELSE
+		TIMES A , 1.60
+		C += 0
+	ENDIF
+	;Ｖ민감、鈍感をみる
+	IF TALENT:103
+		TIMES C , 1.50
+		TIMES D , 1.50
+	ELSEIF TALENT:104
+		TIMES C , 0.60
+		TIMES D , 0.60
+	ENDIF
+	;一度単独で計算
+	SOURCE:13 += D
+ENDIF
+
+;애널バイブ挿入中の場合
+IF TEQUIP:13
+	LOSEBASE:0 += 30
+	LOSEBASE:1 += 80
+
+	;ABL:Ａ感覚をみる
+	IF ABL:3 == 0
+		B += 40
+		D += 150
+	ELSEIF ABL:3 == 1
+		B += 120
+		D += 400
+	ELSEIF ABL:3 == 2
+		B += 300
+		D += 700
+	ELSEIF ABL:3 == 3
+		B += 500
+		D += 900
+	ELSEIF ABL:3 == 4
+		B += 650
+		D += 1000
+	ELSE
+		B += 850
+		D += 1200
+	ENDIF
+
+	;EXP:Ａ経験をみる
+	IF EXP:1 < EXPLV:1
+		TIMES B , 0.50
+		C += 1000
+	ELSEIF EXP:1 < EXPLV:2
+		TIMES B , 1.00
+		C += 150
+	ELSEIF EXP:1 < EXPLV:3
+		TIMES B , 1.10
+		C += 20
+	ELSEIF EXP:1 < EXPLV:4
+		TIMES B , 1.20
+		C += 0
+	ELSEIF EXP:1 < EXPLV:5
+		TIMES B , 1.40
+		C += 0
+	ELSE
+		TIMES B , 1.60
+		C += 0
+	ENDIF
+
+	;Ａ민감、鈍感をみる
+	IF TALENT:105
+		TIMES C , 1.50
+		TIMES D , 1.50
+	ELSEIF TALENT:106
+		TIMES C , 0.60
+		TIMES D , 0.60
+	ENDIF
+	;一度単独で計算
+	SOURCE:13 += D
+ENDIF
+
+;シャワー使用中の場合
+IF TEQUIP:18
+	;ABL:Ｃ感覚をみる
+	IF ABL:0 == 0
+		SOURCE:0 = 150
+		SOURCE:12 = 1000
+		SOURCE:13 = 50
+	ELSEIF ABL:0 == 1
+		SOURCE:0 = 400
+		SOURCE:12 = 1300
+		SOURCE:13 = 80
+	ELSEIF ABL:0 == 2
+		SOURCE:0 = 800
+		SOURCE:12 = 1600
+		SOURCE:13 = 120
+	ELSEIF ABL:0 == 3
+		SOURCE:0 = 1200
+		SOURCE:12 = 1900
+		SOURCE:13 = 190
+	ELSEIF ABL:0 == 4
+		SOURCE:0 = 1500
+		SOURCE:12 = 2200
+		SOURCE:13 = 250
+	ELSE
+		SOURCE:0 = 1800
+		SOURCE:12 = 2500
+		SOURCE:13 = 300
+	ENDIF
+
+	;ABL:Ｖ感覚をみる
+	IF ABL:2 == 0
+		SOURCE:1 = 0
+		D = 0
+	ELSEIF ABL:2 == 1
+		SOURCE:1 = 100
+		D = 300
+	ELSEIF ABL:2 == 2
+		SOURCE:1 = 200
+		D = 400
+	ELSEIF ABL:2 == 3
+		SOURCE:1 = 300
+		D = 500
+	ELSEIF ABL:2 == 4
+		SOURCE:1 = 400
+		D = 600
+	ELSE
+		SOURCE:1 = 500
+		D = 700
+	ENDIF
+
+	;ABL:Ａ感覚をみる
+	IF ABL:3 == 0
+		B = 40
+		D += 150
+	ELSEIF ABL:3 == 1
+		B = 120
+		D += 400
+	ELSEIF ABL:3 == 2
+		B = 300
+		D += 700
+	ELSEIF ABL:3 == 3
+		B = 500
+		D += 900
+	ELSEIF ABL:3 == 4
+		B = 650
+		D += 1000
+	ELSE
+		B = 850
+		D += 1200
+	ENDIF
+
+	;Ｖ민감、鈍感をみる
+	IF TALENT:103
+		TIMES SOURCE:6 , 1.50
+		TIMES D , 1.50
+	ELSEIF TALENT:104
+		TIMES SOURCE:6 , 0.60
+		TIMES D , 0.60
+	ENDIF
+	;Ａ민감、鈍感をみる
+	IF TALENT:105
+		TIMES SOURCE:6 , 1.50
+		TIMES D , 1.50
+	ELSEIF TALENT:106
+		TIMES SOURCE:6 , 0.60
+		TIMES D , 0.60
+	ENDIF
+	;一度単独で計算
+	SOURCE:13 += D
+
+ELSE
+	B = 0
+	SOURCE:2 = 0
+	A = 0
+	SOURCE:1 = 0
+ENDIF
+
+;ＶかＡが上昇するとき、上昇に従ってSOURCE:0、SOURCE:17を減らす
+IF TEQUIP:11 || TEQUIP:13
+	E = ABL:2 + ABL:3
+	IF E <= 1
+		TIMES SOURCE:0 , 1.00
+		TIMES SOURCE:17 , 1.00
+	ELSEIF E <= 3
+		TIMES SOURCE:0 , 0.90
+		TIMES SOURCE:17 , 0.90
+	ELSEIF E <= 5
+		TIMES SOURCE:0 , 0.80
+		TIMES SOURCE:17 , 0.80
+	ELSEIF E <= 7
+		TIMES SOURCE:0 , 0.70
+		TIMES SOURCE:17 , 0.70
+	ELSEIF E <= 9
+		TIMES SOURCE:0 , 0.60
+		TIMES SOURCE:17 , 0.60
+	ELSE
+		TIMES SOURCE:0 , 0.50
+		TIMES SOURCE:17 , 0.50
+	ENDIF
+ENDIF
+
+;バイブ、애널バイブだけ先に計算
+IF TEQUIP:11 || TEQUIP:13
+	;PALAM:潤滑をみる
+	IF PALAM:3 < PALAMLV:1
+		TIMES A , 0.40
+		TIMES B , 0.40
+		C += 800
+	ELSEIF PALAM:3 < PALAMLV:2
+		TIMES A , 0.80
+		TIMES B , 0.80
+		C += 500
+	ELSEIF PALAM:3 < PALAMLV:3
+		TIMES A , 1.00
+		TIMES B , 1.00
+		C += 300
+	ELSEIF PALAM:3 < PALAMLV:4
+		TIMES A , 1.40
+		TIMES B , 1.40
+		C += 120
+	ELSEIF PALAM:3 >= PALAMLV:4
+		TIMES A , 1.80
+		TIMES B , 1.80
+		C += 100
+	ENDIF
+
+	;PALAM:欲情をみる
+	IF PALAM:5 < PALAMLV:1
+		TIMES A , 0.80
+		TIMES B , 0.80
+	ELSEIF PALAM:5 < PALAMLV:2
+		TIMES A , 0.90
+		TIMES B , 0.90
+	ELSEIF PALAM:5 < PALAMLV:3
+		TIMES A , 1.00
+		TIMES B , 1.00
+	ELSEIF PALAM:5 < PALAMLV:4
+		TIMES A , 1.10
+		TIMES B , 1.10
+	ELSEIF PALAM:5 >= PALAMLV:4
+		TIMES A , 1.20
+		TIMES B , 1.20
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES A , 0.80
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES A , 0.90
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES A , 1.00
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES A , 1.10
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES A , 1.20
+		TIMES B , 1.20
+	ELSE
+		TIMES A , 1.30
+		TIMES B , 1.30
+	ENDIF
+	
+	;장신
+	SIF TALENT:99
+		TIMES C , 0.80
+	;小柄体形
+	SIF TALENT:100
+		TIMES C , 2.00
+
+	;정조관념
+	IF TALENT:30
+		TIMES C, 3.00
+	ENDIF
+
+	SOURCE:1 = A
+	SOURCE:2 = B
+	SOURCE:6 = C
+
+ENDIF
+
+;シャワーだけ先に計算
+IF TEQUIP:18
+	;PALAM:潤滑をみる
+	IF PALAM:3 < PALAMLV:1
+		TIMES A , 0.40
+		TIMES B , 0.40
+		C += 800
+	ELSEIF PALAM:3 < PALAMLV:2
+		TIMES A , 0.80
+		TIMES B , 0.80
+		C += 500
+	ELSEIF PALAM:3 < PALAMLV:3
+		TIMES A , 1.00
+		TIMES B , 1.00
+		C += 300
+	ELSEIF PALAM:3 < PALAMLV:4
+		TIMES A , 1.40
+		TIMES B , 1.40
+		C += 120
+	ELSEIF PALAM:3 >= PALAMLV:4
+		TIMES A , 1.80
+		TIMES B , 1.80
+		C += 100
+	ENDIF
+
+	;PALAM:欲情をみる
+	IF PALAM:5 < PALAMLV:1
+		TIMES A , 0.80
+		TIMES B , 0.80
+	ELSEIF PALAM:5 < PALAMLV:2
+		TIMES A , 0.90
+		TIMES B , 0.90
+	ELSEIF PALAM:5 < PALAMLV:3
+		TIMES A , 1.00
+		TIMES B , 1.00
+	ELSEIF PALAM:5 < PALAMLV:4
+		TIMES A , 1.10
+		TIMES B , 1.10
+	ELSEIF PALAM:5 >= PALAMLV:4
+		TIMES A , 1.20
+		TIMES B , 1.20
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES A , 0.80
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES A , 0.90
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES A , 1.00
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES A , 1.10
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES A , 1.20
+		TIMES B , 1.20
+	ELSE
+		TIMES A , 1.30
+		TIMES B , 1.30
+	ENDIF
+
+	SOURCE:1 += A
+	SOURCE:2 += B
+
+ENDIF
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	SOURCE:4 = 100
+	TIMES SOURCE:0 , 0.30
+	TIMES SOURCE:17 , 0.30
+	TIMES SOURCE:1 , 0.30
+	TIMES SOURCE:2 , 0.30
+ELSEIF ABL:12 == 1
+	SOURCE:4 = 160
+	TIMES SOURCE:0 , 0.70
+	TIMES SOURCE:17 , 0.70
+	TIMES SOURCE:1 , 0.70
+	TIMES SOURCE:2 , 0.70
+ELSEIF ABL:12 == 2
+	SOURCE:4 = 220
+	TIMES SOURCE:0 , 1.00
+	TIMES SOURCE:17 , 1.00
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+ELSEIF ABL:12 == 3
+	SOURCE:4 = 280
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+ELSEIF ABL:12 == 4
+	SOURCE:4 = 340
+	TIMES SOURCE:0 , 1.40
+	TIMES SOURCE:17 , 1.40
+	TIMES SOURCE:1 , 1.40
+	TIMES SOURCE:2 , 1.40
+ELSE
+	SOURCE:4 = 400
+	TIMES SOURCE:0 , 1.60
+	TIMES SOURCE:17 , 1.60
+	TIMES SOURCE:1 , 1.60
+	TIMES SOURCE:2 , 1.60
+ENDIF
+
+;ABL:自慰中毒をみる
+IF ABL:31 == 0
+	SOURCE:7 = 0
+	TIMES SOURCE:0 , 1.00
+	TIMES SOURCE:17 , 1.00
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+ELSEIF ABL:31 == 1
+	SOURCE:7 = 100
+	TIMES SOURCE:0 , 1.10
+	TIMES SOURCE:17 , 1.10
+	TIMES SOURCE:1 , 1.10
+	TIMES SOURCE:2 , 1.10
+ELSEIF ABL:31 == 2
+	SOURCE:7 = 300
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+ELSEIF ABL:31 == 3
+	SOURCE:7 = 800
+	TIMES SOURCE:0 , 1.30
+	TIMES SOURCE:17 , 1.30
+	TIMES SOURCE:1 , 1.30
+	TIMES SOURCE:2 , 1.30
+ELSEIF ABL:31 == 4
+	SOURCE:7 = 1500
+	TIMES SOURCE:0 , 1.50
+	TIMES SOURCE:17 , 1.50
+	TIMES SOURCE:1 , 1.50
+	TIMES SOURCE:2 , 1.50
+ELSE
+	SOURCE:7 = 2500
+	TIMES SOURCE:0 , 1.70
+	TIMES SOURCE:17 , 1.70
+	TIMES SOURCE:1 , 1.50
+	TIMES SOURCE:2 , 1.50
+ENDIF
+
+;公開や野外のときは、ABL:露出癖とTALENT:露出狂をみる
+IF TEQUIP:53 || TEQUIP:54
+	IF ABL:17 == 0
+		SOURCE:7 += 0
+		TIMES SOURCE:0 , 1.00
+		TIMES SOURCE:17 , 1.00
+		TIMES SOURCE:1 , 1.00
+		TIMES SOURCE:2 , 1.00
+		TIMES SOURCE:12, 1.00
+	ELSEIF ABL:17 == 1
+		SOURCE:7 += 100
+		TIMES SOURCE:0 , 1.10
+		TIMES SOURCE:17 , 1.10
+		TIMES SOURCE:1 , 1.10
+		TIMES SOURCE:2 , 1.10
+		TIMES SOURCE:12, 1.20
+	ELSEIF ABL:17 == 2
+		SOURCE:7 += 300
+		TIMES SOURCE:0 , 1.20
+		TIMES SOURCE:17 , 1.20
+		TIMES SOURCE:1 , 1.20
+		TIMES SOURCE:2 , 1.20
+		TIMES SOURCE:12, 1.40
+	ELSEIF ABL:17 == 3
+		SOURCE:7 += 800
+		TIMES SOURCE:0 , 1.30
+		TIMES SOURCE:17 , 1.30
+		TIMES SOURCE:1 , 1.30
+		TIMES SOURCE:2 , 1.30
+		TIMES SOURCE:12, 1.60
+	ELSEIF ABL:17 == 4
+		SOURCE:7 += 1500
+		TIMES SOURCE:0 , 1.50
+		TIMES SOURCE:17 , 1.50
+		TIMES SOURCE:1 , 1.50
+		TIMES SOURCE:2 , 1.50
+		TIMES SOURCE:12, 2.00
+	ELSE
+		SOURCE:7 += 2500
+		TIMES SOURCE:0 , 1.70
+		TIMES SOURCE:17 , 1.70
+		TIMES SOURCE:1 , 1.70
+		TIMES SOURCE:2 , 1.70
+		TIMES SOURCE:12, 3.00
+	ENDIF
+
+	IF TALENT:89
+		SOURCE:7 += 500
+		TIMES SOURCE:0 , 1.20
+		TIMES SOURCE:17 , 1.20
+		TIMES SOURCE:1 , 1.20
+		TIMES SOURCE:2 , 1.20
+		TIMES SOURCE:12, 1.50
+	ENDIF
+ENDIF
+
+;陰毛を生やす設定で剃毛状態
+SIF TALENT:125 == 0 && TALENT:310 <= 20
+	TIMES SOURCE:12 , 2.00
+
+;-------------------------------------------------
+;汚れの処理
+;-------------------------------------------------
+;노예の指⇔노예のＢの汚れが移動
+STAIN:1 |= STAIN:5
+STAIN:5 |= STAIN:1
+
+;노예の指⇔노예のＶの汚れが移動
+STAIN:1 |= STAIN:3
+STAIN:3 |= STAIN:1
+
+
+;シャワーオナニーの場合汚れをリセット、潤滑更に半分。
+IF TEQUIP:18 == 1
+	STAIN:1 = 0
+	STAIN:2 = 2
+	STAIN:3 = 1
+	STAIN:4 = 8
+
+	PALAM:3 /= 2
+ENDIF
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+;ビデオ撮影時・野外プレイ時は経験にプラス
+IF TEQUIP:53 || TEQUIP:54
+	EXP:10 += 2
+	PRINTL 자위경험＋２
+	EXP:11 += 2
+	PRINTL 조교자위경험＋２
+ELSE
+	EXP:10 += 1
+	PRINTL 자위경험＋１
+	EXP:11 += 1
+	PRINTL 조교자위경험＋１
+ENDIF
+IF (TEQUIP:53 || TEQUIP:54) && CFLAG:3 == 0
+	EXP:50 += 1
+	PRINTL 이상경험＋１
+	CFLAG:3 = 1
+ENDIF
+
+;レズ・ホモ経験
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +3
+	EXP:40 += 3
+ELSEIF TALENT:122 == 1 && TALENT:PLAYER:122 == 1
+	PRINTS EXPNAME:41
+	PRINTL +3
+	EXP:41 += 3
+ENDIF
+;-------------------------------------------------
+;その他の処理
+;-------------------------------------------------
+;屈服刻印２に相当
+TFLAG:200 = 2
+
+RETURN 1
+
+
+;-------------------------------------------------
+;自動自慰調教
+;-------------------------------------------------
+@COM3_AUTO
+;とりあえず簡略化
+
+;자위
+
+PRINT ≪자위≫
+
+;-------------------------------------------------
+;ソースの計算
+;-------------------------------------------------
+LOSEBASE:0 += 5
+LOSEBASE:1 += 50
+
+SOURCE:14 = 400
+
+;ABL:Ｃ感覚をみる
+IF ABL:0 == 0
+	SOURCE:0 = 15
+	SOURCE:12 = 2000
+	SOURCE:13 = 500
+ELSEIF ABL:0 == 1
+	SOURCE:0 = 50
+	SOURCE:12 = 2300
+	SOURCE:13 = 800
+ELSEIF ABL:0 == 2
+	SOURCE:0 = 300
+	SOURCE:12 = 2600
+	SOURCE:13 = 1200
+ELSEIF ABL:0 == 3
+	SOURCE:0 = 700
+	SOURCE:12 = 2900
+	SOURCE:13 = 1900
+ELSEIF ABL:0 == 4
+	SOURCE:0 = 1100
+	SOURCE:12 = 3200
+	SOURCE:13 = 2500
+ELSE
+	SOURCE:0 = 1600
+	SOURCE:12 = 3500
+	SOURCE:13 = 3000
+ENDIF
+
+;ABL:Ｂ感覚をみる
+IF ABL:1 == 0
+	SOURCE:17 = 15
+ELSEIF ABL:1 == 1
+	SOURCE:17 = 50
+ELSEIF ABL:1 == 2
+	SOURCE:17 = 300
+ELSEIF ABL:1 == 3
+	SOURCE:17 = 700
+ELSEIF ABL:1 == 4
+	SOURCE:17 = 1100
+ELSE
+	SOURCE:17 = 1600
+ENDIF
+
+SOURCE:2 = 0
+SOURCE:1 = 0
+
+;ABL:技巧をみる
+IF ABL:12 == 0
+	SOURCE:4 = 100
+	TIMES SOURCE:0 , 0.30
+	TIMES SOURCE:17 , 0.30
+	TIMES SOURCE:1 , 0.30
+	TIMES SOURCE:2 , 0.30
+ELSEIF ABL:12 == 1
+	SOURCE:4 = 160
+	TIMES SOURCE:0 , 0.70
+	TIMES SOURCE:17 , 0.70
+	TIMES SOURCE:1 , 0.70
+	TIMES SOURCE:2 , 0.70
+ELSEIF ABL:12 == 2
+	SOURCE:4 = 220
+	TIMES SOURCE:0 , 1.00
+	TIMES SOURCE:17 , 1.00
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+ELSEIF ABL:12 == 3
+	SOURCE:4 = 280
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+ELSEIF ABL:12 == 4
+	SOURCE:4 = 340
+	TIMES SOURCE:0 , 1.40
+	TIMES SOURCE:17 , 1.40
+	TIMES SOURCE:1 , 1.40
+	TIMES SOURCE:2 , 1.40
+ELSE
+	SOURCE:4 = 400
+	TIMES SOURCE:0 , 1.60
+	TIMES SOURCE:17 , 1.60
+	TIMES SOURCE:1 , 1.60
+	TIMES SOURCE:2 , 1.60
+ENDIF
+
+;ABL:自慰中毒をみる
+IF ABL:31 == 0
+	SOURCE:7 = 0
+	TIMES SOURCE:0 , 1.00
+	TIMES SOURCE:17 , 1.00
+	TIMES SOURCE:1 , 1.00
+	TIMES SOURCE:2 , 1.00
+ELSEIF ABL:31 == 1
+	SOURCE:7 = 100
+	TIMES SOURCE:0 , 1.10
+	TIMES SOURCE:17 , 1.10
+	TIMES SOURCE:1 , 1.10
+	TIMES SOURCE:2 , 1.10
+ELSEIF ABL:31 == 2
+	SOURCE:7 = 300
+	TIMES SOURCE:0 , 1.20
+	TIMES SOURCE:17 , 1.20
+	TIMES SOURCE:1 , 1.20
+	TIMES SOURCE:2 , 1.20
+ELSEIF ABL:31 == 3
+	SOURCE:7 = 800
+	TIMES SOURCE:0 , 1.30
+	TIMES SOURCE:17 , 1.30
+	TIMES SOURCE:1 , 1.30
+	TIMES SOURCE:2 , 1.30
+ELSEIF ABL:31 == 4
+	SOURCE:7 = 1500
+	TIMES SOURCE:0 , 1.50
+	TIMES SOURCE:17 , 1.50
+	TIMES SOURCE:1 , 1.50
+	TIMES SOURCE:2 , 1.50
+ELSE
+	SOURCE:7 = 2500
+	TIMES SOURCE:0 , 1.70
+	TIMES SOURCE:17 , 1.70
+	TIMES SOURCE:1 , 1.50
+	TIMES SOURCE:2 , 1.50
+ENDIF
+
+;陰毛を生やす設定で剃毛状態
+SIF TALENT:125 == 0 && TALENT:310 <= 20
+	TIMES SOURCE:12 , 2.00
+
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+
+EXP:10 += 1
+PRINTL 자위경험＋１
+
+;自動回数
+CFLAG:666 += 1
+
+
+RETURN 1

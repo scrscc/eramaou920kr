@@ -1,0 +1,1021 @@
+﻿;eraIM@Sから導入しました(eramaou)
+
+;-------------------------------------------------
+;처녀를 빼앗아 갈지 여부를 확인
+;-------------------------------------------------
+@CONFIRM_LOST_VIRGIN
+$INPUT_LOOP_01
+IF TALENT:0 && SELECTCOM != 90
+	PRINTFORML %SAVESTR:TARGET%의 처녀를 빼앗습니까？
+	PRINTL  [0] - 네
+	PRINTL  [1] - 아니오
+	INPUT
+	IF RESULT == 1
+		RETURN 0
+	ELSEIF RESULT != 0
+		GOTO INPUT_LOOP_01
+	ENDIF
+ENDIF
+RETURN 1
+
+@CONFIRM_LOST_VIRGIN_YOU
+$INPUT_LOOP_01
+IF TALENT:0 && SELECTCOM != 90
+	PRINTFORML %SAVESTR:PLAYER%의 처녀를 버립니까？
+	PRINTL  [0] - 네
+	PRINTL  [1] - 아니오
+	INPUT
+	IF RESULT == 1
+		RETURN 0
+	ELSEIF RESULT != 0
+		GOTO INPUT_LOOP_01
+	ENDIF
+ENDIF
+RETURN 1
+
+
+;-------------------------------------------------
+;조교자의 사정 체크
+;-------------------------------------------------
+@COM_EJAC_PLAYER_SEX
+#DIM EXP_ID
+;수간의 경우 그대로 종료
+SIF TEQUIP:89
+	RETURN 0
+
+;콜로세움의 경우 조수 외에는 여기서 종료
+SIF TEQUIP:55 && (ASSI != PLAYER)
+	RETURN 0
+
+;조교자의 사정 게이지 증가량
+B = 0
+
+;정상위、후배위、ニプルファック
+IF SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 90
+	;조교대상의 ABL:기교를 본다
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+	;조교대상의 ABL:온순을 본다
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+;대면좌위
+ELSEIF SELECTCOM == 22
+	;ABL:技巧をみる
+	IF ABL:12 == 0
+		B = 800
+	ELSEIF ABL:12 == 1
+		B = 1000
+	ELSEIF ABL:12 == 2
+		B = 1200
+	ELSEIF ABL:12 == 3
+		B = 1400
+	ELSEIF ABL:12 == 4
+		B = 1600
+	ELSE
+		B = 1800
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 1
+		TIMES B , 1.30
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.60
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.90
+	ELSEIF ABL:10 == 4
+		TIMES B , 2.10
+	ELSE
+		TIMES B , 2.40
+	ENDIF
+;배면좌위
+ELSEIF SELECTCOM == 23
+	;ABL:技巧をみる
+	IF ABL:12 == 0
+		B = 500
+	ELSEIF ABL:12 == 1
+		B = 700
+	ELSEIF ABL:12 == 2
+		B = 900
+	ELSEIF ABL:12 == 3
+		B = 1100
+	ELSEIF ABL:12 == 4
+		B = 1300
+	ELSE
+		B = 1500
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 1
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.30
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.40
+	ELSE
+		TIMES B , 1.50
+	ENDIF
+;기승위
+ELSEIF SELECTCOM == 34
+	;ABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1000
+	ELSEIF ABL:12 == 1
+		B = 1300
+	ELSEIF ABL:12 == 2
+		B = 1700
+	ELSEIF ABL:12 == 3
+		B = 2200
+	ELSEIF ABL:12 == 4
+		B = 3000
+	ELSE
+		B = 4500
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+
+	;ABL:奉仕技術をみる
+	IF ABL:13 == 0
+		TIMES B , 0.30
+	ELSEIF ABL:13 == 1
+		TIMES B , 0.70
+	ELSEIF ABL:13 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:13 == 3
+		TIMES B , 1.20
+	ELSEIF ABL:13 == 4
+		TIMES B , 1.50
+	ELSE
+		TIMES B , 1.80
+	ENDIF
+;삽입자궁구자극
+ELSEIF SELECTCOM == 121
+	;ABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+;삽입Ｇ스팟자극
+ELSEIF SELECTCOM == 120
+	;ABL:技巧をみる
+	IF ABL:12 == 0
+		B = 500
+	ELSEIF ABL:12 == 1
+		B = 700
+	ELSEIF ABL:12 == 2
+		B = 900
+	ELSEIF ABL:12 == 3
+		B = 1100
+	ELSEIF ABL:12 == 4
+		B = 1300
+	ELSE
+		B = 1500
+	ENDIF
+
+	;ABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 1
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.30
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.40
+	ELSE
+		TIMES B , 1.50
+	ENDIF
+;정상위・키스
+ELSEIF SELECTCOM == 128
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+	;調教対象のABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+
+	;ABL:奉仕精神をみる
+	IF ABL:16 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:16 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:16 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:16 == 3
+		TIMES B , 1.50
+	ELSEIF ABL:16 == 4
+		TIMES B , 1.80
+	ELSE
+		TIMES B , 2.40
+	ENDIF
+;정상위・가슴애무
+ELSEIF SELECTCOM == 129
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+	;調教対象のABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+;正常位SP
+ELSEIF SELECTCOM == 130
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2500
+	ELSEIF ABL:12 == 4
+		B = 3200
+	ELSE
+		B = 4000
+	ENDIF
+
+	;調教対象のABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+
+	;ABL:奉仕精神をみる
+	IF ABL:16 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:16 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:16 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:16 == 3
+		TIMES B , 1.50
+	ELSEIF ABL:16 == 4
+		TIMES B , 1.80
+	ELSE
+		TIMES B , 2.40
+	ENDIF
+;후배위・가슴애무・스팽킹
+ELSEIF SELECTCOM == 131 || SELECTCOM == 132
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+	;調教対象のABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+;서서후배위
+ELSEIF SELECTCOM == 133
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+	;調教対象のABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+
+	;ABL:奉仕精神をみる
+	IF ABL:16 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:16 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:16 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:16 == 3
+		TIMES B , 1.50
+	ELSEIF ABL:16 == 4
+		TIMES B , 1.80
+	ELSE
+		TIMES B , 2.40
+	ENDIF
+;후배위ＳＰ
+ELSEIF SELECTCOM == 134
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2500
+	ELSEIF ABL:12 == 4
+		B = 3200
+	ELSE
+		B = 4000
+	ENDIF
+
+	;調教対象のABL:従順をみる
+	IF ABL:10 == 0
+		TIMES B , 0.80
+	ELSEIF ABL:10 == 1
+		TIMES B , 0.90
+	ELSEIF ABL:10 == 2
+		TIMES B , 1.00
+	ELSEIF ABL:10 == 3
+		TIMES B , 1.10
+	ELSEIF ABL:10 == 4
+		TIMES B , 1.20
+	ELSE
+		TIMES B , 1.30
+	ENDIF
+
+	;ABL:奉仕精神をみる
+	IF ABL:16 == 0
+		TIMES B , 0.50
+	ELSEIF ABL:16 == 1
+		TIMES B , 0.80
+	ELSEIF ABL:16 == 2
+		TIMES B , 1.20
+	ELSEIF ABL:16 == 3
+		TIMES B , 1.50
+	ELSEIF ABL:16 == 4
+		TIMES B , 1.80
+	ELSE
+		TIMES B , 2.40
+	ENDIF
+ELSEIF SELECTCOM == 24
+	;調教対象のABL:技巧をみる
+	IF ABL:12 == 0
+		B = 1500
+	ELSEIF ABL:12 == 1
+		B = 1600
+	ELSEIF ABL:12 == 2
+		B = 1800
+	ELSEIF ABL:12 == 3
+		B = 2000
+	ELSEIF ABL:12 == 4
+		B = 2400
+	ELSE
+		B = 3000
+	ENDIF
+
+ENDIF
+
+;調教対象のABL:欲望をみる
+IF ABL:11 == 0
+	TIMES B , 1.00
+ELSEIF ABL:11 == 1
+	TIMES B , 1.10
+ELSEIF ABL:11 == 2
+	TIMES B , 1.20
+ELSEIF ABL:11 == 3
+	TIMES B , 1.30
+ELSEIF ABL:11 == 4
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;ABL:性交技術をみる
+IF ABL:14 == 0
+	TIMES B , 1.00
+ELSEIF ABL:14 == 1
+	TIMES B , 1.10
+ELSEIF ABL:14 == 2
+	TIMES B , 1.20
+ELSEIF ABL:14 == 3
+	TIMES B , 1.30
+ELSEIF ABL:14 == 4
+	TIMES B , 1.40
+ELSE
+	TIMES B , 1.50
+ENDIF
+
+;PALAM:潤滑をみる
+IF PALAM:3 < PALAMLV:1
+	TIMES B , 0.60
+ELSEIF PALAM:3 < PALAMLV:2
+	TIMES B , 0.80
+ELSEIF PALAM:3 < PALAMLV:3
+	TIMES B , 1.00
+ELSEIF PALAM:3 < PALAMLV:4
+	TIMES B , 1.20
+ELSEIF PALAM:3 >= PALAMLV:4
+	TIMES B , 1.40
+ENDIF
+
+;プレイヤーのABL:Ｃ感覚をみる
+IF ABL:PLAYER:0 == 0
+	TIMES B , 1.00
+ELSEIF ABL:PLAYER:0 == 1
+	TIMES B , 1.50
+ELSEIF ABL:PLAYER:0 == 2
+	TIMES B , 2.00
+ELSEIF ABL:PLAYER:0 == 3
+	TIMES B , 2.50
+ELSEIF ABL:PLAYER:0 == 4
+	TIMES B , 3.50
+ELSE
+	TIMES B , 5.00
+ENDIF
+
+;EXP:Ｖ経験をみる
+EXP_ID = 0
+;乳内の場合Ｂ経験
+SIF CFLAG:113 == 1
+	EXP_ID = 35
+;Ｖ経験が多くなると少し下がる
+IF EXP:EXP_ID < EXPLV:1
+	TIMES B , 1.50
+ELSEIF EXP:EXP_ID < EXPLV:2
+	TIMES B , 1.00
+ELSEIF EXP:EXP_ID < EXPLV:3
+	TIMES B , 0.90
+ELSEIF EXP:EXP_ID < EXPLV:4
+	TIMES B , 0.80
+ELSEIF EXP:EXP_ID < EXPLV:5
+	TIMES B , 0.70
+ELSE
+	TIMES B , 0.60
+ENDIF
+
+;EXP:Ｖ拡張経験をみる
+;Ｖ拡張経験が多くなるとかなり下がる
+EXP_ID = 52
+;乳内の場合噴乳経験
+SIF CFLAG:113 == 1
+	EXP_ID = 54
+IF EXP:EXP_ID < EXPLV:1
+	TIMES B , 1.00
+ELSEIF EXP:EXP_ID < EXPLV:2
+	TIMES B , 0.80
+ELSEIF EXP:EXP_ID < EXPLV:3
+	TIMES B , 0.50
+ELSEIF EXP:EXP_ID < EXPLV:4
+	TIMES B , 0.30
+ELSEIF EXP:EXP_ID < EXPLV:5
+	TIMES B , 0.10
+ELSE
+	TIMES B , 0.05
+ENDIF
+
+;コンドーム장착중だと下がる
+IF TEQUIP:35 || (ASSIPLAY && TEQUIP:36 )
+	TIMES B , 0.60
+ENDIF
+
+;사정ゲージ増加処理
+SIF TALENT:PLAYER:121 || TALENT:PLAYER:122
+	BASE:PLAYER:2 += B
+
+;사정処理
+S = BASE:PLAYER:2
+EJAC = MAXBASE:PLAYER:2
+
+IF  S > EJAC * 2
+	E = 2
+ELSEIF S > EJAC
+	E = 1
+ELSE
+	E = 0
+ENDIF
+
+;대량사정
+IF E == 2
+	EXP:PLAYER:3 += 2
+	EXP:20 += 1
+	IF TEQUIP:35 == 1
+		PRINTL 대량 사정
+	ELSEIF CFLAG:113 == 1
+		PRINTL 젖가슴안 대량 사정
+	ELSE
+		PRINTL 질내 대량 사정
+	ENDIF
+	PRINTL 정액경험＋１
+	;Ｐに精液汚れ
+	STAIN:PLAYER:2 |= 4
+
+	BASE:PLAYER:2 -= EJAC*2
+	SIF BASE:PLAYER:2 >= EJAC
+		BASE:PLAYER:2 = EJAC-1
+
+	;セックスで사정フラグ
+	TFLAG:2 = 2
+	;膣内사정フラグ（主人）
+	SIF ASSIPLAY == 0 && TEQUIP:35 == 0
+		TFLAG:38 = 2
+	;膣内사정フラグ（조수）
+	SIF ASSIPLAY && TEQUIP:36 == 0
+		TFLAG:38 = 2
+;通常の사정
+ELSEIF E == 1
+	EXP:PLAYER:3 += 1
+	;Ｐに精液汚れ
+	IF TEQUIP:35 == 1
+		PRINTL 사정
+	ELSEIF CFLAG:113 == 1
+		PRINTL 젖가슴안 사정
+	ELSE
+		PRINTL 질내 사정
+	ENDIF
+	STAIN:PLAYER:2 |= 4
+
+	BASE:PLAYER:2 -= EJAC
+	SIF BASE:PLAYER:2 >= EJAC
+		BASE:PLAYER:2 = EJAC-1
+
+	;セックスで사정フラグ
+	TFLAG:2 = 1
+	;膣内사정フラグ（主人）
+	SIF ASSIPLAY == 0 && TEQUIP:35 == 0
+		TFLAG:38 = 1
+	;膣内사정フラグ（조수）
+	SIF ASSIPLAY && TEQUIP:36 == 0
+		TFLAG:38 = 1
+ENDIF
+
+;-------------------------------------------------
+;セックス後の処理
+;-------------------------------------------------
+@COM_AFTER_VAGINA_SEX
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+S = 0
+;Ｖ感覚が高いほどＶ経験が入る
+IF ABL:2 <= 1
+	S += 2
+ELSEIF ABL:2 <= 4
+	S += 3
+ELSEIF ABL:2 <= 7
+	S += 4
+ELSE
+	S += 5
+ENDIF
+EXP:0 += S
+PRINTFORML Ｖ경험+{S}
+S = 0
+
+EXP:5 += 1
+PRINTL 성교경험＋１
+
+;이상경험
+Z = 0
+TFLAG:14 = 0
+CALL INCEST
+
+;処女喪失の相手が女性なら異常経験に＋1
+SIF TALENT:0 && TALENT:PLAYER:122 == 0
+	Z += 1
+;処女喪失の相手が父親か母親なら異常経験に＋２
+IF TALENT:0 && TFLAG:14 == 1
+	Z += 2
+;処女喪失の相手が兄弟姉妹なら異常経験に＋１
+ELSEIF TALENT:0 && (TFLAG:14 == 3 || TFLAG:14 == 4)
+	Z += 1
+ENDIF
+;処女喪失が獣姦なら異常経験は基本値２
+SIF TALENT:0 && TEQUIP:89
+	Z = 2
+
+;処女喪失が騎乗位なら異常経験に＋1
+SIF TALENT:0 && SELECTCOM == 34
+	Z += 1
+
+IF Z
+	EXP:50 += Z
+	PRINTFORML %EXPNAME:50%＋{Z}
+ENDIF
+
+;膣内フラグに上書きされることもある
+SIF RAND:2 == 0
+	CFLAG:113 = 0
+
+;獣姦の場合はここで終了
+SIF TEQUIP:89
+	RETURN 0
+
+;レズ経験上昇
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +4
+	EXP:40 += 4
+ENDIF
+
+;コロシアムの場合はここで終了
+SIF TEQUIP:55 && (ASSI != PLAYER)
+	RETURN 0
+
+;애정경험
+;調教者が童貞で調教対象が処女
+IF TALENT:PLAYER:1 && TALENT:0
+	E = 100
+;調教対象が処女
+ELSEIF  TALENT:0
+	E = 50
+;정상위、정상위・가슴애무
+ELSEIF SELECTCOM == 20 || SELECTCOM == 129
+	E = 4
+;정상위・키스
+ELSEIF SELECTCOM == 128
+	E = 5
+;정상위・極
+ELSEIF SELECTCOM == 130
+	E = 8
+;대면좌위
+ELSEIF SELECTCOM == 22
+	E = 5
+;기타
+ELSE
+	E = 3
+ENDIF
+
+;애정경험
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+;初体験の相手が조수
+IF ASSI > 0 && ASSIPLAY
+	R = NO:ASSI
+	;조수が童貞で調教対象が処女
+	IF TALENT:ASSI:1 && TALENT:0
+		RELATION:R += 30
+		SIF RELATION:R == 30
+			RELATION:R = 130
+	;調教対象が処女
+	ELSEIF TALENT:0
+		RELATION:R += 20
+		SIF RELATION:R == 20
+			RELATION:R = 120
+	;조수が童貞
+	ELSEIF TALENT:ASSI:1
+		RELATION:R += 10
+		SIF RELATION:R == 10
+			RELATION:R = 110
+	ENDIF
+	SIF RELATION:R > 200
+		RELATION:R = 200
+ENDIF
+
+;주인에 의한 섹스라면 호감도 상승
+IF ASSIPLAY == 0
+	IF ABL:2 >= 3
+		TFLAG:30 += 2
+	ELSE
+		TFLAG:30 += 1
+	ENDIF
+ENDIF
+
+;친족 관계의 판정
+TFLAG:14 = 0
+CALL INCEST
+;조교자가 동정이면 동정 상실
+IF TALENT:PLAYER:1
+	TALENT:PLAYER:1 = 0
+	PRINTW 【동정상실】
+	IF CFLAG:PLAYER:15 == 0
+		CFLAG:PLAYER:15 = NO:TARGET + 1
+		CSTR:PLAYER:3 = %SAVESTR:TARGET%
+		;첫 체험이 근친 상간
+		;첫 경험 상대가 자신의 아들・딸이라는 상황은 생물학적으로 있을 수 없으므로 생략한다
+		IF TFLAG:14 == 2 && TALENT:122
+			CFLAG:PLAYER:15 = 300
+		ELSEIF TFLAG:14 == 2 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:122
+			CFLAG:PLAYER:15 = 306
+		ELSEIF TFLAG:14 == 3 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 307
+		ELSEIF TFLAG:14 == 4 && TALENT:122
+			CFLAG:PLAYER:15 = 304
+		ELSEIF TFLAG:14 == 4 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 305
+		ELSEIF TFLAG:14 == 5 && TALENT:122
+			CFLAG:PLAYER:15 = 309
+		ELSEIF TFLAG:14 == 6 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 308
+		ENDIF
+	ENDIF
+ENDIF
+
+TFLAG:14 = 0
+
+;-------------------------------------------------
+;오염의 처리
+;-------------------------------------------------
+;노예의 Ｖ⇔조교자의 Ｐ의 더러움이 이동
+STAIN:3 |= STAIN:PLAYER:2
+STAIN:PLAYER:2 |= STAIN:3
+;
+;
+;-------------------------------------------------
+@COM_AFTER_EXTRA_SEX
+#DIM ABNOMAL_EXP
+;-------------------------------------------------
+;経験上昇
+;-------------------------------------------------
+LOCAL = 0
+ABNOMAL_EXP = 0
+
+IF CFLAG:113 == 1
+	;Ｂ感覚が高いほどＢ経験が入る
+	IF ABL:1 <= 1
+		LOCAL += 2
+	ELSEIF ABL:1 <= 4
+		LOCAL += 3
+	ELSEIF ABL:1 <= 7
+		LOCAL += 4
+	ELSE
+		LOCAL += 5
+	ENDIF
+	;初のB経験の場合異常経験2
+	SIF EXP:35 < 1
+		ABNOMAL_EXP += 2
+	EXP:35 += LOCAL
+	PRINTFORML Ｂ경험+{LOCAL}
+ENDIF
+LOCAL = 0
+
+EXP:5 += 1
+PRINTL 성교경험＋１
+
+;이상경험
+Z = 0
+TFLAG:14 = 0
+CALL INCEST
+ABNOMAL_EXP += Z
+
+IF ABNOMAL_EXP
+	EXP:50 += ABNOMAL_EXP
+	PRINTFORML %EXPNAME:50%＋{ABNOMAL_EXP}
+ENDIF
+
+;獣姦の場合はここで終了
+SIF TEQUIP:89
+	RETURN 0
+
+;レズ経験上昇
+IF TALENT:122 == 0 && TALENT:PLAYER:122 == 0
+	PRINTS EXPNAME:40
+	PRINTL +4
+	EXP:40 += 4
+ENDIF
+
+;コロシアムの場合はここで終了
+SIF TEQUIP:55 && (ASSI != PLAYER)
+	RETURN 0
+
+;애정경험
+;調教者が童貞で調教対象が処女
+IF TALENT:PLAYER:1 && TALENT:0
+	E = 100
+;調教対象が処女
+ELSEIF  TALENT:0
+	E = 50
+;정상위、정상위・가슴애무
+ELSEIF SELECTCOM == 20 || SELECTCOM == 129
+	E = 4
+;정상위・키스
+ELSEIF SELECTCOM == 128
+	E = 5
+;정상위・極
+ELSEIF SELECTCOM == 130
+	E = 8
+;대면좌위
+ELSEIF SELECTCOM == 22
+	E = 5
+;기타
+ELSE
+	E = 3
+ENDIF
+
+;애정경험
+IF CFLAG:2 >= 1000 && ASSIPLAY == 0
+	PRINTFORML %EXPNAME:23%+{E}
+	EXP:23 += E
+ENDIF
+E = 0
+
+;初体験の相手が조수
+IF ASSI > 0 && ASSIPLAY
+	R = NO:ASSI
+	;조수が童貞で調教対象が処女
+	IF TALENT:ASSI:1 && TALENT:0
+		RELATION:R += 30
+		SIF RELATION:R == 30
+			RELATION:R = 130
+	;調教対象が処女
+	ELSEIF TALENT:0
+		RELATION:R += 20
+		SIF RELATION:R == 20
+			RELATION:R = 120
+	;조수が童貞
+	ELSEIF TALENT:ASSI:1
+		RELATION:R += 10
+		SIF RELATION:R == 10
+			RELATION:R = 110
+	ENDIF
+	SIF RELATION:R > 200
+		RELATION:R = 200
+ENDIF
+
+;주인에 의한 섹스라면 호감도 상승
+IF ASSIPLAY == 0
+	IF ABL:2 >= 3
+		TFLAG:30 += 2
+	ELSE
+		TFLAG:30 += 1
+	ENDIF
+ENDIF
+
+;친족 관계의 판정
+TFLAG:14 = 0
+CALL INCEST
+;조교자가 동정이면 동정 상실
+IF TALENT:PLAYER:1
+	TALENT:PLAYER:1 = 0
+	PRINTW 【동정상실】
+	IF CFLAG:PLAYER:15 == 0
+		CFLAG:PLAYER:15 = NO:TARGET + 1
+		CSTR:PLAYER:3 = %SAVESTR:TARGET%
+		;첫 체험이 근친 상간
+		;첫 경험 상대가 자신의 아들・딸이라는 상황은 생물학적으로 있을 수 없으므로 생략한다
+		IF TFLAG:14 == 2 && TALENT:122
+			CFLAG:PLAYER:15 = 300
+		ELSEIF TFLAG:14 == 2 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 301
+		ELSEIF TFLAG:14 == 3 && TALENT:122
+			CFLAG:PLAYER:15 = 306
+		ELSEIF TFLAG:14 == 3 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 307
+		ELSEIF TFLAG:14 == 4 && TALENT:122
+			CFLAG:PLAYER:15 = 304
+		ELSEIF TFLAG:14 == 4 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 305
+		ELSEIF TFLAG:14 == 5 && TALENT:122
+			CFLAG:PLAYER:15 = 309
+		ELSEIF TFLAG:14 == 6 && TALENT:122 == 0
+			CFLAG:PLAYER:15 = 308
+		ENDIF
+	ENDIF
+ENDIF
+
+TFLAG:14 = 0
+;
