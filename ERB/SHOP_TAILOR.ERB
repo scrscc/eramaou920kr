@@ -1,0 +1,1278 @@
+﻿;=================================================
+;재봉소
+;eraIM@Sから導入しました(eramaou)
+;ZはTARGETを保存してるため使用禁止
+;=================================================
+@TAILOR_MAIN
+;구입한 물품의 종류（1～9:통상 의류 2:학생복 3:아이 옷 10:속옷 11:替えオムツ 20:装備品 ）
+A = 0
+;선택한 옷의 종류
+R = 0
+;옷의 가격
+C = 0
+;갈아입히는데 필요한 순종 Lv
+S = 0
+;착의시 옷의 손상 플래그
+F = 0
+
+$INPUT_LOOP_01
+
+DRAWLINE
+PRINTL 스타일리스트
+PRINTL 《어떤 의상이나 장비품이라도 맞춰주는 의상계입니다》
+DRAWLINE
+PRINTV DAY+1
+PRINT 일째
+IF TIME == 0
+	PRINTL  오전
+ELSE
+	PRINTL  오후
+ENDIF
+
+PRINTFORML 소지금：{MONEY}포인트
+DRAWLINE
+PRINTL 누구의 의상을 맞춰줍니까？　
+DRAWLINE
+CALL LIFE_LIST_TAILOR
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	A = 0
+	C = 0
+	R = 0
+	RETURN 0
+ELSEIF RESULT < 1 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP_01
+;죽어가는 케릭터는 배제
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP_01
+;조교 중이외는 배제
+ELSEIF CFLAG:RESULT:1 != 0
+	GOTO INPUT_LOOP_01
+ENDIF
+
+TARGET = RESULT
+
+$INPUT_LOOP_02
+A = 0
+C = 0
+R = 0
+S = 0
+
+DRAWLINE
+PRINTFORML 소지금：{MONEY}포인트
+PRINTFORM 현재의 %SAVESTR:TARGET%의 모습은 
+CALL PRINT_CLOTHTYPE
+PRINTL 입니다. 
+
+PRINTFORML %SAVESTR:TARGET%에게 어떤 옷을 입혀줍니까？
+DRAWLINE
+
+PRINTL  [0] - 평상복（100포인트）
+PRINTL  [1] - 일반적인 장비（1000포인트）
+PRINTL  [2] - 그 외
+PRINTL  [3] - 대체 속옷（5포인트）
+SIF CFLAG:42 == 69 && ((CFLAG:40 & 64) == 0 || CFLAG:47 > 0)
+	PRINTL  [4] - 대체 기저귀（50포인트）
+SIF CFLAG:42 == 79 && (CFLAG:40 & 64) && CFLAG:49 == 0 && TALENT:0
+	PRINTL  [5] - 정조대의 열쇠를 버린다
+;PRINTL  [6] - 지금 입고 있는 옷을 판다
+PRINTL  [7] - 마법 장비품
+PRINTL  [8] - 무기
+DRAWLINE
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 0
+	CALL TAILOR_CASUAL
+ELSEIF RESULT == 1
+	CALL TAILOR_NORMAL
+ELSEIF RESULT == 2
+	CALL TAILOR_ACCESSORY
+ELSEIF RESULT == 3
+	CALL TAILOR_UNDERWARE
+ELSEIF RESULT == 4 && CFLAG:42 == 69
+	CALL TAILOR_DIAPER
+ELSEIF RESULT == 5 && CFLAG:42 == 79 && (CFLAG:40 & 64) && CFLAG:49 == 0 && TALENT:0 && CFLAG:71 == 0
+	CALL CHASTITY_KEY
+ELSEIF RESULT == 7
+	CALL EQUIP_MAGIC_ITEM
+ELSEIF RESULT == 8
+	CALL EQUIP_MAGIC_WEAPON
+ELSEIF RESULT == 999
+	GOTO INPUT_LOOP_01
+ELSE
+	GOTO INPUT_LOOP_02
+ENDIF
+
+IF A == 0
+	GOTO INPUT_LOOP_02
+
+ELSEIF A == 20 && CFLAG:49
+	PRINTFORMW 정조대를 제외하지 않는 한, 다른 장비품은 붙일 수 없습니다
+	GOTO INPUT_LOOP_02
+ELSEIF MONEY < C
+	PRINTW 돈이 부족합니다
+	GOTO INPUT_LOOP_02
+ELSEIF ABL:10 < S
+	PRINTFORMW 착용이 거부되었습니다
+	GOTO INPUT_LOOP_02
+ENDIF
+
+;【장신】キャラに子供服を買ってやった場合
+IF TALENT:99 && A == 3
+	$INPUT_LOOP_03
+	PRINTFORML %SAVESTR:TARGET%에게, 이 옷은 입힐수 없습니다……
+	PRINTFORML  [0] - 강제로 입힌다
+	PRINTFORML  [1] - 단념한다
+	INPUT
+	IF RESULT == 0
+		PRINTL 강제로 입혔는데, 하반신이 찢어져버렸습니다. 
+		WAIT
+		;下半身が破れたフラグ
+		F = 2
+	ELSEIF RESULT == 1
+		GOTO INPUT_LOOP_02
+	ELSE
+		GOTO INPUT_LOOP_03
+	ENDIF
+;【小型体型】でない【거유】【폭유】【超乳】キャラに子供服を買ってやった場合
+ELSEIF (TALENT:100 == 0 && (TALENT:114 || TALENT:110 || TALENT:119)) && A == 3
+	$INPUT_LOOP_04
+	PRINTFORML %SAVESTR:TARGET%에게, 이 옷은 입힐수 없습니다……
+	PRINTFORML  [0] - 강제로 입힌다
+	PRINTFORML  [1] - 단념한다
+	INPUT
+	IF RESULT == 0
+		PRINTL 강제로 입혔는데, 상반신이 뜯어져 버렸습니다. 
+		WAIT
+		;상반신이 찢어지는 플래그
+		F = 1
+	ELSEIF RESULT == 1
+		GOTO INPUT_LOOP_02
+	ELSE
+		GOTO INPUT_LOOP_04
+	ENDIF
+ENDIF
+
+IF A <= 9 
+	PRINTFORM %조사선택(SAVESTR:TARGET, "를")% 
+	IF CFLAG:41 && (CFLAG:45 == 0 || CFLAG:46 == 0)
+		CALL PRINT_CLOTHTYPE
+		PRINTFORM 로부터 
+	ENDIF
+	
+	CFLAG:41 = R
+	CFLAG:45 = 0
+	CFLAG:46 = 0
+	
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML (으)로 갈아입게 했습니다. 
+
+
+ELSEIF A == 10
+	PRINTFORML %SAVESTR:TARGET%에게 새로운 속옷을 사 주었습니다. 
+	IF CFLAG:43 >= 0 && CFLAG:48 >= 6
+		WAIT
+		M = 50 * CFLAG:48
+		;자위광
+		SIF TALENT:74
+			TIMES M , 1.50
+		;수수께끼의매력
+		SIF TALENT:92
+			TIMES M , 2.00
+		;인기인
+		SIF TALENT:126
+			TIMES M , 1.50
+		PRINTFORML %조사선택(SAVESTR:TARGET, "가")% 입고있던 팬티는, {M}포인트로 팔렸습니다. 
+		MONEY += M
+	ENDIF
+
+	IF CFLAG:41 == 0
+		CFLAG:41 = 1
+		CFLAG:45 = -3
+		CFLAG:46 = -3
+	ENDIF
+
+	CFLAG:40 = 3
+	CFLAG:43 = 0
+	CFLAG:44 = 0
+	CFLAG:48 = 0
+ELSEIF A == 11
+	PRINTFORML 방의 구석을 빌려, %SAVESTR:TARGET%에게 기저귀를 차게 해 주었습니다. 
+	CFLAG:47 = 0
+ELSEIF A == 20
+	IF CFLAG:42 && CFLAG:47 == 0
+		PRINTFORM %SAVESTR:TARGET%(으)로부터 
+		CALL PRINT_CLOTHTYPE_SPECIAL
+		PRINTFORM 을(를) 제외하게 해, 
+	ELSE
+		PRINTFORM %SAVESTR:TARGET%에게 
+	ENDIF
+	
+	CFLAG:42 = R
+	CFLAG:47 = 0
+	
+	CALL PRINT_CLOTHTYPE_SPECIAL
+	PRINTFORML 을(를) 장착시켰습니다. 
+
+
+;	※尿道カテーテルある装備をつけた場合. 
+	IF CFLAG:42 == 99 || CFLAG:42 == 98
+		PRINTFORML 장착 될 때, 익숙하지 않은 요도 카테터의 삽입감에,
+		PRINTFORML %SAVESTR:TARGET%(은)는 무심코 소리를 지르며 얼굴을 붉히고 있다.
+	ENDIF
+
+
+
+ENDIF
+
+IF F == 1
+	PRINT 산지 얼마 안된 
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 상반신이 뜯어져, 
+	PRINTFORML %SAVESTR:TARGET%의 젖가슴이 보여지고 있습니다……
+	CFLAG:44 = 0 - 3
+	CFLAG:45 = 0 - 3
+ELSEIF F == 2
+	PRINT 산지 얼마 안된 
+	CALL PRINT_CLOTHTYPE
+	PRINTFORML 의 하반신이 찢어져, 
+	PRINTFORML %SAVESTR:TARGET%의 엉덩이가 보여지고 있습니다……
+	CFLAG:46 = 0 - 3
+ENDIF
+
+CALL WEARING_CLOTH_ABLE
+
+TARGET = - 1
+MONEY -= C
+
+WAIT
+
+RESTART
+
+;-------------------------------------------------
+;평상복
+;-------------------------------------------------
+@TAILOR_CASUAL
+A = 1
+C = 100
+F = 0
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	A = 0
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP_01
+
+PRINTL □평상복
+PRINTFORML 소지금：{MONEY}포인트
+DRAWLINE
+
+PRINTL  [1] - 평상복・스커트 타입
+PRINTL  [2] - 평상복・바지 타입
+DRAWLINE
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 1
+	R = 1
+	S = 0
+	SIF TALENT:122
+		S = 3
+ELSEIF RESULT == 2
+	R = 101
+	S = 0
+ELSEIF RESULT == 999
+	A = 0
+	C = 0
+	R = 0
+	S = 0
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+RETURN 1
+
+RETURN 1
+
+;-------------------------------------------------
+;일반적인 장비
+;-------------------------------------------------
+@TAILOR_NORMAL
+A = 1
+C = 1000
+F = 0
+;ページ
+P = 0
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	A = 0
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP_01
+
+PRINTL □ 일반적인 장비
+PRINTFORML 소지금：{MONEY}포인트
+DRAWLINE
+
+IF P == 0
+	PRINTL  [1] - 브레스트 플레이트 & 스커트 아머 
+	PRINTL  [2] - 아동복（여자아이용）
+	PRINTL  [3] - 체인 메일 
+	PRINTL  [4] - 레더 & 스커트 아머 
+	PRINTL  [5] - 브레스트 플레이트 & 스패츠 아머 
+	PRINTL  [6] - 신관복 
+	PRINTL  [7] - 퀴라스 & 드로워즈 
+	PRINTL  [8] - 비키니 아머 
+	PRINTL  [9] - 파자마 
+ELSEIF P == 1
+	PRINTL  [10] - 원피스 
+	PRINTL  [11] - 닌자복 
+	PRINTL  [12] - 창부의 드레스 
+	PRINTL  [13] - 무녀복 
+	PRINTL  [14] - 임산부 드레스 
+	PRINTL  [15] - 레오타드 
+	PRINTL  [16] - 바니 슈트 
+	PRINTL  [17] - 스킨 ＆ 스커트 아머 
+	PRINTL  [18] - 퀴라스 & 스커트 
+	PRINTL  [19] - 가시 달린 갑옷 & 스커트 
+ELSEIF P == 2
+	PRINTL  [20] - 메이드복
+	PRINTL  [21] - 모험복
+	PRINTL  [22] - 기사 갑옷
+	PRINTL  [23] - 카오스 아머
+	PRINTL  [24] - 레오타드 아머
+	PRINTL  [25] - 비키니 아머
+	PRINTL  [26] - 섹시한 속옷
+	PRINTL  [27] - 서큐버스 비키니
+	PRINTL  [28] - 데빌 레오타드
+	PRINTL  [29] - 본디지수트
+ELSEIF P == 3
+	PRINTL  [30] - 콘돔을 매단 성녀의 옷
+	PRINTL  [31] - 모험복＆T백
+	PRINTL  [32] - 니플레스＆미니스커트 아머
+	PRINTL  [33] - 가슴흉갑＆시스루 스커트
+	PRINTL  [34] - 앞가슴이 뚫린 무녀 의복
+	PRINTL  [35] - 노출도의 높은 닌자 의복
+	PRINTL  [36] - 가슴흉갑＆T백
+	PRINTL  [37] - 콘돔을 매단 창녀의 드레스
+	PRINTL  [38] - 음탕하고 노출도가 높은 신관옷
+	PRINTL  [39] - 유두나 다리 사이를 노출한 타이츠 아머
+ELSEIF P == 4
+	PRINTL  [40] - 원피스 수영복
+	PRINTL  [41] - 투피스 수영복
+	PRINTL  [42] - 차이나 드레스
+ENDIF
+DRAWLINE
+PRINT [997] 다음　　
+PRINT [998] 이전　　
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 1
+	R = 2
+	S = 0
+ELSEIF RESULT == 2
+	A = 3
+	R = 22
+	S = 5
+	SIF TALENT:132 || TALENT:135 || TALENT:131
+		S = 0
+	SIF TALENT:122 && S < 3
+		S = 3
+ELSEIF RESULT == 3
+	R = 3
+	S = 0
+ELSEIF RESULT == 4
+	R = 4
+	S = 0
+ELSEIF RESULT == 5
+	R = 108
+	S = 0
+ELSEIF RESULT == 6
+	R = 207
+	S = 0
+ELSEIF RESULT == 7
+	R = 111
+	S = 0
+ELSEIF RESULT == 8
+	R = 206
+	S = 3
+ELSEIF RESULT == 9
+	R = 131
+	S = 0
+ELSEIF RESULT == 10
+	R = 201
+	S = 0
+	SIF TALENT:122
+		S = 3
+ELSEIF RESULT == 11
+	R = 110
+	S = 0
+ELSEIF RESULT == 12
+	R = 203
+	S = 1
+	SIF TALENT:122
+		S = 3
+ELSEIF RESULT == 13
+	R = 104
+	S = 0
+ELSEIF RESULT == 14
+	R = 205
+	S = 4
+	SIF TALENT:153
+		S = 1
+ELSEIF RESULT == 15
+	R = 251
+	S = 0
+ELSEIF RESULT == 16
+	R = 254
+	S = 3
+ELSEIF RESULT == 17
+	R = 5
+	S = 0
+ELSEIF RESULT == 18
+	R = 6
+	S = 0
+ELSEIF RESULT == 19
+	R = 7
+	S = 2
+ELSEIF RESULT == 20
+	R = 209
+	S = 0
+ELSEIF RESULT == 21
+	R = 103
+	S = 0
+ELSEIF RESULT == 22
+	R = 105
+	S = 0
+ELSEIF RESULT == 23
+	R = 253
+	S = 3
+ELSEIF RESULT == 24
+	R = 292
+	S = 0
+ELSEIF RESULT == 25
+	R = 193
+	S = 0
+ELSEIF RESULT == 26
+	R = 194
+	S = 3
+ELSEIF RESULT == 27
+	R = 195
+	S = 3
+ELSEIF RESULT == 28
+	R = 294
+	S = 3
+ELSEIF RESULT == 29
+	R = 241
+	S = 3
+ELSEIF RESULT == 30
+	R = 213
+	S = 3
+ELSEIF RESULT == 31
+	R = 113
+	S = 3
+ELSEIF RESULT == 32
+	R = 8
+	S = 3
+ELSEIF RESULT == 33
+	R = 9
+	S = 3
+ELSEIF RESULT == 34
+	R = 114
+	S = 3
+ELSEIF RESULT == 35
+	R = 115
+	S = 3
+ELSEIF RESULT == 36
+	R = 116
+	S = 3
+ELSEIF RESULT == 37
+	R = 210
+	S = 3
+ELSEIF RESULT == 38
+	R = 211
+	S = 3
+ELSEIF RESULT == 39
+	R = 212
+	S = 3
+ELSEIF RESULT == 40
+	R = 295
+	S = 1
+ELSEIF RESULT == 41
+	R = 196
+	S = 1
+ELSEIF RESULT == 42
+	R = 214
+	S = 0
+ELSEIF RESULT == 997
+	P += 1
+	P %= 5
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT == 998
+	P += 4
+	P %= 5
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT == 999
+	A = 0
+	C = 0
+	R = 0
+	S = 0
+	T = 0
+	P = 0
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+RETURN 1
+
+
+;-------------------------------------------------
+;装備品
+;-------------------------------------------------
+@TAILOR_ACCESSORY
+A = 20
+F = 0
+;현재 페이지
+LOCAL:0 = 0
+;商品数
+LOCAL:1 = 40
+
+$INPUT_LOOP_01
+
+PRINTFORML □ 장비품 ({(LOCAL:0)+1,2}/{(LOCAL:1/10)+1,2}페이지)
+PRINTFORML 소지금：{MONEY}포인트
+DRAWLINE
+
+IF LOCAL:0 == 0
+	PRINTL  [1] - 에이프런		（10000포인트）
+	PRINTL  [2] - 코트		（10000포인트）
+	PRINTL  [3] - 백의		（10000포인트）
+	PRINTL  [4] - 남성용 와이셔츠	（10000포인트）
+	PRINTL  [5] - 수수한 색 조끼(베스트)（10000포인트）
+	PRINTL  [6] - 망토		（10000포인트）
+	PRINTL  [7] - 티아라		（10000포인트）
+	PRINTL  [8] - 반다나		（10000포인트）
+	PRINTL  [9] - 간호사모		（10000포인트）
+ELSEIF LOCAL:0 == 1
+	PRINTL  [10] - 여경모		（10000포인트）
+	PRINTL  [11] - 탠 갤런 모자 (100 gallon hat, 카우보이 모자)（10000포인트）
+	PRINTL  [12] - 인디언 모자	（10000포인트）
+	PRINTL  [13] - 비녀		（10000포인트）
+	PRINTL  [14] - 안경		（10000포인트）
+	PRINTL  [15] - 선글라스	（10000포인트）
+	PRINTL  [16] - 은 팬던트	（10000포인트）
+	PRINTL  [17] - 진주 목걸이	（10000포인트）
+	PRINTL  [18] - 곡옥 목걸이	（10000포인트）
+	PRINTL  [19] - 계급장		（10000포인트）
+ELSEIF LOCAL:0 == 2
+	PRINTL  [20] - 명찰		（10000포인트）
+	PRINTL  [21] - 쵸커		（10000포인트）
+	PRINTL  [22] - 나비 네타이	（10000포인트）
+	PRINTL  [23] - 은 팔찌		（10000포인트）
+	PRINTL  [24] - 아뮬렛		（10000포인트）
+	PRINTL  [25] - 봉봉		（10000포인트）
+	PRINTL  [26] - 리스트 밴드	（10000포인트）
+	PRINTL  [27] - 미상가(실팔찌)	（10000포인트）
+	PRINTL  [28] - 긴 장갑		（10000포인트）
+	PRINTL  [29] - 개목걸이	（10000포인트）
+ELSEIF LOCAL:0 == 3
+	PRINTL  [30] - 귀갑 묶기용 밧줄	（10000포인트）
+	PRINTL  [31] - 카우벨과 코뚜레	（10000포인트）
+	PRINTL  [32] - 수갑		（10000포인트）
+	PRINTL  [33] - 족쇄		（10000포인트）
+	PRINTL  [34] - 칼(항쇄)	（10000포인트）
+	PRINTL  [35] - 낙서		（100포인트）
+	PRINTL  [36] - 밧줄 자국	（100포인트）
+	PRINTL  [37] - 매직 타투	（500포인트）
+	PRINTL  [38] - 기저귀		（100포인트）
+	PRINTL  [39] - 정조대		（100포인트）
+ELSEIF LOCAL:0 == 4
+	PRINTL  [40] - 가운（10000포인트）
+	PRINTL  [41] - 서클렛（10000포인트）
+	PRINTL  [42] - 반지（100000포인트）
+	PRINTL  [43] - 신비의 요도 카테터（3000포인트）
+ENDIF
+DRAWLINE
+
+PRINT [997] 다음　　
+PRINT [998] 이전　　
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 997
+	LOCAL:0 += 1
+	IF LOCAL:0 > (LOCAL:1)/10
+		LOCAL:0 = 0
+	ENDIF
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT == 998
+	LOCAL:0 -= 1
+	IF LOCAL:0 < 0
+		LOCAL:0 = (LOCAL:1)/10
+	ENDIF
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT == 1
+	R = 1
+	C = 10000
+	S = 0
+ELSEIF RESULT == 2
+	R = 2
+	C = 10000
+	S = 0
+ELSEIF RESULT == 3
+	R = 3
+	C = 10000
+	S = 0
+ELSEIF RESULT == 4
+	R = 4
+	C = 10000
+	S = 1
+ELSEIF RESULT == 5
+	R = 10
+	C = 10000
+	S = 0
+ELSEIF RESULT == 6
+	R = 12
+	C = 10000
+	S = 1
+ELSEIF RESULT == 7
+	R = 81
+	C = 10000
+	S = 0
+ELSEIF RESULT == 8
+	R = 52
+	C = 10000
+	S = 0
+ELSEIF RESULT == 9
+	R = 53
+	C = 10000
+	S = 2 - TALENT:63
+	SIF TALENT:122 && S < 3
+		S = 3
+ELSEIF RESULT == 10
+	R = 54
+	C = 10000
+	S = 0
+ELSEIF RESULT == 11
+	R = 55
+	C = 10000
+	S = 0
+ELSEIF RESULT == 12
+	R = 56
+	C = 10000
+	S = 0
+ELSEIF RESULT == 13
+	R = 82
+	C = 10000
+	S = 0
+ELSEIF RESULT == 14
+	R = 83
+	C = 10000
+	S = 0
+ELSEIF RESULT == 15
+	R = 84
+	C = 10000
+	S = 0
+ELSEIF RESULT == 16
+	R = 87
+	C = 10000
+	S = 0
+ELSEIF RESULT == 17
+	R = 88
+	C = 10000
+	S = 0
+ELSEIF RESULT == 18
+	R = 89
+	C = 10000
+	S = 0
+ELSEIF RESULT == 19
+	R = 60
+	C = 10000
+	S = 0
+ELSEIF RESULT == 20
+	R = 61
+	C = 10000
+	S = 0
+ELSEIF RESULT == 21
+	R = 90
+	C = 10000
+	S = 0
+ELSEIF RESULT == 22
+	R = 62
+	C = 10000
+	S = 0
+ELSEIF RESULT == 23
+	R = 86
+	C = 10000
+	S = 0
+ELSEIF RESULT == 24
+	R = 85
+	C = 10000
+	S = 0
+ELSEIF RESULT == 25
+	R = 51
+	C = 10000
+	S = 0
+ELSEIF RESULT == 26
+	R = 57
+	C = 10000
+	S = 0
+ELSEIF RESULT == 27
+	R = 58
+	C = 10000
+	S = 0
+ELSEIF RESULT == 28
+	R = 59
+	C = 10000
+	S = 0
+ELSEIF RESULT == 29
+	R = 71
+	C = 10000
+	S = 10 - ABL:21
+	SIF TALENT:124 && S > 5
+		S = 5
+	SIF TALENT:136 || S < 3
+		S = 3
+ELSEIF RESULT == 30
+	R = 72
+	C = 10000
+	S = 8 - ABL:21
+	SIF TALENT:88 || S < 3
+		S = 3
+ELSEIF RESULT == 31
+	R = 73
+	C = 10000
+	S = 6
+	SIF (TALENT:110 || TALENT:114) && TALENT:130
+		S = 3
+ELSEIF RESULT == 32
+	R = 74
+	C = 10000
+	S = 10 - ABL:21
+	SIF TALENT:124 && S > 5
+		S = 5
+	SIF TALENT:136 || S < 3
+		S = 3
+ELSEIF RESULT == 33
+	R = 75
+	C = 10000
+	S = 10 - ABL:21
+	SIF TALENT:124 && S > 5
+		S = 5
+	SIF TALENT:136 || S < 3
+		S = 3
+ELSEIF RESULT == 34
+	R = 76
+	C = 10000
+	S = 10 - ABL:21
+	SIF TALENT:124 && S > 5
+		S = 5
+	SIF TALENT:136 || S < 3
+		S = 3
+ELSEIF RESULT == 35
+	R = 77
+	C = 100
+	S = 8 - ABL:21
+	SIF TALENT:88 || S < 3
+		S = 3
+ELSEIF RESULT == 36
+	R = 80
+	C = 100
+	S = 8 - ABL:21
+	SIF TALENT:88 || S < 3
+		S = 3
+ELSEIF RESULT == 37
+	R = 78
+	C = 500
+	S = 5
+ELSEIF RESULT == 38
+	R = 69
+	C = 100
+	S = 6
+	SIF TALENT:57
+		S = 1
+ELSEIF RESULT == 39
+	R = 79
+	C = 100
+	S = 0
+	SIF TALENT:122
+		S = 99
+ELSEIF RESULT == 40
+	R = 13
+	C = 10000
+	S = 0
+ELSEIF RESULT == 41
+	R = 91
+	C = 10000
+	S = 0
+ELSEIF RESULT == 42
+	R = 92
+	C = 100000
+	S = 6
+	SIF TALENT:85
+		S = 1
+ELSEIF RESULT == 43
+;※神秘の尿道カテーテル
+	R = 98
+	C = 3000
+	S = 3
+ELSEIF RESULT == 999
+	A = 0
+	C = 0
+	R = 0
+	S = 0
+	T = 0
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;속옷
+;-------------------------------------------------
+@TAILOR_UNDERWARE
+A = 10
+C = 5
+F = 0
+S = 0
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	A = 0
+	C = 0
+	R = 0
+	T = 0
+	RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;替えオムツ
+;-------------------------------------------------
+@TAILOR_DIAPER
+A = 11
+C = 50
+F = 0
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	A = 0
+	C = 0
+	R = 0
+	T = 0
+	RETURN 0
+ENDIF
+
+RETURN 1
+
+;-------------------------------------------------
+;정조대 열쇠를 버린다
+;-------------------------------------------------
+@CHASTITY_KEY
+A = 0
+
+PRINTFORML %SAVESTR:TARGET%의 정조대의 열쇠를 버리게 되면, 
+PRINTFORML 아마 %CALLNAME:MASTER%도 정조대를 해제할 수 없게 됩니다. 
+PRINTFORML 버리게 된 열쇠는, 이제 두 번 다시 돌아오지 않을지도 모릅니다
+$INPUT_LOOP_01
+PRINTL  
+PRINTFORML 정말로, %SAVESTR:TARGET%의 정조대의 열쇠를 버립니까？
+PRINTFORML  [0] - 네
+PRINTFORML  [1] - 아니오
+INPUT
+IF RESULT == 0
+	PRINTFORML 멍하지 지켜보는 %SAVESTR:TARGET%의 눈앞에서, 
+	PRINTFORMW %CALLNAME:MASTER%은 정조대의 열쇠를 던전의 각층으로 연결되는 포탈에 내던졌다
+	PRINTFORML 열쇠가 어디로 떨어졌는지는, 이제 아무도 모르게 되었다
+	WAIT
+	CFLAG:49 = 1
+ELSEIF RESULT != 1
+	GOTO INPUT_LOOP_01
+ENDIF
+
+RETURN 1
+
+
+;-------------------------------------------------
+;仕立屋用メンバーリスト
+;-------------------------------------------------
+@LIFE_LIST_TAILOR
+REPEAT CHARANUM
+	;主人公は排除
+	SIF COUNT == 0
+		CONTINUE
+	;죽어가는 케릭터는 배제
+	SIF BASE:COUNT:0 < 1
+		CONTINUE
+	;조교 중이외는 배제
+	SIF CFLAG:COUNT:1 != 0
+		CONTINUE
+	TARGET = COUNT
+	PRINTFORM  [{COUNT}] %SAVESTR:COUNT% 
+	IF CFLAG:41 && (CFLAG:45 >= 0 || CFLAG:46 >= 0)
+		PRINT / 
+		CALL PRINT_CLOTHTYPE
+		PRINT  착용 
+	ELSEIF CFLAG:41 && (CFLAG:43 >= 0 || CFLAG:44 >= 0)
+		PRINT / 속옷 착용 
+	ELSE
+		PRINT / 알몸 
+	ENDIF
+	IF CFLAG:42 && CFLAG:47 >= 0
+		PRINT / 
+		CALL PRINT_CLOTHTYPE_SPECIAL
+		PRINT 장비 
+	ENDIF
+	IF CFLAG:550 > 0
+		PRINT / [
+		W:0 = CFLAG:550
+		CALL PRINT_EQUIPTYPE_WEAPON
+		PRINT ] 
+	ENDIF
+	IF CFLAG:551 > 0
+		PRINT / [
+		W:0 = CFLAG:551
+		CALL PRINT_EQUIPTYPE_RING
+		PRINT ] 
+	ENDIF
+	IF CFLAG:552 > 0
+		PRINT / [
+		W:0 = CFLAG:552
+		CALL PRINT_EQUIPTYPE_RING
+		PRINT ] 
+	ENDIF
+	PRINTL 
+REND
+
+;---------------------------------------------
+@EQUIP_MAGIC_ITEM
+#DIM EQUIPTYPE
+;---------------------------------------------
+;魔法装備品の装備
+;EQUIPTYPE = 装備品の種別（0=新規 1=強化）
+
+$INPUT_LOOP_01
+
+W:0 = CFLAG:TARGET:551
+PRINTFORM  [1] - 장식A　:
+IF W:0 <= -1
+	PRINTL 없음
+ELSE
+	CALL PRINT_EQUIPTYPE_RING
+	PRINTL  
+ENDIF
+
+W:0 = CFLAG:TARGET:552
+PRINTFORM  [2] - 장식B　:
+IF W:0 <= -1
+	PRINTL 없음
+ELSE
+	CALL PRINT_EQUIPTYPE_RING
+	PRINTL  
+ENDIF
+
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT == 1
+	Y:0 = 551
+ELSEIF RESULT == 2
+	Y:0 = 552
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+$INPUT_LOOP_02
+
+REPEAT 25
+	X = COUNT + 300
+	SIF ITEM:X > 0
+		PRINTFORML  [{X}] - %ITEMNAME:X% ({ITEM:X})
+REND
+
+IF CFLAG:0:9 >= 30
+	PRINTL  [997] - 장비 강화한다
+ELSE
+	SETCOLOR 80,80,80
+	PRINTL  [---] - 미해방（30레벨에서 장비 강화 가능）
+	RESETCOLOR
+ENDIF
+PRINTL  [998] - 장비를 뺀다
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+EQUIPTYPE = 0
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT == 997 && CFLAG:0:9 >= 30
+	EQUIPTYPE = 1
+ELSEIF RESULT == 998
+	W:0 = CFLAG:TARGET:Y
+	CALL EQUIP_GET
+	CFLAG:TARGET:Y = -1
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT >= 300
+	SIF ITEM:RESULT < 1
+	GOTO INPUT_LOOP_02
+	Y:1 = RESULT
+ELSE
+	GOTO INPUT_LOOP_02
+ENDIF
+
+IF EQUIPTYPE == 1
+	PRINTFORML 현재 장비를 장비 강화 하시겠습니까? +1마다 10000pt 소요 최대치 +10합니다
+ELSE
+	PRINTFORML %조사선택(ITEMNAME:RESULT, "를")% 장비하겠습니까?　장비 레벨을 입력하십시오. +1마다 10000pt 소요 최대치 +10합니다
+ENDIF
+
+$INPUT_LOOP_03
+
+X = MONEY / 10000
+SIF X > 10
+	X = 10
+
+PRINTFORML [0] [1] [2] [4] [6] [8] [{X}]
+PRINTL [999] - 장비하지 않는다
+
+INPUT
+
+IF RESULT == 999
+	GOTO INPUT_LOOP_01
+ELSEIF X >= 0 && X <= 10
+	Y:2 = RESULT
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+IF MONEY < (RESULT * 10000)
+	PRINTW 자금이 부족하다! ! 
+	GOTO INPUT_LOOP_01
+ENDIF
+
+W:0 = CFLAG:TARGET:Y
+
+;強化の場合
+IF EQUIPTYPE == 1
+	;強度を求める
+	W:2 = W:0 % 100000
+	W:2 /= 1000
+	
+	;強化
+	W:2 += Y:2
+	
+	;オーバーの場合
+	SIF W:2 > 10
+		Y:2 += 10 - W:2
+	
+	;実際の値に加算強化
+	W:0 += 1000 * Y:2
+	
+	;支払い
+	MONEY -= (Y:2 * 10000)
+	CFLAG:TARGET:Y = W:0
+	GOTO INPUT_LOOP_01
+ENDIF
+
+CALL EQUIP_GET
+
+;装備で一個減らす
+X = Y:1
+ITEM:X -= 1
+
+MONEY -= (Y:2 * 10000)
+
+;ITEMナンバーから識別番号へ
+W:8 = Y:1
+CALL GET_EQUIP_NUM
+W:0 += Y:2 * 1000
+CFLAG:TARGET:Y = W:0
+GOTO INPUT_LOOP_01
+
+
+;---------------------------------------------
+@EQUIP_MAGIC_WEAPON
+#DIM EQUIPTYPE
+;---------------------------------------------
+;武器の装備
+;EQUIPTYPE = 装備品の種別（0=新規 1=強化）
+
+$INPUT_LOOP_01
+
+W:0 = CFLAG:TARGET:550
+
+PRINTFORM 무기　:
+IF W:0 <= -1
+	PRINTL 맨손
+ELSE
+	CALL PRINT_EQUIPTYPE_WEAPON
+	PRINTL  
+ENDIF
+
+PRINTL  [340] - 소드
+
+REPEAT 19
+	X = COUNT + 341
+	SIF ITEM:X > 0 && X != 349
+		PRINTFORML  [{X}] - %ITEMNAME:X% ({ITEM:X})
+REND
+
+SIF ITEM:90 > 0
+	PRINTFORML  [990] - 텐타클
+
+IF CFLAG:0:9 >= 30
+	PRINTL  [997] - 장비 강화한다
+ELSE
+	SETCOLOR 80,80,80
+	PRINTL  [---] - 미해방（30레벨에서 장비 강화 가능）
+	RESETCOLOR
+ENDIF
+PRINTL  [998] - 장비를 뺀다
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+EQUIPTYPE = 0
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT == 990
+	Y:1 = 349
+	RESULT = 349
+ELSEIF RESULT == 997 && W:0 <= -1
+	PRINTFORML 맨손은 강화할수 없습니다
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT == 997 && CFLAG:0:9 >= 30
+	EQUIPTYPE = 1
+ELSEIF RESULT == 998
+	W:0 = CFLAG:TARGET:550
+	CALL EQUIP_GET
+	CFLAG:TARGET:550 = -1
+	GOTO INPUT_LOOP_01
+ELSEIF RESULT >= 300
+	SIF ITEM:RESULT < 1
+	GOTO INPUT_LOOP_01
+	Y:1 = RESULT
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+IF EQUIPTYPE == 1
+	PRINTFORML 현재 장비를 장비 강화 하시겠습니까? +1마다 10000pt 소요 최대치 +10합니다
+ELSE
+	PRINTFORML %조사선택(ITEMNAME:RESULT, "를")% 장비하겠습니까?　장비 레벨을 입력하십시오. +1마다 10000pt 소요 최대치 +10합니다
+ENDIF
+
+$INPUT_LOOP_03
+
+X = MONEY / 10000
+SIF X > 10
+	X = 10
+
+PRINTFORML [0] [1] [2] [4] [6] [8] [{X}]
+PRINTL [999] - 장비하지 않는다
+
+INPUT
+
+IF RESULT == 999
+	GOTO INPUT_LOOP_01
+ELSEIF X >= 0 && X <= 10
+	Y:2 = RESULT
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+IF MONEY < (RESULT * 10000)
+	PRINTW 자금이 부족하다! ! 
+	GOTO INPUT_LOOP_01
+ENDIF
+
+;強化の場合
+IF EQUIPTYPE == 1
+	W:0 = CFLAG:TARGET:550
+	;強度を求める
+	W:2 = W:0 % 100000
+	W:2 /= 1000
+	
+	;強化
+	W:2 += Y:2
+	
+	;オーバーの場合
+	SIF W:2 > 10
+		Y:2 += 10 - W:2
+	
+	;実際の値に加算強化
+	W:0 += 1000 * Y:2
+	
+	;支払い
+	MONEY -= (Y:2 * 10000)
+	CFLAG:TARGET:550 = W:0
+	GOTO INPUT_LOOP_01
+ENDIF
+
+PRINTFORMW 접두어 인챈트를 설정해주십시오
+PRINTL [0] - 없음
+PRINTL [1] - 자이언트
+PRINTL [2] - 포이즌
+PRINTL [3] - 데스
+PRINTL [4] - 슬래시
+PRINTL [5] - 파이어
+PRINTL [6] - 아이스
+PRINTL [7] - 선더
+PRINTL [8] - 매지컬
+PRINTL [9] - 다크
+
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT >= 0 && RESULT < 10
+	Y:3 = RESULT
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+W:0 = CFLAG:TARGET:550
+CALL EQUIP_GET
+
+;装備で一個減らす
+X = Y:1
+ITEM:X -= 1
+
+MONEY -= (Y:2 * 10000)
+
+;ITEMナンバーから識別番号へ
+W:8 = Y:1
+CALL GET_EQUIP_NUM
+W:0 += Y:2 * 1000
+W:0 += Y:3 * 100000
+CFLAG:TARGET:550 = W:0
+GOTO INPUT_LOOP_01
+
+
+

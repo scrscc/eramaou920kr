@@ -1,0 +1,3320 @@
+﻿;=================================================
+;秘密ラボ
+;=================================================
+@SECRET_LABO
+P = 0
+$INPUT_LOOP
+
+DRAWLINE
+PRINTL 마계의 문
+PRINTL 《조교중인 노예의 육체나 정신을 마개조할 수 있습니다》
+DRAWLINE
+PRINTV DAY+1
+PRINT 일째
+IF TIME == 0
+	PRINTL  오전
+ELSE
+	PRINTL  오후
+ENDIF
+
+PRINTFORML 소지금：{MONEY}포인트
+DRAWLINE
+
+IF P == 0
+	CALL LABO_PAGE1
+ELSEIF P == 1
+	CALL LABO_PAGE2
+ELSEIF P == 2
+	CALL LABO_PAGE3
+ELSE
+	CALL LABO_PAGE4
+ENDIF
+
+
+
+DRAWLINE
+PRINT  [999] - 돌아온다
+PRINT  [997] - 이전
+PRINTL  [998] - 다음
+
+INPUT
+
+IF RESULT == 0
+	CALL MODIFY_BUSTUP
+ELSEIF RESULT == 1
+	CALL MODIFY_BUSTDOWN
+ELSEIF RESULT == 2
+	CALL MODIFY_BONYU
+ELSEIF RESULT == 3
+	CALL MODIFY_FUTANARI
+ELSEIF RESULT == 4
+	CALL MODIFY_FUTANARI_ERASE
+ELSEIF RESULT == 5
+	CALL MODIFY_ANIMAL
+ELSEIF RESULT == 6
+	CALL MODIFY_ANIMAL_ERASE
+ELSEIF RESULT == 7
+	CALL MODIFY_DEIMMATURITY
+ELSEIF RESULT == 8
+	CALL MODIFY_AMNESIA
+ELSEIF RESULT == 9
+	CALL MODIFY_REMOVEHAIR
+ELSEIF RESULT == 10
+	CALL MODIFY_BONYU_ERASE
+ELSEIF RESULT == 11
+	CALL MODIFY_OMORASHI_ERASE
+ELSEIF RESULT == 12
+	CALL SHOJO_SAISEI
+ELSEIF RESULT == 13
+	CALL SHOJO_SEAL
+ELSEIF RESULT == 14
+	CALL SHOJO_SEAL_OFF
+ELSEIF RESULT == 15
+	CALL TATOO_SET_OFF
+ELSEIF RESULT == 16
+	CALL MODIFY_HAIR_COLOR
+ELSEIF RESULT == 17
+	CALL MODIFY_SKIN_COLOR
+ELSEIF RESULT == 18
+	CALL BLOCK_FEELING
+ELSEIF RESULT == 19
+	CALL EXTRA_PREG_MARK
+ELSEIF RESULT == 20
+	CALL TRANS_SEX
+ELSEIF RESULT == 21
+	CALL SET_FREE_TRAIN
+ELSEIF RESULT == 30
+	C = 5000
+	B = 64
+	CALL BRAIN_WASHING
+ELSEIF RESULT == 31
+	C = 8000
+	B = 133
+	CALL BRAIN_WASHING
+ELSEIF RESULT == 32
+	C = 10000
+	B = 132
+	CALL BRAIN_WASHING
+ELSEIF RESULT == 33
+	C = 10000
+	B = 83
+	CALL BRAIN_WASHING
+ELSEIF RESULT == 50 && ITEM:90 == 0
+	CALL BOUGT_TENTACLES
+ELSEIF RESULT == 51 && TALENT:MASTER:398
+	CALL RESULECTION
+ELSEIF RESULT == 52 && TALENT:MASTER:398
+	CALL GIVEN_HUMAN_LIFE
+ELSEIF RESULT == 54 && TALENT:MASTER:398
+	CALL CURE_INSANE
+ELSEIF RESULT == 55 && TALENT:MASTER:398
+	CALL REGET_CHASTITY_KEY
+ELSEIF RESULT == 56
+	CALL SUMMON_SLAVE
+ELSEIF RESULT == 59
+	CALL HORN
+ELSEIF RESULT == 60
+	CALL BLUESKIN
+ELSEIF RESULT == 61
+	CALL EVILWING
+ELSEIF RESULT == 62
+	CALL EVILTAIL
+ELSEIF RESULT == 63
+	CALL EVILSIGHT
+ELSEIF RESULT == 64
+	CALL DEMON_REBIRTH
+ELSEIF RESULT == 65
+	CALL SOULBOUND
+ELSEIF RESULT == 66
+	CALL SOULBOUND_ERASE
+ELSEIF RESULT == 67
+	CALL ENCHARMED_ERASE
+ELSEIF RESULT == 70
+	C = 5000
+	B = 0
+	CALL ST_UP_LABO
+ELSEIF RESULT == 71
+	C = 5000
+	B = 1
+	CALL ST_UP_LABO
+ELSEIF RESULT == 72
+	C = 5000
+	B = 2
+	CALL ST_UP_LABO
+ELSEIF RESULT == 73
+	C = 5000
+	B = 3
+	CALL ST_UP_LABO
+ELSEIF RESULT == 74
+	CALL MAGICRESIST
+ELSEIF RESULT == 999
+	RETURN 0
+ELSEIF RESULT == 997
+	P += 3
+	P %= 4
+ELSEIF RESULT == 998
+	P += 1
+	P %= 4
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+GOTO INPUT_LOOP
+
+;----------------------------------------------------
+@LABO_PAGE1
+;-----------------------------------------------------
+PRINTL □육체개조
+PRINTL  [0] - 거유화한다		（20000포인트）
+PRINTL  [1] - 빈유화한다		（10000포인트）
+PRINTL  [2] - 모유체질로 한다		（50000포인트）
+PRINTL  [3] - 후타나리화 한다		（50000포인트）
+PRINTL  [4] - 후타나리를 제거한다	（10000포인트）
+PRINTL  [5] - 동물귀를 붙인다		（2000포인트）
+PRINTL  [6] - 동물귀를 제거한다		（1000포인트）
+PRINTL  [7] - 미숙을 제거한다		（10000포인트）
+PRINTL  [8] - 기억을 제거한다		（100000포인트）
+PRINTL  [9] - 백보지로 한다		（5000포인트）
+
+;----------------------------------------------------
+@LABO_PAGE2
+;-----------------------------------------------------
+PRINTL  [10] - 모유체질을 개선한다		（10000포인트）
+PRINTL  [11] - 오줌싸개 버릇을 개선한다	（10000포인트）
+PRINTL  [12] - 처녀막을 재생한다		（100000포인트）
+PRINTL  [13] - 정조 봉인을 실시한다		（10000포인트）
+PRINTL  [14] - 정조 봉인을 해제한다		（10000포인트）
+PRINTL  [15] - 문신을 새긴다/지운다		（10000포인트）
+PRINTL  [16] - 머리색을 변화한다		（5000포인트）
+PRINTL  [17] - 피부색을 변화한다		（5000포인트）
+PRINTL  [18] - 감각봉쇄				（20000포인트）
+PRINTL  [19] - 이상 임신 체질			（20000포인트）
+PRINTL  [20] - 성전환한다				（200000포인트）
+PRINTL  [21] - 프리 조교 설정			（20000포인트）
+
+;PRINTL □세뇌 （조수용）
+;PRINTL  [30] -【불결무시】로 한다	  （5000포인트）
+;PRINTL  [31] -【조루】로 한다		  （8000포인트）
+;PRINTL  [32] -【유치】로 한다		 （10000포인트）
+;PRINTL  [33] -【새드】로 한다		 （10000포인트）
+
+;----------------------------------------------------
+@LABO_PAGE3
+;-----------------------------------------------------
+PRINTL □그 외
+SIF ITEM:90 == 0
+	PRINTL  [50] - 촉수 생물의 구입		（50000포인트）
+;IF TALENT:MASTER:398
+;	PRINTL  [51] - 사자를 불러온다		（【勲章】と交換）
+;	PRINTL  [52] - 인간의 수명을 준다	（【勲章】と交換）
+;	PRINTL  [54] - 부서진 마음과 광기를 치료한다	（【勲章】と交換）
+;	PRINTL  [55] - 정조대의 열쇠를 찾는다	（【勲章】と交換）
+;ENDIF
+PRINTL  [56] - 노예 소환		（100000포인트）
+PRINTL  [59] - 뿔을 기른다		（20000포인트）
+PRINTL  [60] - 푸른 피부로 바꾼다		（20000포인트）
+PRINTL  [61] - 악마의 날개를 단다		（20000포인트）
+PRINTL  [62] - 악마의 꼬리를 단다		（20000포인트）
+PRINTL  [63] - 악마의 눈으로 바꾼다		（20000포인트）
+PRINTL  [64] - 전생의 비법		（50000포인트）
+PRINTL  [65] - 혼박의 주술		（10000포인트）
+PRINTL  [66] - 혼박의 해주		（50000포인트）
+PRINTL  [67] - 광왕의 포로 소거		（50000포인트）
+
+
+;----------------------------------------------------
+@LABO_PAGE4
+;-----------------------------------------------------
+PRINTL □스테이터스 업
+
+PRINTL  [70] - HP＋10			  （5000포인트）
+PRINTL  [71] - 기력＋10 		  （5000포인트）
+PRINTL  [72] - 공격＋1			  （5000포인트）
+PRINTL  [73] - 방어＋1			  （5000포인트）
+PRINTL  [74] - 마법내성부여		  （50000포인트）
+
+;
+;-------------------------------------------------
+;巨乳化
+;-------------------------------------------------
+@MODIFY_BUSTUP
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 모자랍니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조대상의 가슴을 강제발육 시킵니다
+PRINTL 누구를 거유화 하겠습니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:122
+	PRINTFORMW 【%TALENTNAME:122%】는 거유화 할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:119
+	PRINTFORMW %SAVESTR:RESULT%는 그 이상 거유화 할 수 없습니다
+	RETURN 0
+ENDIF
+
+IF TALENT:RESULT:110
+	PRINTFORML %SAVESTR:RESULT%를 더욱 거유화 하기 위해서는, 50000포인트 필요합니다
+	C = 50000
+	SIF MONEY < C
+		GOTO INPUT_LOOP
+	PRINTL 그럼에도 실행하시겠습니까?
+ELSE
+	PRINTFORML %SAVESTR:RESULT%를 거유화 하시겠습니까？
+ENDIF
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 && TALENT:T:116
+	PRINTFORMW 《%SAVESTR:T%는【%TALENTNAME:109%】가 되었다》
+	TALENT:T:116 = 0
+	TALENT:T:109 = 1
+ELSEIF RESULT == 0 && TALENT:T:109
+	PRINTFORMW 《%SAVESTR:T%는 보통 가슴 사이즈가 되었다》
+	TALENT:T:109 = 0
+ELSEIF RESULT == 0 && TALENT:T:110
+	PRINTFORMW 《%SAVESTR:T%는【%TALENTNAME:114%】가 되었다》
+	TALENT:T:110 = 0
+	TALENT:T:114 = 1
+ELSEIF RESULT == 0 && TALENT:T:114
+	PRINTFORMW 《%SAVESTR:T%하【%TALENTNAME:119%】(이)가 되었다》
+	TALENT:T:114 = 0
+	TALENT:T:119 = 1
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%SAVESTR:T%는【%TALENTNAME:110%】가 되었다》
+	TALENT:T:110 = 1
+ELSE
+	RETURN 0
+ENDIF
+
+MONEY -= C
+;対象があなたでなく, コンフィグ設定してあるならバストサイズ更新
+IF T != 0
+	IF GETBIT(FLAG:5,12) || GETBIT(FLAG:5,15)
+		CALL CHAR_SIZE_GENERATE, T, CFLAG:T:451, 1
+		CFLAG:T:454 = RESULT:0
+		CFLAG:T:455 = RESULT:1
+	ENDIF
+ENDIF
+
+RETURN 1
+;
+;-------------------------------------------------
+;貧乳化
+;-------------------------------------------------
+@MODIFY_BUSTDOWN
+C = 10000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조대상의 가슴을 강제로 미숙화 시킵니다
+PRINTL 누구를 빈유화 하겠습니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:122
+	PRINTFORMW 【%TALENTNAME:122%】는 빈유화 할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:116
+	PRINTFORMW %SAVESTR:RESULT%는 그 이상 빈유화 할 수 없습니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%를 빈유화 하시겠습니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 && TALENT:T:119
+	PRINTFORMW 《%SAVESTR:T%는【%TALENTNAME:114%】가 되었다》
+	TALENT:T:119 = 0
+	TALENT:T:114 = 1
+ELSEIF RESULT == 0 && TALENT:T:114
+	PRINTFORMW 《%SAVESTR:T%는【%TALENTNAME:110%】가 되었다》
+	TALENT:T:114 = 0
+	TALENT:T:110 = 1
+ELSEIF RESULT == 0 && TALENT:T:110
+	PRINTFORMW 《%SAVESTR:T%는 보통 가슴 사이즈가 되었다》
+	TALENT:T:110 = 0
+ELSEIF RESULT == 0 && TALENT:T:109
+	PRINTFORMW 《%SAVESTR:T%의 가슴의 부푼 곳이 완전하게 없어졌다》
+	TALENT:T:109 = 0
+	TALENT:T:116 = 1
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%SAVESTR:T%는【%TALENTNAME:109%】가 되었다》
+	TALENT:T:109 = 1
+ELSE
+	RETURN 0
+ENDIF
+
+MONEY -= C
+;対象があなたでなく, コンフィグ設定してあるならバストサイズ更新
+IF T != 0
+	IF GETBIT(FLAG:5,12) || GETBIT(FLAG:5,15)
+		CALL CHAR_SIZE_GENERATE, T, CFLAG:T:451, 1
+		CFLAG:T:454 = RESULT:0
+		CFLAG:T:455 = RESULT:1
+	ENDIF
+ENDIF
+
+RETURN 1
+;
+;-------------------------------------------------
+;母乳体質化
+;-------------------------------------------------
+@MODIFY_BONYU
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 유선을 활성시키고 모유의 분비를 재촉합니다
+PRINTL 누구를 모유 체질화 시킵니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:122
+	PRINTFORMW 【%TALENTNAME:122%】은(는) 모유체질화 할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:109 || TALENT:RESULT:116
+	PRINTFORMW %SAVESTR:RESULT%의 유방 사이즈로는 모유체질화할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:130
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미 모유체질입니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%을(를) 모유체질화 합니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%모유가 나오는듯 하다》
+	TALENT:T:130 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;フタナリ化
+;-------------------------------------------------
+@MODIFY_FUTANARI
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 클리토리스를 변형시키고 페니스를 형성시킵니까
+PRINTL 난소로부터 의사 정소를 만들어 내는 것으로 사정 할 수 있습니다
+PRINTL 누구를 후타나리 합니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:121 || TALENT:RESULT:122
+	PRINTFORMW %SAVESTR:RESULT%에게는 이미 페니스가 있습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%을 어떤 후타나리로 바꿉니까？
+
+PRINTL  [0] - 보통
+PRINTL  [1] - 거근
+PRINTL  [2] - 단소 포경
+PRINTL  [3] - 포경
+PRINTL  [4] - 말자지
+PRINTL  [999] - 그만둔다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT >= 0 && RESULT <= 4
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:121%】가 되었다》
+	PRINT 페니스의 상태는 
+	IF RESULT == 1
+		PRINTW 《거근》이다
+	ELSEIF RESULT == 2
+		PRINTW 《단소 포경》이다
+	ELSEIF RESULT == 3
+		PRINTW 《포경》이다
+	ELSEIF RESULT == 4
+		PRINTW 《말자지》이다
+	ELSE
+		PRINTW 《보통》이다
+	ENDIF
+	TALENT:T:121 = 1
+	TALENT:T:326 = 0
+	TALENT:T:318 = RESULT
+	TALENT:T:1 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;フタナリ消去
+;-------------------------------------------------
+@MODIFY_FUTANARI_ERASE
+C = 10000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 후타나리를 소거할 수 있습니다
+PRINTL 누구의 페니스를 소거합니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:122
+	PRINTFORMW 그것을 버리라니 터무니 없다! 
+	RETURN 0
+ELSEIF TALENT:RESULT:121 == 0
+	PRINTFORMW 소거할 페니스가 없습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 페니스를 소거합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:121%】가 아니게 되었다》
+	TALENT:T:121 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;動物耳を付ける
+;-------------------------------------------------
+@MODIFY_ANIMAL
+C = 2000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 유전자의 일부를 동물 유전자로 덮어 씁니다
+PRINTL 누구를 동물귀를 시킵니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:124
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미 동물귀 입니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %조사선택(SAVESTR:RESULT, "를")% 동물귀로 합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	IF TALENT:T:314 == 2
+		PRINTFORMW 《%NAME:T%은(는) 인랑의 증거인【%TALENTNAME:124%】를 퇴찾았다》
+	ELSE
+		PRINTFORMW 《%NAME:T%은(는)【%TALENTNAME:124%】가 되었다》
+	ENDIF
+	TALENT:T:124 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;動物耳を消去
+;-------------------------------------------------
+@MODIFY_ANIMAL_ERASE
+C = 1000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 동물귀를 소거할 수 있습니다
+PRINTL 누구의 동물귀를 소거합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:124 == 0
+	PRINTFORMW 소거할 수 있는 동물귀가 없습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 동물귀를 소거합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	IF TALENT:T:314 == 2
+		PRINTFORMW 《%NAME:T%(으)로부터 인랑의 증거인【%TALENTNAME:124%】가 없어져버렸다…》
+	ELSE
+		PRINTFORMW 《%NAME:T%은(는)【%TALENTNAME:124%】가 아니게 되었다》
+	ENDIF
+	TALENT:T:124 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;パイパンにする
+;-------------------------------------------------
+@MODIFY_REMOVEHAIR
+C = 5000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 성기로부터 음모의 모근을 제거합니다 
+PRINTL 누구의 음모를 영구 탈모시킵니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;죽어가는 케릭터는 배제
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:125
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미 백보지입니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 음모를 영구탈모합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:125%】가 되었다》
+	TALENT:T:125 = 1
+	TALENT:T:310 = 1
+	TALENT:T:311 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;
+;-------------------------------------------------
+;未熟を除去
+;-------------------------------------------------
+@MODIFY_DEIMMATURITY
+C = 10000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 성기만을 부분 발육시키고 성교 가능하게 합니다
+PRINTL 누구의 미숙을 제거합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:135 == 0
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 미숙하지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 미숙을 제거합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:135%】이 아니게 되었다》
+	TALENT:T:135 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;記憶を消去
+;-------------------------------------------------
+@MODIFY_AMNESIA
+
+C = 100000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 육체나 감각의 변화를 그대로 하고 
+PRINTL 기억을 조교가 시작되기 이전의 상태로 되돌립니다 
+PRINTL 누구의 기억을 소거합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 1 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ENDIF
+
+D = RESULT
+
+PRINTFORML %SAVESTR:D%의 기억을 지우시겠습니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+
+	;助手だった場合は解除
+	SIF ASSI == D
+		ASSI = 0
+	SIF FLAG:2 == D
+		FLAG:2 = -1
+
+	;ABL初期化
+	FOR LOCAL , 0 , 100
+		ABL:D:LOCAL = 0
+	NEXT
+
+	;EXP初期化しない
+	;FOR LOCAL , 0 , 100
+	;	EXP:D:LOCAL = 0
+	;NEXT
+
+	;MARK初期化
+	FOR LOCAL , 0 , 100
+		MARK:D:LOCAL = 0
+	NEXT
+
+	;JUEL初期化
+	FOR LOCAL , 0 , 100
+		JUEL:D:LOCAL = 0
+	NEXT
+
+	;特殊性癖初期化 자위광（74）～가슴광（78）
+	FOR LOCAL , 74, 78
+		TALENT:D:LOCAL = 0
+	NEXT
+
+	;陥落系素質の初期化
+	TALENT:D:85 = 0		;애정
+	TALENT:D:86 = 0		;망신
+
+	;TALENT:D:76 = 0	;음란
+	;TALENT:D:180 = 0	;창부
+	;TALENT:D:181 = 0	;경국지색
+	;TALENT:D:183 = 0	;단골손님
+	;TALENT:D:184 = 0	;구애
+
+	;CFLAGの初期化
+	CFLAG:D:0 = 0		;売却及び助手可能
+	CFLAG:D:2 = 0		;好感度
+	CFLAG:D:10 = 0		;調教経験回数
+	CFLAG:D:130 = 0
+	CFLAG:D:131 = 0
+	
+
+	PRINTFORML 《%SAVESTR:D%は 조교 시작 후의 모든 기억을 잃었다
+
+	WAIT
+
+	;妊娠していた場合
+	IF TALENT:D:153
+		PRINTFORML 그녀 본인의 감각으로 부터 보면, 갑자기 부풀어 오른 자신의 복부를 내려다 보고, 
+		PRINTFORML %CALLNAME:D%は 망연히 하고 있다……
+		WAIT
+		IF TALENT:D:155 == 0 && TALENT:D:12 == 0
+			PRINTFORML %CALLNAME:D%의 안에서 무언가가 망가진 것 같다……
+			PRINTFORML %CALLNAME:D%의 정신은 【%TALENTNAME:9%】되어 버렸다
+			TALENT:D:9 = 1
+			WAIT
+		ENDIF
+	ENDIF
+	;育児中だった場合
+	IF TALENT:D:154
+		PRINTFORML %CALLNAME:D%가 있는곳에, 육아중이었던 그녀의 아이를 데려 왔다……
+		WAIT
+		IF TALENT:D:155 || TALENT:D:63
+			PRINTFORML 자신의 유방에 매달리는 낯선 갓난아기를, %CALLNAME:D%(은)는 이상한 것 같아서 보고 있었지만,
+			PRINTFORML 문득 뭔가를 결심한 것처럼 갓난 아기를 안아올리고, 젖을 물리기 시작햇다
+			PRINTFORML 《육아를 계속합니다》
+			WAIT
+		ELSE
+			PRINTFORML 자신의 유방에 매달리는 낯선 갓난아기를, %CALLNAME:D%(은)는 의아스러운 것 같게 보고 있다
+			PRINTFORML %CALLNAME:MASTER%은 부득이하게, 갓난 아기를 남에게 맡겨 기르게 했다
+			WAIT
+			TALENT:D:154 = 0
+			;妊娠時に減った体力の最大値が回復
+			MAXBASE:D:0 += 500
+			;妊娠時に大きくなった胸のサイズを一段小さくする
+			CALL REVERSE_B_SIZE
+			;妊娠パッチまわりのフラグをリセット
+			CALL CLEAR_FLAG
+		ENDIF
+	ENDIF
+
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;		############## 旧ソース ##############
+
+[SKIPSTART]
+
+P = 100000
+
+IF MONEY < P
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 개조 대상의 육체나 감각의 변화를 그대로 하고 
+PRINTL 기억을 조교가 시작되기 이전의 상태로 되돌립니다 
+PRINTL 누구의 기억을 소거합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 1 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ENDIF
+
+C = RESULT
+
+PRINTFORML %SAVESTR:C%의 기억을 소거합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	D = CHARANUM
+	ADDCHARA NO:C
+
+	;主人公を変更している場合の処理
+	TARGET = D
+	;CALL SPECIAL_MASTER_CHECK
+
+	;購入時に行われる初期設定
+	;CALL CHARA_BUY_SETTING
+
+	;体力, 気力
+	BASE:D:0 = BASE:C:0
+	MAXBASE:D:0 = MAXBASE:C:0
+	BASE:D:1 = BASE:C:1
+	MAXBASE:D:1 = MAXBASE:C:1
+	;처녀
+	TALENT:D:0 = TALENT:C:0
+	CFLAG:D:15 = CFLAG:C:15
+	;동정
+	TALENT:D:1 = TALENT:C:1
+	;음모의상태
+	TALENT:D:125 = TALENT:C:125
+	TALENT:D:310 = TALENT:C:310
+	TALENT:D:311 = TALENT:C:310
+	;후타나리
+	TALENT:D:121 = TALENT:C:121
+	TALENT:D:326 = TALENT:C:326
+	;모유체질
+	TALENT:D:130 = TALENT:C:130
+	;乳サイズ	
+	TALENT:D:109 = TALENT:C:109
+	TALENT:D:110 = TALENT:C:110
+	TALENT:D:114 = TALENT:C:114
+	TALENT:D:116 = TALENT:C:116
+	;性感
+	ABL:D:0 = ABL:C:0
+	ABL:D:1 = ABL:C:1
+	ABL:D:2 = ABL:C:2
+	ABL:D:3 = ABL:C:3
+	;経験
+	EXP:D:0 = EXP:C:0
+	EXP:D:1 = EXP:C:1
+	EXP:D:3 = EXP:C:3
+	EXP:D:5 = EXP:C:5
+	EXP:D:10 = EXP:C:10
+	EXP:D:20 = EXP:C:20
+	EXP:D:30 = EXP:C:30
+	EXP:D:31 = EXP:C:31
+	EXP:D:32 = EXP:C:32
+	EXP:D:33 = EXP:C:33
+	EXP:D:40 = EXP:C:40
+	EXP:D:41 = EXP:C:41
+	EXP:D:52 = EXP:C:52
+	EXP:D:53 = EXP:C:53
+	EXP:D:54 = EXP:C:54
+	EXP:D:57 = EXP:C:57
+	EXP:D:60 = EXP:C:60
+	;妊娠関連
+	TALENT:D:153 = TALENT:C:153
+	TALENT:D:154 = TALENT:C:154
+	CFLAG:D:101 = CFLAG:C:101
+	CFLAG:D:102 = CFLAG:C:102
+	CFLAG:D:103 = CFLAG:C:103
+	CFLAG:D:104 = CFLAG:C:104
+	CFLAG:D:105 = CFLAG:C:105
+	CFLAG:D:106 = CFLAG:C:106
+	CFLAG:D:109 = CFLAG:C:109
+	CFLAG:D:110 = CFLAG:C:110
+	CFLAG:D:111 = CFLAG:C:111
+	;しあわせ草中毒
+	TALENT:D:46 = TALENT:C:46
+	CFLAG:D:31 = CFLAG:C:31
+	CFLAG:D:32 = CFLAG:C:32
+	;現在の着衣状況
+	CFLAG:D:40 = CFLAG:C:40
+	CFLAG:D:41 = CFLAG:C:41
+	CFLAG:D:42 = CFLAG:C:42
+	CFLAG:D:43 = CFLAG:C:43
+	CFLAG:D:44 = CFLAG:C:44
+	CFLAG:D:45 = CFLAG:C:45
+	CFLAG:D:46 = CFLAG:C:46
+	CFLAG:D:47 = CFLAG:C:47
+	CFLAG:D:48 = CFLAG:C:48
+	;性転換関連
+	CFLAG:D:70 = CFLAG:C:70
+	TALENT:D:122 = TALENT:C:122
+	
+	CALL PARTY_CHAR_DEL, C
+	
+	DELCHARA C
+
+	D = C
+	;キャラを元の位置に戻しておく
+	IF C < CHARANUM -1
+		A = CHARANUM - C - 1
+		REPEAT A
+			B = D
+			;CALL CHARA_SORT_2
+		REND
+	ENDIF
+	C = D
+
+	TARGET = C
+	PRINTFORML 《%조사선택(SAVESTR:C, "는")% 조교 개시 후의 일절의 기억을 잃었다》
+
+	WAIT
+
+	;妊娠していた場合
+	IF TALENT:C:153 
+		PRINTFORML 그녀 본인의 감각으로 부터 보면, 갑자기 부풀어 오른 자신의 복부를 내려다 보고, 
+		PRINTFORML %CALLNAME:C%은(는) 멍하니 있다……
+		WAIT
+		IF TALENT:C:155 == 0 && TALENT:C:12 == 0
+			PRINTFORML %CALLNAME:C%의 안에서 뭔가가 망가져 버린 것 같다……
+			PRINTFORML %CALLNAME:C%의 정신은【%TALENTNAME:9%】해 버렸다
+			TALENT:C:9 = 1
+			WAIT
+		ENDIF
+	ENDIF
+	;育児中だった場合
+	IF TALENT:C:154
+		PRINTFORML %CALLNAME:C%의 눈앞으로, 육아 중이던 그녀의 아리를 데려 왔다……
+		WAIT
+		IF TALENT:C:155 || TALENT:C:63
+			PRINTFORML 자신의 유방에 매달리는 낯선 갓난아기를, %CALLNAME:C%은(는) 이상한 듯 보고 있었지만, 
+			PRINTFORML 문득 뭔가를 결심한 것처럼 갓난 아기를 안아올리고, 젖을 물리기 시작햇다
+			PRINTFORML 《육아를 계속합니다》
+			WAIT
+		ELSE
+			PRINTFORML 자신의 유방에 매달리는 낯선 아기를, %CALLNAME:C%은(는) 의아한 듯이 보고 있다 
+			PRINTFORML %CALLNAME:MASTER%은 부득이하게, 갓난 아기를 남에게 맡겨 기르게 했다
+			WAIT
+			TALENT:C:154 = 0
+			;妊娠時に減った体力の最大値が回復
+			MAXBASE:C:0 += 500
+			;妊娠時に大きくなった胸のサイズを一段小さくする
+			CALL REVERSE_B_SIZE
+			;妊娠パッチまわりのフラグをリセット
+			CALL CLEAR_FLAG
+		ENDIF
+	ENDIF
+
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= P
+
+RETURN 1
+
+[SKIPEND]
+;		############## 旧ソース ここまで ##############
+
+;
+;-------------------------------------------------
+;母乳体質を消去
+;-------------------------------------------------
+@MODIFY_BONYU_ERASE
+C = 10000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 모유를 나오지 않게 합니다
+PRINTL 누구의 모유 체질을 소거합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:130 == 0
+	PRINTFORMW 모유 체질이 아닙니다
+	RETURN 0
+ELSEIF TALENT:RESULT:153
+	PRINTFORMW 임신중인 캐릭터의 모유 체질은 소거할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:154
+	PRINTFORMW 육아중인 캐릭터의 모유 체질은 소거할 수 없습니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%의 모유체질을 소거합니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")% 모유가 나오지 않게 되었다》
+	TALENT:T:130 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;おもらし癖を消去
+;-------------------------------------------------
+@MODIFY_OMORASHI_ERASE
+C = 10000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 오줌싸개를 치료합니다
+PRINTL 누구의 오줌싸개를 소거합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:57 == 0
+	PRINTFORMW 오줌싸개가 아닙니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%의 오줌싸개 버릇을 소거합니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")% 오줌싸개가 아니게 되었다》
+	TALENT:T:57 = 0
+	EXP:T:31 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;処女膜再生
+;-------------------------------------------------
+@SHOJO_SAISEI
+C = 100000
+;金がなければ終了
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML 대상의 처녀막을 재생합니다
+PRINTFORML 누구의 처녀막을 재생합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;【남자】는 제외
+ELSEIF TALENT:RESULT:122
+	PRINTW 어떻게봐도 불가능합니다만, 정말로 고마워요
+	RETURN 0
+;【처녀】は除外
+ELSEIF TALENT:RESULT:0
+	PRINTFORM %조사선택(SAVESTR:RESULT, "는")% 처녀입니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT% 의 처녀막을 재생합니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:0%】가 되었다》
+	TALENT:T:0 = 1
+	CFLAG:T:71 += 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;-------------------------------------------------
+;貞操封印
+;-------------------------------------------------
+@SHOJO_SEAL
+C = 10000
+;金がなければ終了
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML 대상의 성기를 봉인합니다
+PRINTFORML 누구의 성기를 봉인합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;封印済みは除外
+ELSEIF TALENT:RESULT:273
+	PRINTFORM %조사선택(SAVESTR:RESULT, "는")% 벌써 봉인되어 있습니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%의 성기를 봉인합니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:273%】되었다》
+	TALENT:T:273 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+
+;-------------------------------------------------
+;貞操封印解除
+;-------------------------------------------------
+@SHOJO_SEAL_OFF
+C = 10000
+;金がなければ終了
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML 대상의 성기의 봉인을 해제합니다
+PRINTFORML 누구의 정조 봉인을 해제합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;封印済みは除外
+ELSEIF TALENT:RESULT:273 == 0
+	PRINTFORM %조사선택(SAVESTR:RESULT, "는")% 봉인되어 있지 않습니다
+	RETURN 0
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%의 성기의 봉인을 해제합니까？
+
+T = RESULT
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:273%】을 잃었다》
+	TALENT:T:273 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+
+;
+;-------------------------------------------------
+;刺青
+;-------------------------------------------------
+@TATOO_SET_OFF
+#DIMS TATOO_NAME,20
+#DIM COST
+#DIM TATOO_COUNT
+#DIM TATOO_TARGET
+#DIM TATOO_SELECT
+
+;TATOO_TARGET = 刺青を受けるひと
+;TATOO_SELECT = 選ばれた刺青
+
+;刺青を入れる場所リスト. CSTRの場所に対応
+TATOO_NAME:10 = 뺨
+TATOO_NAME:11 = 가슴
+TATOO_NAME:12 = 등
+TATOO_NAME:13 = 하복부
+TATOO_NAME:14 = 엉덩이
+TATOO_NAME:15 = 성기
+TATOO_NAME:16 = 항문
+TATOO_NAME:17 = 허벅지
+
+COST = 10000
+;金がなければ終了
+IF MONEY < COST
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML 대상에게 문신을 새기거나 지울수 있습니다
+PRINTFORML 누구를 대상으로 합니까？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML %SAVESTR:RESULT%의 문신
+PRINTL  
+
+TATOO_TARGET = RESULT
+
+
+FOR TATOO_COUNT,10, 20
+	SIF TATOO_NAME:TATOO_COUNT != ""
+		PRINTFORML  [{TATOO_COUNT}] %TATOO_NAME:TATOO_COUNT%	 - 『%CSTR:TATOO_TARGET:TATOO_COUNT%』
+NEXT
+
+PRINTL  [999] - 그만둔다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF TATOO_NAME:RESULT != ""
+	PRINTFORML %TATOO_NAME:RESULT%의 문신을 처리합니다
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+TATOO_SELECT = RESULT
+
+PRINTFORML 새기고 싶은 문신을 자유로이 입력해주세요. 공란으로 하면 지워집니다
+PRINTFORM 현재 새겨져있는 문신은 
+
+IF CSTR:TATOO_TARGET:TATOO_SELECT != ""
+	PRINTFORML 『%CSTR:TATOO_TARGET:TATOO_SELECT%』입니다
+ELSE
+	PRINTFORML 없습니다
+ENDIF
+
+INPUTS
+
+IF RESULTS != ""
+	PRINTFORMW %TATOO_NAME:TATOO_SELECT%에게『%RESULTS%』의 문신을 새깁니까？
+ELSE
+	PRINTFORMW %TATOO_NAME:TATOO_SELECT%의 문신을 지웁니까？
+ENDIF
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	IF RESULTS != ""
+		PRINTFORMW 《%TATOO_NAME:TATOO_SELECT%에게『%RESULTS%』의 문신을 새겼다》
+	ELSE
+		PRINTFORMW 《%TATOO_NAME:TATOO_SELECT%의 문신을 지웠다》
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+CSTR:TATOO_TARGET:TATOO_SELECT = %RESULTS%
+
+
+MONEY -= COST
+
+RETURN 1
+
+;-------------------------------------------------
+;髪の色を変える
+;-------------------------------------------------
+@MODIFY_HAIR_COLOR
+#DIM COL
+
+C = 5000
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+DO
+	PRINTL 누구의 모발색을 바꿉니까？
+	CALL LIFE_LIST
+	PRINTL  [999] - 돌아온다
+	INPUT
+	SIF RESULT == 999
+		RETURN 0
+LOOP !INRANGE(RESULT, 0, CHARANUM - 1) || BASE:RESULT:0 < 1
+T = RESULT
+
+DO
+	PRINTFORML 무슨 색으로 변화합니까？（現在：%GET_LOOK_INFO(T, "머리색")%）
+	PRINTL [0] 금발
+	PRINTL [1] 밤색
+	PRINTL [2] 흑발
+	PRINTL [3] 적발
+	PRINTL [4] 은발
+	PRINTL [5] 청발
+	PRINTL [6] 녹발
+	PRINTL [999] - 돌아온다
+	INPUT
+	SIF RESULT == 999
+		RESTART
+LOOP !INRANGE(RESULT, 0, 6)
+COL = RESULT + 1
+
+DO
+	SWAP TALENT:T:머리색, COL
+	PRINTFORML %SAVESTR:T%を%GET_LOOK_INFO(T, "머리색")%(으)로 합니까？
+	PRINTL  [0] - 네
+	PRINTL  [1] - 그만둔다
+	SWAP TALENT:T:머리색, COL
+	INPUT
+	SIF RESULT == 1
+		RETURN 0
+LOOP RESULT != 0
+
+TALENT:T:머리색 = COL
+PRINTFORMW 《%SAVESTR:T%은(는)【%GET_LOOK_INFO(T, "머리색")%】이(가) 되었다》
+
+MONEY -= C
+
+RETURN 1
+
+;-------------------------------------------------
+;肌の色を変える
+;-------------------------------------------------
+@MODIFY_SKIN_COLOR
+#DIM COL
+#DIMS CURRENT
+
+C = 5000
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+DO
+	PRINTL 누구의 피부색을 바꿉니까？
+	CALL LIFE_LIST
+	PRINTL  [999] - 돌아온다
+	INPUT
+	SIF RESULT == 999
+		RETURN 0
+LOOP !INRANGE(RESULT, 0, CHARANUM - 1) || BASE:RESULT:0 < 1
+T = RESULT
+
+IF TALENT:T:하얀피부
+	CURRENT = 하얀피부
+ELSEIF TALENT:T:갈색피부
+	CURRENT = 갈색피부
+ELSEIF TALENT:T:파란피부
+	CURRENT = 파란피부
+ELSE
+	CURRENT = 보통피부
+ENDIF
+
+LOCALS:0 = 보통피부
+LOCALS:1 = 하얀피부
+LOCALS:2 = 갈색피부
+DO
+	PRINTFORML 무슨색으로 바꿉니까？（現在：%CURRENT%）
+	REPEAT 3
+		PRINTFORML [{COUNT}] %LOCALS:COUNT%
+	REND
+	PRINTL [999] - 돌아온다
+	INPUT
+	SIF RESULT == 999
+		RESTART
+LOOP !INRANGE(RESULT, 0, 2)
+COL = RESULT
+DO
+	PRINTFORML %SAVESTR:T%을(를) %LOCALS:COL%로 합니까？
+	PRINTL  [0] - 네
+	PRINTL  [1] - 그만둔다
+	INPUT
+	SIF RESULT == 1
+		RETURN 0
+LOOP RESULT != 0
+
+TALENT:T:하얀피부 = 0
+TALENT:T:갈색피부 = 0
+TALENT:T:파란피부 = 0
+IF COL == 1
+	TALENT:T:하얀피부 = 1
+ELSEIF COL == 2
+	TALENT:T:갈색피부 = 1
+ENDIF
+
+PRINTFORMW 《%SAVESTR:T%은(는) %CURRENT%로부터 %LOCALS:COL%가 되었다》
+
+MONEY -= C
+
+RETURN 1
+
+;
+;-------------------------------------------------
+;감각봉쇄
+;-------------------------------------------------
+@BLOCK_FEELING
+#DIM CID
+#DIM PID
+#DIM PAID
+#DIM FLAG_B
+
+C = 20000
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+$CHAR_TOP
+
+PRINTFORML 감각LV이 제로인 특정부위를 봉쇄하는것으로, 성감소질을 가지는 부위를 보다 예민하게 합니다
+PRINTFORML 누구의 감각을 봉쇄시킵니까？
+
+
+PRINTL 
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+
+$INPUT_LOOP
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ENDIF
+
+CID = RESULT
+
+$PART_TOP
+
+PRINTFORML %SAVESTR:CID%의 어떤 부위를 봉쇄시킵니까？
+PRINTL 
+
+FLAG_B = TALENT:CID:101 & 2
+SIF FLAG_B
+	SETCOLOR 128, 128, 128
+PRINTFORML 　[\@ FLAG_B ? - # 0 \@] Ｃ감각　\@ FLAG_B ? 봉쇄끝남 #  \@
+RESETCOLOR
+
+FLAG_B = TALENT:CID:103 & 2
+SIF FLAG_B
+	SETCOLOR 128, 128, 128
+PRINTFORML 　[\@ FLAG_B ? - # 1 \@] Ｖ감각　\@ FLAG_B ? 봉쇄끝남 #  \@
+RESETCOLOR
+
+FLAG_B = TALENT:CID:105 & 2
+SIF FLAG_B
+	SETCOLOR 128, 128, 128
+PRINTFORML 　[\@ FLAG_B ? - # 2 \@] Ａ감각　\@ FLAG_B ? 봉쇄끝남 #  \@
+RESETCOLOR
+
+FLAG_B = TALENT:CID:107 & 2
+SIF FLAG_B
+	SETCOLOR 128, 128, 128
+PRINTFORML 　[\@ FLAG_B ? - # 3 \@] Ｂ감각　\@ FLAG_B ? 봉쇄끝남 #  \@
+RESETCOLOR
+
+PRINTL 
+PRINTL 　[9] 캐릭터 선택으로 돌아간다
+DRAWLINE
+PRINTL  [999] - 돌아온다
+
+$INPUT_LOOP2
+
+INPUT
+
+PID = RESULT
+PAID = PID
+SIF PID >= 1 && PID < 3
+	PAID += 1
+SIF PID == 3
+	PAID = 1
+
+IF PID >= 0 && PID < 4
+	IF ABL:CID:PAID > 0
+		PRINTL 감각LV이 1이상 있는 부위는 봉쇄시킬수 없습니다
+		WAIT
+		GOTO PART_TOP
+	ENDIF
+	IF TALENT:CID:(PID * 2 + 101) & 2
+		PRINTL 이미 봉쇄가 끝났습니다
+		WAIT
+		GOTO PART_TOP
+	ENDIF
+	PRINTL 　　한번 실행하면 해제할 수 없습니다
+	PRINTL 　　정말로 괜찮겠습니까？
+	PRINTL 
+	PRINTL 　　　[0] - 네
+	PRINTL 　　　[1] - 아니오
+
+	INPUT
+
+	IF RESULT == 0
+		TALENT:CID:(PID * 2 +101) |= 2
+		MONEY -= C
+		PRINTFORML 　　《%SAVESTR:CID%의 \@ PID == 0 ? Ｃ #\@\@ PID == 1 ? Ｖ #\@\@ PID == 2 ? Ａ #\@\@ PID == 3 ? Ｂ #\@감각은 봉쇄되었다》
+		WAIT
+		PRINTL 
+	ELSE
+	ENDIF
+	SIF MONEY >= C
+		GOTO PART_TOP
+ELSEIF RESULT == 9
+ELSEIF RESULT == 999
+	RETURN 0
+
+ENDIF
+
+
+;
+;-------------------------------------------------
+;性転換
+;-------------------------------------------------
+@TRANS_SEX
+C = 200000
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML 대상을 성전환합니다
+PRINTFORML 한번 전환하면 원래대로 되돌릴 수 없습니다
+PRINTFORML 누구를 성전환합니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;既に性転換済のキャラは除外
+ELSEIF CFLAG:RESULT:70
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미 성전환을 실시하고 있습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %조사선택(SAVESTR:RESULT, "를")% 성전환 시킵니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	;オトコならそれを外す
+	IF TALENT:T:122
+		PRINTFORML 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:122%】가 아니게 되었다》
+		TALENT:T:122 = 0
+		TALENT:T:0 = 1
+		TALENT:T:1 = 0
+	;オトコでなければオトコをつける
+	ELSE
+		;ふたなりならそれを外す
+		IF TALENT:T:121
+			PRINTFORML 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:121%】가 아니가 되었다》
+			TALENT:T:121 = 0
+		ENDIF
+		PRINTFORML 《%조사선택(SAVESTR:T, "는")%【%TALENTNAME:122%】가 되었다》
+		TALENT:T:122 = 1
+		TALENT:T:0 = 0
+		TALENT:T:1 = 1
+	ENDIF
+	Z = 1
+	PRINTFORMW %EXPNAME:50%＋{Z}
+	EXP:T:50 += Z
+	CFLAG:T:70 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;洗脳
+;-------------------------------------------------
+;C:費用
+;B:追加する素質
+;-------------------------------------------------
+@BRAIN_WASHING
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML 세뇌 대상의 심층 심리를 외부로부터 고쳐 씁니다
+PRINTFORML 누구를【%TALENTNAME:B%】으로 합니까？
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:B
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미【%TALENTNAME:B%】입니다
+	RETURN 0
+ELSEIF RESULT != 0 && CFLAG:RESULT:0 < 2
+	PRINTFORMW 조수가 아닌 캐릭터는 세뇌할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:121 == 0 && TALENT:RESULT:122 == 0 && B == 133
+	PRINTFORMW 【%TALENTNAME:122%】가【%TALENTNAME:121%】가 아니면 조루로는 할 수 없습니다
+	RETURN 0
+ELSEIF TALENT:RESULT:152
+	PRINTFORMW 【%TALENTNAME:152%】의 캐릭터는 세뇌할 수 없습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%을(를) 【%TALENTNAME:B%】으로 합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0 
+	PRINTFORML %조사선택(SAVESTR:T, "는")%【%TALENTNAME:B%】가 되었다
+	TALENT:T:B = 1
+	WAIT
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+MONEY -= C
+
+RETURN 1
+;
+;-------------------------------------------------
+;촉수生物の購入
+;-------------------------------------------------
+@BOUGT_TENTACLES
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTFORML %ITEMNAME:90%은(는) 신체 개조에 실패한 성노예의 말로입니다……
+PRINTFORML 　%ITEMNAME:90%을(를) 구입합니까？
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 0
+	PRINTFORML 《%ITEMNAME:90%을(를) 구입했습니다》
+	ITEM:90 = 1
+	MONEY -= C
+	WAIT
+	RETURN 1
+ELSEIF RESULT == 1
+	RETURN 0
+ENDIF
+
+GOTO INPUT_LOOP
+;
+;-------------------------------------------------
+;人間としての命を与える
+;-------------------------------------------------
+@GIVEN_HUMAN_LIFE
+IF TALENT:MASTER:398 <= 0
+	PRINTW 인간의 생명은 돈으로는 못 삽니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 인간이 아니기 때문에 한정된 생명 밖에 가지고 있지 않은 존재나
+PRINTL 혹은 어떤 사정으로 한정된 생명 밖에 가지고 있지 않은 인간에게
+PRINTL 통상의 인간에 버금가는 수명을 줍니다
+PRINTL 누구에게 인간의 목숨을 주시겠습니까?
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;【애정】がないとダメ
+ELSEIF TALENT:RESULT:85 == 0
+	PRINTFORMW %SAVESTR:RESULT%는 인간의 수명을 줄 이유가 없습니다
+	RETURN 0
+ELSEIF BASE:RESULT:10 == 0 && TALENT:RESULT:124 == 0
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미 인간의 수명을 가지고 있습니다
+	RETURN 0
+ELSEIF BASE:RESULT:10 == 0
+	PRINTFORML %조사선택(SAVESTR:RESULT, "는")% 인간의 수명은 아닐지 모르지만, 
+	PRINTL 그 존재로서 주어진 수명을 가지고 있습니다 
+	PRINT 그래도
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에게 인간의 목숨을 부여합니까?
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	IF TALENT:T:124
+		PRINTFORML %SAVESTR:T%に인간의 수명이 주어졌다
+		TALENT:T:124 = 0
+	ENDIF
+	IF BASE:T:10 > 0
+		PRINTFORML %조사선택(SAVESTR:T, "는")%인간의 수명이 계속되는 한 살아갈 수 있게 되었다
+		BASE:T:10 = 0
+	ENDIF
+	WAIT
+	;口上
+	TFLAG:13 = 15
+	CALL SELF_KOJO
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML 《【%TALENTNAME:398%】가 없어졌다》
+TALENT:MASTER:398 = 0
+WAIT
+
+RETURN 1
+;
+;-------------------------------------------------
+;死者を甦らせる
+;-------------------------------------------------
+@RESULECTION
+IF TALENT:MASTER:398 <= 0
+	PRINTW 인간의 목숨은 돈을 주고 살 수 없습니다
+	RETURN 0
+ENDIF
+
+;一度に所有できる노예はEXTRA30人, それ以外は10人まで
+IF CHARANUM > 30
+	PRINTW 더 이상 이 세상에 사망자가 돌아갈 곳은 없는 것 같습니다
+	RETURN 0
+ELSEIF FLAG:5 != 9 && CHARANUM > 10
+	PRINTW 더 이상 이 세상에 사망자가 돌아갈 곳은 없는 것 같습니다
+	RETURN 0
+ENDIF
+
+D = 0
+REPEAT 100
+	C = COUNT + 1000
+	SIF FLAG:C < 0
+		D += 1
+REND
+IF D == 0
+	PRINTW 되살아나게 할 상대가 없는 것 같습니다.
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP_00
+
+PRINTL 과거에 죽은 사람이나 사라진 자를 세상으로 귀환시킵니다
+PRINTL 저승에서 소환된 사람은 이 세상에 있을 때와 같은 모습으로 되살아 납니다.
+PRINTL 하지만, 이 세상에서 벌어진 일도, 당신에 대한 일도 다 잊어버린 상태입니다.
+PRINTL ……그래도, 되살리고 싶은 상대가 있습니까？
+
+PRINTL  [0] - 있다
+PRINTL  [1] - 없다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT != 0
+	GOTO INPUT_LOOP_00
+ENDIF
+
+$INPUT_LOOP_01
+
+PRINTL 누구를 되살립니까？
+
+REPEAT 100
+	C = COUNT + 1000
+	D = COUNT + 100
+	SIF FLAG:C <= -2
+		PRINTFORML  [{D}] - %ITEMNAME:D%
+REND
+
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+D = RESULT - 99
+C = RESULT + 900
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 100 || RESULT > 100 + 99
+	GOTO INPUT_LOOP_01
+ELSEIF FLAG:C < 0
+	ADDCHARA D
+	;蘇生したキャラには購入フラグを立てる
+	FLAG:C = -1
+	C = CHARANUM - 1
+	PRINTFORML 《%조사선택(SAVESTR:C, "는")% 저승으로부터 귀환하였습니다》
+
+	;主人公を変更している場合の処理
+	TARGET = C
+	;CALL SPECIAL_MASTER_CHECK
+
+	WAIT
+ELSE
+	GOTO INPUT_LOOP_01
+ENDIF
+
+PRINTFORML 《【%TALENTNAME:398%】가 없어졌다》
+TALENT:MASTER:398 = 0
+WAIT
+
+RETURN 1
+;
+;-------------------------------------------------
+;正気に戻す
+;-------------------------------------------------
+@CURE_INSANE
+IF TALENT:MASTER:398 <= 0
+	PRINTW 손상된 정신은 돈으로 돌려놓을 수 없습니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 손상된 마음에, 다시 이성의 빛을 돌려놓습니다.
+PRINTL 비록, 본인에게는 마음이 고장난 상태가 행복이라 할지라도 말입니다.
+PRINTL 누구를 제 정신으로 돌려놓을까요？
+
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:9 == 0 && TALENT:RESULT:123 == 0 
+	PRINTFORMW %SAVESTR:RESULT%의 마음은 부셔지지 않았습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%을 제 정신으로 돌려놓을까요？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	IF TALENT:T:9
+		PRINTFORMW 《%SAVESTR:T%의 눈동자가 다시 이성의 빛을 되찾았다》
+		TALENT:T:9 = 0
+	ENDIF
+	IF TALENT:T:123
+		PRINTFORMW 《%조사선택(SAVESTR:T, "는")% 악몽으로부터 깬 것 같다》
+		TALENT:T:123 = 0
+	ENDIF
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML 《【%TALENTNAME:398%】이 없어짐》
+TALENT:MASTER:398 = 0
+WAIT
+
+RETURN 1
+
+
+;
+;-------------------------------------------------
+;貞操帯のカギを探す
+;-------------------------------------------------
+@REGET_CHASTITY_KEY
+IF TALENT:MASTER:398 <= 0
+	PRINTW 세상에는 돈으로 해결할 수 없는 문제도 있습니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 잃어버린 정조대의 열쇠를 찾아냅니다
+PRINTL 누구의 정조대의 열쇠를 찾나요？
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:49 == 0
+	PRINTFORMW %CALLNAME:RESULT%의 정조대의 열쇠를 찾을 필요는 없습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 정조대의 열쇠를 찾습니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%의 정조대의 열쇠가 발견되었다》
+	CFLAG:T:49 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML 《【%TALENTNAME:398%】이 없어졌다》
+TALENT:MASTER:398 = 0
+WAIT
+
+RETURN 1
+
+;----------------------------
+@HORN
+;----------------------------
+
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 노예의 머리에 뿔을 기릅니다
+PRINTL 누구의 머리에 뿔을 기르겠습니까 ？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:264 == 1
+	PRINTFORMW %SAVESTR:RESULT%は 이미 뿔이 나 있습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에게 뿔을 기르겠습니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%에게 뿔이 났다》
+	TALENT:T:264 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@BLUESKIN
+;----------------------------
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+
+$INPUT_LOOP
+
+PRINTL 푸른 피부로 개조합니다
+PRINTL 누구의 피부를 푸르게 합니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:244 == 1
+	PRINTFORMW %SAVESTR:RESULT%의 피부는 벌써 파랗습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 피부를 푸르게 합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	IF TALENT:T:253 == 1 || TALENT:T:255 == 1
+		PRINTFORMW 《%SAVESTR:T%의 피부는 \@(TALENT:T:253 == 1) ? 갈색피부 # 하얀피부\@로부터 푸른피부로 바뀌었다》
+	ELSE
+		PRINTFORMW 《%SAVESTR:T%은(는) 푸른피부가 되었다》
+	ENDIF
+	TALENT:T:244 = 1
+	TALENT:T:253 = 0
+	TALENT:T:255 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@EVILWING
+;----------------------------
+
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 악마 날개로 개조합니다
+PRINTL 누구에게 악마 날개를 기릅니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:245 == 1
+	PRINTFORMW %SAVESTR:RESULT%에게는 벌써 악마 날개가 나 있습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에게 악마날개를 기릅니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%에게 악마 날개가 났다》
+	TALENT:T:245 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+
+;----------------------------
+@EVILTAIL
+;----------------------------
+
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 악마 꼬리로 개조합니까
+PRINTL 누구에게 악마 꼬리를 기릅니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:246 == 1
+	PRINTFORMW %SAVESTR:RESULT%에게는 벌써 악마 꼬리가 나 있습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에게 악마 꼬리를 기름니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%에게 악마의 꼬리가 났다》
+	TALENT:T:246 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@EVILSIGHT
+;----------------------------
+
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 악마 눈으로 개조합니까
+PRINTL 누구를 악마 눈으로 합니까？
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:247 == 1
+	PRINTFORMW %SAVESTR:RESULT%에게는 이미 악마의 눈이 달려있습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %조사선택(SAVESTR:RESULT, "를")% 악마눈으로 합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%조사선택(SAVESTR:T, "는")% 악마눈이 되었다》
+	TALENT:T:247 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@DEMON_REBIRTH
+;----------------------------
+#DIMS TYPEDATAS, 11
+#DIM COND, 11
+#DIMS CONDDESCS, 11
+#DIMS TYPES, 9
+#DIM TEMP
+#DIMS TYPENAME
+#DIM TYPEN
+#DIM T2
+#DIM TYPEID, 11, 9
+
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+
+PRINTL 전생의 비법을 베풀어 마족으로서 다시 태어나게 합니다
+PRINTL 누구를 대상으로 합니까？
+PRINTL  
+;PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+;ELSEIF TALENT:RESULT:종족 == 9
+;	PRINTFORMW %SAVESTR:RESULT%은 이미 마족이 되어있습니다
+;	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+TYPEDATAS:0 = 위저드/윗치/프리스트/쿠노이치/다크나이트/프리스티스/닌자
+TYPEDATAS:1 = 좀비/좀비웜/좀비하운드/뱀파이어/로드오브데스
+COND:1 = !TALENT:T:파란피부
+CONDDESCS:1 = [파란피부]
+TYPEDATAS:2 = 오크/트롤/오우거/자이언트
+COND:2 = !TALENT:T:장신
+CONDDESCS:2 = [장신]
+TYPEDATAS:3 = 고블린/홉고블린/페어리/밴시/픽시/듀라한
+TYPEDATAS:4 = 코볼트/리자드맨
+TYPEDATAS:5 = 우즈/가고일/슬라임/위스프/이블아이
+TYPEDATAS:6 = 아머이터/헬하운드/키마이라/브레인이터/나이트메어
+TYPEDATAS:7 = 드래곤플라이/포이즌센터피드/데스스콜피온
+TYPEDATAS:8 = 몬스터아이비/뱀파이어트리
+TYPEDATAS:9 = 임프/레서데몬/아크데몬
+COND:9 = !(TALENT:T:파란피부 && TALENT:T:악마안 && TALENT:T:악마날개 && TALENT:T:악마꼬리)
+CONDDESCS:9 = [파란피부][악마안][악마날개][악마꼬리]
+TYPEDATAS:10 = 나이트걸/서큐버스/릴리스
+COND:10 = COND:9 || !TALENT:T:음란
+CONDDESCS:10 = [파란피부][악마안][악마날개][악마꼬리][음란]
+
+PRINTL 어떤 마족으로 전생시키겠습니까？
+TEMP = 0
+REPEAT 11
+	SPLIT TYPEDATAS:COUNT, "/", TYPES
+	FOR LOCAL, 0, RESULT
+		FOR T2, 100, 200
+			IF ITEMNAME:T2 == TYPES:LOCAL
+				TYPEID:COUNT:LOCAL = T2
+				BREAK
+			ENDIF
+		NEXT
+		SIF COND:COUNT || CFLAG:T:9 < ITEMPRICE:(TYPEID:COUNT:LOCAL) / 20
+			SETCOLOR 64, 64, 64
+		PRINTFORMLC [{COUNT * 10 + LOCAL,3}] %TYPES:LOCAL%
+		RESETCOLOR
+		TEMP += 1
+		SIF TEMP % 3 == 0
+			PRINTL
+	NEXT
+REND
+PRINTL [999] 돌아온다
+
+TYPENAME =
+DO
+	INPUT
+	SIF RESULT == 999
+		RESTART
+	TEMP = RESULT
+	TYPEN = TYPEID:(TEMP / 10):(TEMP % 10)
+	IF COND:(TEMP / 10) != 0 || CFLAG:T:9 < ITEMPRICE:TYPEN / 20
+		PRINTFORMW Lv{ITEMPRICE:TYPEN / 20}（現在{CFLAG:T:9}）\@CONDDESCS:(TEMP / 10) != "" ?, #\@%CONDDESCS:(TEMP / 10)%이(가) 필요합니다
+		CLEARLINE 2
+	ELSE
+		SPLIT TYPEDATAS:(TEMP / 10), "/", TYPES
+		TYPENAME '= TYPES:(TEMP % 10)
+	ENDIF
+LOOP TYPENAME == ""
+
+IF TALENT:T:서브종족 == TYPEN
+	PRINTFORMW %SAVESTR:T%은(는) 이미 %TYPENAME%입니다
+	RETURN 0
+ENDIF
+
+
+$INPUT_LOOP
+
+PRINTFORML %SAVESTR:T%을(를) %TYPENAME%으로 전생시킵니까？
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	SIF TALENT:T:종족 != 9
+		TALENT:T:원료족 = TALENT:T:종족
+	TALENT:T:종족 = 9
+	TALENT:T:서브종족 = TYPEN
+	PRINTFORMW 농후한 마력이 충만하게 가득차오른다………
+	PRINTFORMW %SAVESTR:T%은(는) 전생한 결과, 원래의 종족을 그만두고 
+	PRINTFORMW 《훌륭한 【마족 ・%ITEMNAME:(TALENT:T:서브종족)%】이(가) 되었다》
+
+	;付加素質
+	;転生を繰り返して素質収集が出来ないようとりあえず限定的に
+	SELECTCASE TYPENAME
+	CASE "코볼트", "좀비하운드", "헬하운드", "키마이라", "나이트메어"
+		CALL LABO_DR_GET_TALENT, T, 124, "의 머리에【동물귀】가 생겼다! "
+	CASE "서큐버스", "릴리스"
+		CALL LABO_DR_GET_TALENT, T, 91, "은(는) 육체로부터 풍기기 시작하는 색과 향기로 저항하기 힘든【매혹】의 힘을 얻은거삭 타다……"
+;追加してもいいかわからない
+[SKIPSTART]
+	CASE "페어리", "픽시"
+		CALL LABO_DR_GET_TALENT, T, 263, "의 몸이 점점 작아져, 【소인체형】이 되었다"
+	CASE "우즈", "슬라임"
+		CALL LABO_DR_GET_TALENT, T, 261, "의 신체는 부정형의 【슬라임】이 되었다……"
+	CASE "아머이터", "브레인이터", "몬스터아이비", "뱀파이어트리"
+		CALL LABO_DR_GET_TALENT, T, 262, "은(는) 마음먹은대로 움직일수 있는 몇개의 【촉수】를 갖추고있다……"
+	CASE "쿠노이치", "닌자"
+		CALL LABO_DR_GET_TALENT, T, 251, "은(는) 그림자에 잠복할수있는【인술】의 기술을 체득했다! "
+	CASE "프리스트", "프리스티스"
+		CALL LABO_DR_GET_TALENT, T, 242, "은(는) 재앙신의 축복을 받아 【법술】을 취급할수 있게 되었다! "
+	CASE "윗치", "위저드"
+		CALL LABO_DR_GET_TALENT, T, 241, "은(는) 마력을 다루는 법을 몸에 익혀 【마술】을 취급할수 있게 되었다! "
+	CASE "다크나이트"
+		CALL LABO_DR_GET_TALENT, T, 240, "은(는) 암흑의 힘을 흔들기 위한 【전술】을 체득했다! "
+[SKIPEND]
+	ENDSELECT
+
+	;머리색
+	SIF RAND:3 == 0
+		CALL LABO_DR_CHANGE_HAIR_COLOR, T, (RAND:7 + 1)
+
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+@LABO_DR_GET_TALENT, ARG, ARG:1, ARGS
+IF !TALENT:ARG:(ARG:1)
+	TALENT:ARG:(ARG:1) = 1
+	PRINTL
+	PRINTFORMW %SAVESTR:ARG%%ARGS%
+ENDIF
+
+@LABO_DR_CHANGE_HAIR_COLOR, ARG, ARG:1
+IF TALENT:ARG:머리색 != ARG:1
+	PRINTFORM %SAVESTR:ARG%의 머리색이 %GET_LOOK_INFO(ARG, "머리색")%(으)로부터
+	TALENT:ARG:머리색 = ARG:1
+	PRINTFORMW %GET_LOOK_INFO(ARG, "머리색")%(으)로 변화했다
+ENDIF
+
+
+;----------------------------
+@SOULBOUND
+;----------------------------
+C = 10000
+
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 혼박의 주술을 행하여 마음을 움직이고 없앱니다
+PRINTL 혼박의 주술이 걸리면 소질에 의한 자연종족변경과 업의 변동이 발생하지 않게됩니다
+PRINTL 누구를 대상으로 합니까？
+PRINTL  
+;PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:혼박
+	PRINTFORMW %SAVESTR:RESULT%에게 벌써 혼박의 주술이 베풀어지고 있습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에게 혼박의 주술을 사용하겠습니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%의 영혼은 얽매였다》
+	TALENT:T:혼박 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@SOULBOUND_ERASE
+;----------------------------
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 부여된 혼박의 주술을 해주합니다
+PRINTL 누구를 대상으로 합니까？
+PRINTL  
+;PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF !TALENT:RESULT:혼박
+	PRINTFORMW %SAVESTR:RESULT%은(는) 혼박이 걸려있지 않습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%을(를) 혼박의 주술로부터 해방시킵니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%의 영혼은 해방되었다》
+	TALENT:T:혼박 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@ENCHARMED_ERASE
+;----------------------------
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 충분하지 않습니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 광왕의 포로를 소거합니다
+PRINTL 누구를 대상으로 합니까？
+PRINTL  
+;PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF !TALENT:RESULT:광왕의포로
+	PRINTFORMW %SAVESTR:RESULT%은(는) 광왕의 포로가 아닙니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%의 광왕의포로를 소거합니까？
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%은(는)【%TALENTNAME:280%】이 아니게 되었따》
+	TALENT:T:광왕의포로 = 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@ST_UP_LABO
+;----------------------------
+
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINT 원 용사의
+IF B == 0
+	PRINT HP
+ELSEIF B == 1
+	PRINT 기력
+ELSEIF B == 2
+	PRINT 공격
+ELSE
+	PRINT 방어
+ENDIF
+PRINTL 을(를) 강화합니다
+PRINTL 누구를 강화합니까？
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 1 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+;リミットに届いているか
+IF B == 0
+	IF MAXBASE:T:0 >= (2000 + CFLAG:T:9 * 50)
+		PRINTL *한계까지 HP가 성장하고 있습니다*
+		PRINTW *좀 더 레벨을 올려 주세요*
+		RETURN 0
+	ENDIF
+ELSEIF B == 1
+	IF MAXBASE:T:1 >= (2000 + CFLAG:T:9 * 50)
+		PRINTL *한계까지 기력이 성장하고 있습니다*
+		PRINTW *좀 더 레벨을 올려 주세요*
+		RETURN 0
+	ENDIF
+ELSEIF B == 2
+	IF CFLAG:T:13 >= CFLAG:T:9 * 5
+		PRINTL *한계까지 공격 성장하고 있습니다*
+		PRINTW *좀 더 레벨을 올려 주세요*
+		RETURN 0
+	ENDIF
+ELSE
+	IF CFLAG:T:14 >= CFLAG:T:9 * 5
+		PRINTL *한계까지 방어가 성장하고 있습니다*
+		PRINTW *좀 더 레벨을 올려 주세요*
+		RETURN 0
+	ENDIF
+ENDIF
+
+
+D = MONEY/C
+
+;リミットに届いているか
+IF B == 0
+	LOCAL = (2000 + CFLAG:T:9 * 50 - MAXBASE:T:0 ) / 10
+	SIF LOCAL < D
+		D = LOCAL
+ELSEIF B == 1
+	LOCAL = (2000 + CFLAG:T:9 * 50 - MAXBASE:T:1 ) / 10
+	SIF LOCAL < D
+		D = LOCAL
+ELSEIF B == 2
+	LOCAL = (CFLAG:T:9 * 5 - CFLAG:T:13 )
+	SIF LOCAL < D
+		D = LOCAL
+ELSE
+	LOCAL = (CFLAG:T:9 * 5 - CFLAG:T:14 )
+	SIF LOCAL < D
+		D = LOCAL
+ENDIF
+
+PRINTFORML %조사선택(SAVESTR:RESULT, "를")% 몇 회 강회합니까？(1-{D})
+
+
+
+
+INPUT
+
+IF RESULT == 0
+	RETURN 0
+ELSEIF RESULT >= 1 && RESULT <= D
+	IF B == 0
+		PRINTW HP를 강화했습니다
+		MAXBASE:T:0 += 10*RESULT
+	ELSEIF B == 1
+		PRINTW 기력을 강화했습니다
+		MAXBASE:T:1 += 10*RESULT
+	ELSEIF B == 2
+		PRINTW 공격을 강화했습니다
+		CFLAG:T:13 += RESULT
+	ELSE
+		PRINTW 방어를 강화했습니다
+		CFLAG:T:14 += RESULT
+	ENDIF
+ELSE
+	PRINTL 너무 큽니다
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C*RESULT
+RETURN 1
+
+;----------------------------
+@MAGICRESIST
+;----------------------------
+
+C = 50000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 마법 내성을 부여합니다
+PRINTL 누구에게 부여합니까?
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:257 == 1
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 이미 마법에 대한 내성이 있습니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에 마법 내성을 부여합니까
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%에 마법 내성이 부여되었다》
+	TALENT:T:257 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@EXTRA_PREG_MARK
+;----------------------------
+
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 이상 임신 체질을 부여합니다
+PRINTL 누구에게 부여합니까
+PRINTL  
+PRINTL [0] 당신
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT < 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF TALENT:RESULT:257 == 1
+	PRINTFORMW %SAVESTR:RESULT%は 이미 이상 임신 체질입니다
+	RETURN 0
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+T = RESULT
+
+PRINTFORML %SAVESTR:RESULT%에게 이상 임신 체질을 부여 하시겠습니까
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	PRINTFORMW 《%SAVESTR:T%에게 이상 임신 체질이 부여되었다》
+	TALENT:T:340 = 1
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@SET_FREE_TRAIN
+;----------------------------
+
+C = 20000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL 프리 조교를 설정합니다
+PRINTL 누구에게 설정하겠습니까？
+PRINTL  
+CALL LIFE_LIST
+PRINTL  [999] - 돌아온다
+
+INPUT
+
+IF RESULT == 999
+	RETURN 0
+ELSEIF RESULT <= 0 || RESULT >= CHARANUM
+	GOTO INPUT_LOOP
+;臨死中のキャラは排除
+ELSEIF BASE:RESULT:0 < 1
+	GOTO INPUT_LOOP
+ELSEIF CFLAG:RESULT:1 == 2
+	PRINTFORMW %조사선택(SAVESTR:RESULT, "는")% 아직 지배하에 두고 있지 않습니다
+	RETURN 0
+ENDIF
+
+LOCAL = RESULT
+
+SIF CSTR:RESULT:7 != ""
+	PRINTFORML 새로운 것을 설정하면 %CSTR:RESULT:7%의 조교는 재설정됩니다
+
+PRINTFORML %SAVESTR:RESULT%에게 프리 조교를 설정하겠습니까
+
+PRINTL  [0] - 네
+PRINTL  [1] - 그만둔다
+
+INPUT
+
+IF RESULT == 1
+	RETURN 0
+ELSEIF RESULT == 0
+	
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+PRINTFORML 새로운 프리 조교를 입력하십시오
+PRINTFORML 백지로 내면 재설정 할 수 있습니다
+
+INPUTS
+CSTR:LOCAL:7 = %RESULTS%
+ABL:LOCAL:4 = 0
+ABL:LOCAL:40 = 0
+JUEL:LOCAL:15 = 0
+
+IF CSTR:LOCAL:7 == ""
+	PRINTFORMW 프리 조교를 재설정했습니다
+ELSE
+	PRINTFORMW %CSTR:LOCAL:7%의 조교가 설정되었습니다
+ENDIF
+
+MONEY -= C
+RETURN 1
+
+;----------------------------
+@SUMMON_SLAVE
+;----------------------------
+
+C = 100000
+
+IF MONEY < C
+	PRINTW 돈이 부족합니다
+	RETURN 0
+ENDIF
+
+$INPUT_LOOP
+
+PRINTL CSV파일을 로드해서 노예를 생성합니다
+PRINTL 추가로 레벨과 육변기를 30 소비합니다
+
+IF CFLAG:0:9 < 30
+	PRINTW 레벨이 부족합니다.
+	RETURN 0
+ENDIF
+
+IF FLAG:83 < 30
+	PRINTW 육변기가 부족합니다.
+	RETURN 0
+ENDIF
+
+PRINTFORML 조건을 충족하고 있습니다. 노예를 작성하겠습니까？
+PRINTFORML 생성하는 경우 노예의 번호를 입력하십시오
+
+PRINTL  [0] - 생성하지 않는다
+
+INPUT
+
+IF RESULT == 0
+	RETURN 0
+ELSEIF RESULT > 199 || RESULT < 150
+	PRINTW 대상의 번호는 150 이상 199 이하로 유지하십시오
+	GOTO INPUT_LOOP
+ENDIF
+
+LOCAL = RESULT
+
+EXISTCSV LOCAL
+
+IF RESULT == 0
+	PRINTW 대상의 노예는 존재하지 않습니다
+	GOTO INPUT_LOOP
+ENDIF
+
+ADDCHARA LOCAL
+LOCAL:1 = CHARANUM - 1
+SAVESTR:(LOCAL:1) = %NAME:(LOCAL:1)%
+CSTR:(LOCAL:1):1 = %NAME:(LOCAL:1)%
+LOCAL:2 = TARGET
+TARGET = LOCAL:1
+CALL WEARING_CLOTH_ABLE
+TARGET = LOCAL:2
+
+PRINTL *****************************************
+PRINT 마왕의 그림자에서
+PRINTS SAVESTR:(LOCAL:1)
+PRINTL が 소환 되었다! 
+PRINTL *****************************************
+
+;마왕의그림자
+TALENT:(LOCAL:1):292 = 1
+;召喚酔い
+CFLAG:(LOCAL:1):1 = 11
+CFLAG:(LOCAL:1):420 = 1
+
+FOR LOCAL:2,800,810
+	CFLAG:(LOCAL:1):(LOCAL:2) = 0
+NEXT
+
+CFLAG:0:9 -= 30
+FLAG:83 -= 30
+MONEY -= C
+PRINTL 대가로 레벨과 육변기가 30 감소했습니다
+PRINTFORMW %SAVESTR:(LOCAL:1)%의 소환은 불완전합니다
+PRINTFORMW 종족・성격・이유・용사가 되기 전・머리색・눈동자 중 하나는 공통된 노예를 찾아 육변기에 해 주세요
+PRINTFORMW 각각의 항목이 총 30이상이 되면 %SAVESTR:(LOCAL:1)%が 해제됩니다
+
+WAIT
+
+
+RETURN 1
+

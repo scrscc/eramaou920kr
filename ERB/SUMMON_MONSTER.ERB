@@ -1,0 +1,230 @@
+﻿;몬스터 소환 및 출산
+;ARG==0のとき召喚、ARG==1以上のとき出産（ARGはNo）ARG:0=-1のとき、弱召喚
+;SUMMON_POWはモンスターレベル（階層）SUMMON_ITEMがアイテム番号
+;SUMMON_NUMは召喚回数, 基本は５ SUMMON_MONはモンスターの召喚数
+@SUMMON_MONSTER(ARG)
+#DIM SUMMON_POW
+#DIM SUMMON_NUM
+#DIM SUMMON_ITEM
+#DIM SUMMON_MON
+#DIM BABY_ID
+
+DRAWLINE
+
+SUMMON_NUM = 5
+
+;마왕의 레벨이 １０, ３０, ５０, ７０, １００이 되면 소환 횟수를 1회씩 더함. 
+;마계 지식을 가지고 있으면 소환 횟수가 +1회
+SIF CFLAG:MASTER:9 >= 10
+	SUMMON_NUM += 1
+SIF CFLAG:MASTER:9 >= 30
+	SUMMON_NUM += 1
+SIF CFLAG:MASTER:9 >= 50
+	SUMMON_NUM += 1
+SIF CFLAG:MASTER:9 >= 70
+	SUMMON_NUM += 1
+SIF CFLAG:MASTER:9 >= 100
+	SUMMON_NUM += 1
+SIF TALENT:MASTER:325 == 1
+	SUMMON_NUM += 1
+SIF ARG:0 == -1
+	SUMMON_NUM /= 2
+FOR LOCAL, 0 , SUMMON_NUM
+	;20141001改変
+	;SUMMON_POW = RAND:9
+	;SUMMON_ITEM = SUMMON_POW * 10
+	;SUMMON_ITEM += RAND:5
+	;SUMMON_ITEM += 100
+	;モンスターの抽選. 
+	CALL RAND_MONSTER_NUMBER
+	SUMMON_ITEM = RESULT
+    SUMMON_POW = (SUMMON_ITEM - 100) / 10
+	IF ARG == 0 || ARG == -1
+		SUMMON_MON = 25
+		;通常召喚. ランダムでモンスターレベル(SUMMON_POW)に応じて召喚数(SUMMON_MON)が変わる. 基本25
+		SUMMON_MON = RAND:(SUMMON_MON - (SUMMON_POW * 3))
+		SUMMON_MON += 1
+		;魔王のレベルが２０, ４０, ６０, ８０, １００になるごとにモンスターの召喚数が増える. 
+		SIF CFLAG:MASTER:9 >= 20
+			SUMMON_MON += 1
+		SIF CFLAG:MASTER:9 >= 40
+			SUMMON_MON += 1
+		SIF CFLAG:MASTER:9 >= 60
+			SUMMON_MON += 1
+		SIF CFLAG:MASTER:9 >= 80
+			SUMMON_MON += 1
+		SIF CFLAG:MASTER:9 >= 100
+			SUMMON_MON += 1
+		;淫魔知識で+1匹追加
+		SIF TALENT:MASTER:327 == 1
+			SUMMON_MON += 1
+		PRINTFORML %ITEMNAME:(SUMMON_ITEM)%를 {SUMMON_MON}체 소환했습니다
+		ITEM:SUMMON_ITEM += SUMMON_MON
+		SIF ITEM:SUMMON_ITEM > 999
+			ITEM:SUMMON_ITEM = 999
+	ELSE
+	;出産. 3つ子まで
+		SUMMON_MON = RAND:3
+		SUMMON_MON += 1
+		;父親モンスターが決まっている場合, 対象初期化
+		;初期化のまま通った場合, キャラとして子を授かる
+		SIF CFLAG:ARG:112 > 0
+			SUMMON_ITEM = 0
+		;確率で近衛兵
+		SIF RAND:2 == 0
+			SUMMON_ITEM = 191 + RAND:3
+		;父親があなたなら近衛兵
+		IF CFLAG:ARG:111 == 0
+			SUMMON_ITEM = 191 + RAND:3
+		;父親が野良犬で母親がドラゴンならヘルハウンドかキマイラ
+		ELSEIF CFLAG:ARG:111 == -2 && TALENT:ARG:314 == 5
+			IF RAND:2 ==0
+				SUMMON_ITEM = 141
+				;犬はぽこぽこ産む. 追加分あわせて5つ子まで
+				SUMMON_MON += RAND:3
+			ELSE
+				SUMMON_ITEM = 151
+			ENDIF
+		;父親が野良犬ならゾンビハウンドかヘルハウンド
+		ELSEIF CFLAG:ARG:111 == -2
+			IF RAND:2 ==0
+				SUMMON_ITEM = 114
+			ELSE
+				SUMMON_ITEM = 141
+			ENDIF
+			;犬はぽこぽこ産む. 追加分あわせて5つ子まで
+			SUMMON_MON += RAND:3
+		ENDIF
+		;NTR中以外ならモンスターが増える. 
+		IF CFLAG:ARG:1 == 9
+			;父親が조수か노예か狂王か見ず知らずの男
+			IF CFLAG:ARG:102 == 7 || CFLAG:ARG:102 == 2 || CFLAG:ARG:102 == 3 || CFLAG:ARG:102 == 4
+				PRINTFORML %SAVESTR:ARG%이 낳은 아이는 어딘가로 반출되었습니다
+			ELSE
+				PRINTFORML %SAVESTR:ARG%는 %ITEMNAME:(SUMMON_ITEM)%를 {SUMMON_MON}체 낳았으나 모두 처분되었습니다
+			ENDIF
+		;父親が조수か노예
+		ELSEIF CFLAG:ARG:102 == 2 || CFLAG:ARG:102 == 3
+			PRINTFORML %SAVESTR:ARG%이 낳은 아이는 떠났습니다
+		;父親が狂王か見ず知らずの男
+		ELSEIF CFLAG:ARG:102 == 7 || CFLAG:ARG:102 == 4
+			PRINTFORML %SAVESTR:ARG%이 낳은 아이는 떠났습니다
+		;出産モンスターが初期化されている場合, キャラを出産
+		ELSEIF SUMMON_ITEM == 0
+			;異種妊娠出産
+			;父親と同じ種族が生まれる
+			BABY_ID = CFLAG:ARG:112
+			PRINTFORML %SAVESTR:ARG%이 낳은 %ITEMNAME:(BABY_ID)%の娘은 전력에 합류했습니다
+			IF CHARANUM < 20
+				;キャラ枠に空きがある場合
+				PRINTFORML 간부로 양육해, 부하로 추가하겠습니까？
+				CALL SELECT_YES_NO
+			ELSE
+				RESULT = 1
+			ENDIF
+			
+			IF RESULT == 1
+				PRINTFORML %SAVESTR:ARG%이 낳은 1체의 %ITEMNAME:(BABY_ID)%は 전력에 합류했습니다
+				ITEM:BABY_ID += 1
+				SIF ITEM:BABY_ID > 999
+					ITEM:BABY_ID = 999
+			ELSE
+				;ENDING.ERB参照
+				LOCAL = ARG + 100
+				CALL CHAR_GIFT, LOCAL, "아이"
+			ENDIF
+			;初期化
+			CFLAG:ARG:112 = 0
+		ELSE
+			PRINTFORML %SAVESTR:ARG%이 낳은 후, {SUMMON_MON}체의 %ITEMNAME:(SUMMON_ITEM)%는 전력에 가담했습니다.
+			ITEM:SUMMON_ITEM += SUMMON_MON
+			SIF ITEM:SUMMON_ITEM > 999
+				ITEM:SUMMON_ITEM = 999
+		;父親が野良犬ではなく母親が吸血鬼かデュラハンで出産した子供が1匹だった時は確率で二卵性の双子
+		IF CFLAG:ARG:111 != -2 && (TALENT:ARG:314 == 3 || TALENT:ARG:314 == 4) && SUMMON_MON == 1 && RAND:2 == 0
+			PRINTFORM 이런…？　아이는 쌍둥이였던 것 같습니다. 계속해서 
+			;母親が吸血鬼
+			IF TALENT:ARG:314 == 3 
+				PRINTFORML 뱀파이어를 1체 출산했습니다
+				SIF ITEM:172 < 999
+					ITEM:172 += 1
+			;母親がデュラハン
+			ELSEIF TALENT:ARG:314 == 4
+				PRINTFORML 듀라한을 1체 출산했습니다
+				SIF ITEM:171 < 999
+					ITEM:171 += 1
+			ENDIF
+		ENDIF
+		ENDIF
+		BREAK
+	ENDIF
+NEXT
+WAIT
+RETURN 0
+
+@PREGNANCY_MASTER(ARG)
+;母親があなたで出産
+PRINTL  
+DRAWLINE
+LOCAL:0 += RAND:3 + 1
+;必ず近衛兵
+LOCAL:1 = 191 + RAND:3
+PRINTFORML %SAVESTR:ARG%는 %ITEMNAME:(LOCAL:1)%를 {LOCAL:0}체 낳았습니다
+ITEM:(LOCAL:1) += LOCAL:0
+SIF ITEM:(LOCAL:1) > 999
+	ITEM:(LOCAL:1) = 999
+RETURN 0
+
+;20160116改変
+;-------------------------------------
+@MONSTER_TOTAL_COUNT
+#DIM MONSTER_ALL
+#DIM MON_ID
+;-------------------------------------
+;モンスターの総数を返します. 
+MONSTER_ALL = 0
+FOR LOCAL:0, 0, 5
+	FOR LOCAL:1, 0, 9
+        MON_ID = 100 + LOCAL:1 * 10 + LOCAL:0
+    	MONSTER_ALL += ITEM:MON_ID
+    NEXT
+NEXT
+RETURN MONSTER_ALL
+
+;20160116改変
+;-------------------------------------
+@RAND_MONSTER_NUMBER
+#DIM MONSTER_ALL
+#DIM MON_ID
+;-------------------------------------
+;モンスターの番号を抽選し, 返します. 
+;抽選された番号のモンスターを既に最大数(999体)まで所持している場合は, 
+;再度抽選を行い, 未だ最大数に達していないモンスターを優先します. 
+;全ての種類のモンスターを既に最大まで所持している場合だけは, 
+;(9階層 x 5種類 x 999体 = 44955)
+;モンスターの番号の重複を許容し, 抽選された番号をそのまま返します. 
+
+;モンスターの総数を取得します. 
+CALL MONSTER_TOTAL_COUNT
+MONSTER_ALL = RESULT
+
+;モンスター番号を抽選します. 
+$RAND_MONSTER_NUMBER_LOOP
+MON_ID = RAND:9 * 10  ;階層を抽選
+MON_ID += RAND:5      ;階層における種類
+MON_ID += 100         ;モンスター番号の基本数
+
+;コンフィグでオプション化設定. 
+;IF FLAG:?? == 0
+
+	;抽選された番号のモンスターの数が, 既に最大数(99体)で, 
+	;かつ, モンスターの総数が最大に達していない場合は, 
+	;再度抽選を行います. 
+	IF ITEM:MON_ID >= 999 && MONSTER_ALL < 44955
+		GOTO RAND_MONSTER_NUMBER_LOOP
+	ENDIF
+
+;コンフィグでオプション化設定. 
+;ENDIF
+
+RETURN MON_ID

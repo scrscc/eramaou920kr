@@ -1,0 +1,777 @@
+﻿@EVENTFIRST
+#DIM CHARA, 1
+#DIM ID_OF_NEWCHARA
+#DIM TEMP
+#DIM HAIRCOLOR
+#DIM CHARACTER
+HAIRCOLOR = -1
+CHARACTER = -1
+
+
+;광왕은 초기치에서 후타나리
+FLAG:500 = 2
+;각종 설정
+CALL FIRST_SETTING
+
+REPEAT 14
+	X = COUNT + 60
+	FLAG:X = -1
+REND
+
+TARGET = -1
+BOUGHT = -1
+
+;전투 로그 표시 플래그
+FLAG:5 += 32
+
+DAY:1 = 1
+
+ITEMSALES:53 = 1
+A = 200
+REPEAT 8
+	FLAG:A = 1
+	A += 1
+REND
+
+PBAND = 4
+
+;빈사 때 조교를 자동 종료
+FLAG:35 = 1
+;착의 시스템 
+FLAG:37 = 1
+
+MONEY = 10000
+
+;2D모드 맵 생성
+IF FLAG:502 == 1
+	CALL GEO_TEST
+	CALL SET_VIL
+	FOR LOCAL:0,0,50
+		FOR LOCAL:1,0,50
+			DB:(LOCAL:0):(LOCAL:1) = 0
+	NEXT
+NEXT
+ENDIF
+
+
+PRINTL          		먼 옛날, 불사의 힘을 손에 넣은 마왕이 있었다
+PRINTL        마왕은 여성에 의해서가 아니라면 쓰러지지 않는 저주로 인해
+PRINTL       				 세계를 장악할 만큼의 힘을 거머쥐었으나
+PRINTL        어느 날 전설의 여용사(女勇者)에 의해 쓰러져 봉인되었다
+PRINTL  
+PRINTL        			그 봉인이 긴 시간에 걸쳐 지금 풀린 것이다
+PRINTL       	 오늘도 더러움을 모르는 용사가 던전의 문을 두드린다
+WAIT
+
+;시골 처녀의 경우. 他のユニークも同様に処理する感じ
+IF FLAG:501 == 1
+	DRAWLINE
+	PRINTW 우선은 나의 잠을 깨운 어리석은 여자에게 포상을 내려줘야겠군…
+	PRINTW 마왕은 봉인 파괴를 위해 에너지를 흡수당해 힘없이 쓰러져 있는 마을처녀를 내려다보고 있었다
+	PRINTW ………
+	PRINTW ……
+	PRINTW …
+	
+	ADDCHARA 17
+	
+	SAVESTR:1 = %NAME:1%
+	
+	TARGET = 1
+	
+	CSTR:1 = %NAME:1%
+	CFLAG:420 = 1
+	
+	CFLAG:9 = 1
+	CFLAG:1 = 0
+	CFLAG:6 = 1
+	CFLAG:11 = 15
+	CFLAG:12 = 15
+	CFLAG:13 = 15
+	CFLAG:14 = 15
+	CFLAG:16 = -1
+	CFLAG:450 = 31
+	
+	;勝手には書かないけどなんかセリフあってもいいかもね
+	;口上作者さん待ってます
+	;あいよー　4/8
+	PRINTFORMW 마을처녀는 봉인을 파괴했을 때 마력의 급류로 인해 모든 의복이 찢어발겨져 있다.
+	PRINTFORMW 마을처녀는 아직 소녀라고 해도 좋을 정도의 체격에, 습관인 머리모양은 숏컷으로 정돈되어 있다.
+	PRINTFORMW 아직 숨이 붙어있는지 완만한 가슴은 부드럽게 오르내리고, 요염하게 빛나는 갈색의 피부는 능욕되는 것을 기다리고 있는 것만 같다.
+	PRINTFORMW 식전운동 겸으로 이 자리에서 능욕하는 것도 좋을 것 같으나 우선은………
+	PRINTL 
+	PRINTL [1] 안아들고 감옥까지 데려간다
+	PRINTL [2] 다리를 붙들고 감옥까지 끌고 간다
+	DRAWLINE
+
+	$INPUT_LOOP
+	INPUT
+	IF RESULT == 1
+		PRINTFORMW 마을처녀는 생각보다 가볍다. 농민인지 흙냄새에 섞여 여자의 좋은 향기가 난다.
+		PRINTFORMW 살집은 유감스럽게도 그닥 없지만, 지금 그대로라도 충분히 받아들이는 것 정도는 가능할 것이다.
+		PRINTFORMW 오랜만에 접하는 여자의 감촉에 흥분하고 있던 당신은 이대로 자신의 방으로 데리고 들어가, 범하려고 생각했지만………
+		PRINTFORMW 「언…니이………」
+		PRINTFORMW 마을처녀의 신음소리에, 독기가 빠져버렸다.
+	ELSEIF RESULT == 2
+		PRINTFORMW 단순한 계집년 상대로 괜찮은 대우를 해줄 필요는 없겠지―――
+		PRINTFORMW 당신은 마을처녀의 다리를 붙들고서 감옥까지 끌고 갔다.
+		PRINTFORMW 곳곳에 생채기는 생기겠지만 핥으면 낫겠지………
+		PRINTFORMW 맥빠지게 감옥에 집어던져도 마을처녀는 일어나지 않았다.
+	ELSE
+		GOTO INPUT_LOOP
+	ENDIF
+
+	PRINTL *****************************************
+	PRINT 마을처녀 
+	PRINTS SAVESTR:1
+	PRINTL (을)를 지하감옥에 유폐했습니다!
+	PRINTL *****************************************
+
+	
+	WAIT
+	
+	BEGIN SHOP
+ENDIF
+
+;랜덤의 경우
+
+PRINTW 우선은 나의 잠을 깨운 어리석은 여자에게 포상을 내려줘야겠군…
+PRINTW 마왕은 봉인 파괴 때문에 에너지를 흡수당해 힘없이 누워있는 모험가를 내려다보았다
+PRINTW ………
+PRINTW ……
+PRINTW …
+PRINTW 
+PRINTL …
+PRINTL ……
+PRINTL ………
+
+CALL RAND_CHARA_MAKE
+BEGIN SHOP
+
+
+@EVENTCOMEND
+#PRI
+
+@EVENTTURNEND
+#DIM HEAL
+#DIM MHEAL
+#DIM LEADER
+#DIM TARGET_POOL
+#DIM ASSI_POOL
+#DIM COUNT_TEMP
+;HEAL   = HP回復量
+;MHEAL  = 気力回復量
+;LEADER = リーダー記憶
+
+TARGET_POOL = TARGET
+ASSI_POOL = ASSI
+PLAYER = 0
+ASSI = -1
+
+
+FOR TARGET, 0, CHARANUM
+	;自動調教フォーマット
+	CALL FORMAT_AUTOTRAIN
+	;新人フラグ消去
+	CFLAG:506 = 0
+	;自動調教フラグ消去
+	CFLAG:666 = 0
+	
+NEXT
+
+
+
+;パーティー設定
+CALL PARTY_UNITE
+
+FOR LEADER, 0, CHARANUM
+	;장비의 회복
+	CALL WEAPON_RESTORE,LEADER
+	
+	;던전 공략
+	SIF CFLAG:LEADER:1 == 12
+		CALL DUNGEON, LEADER
+NEXT
+
+A = 1
+REPEAT CHARANUM
+	SIF A >= CHARANUM
+		BREAK
+	
+	;キャンペーン終了後のリセット
+	IF FLAG:400 == 0 && CFLAG:A:1 == 12
+		CFLAG:A:1 = 0
+		CFLAG:A:534 = 0
+	ENDIF
+	
+	;던전 공략
+	IF (CFLAG:A:1 == 2 || CFLAG:A:1 == 3) && FLAG:502 == 0
+		
+		LEADER = A
+		
+		CALL DUNGEON, LEADER
+		
+		A = LEADER
+		
+	ELSEIF CFLAG:A:1 == 2 || CFLAG:A:1 == 3
+		;필드
+		CALL DUNGEON_MAP
+	ENDIF
+	
+	SIF CFLAG:A:1 != 2
+		CALL LVUP, A
+	
+	;전과
+	CALL DUNGEON_AFTER
+	
+	;체력의 회복（午後の調教後は夜の休みが入るので回復大きい）
+	SIF BASE:A:0 < 1
+		BASE:A:0 = 1
+	
+	IF TIME == 1
+		HEAL = MAXBASE:A:0 / 10
+	ELSE
+		HEAL = MAXBASE:A:0 / 2
+	ENDIF
+	
+	;装備効果
+	W:8 = 4
+	CALL EQUIP_CHECK
+	RESULT += 1
+	SIF RESULT > 0
+		HEAL *= RESULT
+	
+	;装備効果
+	W:8 = 13
+	CALL EQUIP_CHECK
+	RESULT += 1
+	SIF RESULT > 0
+		HEAL /= RESULT
+	
+	;吸血鬼の場合ボーナス
+	SIF TALENT:A:314 == 3
+		HEAL *= 3
+	
+	;侵攻中の勇者は回復にペナルティ
+	SIF CFLAG:A:1 == 2
+		HEAL /= 30
+	
+	;休憩フラグ
+	IF CFLAG:A:503 & 1
+		HEAL *= 2
+		CFLAG:A:503 -= 1
+	ENDIF
+	CFLAG:A:4 = 0
+	
+	;회복빠름, 회복느림, 허약
+	IF TALENT:A:111
+		HEAL *= 2
+	ELSEIF TALENT:A:112 || TALENT:A:256
+		HEAL /= 2
+	ENDIF
+
+	BASE:A:0 += HEAL
+	SIF BASE:A:0 > MAXBASE:A:0
+		BASE:A:0 = MAXBASE:A:0
+
+	;気力の回復
+	;侵攻中の勇者は回復にペナルティ
+	IF CFLAG:A:1 == 2
+		MHEAL = MAXBASE:A:1 / 40
+		
+		;装備効果
+		W:8 = 5
+		CALL EQUIP_CHECK
+		RESULT += 1
+		MHEAL *= RESULT
+		
+		;装備効果
+		W:8 = 13
+		CALL EQUIP_CHECK
+		RESULT += 1
+		MHEAL /= RESULT
+		
+		;굳건함, 겁쟁이
+		IF TALENT:A:12
+			MHEAL *= 2
+		ELSEIF TALENT:A:10
+			MHEAL /= 2
+		ENDIF
+		
+		BASE:A:1 += MHEAL
+		SIF BASE:A:1 > MAXBASE:A:1
+			BASE:A:1 = MAXBASE:A:1
+		
+	ELSE
+		BASE:A:1 = MAXBASE:A:1
+	ENDIF
+	
+	;場所のリセット
+	SIF CFLAG:A:1 != 2 && CFLAG:A:1 != 3 && CFLAG:A:1 != 7 && CFLAG:A:1 != 8 && CFLAG:A:1 != 9 && CFLAG:A:1 != 10 && CFLAG:A:1 != 11 && CFLAG:A:1 != 12
+		CFLAG:A:1 = 0
+	
+	;即落ち付与
+	;装備効果
+	W:8 = 6
+	CALL EQUIP_CHECK
+	IF RESULT > 0
+		TALENT:A:73 = 1
+		;レベルに応じて欲情
+		SIF JUEL:A:5 < 10000
+			JUEL:A:5 += RESULT / 2
+	ENDIF
+	
+	;攻撃・防御増加について
+	;非常に強力になりすぎるため
+	;仕様変更を行いました
+	;現在これらの効果はCHAR_ST.ERBの@WEAPON_RESTOREに
+	;移動しています
+	
+	;装備効果(攻撃増加)
+	;W:8 = 7
+	;CALL EQUIP_CHECK
+	;SIF RESULT > 0 && CFLAG:A:13 < 200
+	;	CFLAG:A:13 += RESULT
+	
+	;装備効果(防御増加)
+	;W:8 = 8
+	;CALL EQUIP_CHECK
+	;SIF RESULT > 0 && CFLAG:A:14 < 200
+	;	CFLAG:A:14 += RESULT
+	
+	;装備効果(経験増加)
+	W:8 = 10
+	CALL EQUIP_CHECK
+	SIF RESULT > 0
+		EXP:A:80 += RESULT * 10
+	
+	;装備効果(攻撃防御減少)
+	W:8 = 14
+	CALL EQUIP_CHECK
+	IF RESULT > 0
+		CFLAG:A:13 -= RESULT
+		SIF CFLAG:A:13 < 15
+			CFLAG:A:13 = 15
+		CFLAG:A:14 -= RESULT
+		SIF CFLAG:A:14 < 15
+			CFLAG:A:14 = 15
+	ENDIF
+	
+	;装備効果(支配)
+	W:8 = 9
+	CALL EQUIP_CHECK
+	IF RESULT > 0
+		IF CFLAG:A:1 == 3
+			X = CFLAG:A:501 - 1
+			X *= 10
+			X += 100 + RAND:5
+			IF CFLAG:A:501 >= 8 && RAND:10 == 0
+				Z = 191 + RAND:3
+				SIF ITEM:Z > 0
+					X = Z
+			ENDIF
+			CFLAG:A:570 = X
+		ENDIF
+	ELSE
+		CFLAG:A:570 = 0
+	ENDIF
+	
+	;装備効果(洗脳)
+	W:8 = 15
+	CALL EQUIP_CHECK
+	IF RESULT > 0 && CFLAG:A:1 == 2
+		CFLAG:A:1 = 0
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 공허한 시선으로 당신을 바라보았다
+		CFLAG:A:506 = 1
+		CFLAG:A:507 = 0
+		CALL PARTY_DEL, A
+		ABL:A:10 += 1
+	ELSEIF RESULT > 0 && ABL:A:10 < RESULT
+		PRINTFORMW %조사선택(SAVESTR:A, "는")% 공허한 시선으로 당신을 바라보았다
+		ABL:A:10 += 1
+	ENDIF
+	
+	;선호도 감소
+	IF CFLAG:A:1 == 2 && CFLAG:A:2 > 100
+		CFLAG:A:2 -= RAND:100
+	ENDIF
+	
+	;妄想支援パッチ. eraWIZから流用改変しました
+	IF A > 0 
+		IF TALENT:A:302 <= 201
+			;머리가 길 때까진 １００턴, 즉 ５０일. 
+			TALENT:A:302 += 1
+			IF TALENT:A:302 == 51 || TALENT:A:302 == 201
+				PRINTFORM %SAVESTR:A%의 
+				SIF TALENT:A:312 == 22
+					PRINT 아름다운 
+				;毛髪の色
+				SIF TALENT:A:300 == 1
+					PRINT 금색 
+				SIF TALENT:A:300 == 2
+					PRINT 갈색 
+				SIF TALENT:A:300 == 3
+					PRINT 흑발 
+				SIF TALENT:A:300 == 4
+					PRINT 적색 
+				SIF TALENT:A:300 == 5
+					PRINT 은색 
+				SIF TALENT:A:300 == 6
+					PRINT 청색 
+				SIF TALENT:A:300 == 7
+					PRINT 녹색 
+				IF TALENT:A:302 == 51
+					PRINTL 머리카락은 어깨까지 자라, 세미롱헤어가 되었다.
+				ELSEIF TALENT:A:302 == 201
+					PRINTL 머리카락은 허리까지 자라, 롱헤어가 되었다.
+				ENDIF
+			ENDIF
+		ENDIF
+		;TALENT:310 == TALENT:311 のとき, 成長が止まる
+		IF TALENT:A:310 < TALENT:A:311 && TALENT:A:125 == 0 && TALENT:A:310 <= 200
+			TALENT:A:310 += 1
+			IF TALENT:A:310 == 2 || TALENT:A:310 == 21 || TALENT:A:310 == 51 || TALENT:A:310 == 101 || TALENT:A:310 == 151 || TALENT:A:310 == 201
+				PRINTFORM %SAVESTR:A%의 
+				;チャームポイント確認
+				SIF  TALENT:A:312 ==  11
+					PRINT 귀여운 배꼽 아래의 
+				SIF  TALENT:A:312 == 14
+					PRINT 여성적인 엉덩이의 그늘에 있는 
+				SIF  TALENT:A:312 == 15
+					PRINT 아름다운 가랑이 사이에 있는 
+				SIF  TALENT:A:312 == 22
+					PRINT 요염한 
+				PRINT 부끄러운 언덕에 
+				;毛髪の色で陰毛の色を判断
+				SIF TALENT:A:300 == 1
+					PRINT 금색의 
+				SIF TALENT:A:300 == 2
+					PRINT 갈색의 
+				SIF TALENT:A:300 == 3
+					PRINT 칠흑색의 
+				SIF TALENT:A:300 == 4
+					PRINT 적색 
+				SIF TALENT:A:300 == 5
+					PRINT 은색의 
+				SIF TALENT:A:300 == 6
+					PRINT 청생의
+				SIF TALENT:A:300 == 7
+					PRINT 녹색의
+				;陰毛の状態を見る
+				SIF TALENT:A:310 == 2
+					PRINTL 음모가 돋아 있었다.
+				SIF TALENT:A:310 == 21
+					PRINTL 음모가 자라나 있었다.
+				SIF TALENT:A:310 == 51
+					PRINTL 연한 털이 자라나 있었다.
+				SIF TALENT:A:310 == 101
+					PRINTL 수풀이 우거져 있었다.
+				SIF TALENT:A:310 == 151
+					PRINTL 강모가 돋아 있었다.
+				SIF TALENT:A:310 == 201
+					PRINTL 숲이 우거져 있었다.
+				IF TALENT:A:310 >= TALENT:A:311
+					TALENT:A:310 = TALENT:A:311
+				ENDIF
+			ENDIF
+		ENDIF
+	ENDIF
+	
+	A += 1
+	COUNT = 0
+REND
+
+IF FLAG:5 & 8
+	A = 0
+	REPEAT CHARANUM
+		TARGET = A
+		SIF A >= CHARANUM
+			BREAK
+
+		;자동 처형
+		;조교가 완료된 것으로 생각되는 온순한 용사는 죽음을 면함
+		;事前にお気に入り登録されている場合も処刑されない
+		IF CFLAG:A:506 == 1 && ABL:10 < 2 && CFLAG:A:700 == 0
+			COUNT_TEMP = COUNT
+			CALL EXECUTION_MINI("")
+			A -= 1
+			COUNT = COUNT_TEMP
+		ELSEIF CFLAG:A:506 == 1
+			PRINTFORMW %조사선택(SAVESTR:A, "는")% 필사적으로 목숨을 구걸해 마왕에게 충성을 맹세했다
+		ENDIF
+		
+		A += 1
+	REND
+ENDIF
+
+
+
+;컨피그「戦闘ログでのSKIP中断」がONなら강제停止
+;戦闘後の処理が飛ばされてしまうので追加しました
+IF GETBIT(FLAG:5,9)
+	FORCEWAIT
+ELSE
+	WAIT
+ENDIF
+
+LOCAL:0 = CFLAG:0:9 * 100 + 10
+$LVUP_REPEAT
+IF EXP:0:80 >= LOCAL:0
+	EXP:0:80 -= LOCAL:0
+	CALL ST_UP, 0
+	LOCAL:0 = CFLAG:0:9 * 100 + 10
+	SIF EXP:0:80 >= LOCAL:0
+		GOTO LVUP_REPEAT
+	PRINTFORML *%NAME:0%는 레벨업하여 {CFLAG:0:9}레벨이 되었다*
+ENDIF
+
+;CALL INVASION_CHECK
+
+PRINTL
+IF FLAG:82 == 0
+	IF FLAG:81 > 0
+		FLAG:81 -= RAND:100
+		PRINTL 인간계의 군대는 마왕군의 침공에 저항하고 있다………
+		PRINTW *인간계의 침략도가 감소했습니다*
+		SIF FLAG:81 < 0
+			FLAG:81 = 0
+	ENDIF
+ENDIF
+IF FLAG:87 == 0
+	IF FLAG:86 > 0
+		FLAG:86 -= RAND:100
+		PRINTL 엘프 레지스탕스는 마왕군에게 저항하고 있다………
+		PRINTW *엘프 영역의 침략도가 감소했습니다*
+		SIF FLAG:86 < 0
+			FLAG:86 = 0
+	ENDIF
+ENDIF
+IF FLAG:89 == 0
+	IF FLAG:88 > 0
+		FLAG:88 -= RAND:100
+		PRINTL 드래곤의 군세는 마왕군에게 저항하고 있다………
+		PRINTW *드래곤의 산맥 침략도가 감소했습니다*
+		SIF FLAG:88 < 0
+			FLAG:88 = 0
+	ENDIF
+ENDIF
+IF FLAG:91 == 0
+	IF FLAG:90 > 0
+		FLAG:90 -= RAND:100
+		PRINTL 천계의 군대는 마왕군에게 저항하고 있다………
+		PRINTW *천계의 침략도가 감소했습니다*
+		SIF FLAG:90 < 0
+			FLAG:90 = 0
+	ENDIF
+ENDIF
+
+
+;魔王の回復
+IF TIME == 0
+	HEAL = 1400
+ELSE
+	HEAL = 1000
+ENDIF
+
+BASE:0:0 += HEAL
+SIF BASE:0:0 > MAXBASE:0:0
+	BASE:0:0 = MAXBASE:0:0
+
+SIF FLAG:400 > 0
+	HEAL = -10
+
+BASE:0:1 += HEAL
+SIF BASE:0:1 > MAXBASE:0:1
+	BASE:0:1 = MAXBASE:0:1
+
+CALL CAMPAIGN_GAMEOVER
+
+TARGET = TARGET_POOL
+
+;육변기/苗床業務/결혼
+;イベント後の場所, クエスト初期化
+A = 0
+REPEAT CHARANUM
+	CALL BENKI,A
+	CALL NAEDOKO,A
+	CALL MARRIAGE_DAY,A
+	IF FLAG:400 == 0 && CFLAG:A:1 == 12
+		CFLAG:A:1 = 0
+		CFLAG:A:534 = 0
+	ENDIF
+	A += 1
+REND
+
+;自動調教
+CALL AUTOTRAIN
+
+;パーティ結成
+CALL PARTY_JOIN
+
+SIF FLAG:502 == 1
+	CALL GEO_OUTPUT_2
+
+
+;翌朝に起こる出来事
+SIF TIME == 0
+	CALL EVENT_NEWDAY
+
+;前回の調教対象と前回の조수を戻す
+TARGET = FLAG:1
+ASSI = FLAG:2
+
+
+BEGIN SHOP
+
+;ロード時の処理
+@EVENTLOAD
+LOADGLOBAL
+IF LASTLOAD_NO == 999
+	CALL MAOUNET
+	BEGIN SHOP
+ENDIF
+SIF LASTLOAD_NO >= 1000 && LASTLOAD_NO < 1020
+	CALL INPORT_B
+
+
+;---------------------------------------
+@FIRST_SETTING
+;---------------------------------------
+#DIM MAOUSEX
+CFLAG:0:16 = -1
+$INPUT_LOOP
+
+PRINT [0] 마왕(魔王)의 성별 ： 
+
+IF MAOUSEX == 0
+	PRINTL 남성
+ELSEIF MAOUSEX == 1
+	PRINTL 여성
+ELSEIF MAOUSEX == 3
+	PRINTL 소년
+ELSE
+	PRINTL 후타나리
+ENDIF
+
+PRINT [1] 광왕(狂王)의 성별 ： 
+
+IF FLAG:500 == 0
+	PRINTL 남성
+ELSEIF FLAG:500 == 1
+	PRINTL 여성
+ELSE
+	PRINTL 후타나리
+ENDIF
+
+PRINT [2] 초기노예 ： 
+
+IF FLAG:501 == 0
+	PRINTL 랜덤
+ELSEIF FLAG:501 == 1
+	PRINTL 마을처녀
+ENDIF
+
+;현재 개발 중인 모드. 숨김 처리
+
+;PRINT [3] 던전 모드 ： 
+
+;IF FLAG:502 == 0
+;	PRINTL 통상
+;ELSEIF FLAG:502 == 1
+;	PRINTL 2D
+;ENDIF
+
+
+DRAWLINE
+PRINTL [100] 결정
+
+INPUT
+
+IF RESULT == 0
+	;마왕의 성별
+	PRINTL [0] 남성  [1] 여성  [2] 후타나리  [3] 소년
+	INPUT
+	
+	IF RESULT == 0
+		TALENT:0:1 = 1
+		TALENT:0:122 = 1
+		TALENT:0:121 = 0
+		TALENT:0:100 = 0
+		CFLAG:0:16 = -1
+		MAOUSEX = 0
+	ELSEIF RESULT == 1
+		TALENT:0:1 = 0
+		TALENT:0:122 = 0
+		TALENT:0:121 = 0
+		TALENT:0:100 = 0
+		CFLAG:0:16 = 0
+		MAOUSEX = 1
+	ELSEIF RESULT == 2
+		TALENT:0:1 = 1
+		TALENT:0:122 = 0
+		TALENT:0:121 = 1
+		TALENT:0:100 = 0
+		CFLAG:0:16 = -1
+		MAOUSEX = 2
+	ELSEIF RESULT == 3
+		TALENT:0:1 = 1
+		TALENT:0:122 = 1
+		TALENT:0:121 = 0
+		TALENT:0:100 = 1
+		CFLAG:0:16 = -1
+		MAOUSEX = 3
+	ENDIF
+	
+ELSEIF RESULT == 1
+	;광왕의 성별
+	PRINTL 광왕(狂王)은 이 지역을 지배하는 군주입니다
+	PRINTL 이전 당신을 봉인했던 용사의 피를 물려받아, 당신을 다시 봉인하려 하고 있습니다
+	PRINTL [0] 남성  [1] 여성  [2] 후타나리
+	INPUT
+	
+	SIF RESULT >= 0 && RESULT <= 2
+		FLAG:500 = RESULT
+	
+ELSEIF RESULT == 2
+	;초기 노예
+	PRINTL [0] 랜덤  [1] 마을처녀
+	INPUT
+	
+	SIF RESULT >= 0 && RESULT <= 1
+		FLAG:501 = RESULT
+	
+ELSEIF RESULT == 3
+	;모드
+	PRINTL [0] 통상  [1] 2D
+	INPUT
+	
+	SIF RESULT >= 0 && RESULT <= 1
+		FLAG:502 = RESULT
+	
+ELSEIF RESULT == 100
+	RETURN 0
+ELSE
+	GOTO INPUT_LOOP
+ENDIF
+
+GOTO INPUT_LOOP
+
+;========================================================
+;セーブ時のテキストの設定
+;;========================================================
+@SAVEINFO
+
+
+IF TIME == 0
+	PUTFORM {DAY+1}일째 오전 
+ELSE
+	PUTFORM {DAY+1}일째 오후 
+ENDIF
+
+SIF FLAG:1 >= 0
+	TARGET = FLAG:1
+SIF FLAG:2 >= 0
+	ASSI = FLAG:2
+
+SIF TARGET >= 1
+	PUTFORM 전회:%SAVESTR:TARGET%조교
+;

@@ -1,0 +1,2759 @@
+﻿
+;eraIM@Sから流用しました
+;｢CALL MASTER_SKILL_CHECK｣｢CALL MASTER_FLAG_CHECK｣｢CALL TRAIN_MESSAGE_A｣를 추가
+;｢CALL ECST_CHECK｣를 추가
+;구상용 처리를 추가. FLAG:7에서 관리
+
+@SOURCE_CHECK
+;-------------------------------------------------
+;명령 실행시 구상
+;-------------------------------------------------
+SIF FLAG:7 > 0
+	CALL KOJO_MESSAGE_COM
+
+;-------------------------------------------------
+;콘돔의 사용 확인（조교자）
+;-------------------------------------------------
+;콘돔을 붙인 조교자가 사정
+;조교자가 주인
+IF ASSIPLAY == 0 && TEQUIP:35 && (TFLAG:0 || TFLAG:1 || TFLAG:2 || TFLAG:4 || TFLAG:5 || TFLAG:7 || TFLAG:8 || TFLAG:9 || TFLAG:18)
+	PRINTL 콘돔 안에 사정
+	TEQUIP:35 = 0
+	TFLAG:0 = 0
+	TFLAG:1 = 0
+	TFLAG:2 = 0
+	TFLAG:4 = 0
+	TFLAG:5 = 0
+	TFLAG:7 = 0
+	TFLAG:8 = 0
+	TFLAG:9 = 0
+	TFLAG:18 = 0
+;조교자가 조수
+ELSEIF ASSIPLAY && TEQUIP:36 && (TFLAG:0 || TFLAG:1 || TFLAG:2 || TFLAG:4 || TFLAG:5 || TFLAG:7 || TFLAG:8 || TFLAG:9 || TFLAG:18)
+	PRINTL 콘돔 안에 사정
+	TEQUIP:36 = 0
+	TFLAG:0 = 0
+	TFLAG:1 = 0
+	TFLAG:2 = 0
+	TFLAG:4 = 0
+	TFLAG:5 = 0
+	TFLAG:7 = 0
+	TFLAG:8 = 0
+	TFLAG:9 = 0
+	TFLAG:18 = 0
+ENDIF
+
+;콘돔을 붙인 조수가 사정
+IF TEQUIP:36 && TFLAG:6 && ASSI > 0
+	PRINTFORML 콘돔 안에 사정（%SAVESTR:ASSI%）
+	TEQUIP:36 = 0
+	TFLAG:6 = 0
+ENDIF
+
+PRINTL ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+;-------------------------------------------------
+;바이브 등 장착 아이템의 체크
+;-------------------------------------------------
+
+;바이브 장착 중
+SIF TEQUIP:11
+	CALL EQUIP_COM11
+;애널바이브 장착 중
+SIF TEQUIP:13
+	CALL EQUIP_COM13
+;클리캡 장착 중
+SIF TEQUIP:14
+	CALL EQUIP_COM14
+;유두캡 장착 중
+SIF TEQUIP:15
+	CALL EQUIP_COM15
+;착유기 장착 중
+SIF TEQUIP:16
+	CALL EQUIP_COM16
+;오나홀 장착 중
+SIF TEQUIP:17
+	CALL EQUIP_COM17
+;샤워 사용 중
+SIF TEQUIP:18
+	CALL EQUIP_COM18
+;애널 비즈 사용중
+SIF TEQUIP:19
+	CALL EQUIP_COM19
+;아이 마스크 장착 중
+SIF TEQUIP:43
+	CALL EQUIP_COM43
+;밧줄로 긴박 중
+SIF TEQUIP:44
+	CALL EQUIP_COM44
+;볼개그 장착 중
+SIF TEQUIP:45
+	CALL EQUIP_COM45
+;관장＋애널 플러그 장착 중
+SIF TEQUIP:46
+	CALL EQUIP_COM46
+;조수가 본디지 장착 중
+SIF TEQUIP:47
+	CALL EQUIP_COM47
+;애널 전극 장착 중
+SIF TEQUIP:49
+	CALL EQUIP_COM49
+;비디오 촬영 중
+SIF TEQUIP:53
+	CALL EQUIP_COM53
+;야외 플레이 중
+SIF TEQUIP:54
+	CALL EQUIP_COM54
+;수치 플레이 중
+SIF TEQUIP:57
+	CALL EQUIP_COM57
+;욕실 플레이 중
+SIF TEQUIP:58
+	CALL EQUIP_COM58
+;새댁 플레이 중
+SIF TEQUIP:59
+	CALL EQUIP_COM59
+;수간 플레이 중
+SIF TEQUIP:89
+	CALL EQUIP_COM89
+;촉수 조교 중
+SIF TEQUIP:90
+	CALL EQUIP_COM100
+;촉수 구욕 중
+SIF TEQUIP:98
+	CALL EQUIP_COM108
+
+;-------------------------------------------------
+;동성에 대한 체크, 조교자의 능력 체크
+;-------------------------------------------------
+CALL SOURCE_SEX_CHECK
+CALL PLAYER_SKILL_CHECK
+CALL MASTER_SKILL_CHECK
+;-------------------------------------------------
+;コスチュームによる効果
+;-------------------------------------------------
+;ズーコの着ぐるみを着ている
+IF CFLAG:42 == 11 && (CFLAG:40 & 64)
+	TIMES SOURCE:6 , 0.10
+	IF TEQUIP:90 == 0
+		TIMES SOURCE:0 , 0.10
+		TIMES SOURCE:1 , 0.10
+		TIMES SOURCE:2 , 0.10
+		TIMES SOURCE:17 , 0.10
+	ENDIF
+ENDIF
+
+;-------------------------------------------------
+;近親상간
+;-------------------------------------------------
+CALL INCEST_SEX_CHECK
+;-------------------------------------------------
+;処女喪失のチェック
+;-------------------------------------------------
+CALL LOST_VIRGIN_CHECK
+;-------------------------------------------------
+;ファーストキス
+;-------------------------------------------------
+SIF TFLAG:13
+	PRINTL 퍼스트 키스
+
+;-------------------------------------------------
+;快Ｃのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_C
+
+;-------------------------------------------------
+;快Ｖのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_V
+
+;-------------------------------------------------
+;快Ａのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_A
+
+;-------------------------------------------------
+;快Ｂのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_B
+
+;-------------------------------------------------
+;快Ｆのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_FREE
+
+
+;-------------------------------------------------
+;同じコマンドの連続実行による上下の処理（快楽系）
+;-------------------------------------------------
+IF SELECTCOM == PREVCOM && TFLAG:201 != 1
+	;UP:0,1,2は절정に絡むので先に処理してある
+	UP:0 /= 2
+	UP:1 /= 2
+	UP:2 /= 2
+	UP:14 /= 2
+ENDIF
+
+;-------------------------------------------------
+;気力０による上下の処理（快楽系）
+;-------------------------------------------------
+IF BASE:1 <= 0 && TFLAG:201 != 1
+	;UP:0,1,2は절정に絡むので先に処理してある
+	UP:0 /= 2
+	UP:1 /= 2
+	UP:2 /= 2
+	UP:14 /= 2
+ENDIF
+
+;-------------------------------------------------
+;相性による上下の処理（快楽系）
+;-------------------------------------------------
+R = NO:PLAYER
+IF RELATION:R != 0 && TFLAG:201 != 1
+	UP:0 *= RELATION:R
+	UP:0 /= 100
+	UP:1 *= RELATION:R
+	UP:1 /= 100
+	UP:2 *= RELATION:R
+	UP:2 /= 100
+	UP:14 *= RELATION:R
+	UP:14 /= 100
+ENDIF
+
+;-------------------------------------------------
+;素質などによる上下の処理（快楽系）
+;-------------------------------------------------
+CALL UP_TALENT_CVA_CHECK
+
+;-------------------------------------------------
+;愛液処理
+;-------------------------------------------------
+CALL LOVE_MOIST_CHECK_UP
+
+;-------------------------------------------------
+;절정処理
+;-------------------------------------------------
+CALL EX_CHECK_UP
+
+;-------------------------------------------------
+;調教対象の사정チェック（후타나리・남자）
+;-------------------------------------------------
+CALL TARGET_EJAC_CHECK
+
+;-------------------------------------------------
+;調教対象の噴乳チェック
+;-------------------------------------------------
+CALL TARGET_MILK_CHECK
+
+;-------------------------------------------------
+;調教対象のワーム出産チェック
+;-------------------------------------------------
+CALL TARGET_WORMBABY_CHECK
+
+;-------------------------------------------------
+;主人による調教の経験値
+;-------------------------------------------------
+CALL MASTER_FLAG_CHECK
+
+;-------------------------------------------------
+;情愛のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_LOVE
+
+;-------------------------------------------------
+;性行動のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_IMPULSIVE
+
+;-------------------------------------------------
+;達成のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_ACHIEVE
+
+;-------------------------------------------------
+;痛覚のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_PAIN
+
+;-------------------------------------------------
+;中毒充足のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_POISON
+
+;-------------------------------------------------
+;不潔のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_DIRTY
+
+;-------------------------------------------------
+;液体追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_MOIST
+
+;-------------------------------------------------
+;欲情追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_DESIRE
+
+;-------------------------------------------------
+;露出のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_FLASHER
+
+;-------------------------------------------------
+;屈従のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_SUBMIT
+
+;-------------------------------------------------
+;逸脱のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_DEVIATE
+
+;-------------------------------------------------
+;反感追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_ANTI
+
+;-------------------------------------------------
+;恭順追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_LIKE
+
+;-------------------------------------------------
+;素質などによる上下の処理
+;-------------------------------------------------
+CALL UP_TALENT_CHECK
+
+;-------------------------------------------------
+;相性による上下の処理
+;-------------------------------------------------
+R = NO:PLAYER
+IF RELATION:R != 0
+	;PRINTFORML ＜相性{RELATION:R/100}.{RELATION:R%100}倍＞
+
+	UP:4 *= RELATION:R
+	UP:4 /= 100
+	UP:5 *= RELATION:R
+	UP:5 /= 100
+	UP:7 *= RELATION:R
+	UP:7 /= 100
+	UP:11 *= 100
+	UP:11 /= RELATION:R
+	UP:12 *= 100
+	UP:12 /= RELATION:R
+	UP:13 *= 100
+	UP:13 /= RELATION:R
+ENDIF
+
+;-------------------------------------------------
+;同じコマンドの連続実行による上下の処理
+;-------------------------------------------------
+IF SELECTCOM == PREVCOM
+	;UP:0,1,2は절정に絡むので先に処理してある
+	;PRINTL ＜동일 커맨드 연속 실행＞
+	UP:4 /= 2
+	UP:5 /= 2
+	UP:6 /= 2
+	UP:7 /= 2
+	UP:8 /= 2
+ENDIF
+
+;「前回のコマンド」をTFLAG:59「前々回のコマンド」に入力
+TFLAG:59 = PREVCOM
+;今回のコマンドを「前回のコマンド」とする
+;PREVCOM = SELECTCOM
+
+;前回の調教者が助手か主人か
+;IF ASSIPLAY
+	;TFLAG:50 == 1
+;ELSE
+	;TFLAG:50 == 0
+;ENDIF
+
+;-------------------------------------------------
+;気力０による上下の処理
+;-------------------------------------------------
+IF BASE:1 <= 0
+	;UP:0,1,2は절정に絡むので先に処理してある
+	UP:3 /= 2
+	UP:4 /= 2
+	UP:5 /= 2
+	UP:7 /= 2
+	UP:9 /= 2
+	UP:13 /= 2
+
+	LOSEBASE:0 *= 2
+	LOSEBASE:0 += 80
+ENDIF
+
+;-------------------------------------------------
+;調教対象の失神チェック
+;-------------------------------------------------
+CALL PASSOUT_CHECK
+;野外プレイ中の失神処理
+SIF TEQUIP:54 && TFLAG:899 > 0
+	CALL PASSOUT_OUTDOOR
+
+;-------------------------------------------------
+;苦痛からくる体力・気力の減少
+;-------------------------------------------------
+CALL PAIN_DAMAGE_CHECK_UP
+
+;-------------------------------------------------
+;体力・気力の減少
+;-------------------------------------------------
+BASE:0 -= LOSEBASE:0
+BASE:1 -= LOSEBASE:1
+
+;-------------------------------------------------
+;挿しっぱなし判定 TFLAG:60
+;-------------------------------------------------
+TFLAG:60 = 0
+IF SELECTCOM == 20 || SELECTCOM == 21 || SELECTCOM == 22 || SELECTCOM == 23 || SELECTCOM == 26 || SELECTCOM == 27 || SELECTCOM == 28 || SELECTCOM == 29 || SELECTCOM == 34 || SELECTCOM == 36 || SELECTCOM == 56 || SELECTCOM == 120 || SELECTCOM == 121 || SELECTCOM == 128 || SELECTCOM == 129 || SELECTCOM == 130 || SELECTCOM == 131 || SELECTCOM == 132 || SELECTCOM == 133 || SELECTCOM == 134
+	SIF TFLAG:2 == 0 || PALAM:5 >= PALAMLV:4
+		TFLAG:60 = 1
+ENDIF
+
+;-------------------------------------------------
+;コンドームの使用チェック（調教対象）
+;-------------------------------------------------
+;コンドームを付けた調教対象が사정
+IF TEQUIP:37 && TFLAG:10
+	PRINTFORML 콘돔 안에 사정（%CALLNAME:TARGET%）
+	TEQUIP:37 = 0
+	TFLAG:10 = 0
+ENDIF
+
+;-------------------------------------------------
+;膣内사정のチェック
+;-------------------------------------------------
+IF TFLAG:19
+	;3P조수が膣内사정
+	IF TFLAG:6 && TFLAG:41 == 1
+		CFLAG:TARGET:103 += TFLAG:38
+	;3P主人が膣内사정
+	ELSEIF TFLAG:2 && TFLAG:40 == 1
+		CFLAG:TARGET:101 += TFLAG:38
+	;獣姦で膣内사정
+	ELSEIF TEQUIP:89 && TFLAG:16
+		CFLAG:TARGET:106 += TFLAG:16
+	;조수が膣内사정	
+	ELSEIF ASSIPLAY && TFLAG:2
+		CFLAG:TARGET:103 += TFLAG:38
+	;コロシアムでモンスターが膣内사정
+	ELSEIF TFLAG:15 && TEQUIP:55
+		CFLAG:TARGET:107 += TFLAG:15
+	;主人が膣内사정
+	ELSEIF TFLAG:2
+		CFLAG:TARGET:101 += TFLAG:38
+	;촉수バイブで사정
+	ELSEIF TEQUIP:90 && TEQUIP:11 && TFLAG:15
+		CFLAG:TARGET:107 += TFLAG:15
+	ENDIF
+;調教対象が조수に膣内사정（역강간）
+ELSEIF SELECTCOM == 24 && TFLAG:10 && ASSIPLAY
+	CFLAG:ASSI:104 += TFLAG:10
+;調教対象が主人に膣内사정（역강간）
+ELSEIF SELECTCOM == 24 && TFLAG:10
+	CFLAG:MASTER:104 += TFLAG:10
+;主人が조수に膣内사정（조수를범한다）
+ELSEIF SELECTCOM == 62 && TFLAG:7
+	CFLAG:ASSI:101 += TFLAG:7
+;調教対象が조수に膣内사정（조수를범하게한다）
+ELSEIF SELECTCOM == 65 && ASSI >= 1 && TFLAG:10
+	CFLAG:ASSI:104 += TFLAG:10
+ENDIF
+
+;-------------------------------------------------
+;テキストの表示
+;-------------------------------------------------
+CALL TRAIN_MESSAGE_A
+
+;-------------------------------------------------
+;失神テキストの表示
+;-------------------------------------------------
+;そのままでは見にくいので全角空白で改行を入れてみる
+IF TFLAG:899 < 1
+		CALL PASSOUT_TEXT
+ELSEIF TFLAG:899 >= 1
+	CALL PASSOUT_TEXT
+	SIF TFLAG:896 == 2 || TFLAG:897 == 2 || TFLAG:898 == 2
+		CALL PASSOUT_PALAM_CHECK
+	IF TFLAG:896 == 3 || TFLAG:897 == 3 || TFLAG:898 == 3
+		CALL PASSOUT_PALAM_UP
+		CALL MARK_GOT_CHECK
+		SIF FLAG:7 > 0
+			CALL KOJO_MESSAGE_MARKCNG
+	ENDIF
+ENDIF
+
+;--------------------------------------------------------
+;절정時のおもらし処理
+;--------------------------------------------------------
+CALL PISSING_ECST_CHECK
+
+;-------------------------------------------------
+;パラメータ変動による口上
+;-------------------------------------------------
+SIF FLAG:7 > 0
+	CALL KOJO_MESSAGE_PALAMCNG
+
+;-------------------------------------------------
+;각인 취득의 체크
+;-------------------------------------------------
+CALL MARK_GOT_CHECK
+;각인 취득에 의한 구상
+SIF FLAG:7 > 0
+	CALL KOJO_MESSAGE_MARKCNG
+
+;-------------------------------------------------
+;가학쾌락경험, 피학쾌락경험, 봉사쾌락경험의 체크
+;-------------------------------------------------
+CALL EXP_GOT_CHECK
+
+;-------------------------------------------------
+;[즉각함락]의 체크
+;-------------------------------------------------
+CALL SOKUOCHI_CHECK
+
+PRINTW ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+
+;-------------------------------------------------
+;조교 소스 보기
+;-------------------------------------------------
+CALL SHOW_SOURCE
+
+;-------------------------------------------------
+;수치 변화의 표시
+;-------------------------------------------------
+;궁합
+R = NO:PLAYER
+SIF RELATION:R != 0
+	PRINTFORML ＜궁합 {RELATION:R/100}.{RELATION:R%100}배＞
+
+;같은 명령의 연속 수행
+SIF SELECTCOM == PREVCOM
+	PRINTL ＜동일 커맨드 연속 실행＞
+
+;今回のコマンドを「前回のコマンド」とする
+PREVCOM = SELECTCOM
+
+;前回の調教者が助手か主人か
+IF ASSIPLAY
+	TFLAG:50 = 1
+ELSE
+	TFLAG:50 = 0
+ENDIF
+
+;체력・기력 감소량을 표시
+IF BASE:0 > 0 && LOSEBASE:0 > 0
+	CALL LOSELIFE_BAR
+	PRINTFORM  -{LOSEBASE:0} 
+	SIF BASE:0 < 500
+		PRINT ★빈사★
+	PRINTL 
+ELSEIF BASE:0 < 1
+	PRINT  체력
+	BAR 0,MAXBASE:0,32
+	PRINTFORML  -{LOSEBASE:0} ★사망★
+ENDIF
+IF BASE:1 > 0 && LOSEBASE:1 > 0
+	CALL LOSEVITAL_BAR
+	PRINTFORML  -{LOSEBASE:1} 
+ELSEIF BASE:1 < 1
+	PRINTL  기력[................................] ★기력０★ 
+ENDIF
+
+;-------------------------------------------------
+;파라미터 상승＆표시（DOWN도 여기서）
+;-------------------------------------------------
+CALL PALAM_UP_CHECK
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_C
+;快Ｃのソース
+;-------------------------------------------------
+;Ｃ敏感とＣ鈍感はここで処理
+SIF TALENT:101 & 1
+	TIMES SOURCE:0 , 0.50
+SIF TALENT:101 & 2
+	TIMES SOURCE:0 , 0.10
+SIF TALENT:102
+	TIMES SOURCE:0 , 2.00
+
+LOCAL:0 = SOURCE:0
+
+;PALAM:欲情をみる
+IF TFLAG:201 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:1
+	TIMES LOCAL:0 , 0.50
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES LOCAL:0 , 0.70
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES LOCAL:0 , 1.30
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.80
+ENDIF
+
+LOCAL:1 = SOURCE:0
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES LOCAL:1 , 0.10
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:1 , 0.15
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:1 , 0.20
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:1 , 0.25
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:1 , 0.30
+ELSEIF ABL:11 == 5
+	TIMES LOCAL:1 , 0.40
+ELSE
+	TIMES LOCAL:1 , 0.50
+ENDIF
+
+;쾌감을부정, 억압, 저항
+IF TALENT:32 || TALENT:34 || TALENT:71
+	LOCAL:2 = SOURCE:0 / 3
+	;ABL:欲望をみる
+	IF ABL:11 == 0
+		TIMES LOCAL:2 , 1.00
+	ELSEIF ABL:11 == 1
+		TIMES LOCAL:2 , 0.85
+	ELSEIF ABL:11 == 2
+		TIMES LOCAL:2 , 0.70
+	ELSEIF ABL:11 == 3
+		TIMES LOCAL:2 , 0.40
+	ELSEIF ABL:11 == 4
+		TIMES LOCAL:2 , 0.30
+	ELSEIF ABL:11 == 5
+		TIMES LOCAL:2 , 0.10
+	ELSE
+		LOCAL:2 = 0
+	ENDIF
+ELSE
+	LOCAL:2 = 0
+ENDIF
+
+;자위광
+IF TALENT:74
+	TIMES LOCAL:0 , 1.50
+	TIMES LOCAL:1 , 1.20
+	TIMES LOCAL:2 , 0.50
+ENDIF
+
+;음핵
+IF TALENT:230
+	TIMES LOCAL:0 , 2.00
+ENDIF
+
+IF ABL:0 > 5
+	LOCAL:0 = LOCAL:0 * (ABL:0 + 5) / 10
+ENDIF
+
+;PALAM:快Ｃの上昇
+UP:0 += LOCAL:0
+;PALAM:欲情の上昇
+UP:5 += LOCAL:1
+;PALAM:抑鬱の上昇
+UP:13 += LOCAL:2
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_V
+;快Ｖのソース
+;-------------------------------------------------
+;Ｖ敏感とＶ鈍感はここで処理
+SIF TALENT:103 & 1
+	TIMES SOURCE:1 , 0.50
+SIF TALENT:103 & 2
+	TIMES SOURCE:1 , 0.10
+SIF TALENT:104
+	TIMES SOURCE:1 , 2.00
+
+LOCAL:0 = SOURCE:1
+
+;PALAM:欲情をみる
+IF TFLAG:201 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:1
+	TIMES LOCAL:0 , 0.30
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES LOCAL:0 , 0.50
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES LOCAL:0 , 1.50
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES LOCAL:0 , 2.00
+ENDIF
+
+LOCAL:1 = SOURCE:1
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES LOCAL:1 , 0.10
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:1 , 0.15
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:1 , 0.20
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:1 , 0.25
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:1 , 0.30
+ELSEIF ABL:11 == 5
+	TIMES LOCAL:1 , 0.40
+ELSE
+	TIMES LOCAL:1 , 0.50
+ENDIF
+
+;쾌감을부정, 억압, 저항
+IF TALENT:32 || TALENT:34 || TALENT:71
+	LOCAL:2 = SOURCE:1 / 3
+	;ABL:欲望をみる
+	IF ABL:11 == 0
+		TIMES LOCAL:2 , 1.00
+	ELSEIF ABL:11 == 1
+		TIMES LOCAL:2 , 0.85
+	ELSEIF ABL:11 == 2
+		TIMES LOCAL:2 , 0.70
+	ELSEIF ABL:11 == 3
+		TIMES LOCAL:2 , 0.40
+	ELSEIF ABL:11 == 4
+		TIMES LOCAL:2 , 0.30
+	ELSEIF ABL:11 == 5
+		TIMES LOCAL:2 , 0.10
+	ELSE
+		LOCAL:2 = 0
+	ENDIF
+ELSE
+	LOCAL:2 = 0
+ENDIF
+
+;섹스광
+IF TALENT:75
+	TIMES LOCAL:0 , 1.50
+	TIMES LOCAL:1 , 1.20
+	TIMES LOCAL:2 , 0.50
+ENDIF
+
+;음호
+IF TALENT:232
+	TIMES LOCAL:0 , 1.50
+ENDIF
+
+IF ABL:2 > 5
+	LOCAL:0 = LOCAL:0 * (ABL:2 + 5) / 10
+ENDIF
+
+;PALAM:快Ｖの上昇
+UP:1 += LOCAL:0
+;PALAM:恭順の上昇
+UP:4 += LOCAL:1
+;PALAM:欲情の上昇
+UP:5 += LOCAL:1
+;PALAM:抑鬱の上昇
+UP:13 += LOCAL:2
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_A
+;快Ａのソース
+;-------------------------------------------------
+;Ａ敏感とＡ鈍感はここで処理
+SIF TALENT:105 & 1
+	TIMES SOURCE:2 , 0.50
+SIF TALENT:105 & 2
+	TIMES SOURCE:2 , 0.10
+SIF TALENT:106
+	TIMES SOURCE:2 , 2.00
+
+LOCAL:0 = SOURCE:2
+
+;PALAM:欲情をみる
+;快ＡはあまりPALAM:欲情では差が出ない
+IF TFLAG:201 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:1
+	TIMES LOCAL:0 , 0.60
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES LOCAL:0 , 0.80
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES LOCAL:0 , 1.20
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.40
+ENDIF
+
+LOCAL:1 = SOURCE:2
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES LOCAL:1 , 0.05
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:1 , 0.10
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:1 , 0.40
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:1 , 0.80
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:1 , 1.20
+ELSEIF ABL:11 == 5
+	TIMES LOCAL:1 , 1.80
+ELSE
+	TIMES LOCAL:1 , 2.00
+ENDIF
+
+;쾌감을부정, 억압, 저항
+IF TALENT:32 || TALENT:34 || TALENT:71
+	LOCAL:2 = SOURCE:2 / 3
+	;ABL:欲望をみる
+	IF ABL:11 == 0
+		TIMES LOCAL:2 , 1.00
+	ELSEIF ABL:11 == 1
+		TIMES LOCAL:2 , 0.85
+	ELSEIF ABL:11 == 2
+		TIMES LOCAL:2 , 0.70
+	ELSEIF ABL:11 == 3
+		TIMES LOCAL:2 , 0.40
+	ELSEIF ABL:11 == 4
+		TIMES LOCAL:2 , 0.30
+	ELSEIF ABL:11 == 5
+		TIMES LOCAL:2 , 0.10
+	ELSE
+		LOCAL:2 = 0
+	ENDIF
+ELSE
+	LOCAL:2 = 0
+ENDIF
+
+;항문광
+IF TALENT:77
+	TIMES LOCAL:0 , 1.50
+	TIMES LOCAL:1 , 1.20
+	TIMES LOCAL:2 , 0.50
+ENDIF
+
+;음항
+IF TALENT:233
+	TIMES LOCAL:0 , 2.00
+ENDIF
+
+IF ABL:3 > 5
+	LOCAL:0 = LOCAL:0 * (ABL:3 + 5) / 10
+ENDIF
+
+;PALAM:快Ａの上昇
+UP:2 += LOCAL:0
+;PALAM:欲情の上昇
+UP:5 += LOCAL:1
+;PALAM:屈服の上昇
+UP:6 += LOCAL:1
+;PALAM:抑鬱の上昇
+UP:13 += LOCAL:2
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_B
+;快Ｂのソース
+;-------------------------------------------------
+;Ｂ敏感とＢ鈍感はここで処理
+SIF TALENT:107 & 1
+	TIMES SOURCE:17 , 0.50
+SIF TALENT:107 & 2
+	TIMES SOURCE:17 , 0.10
+SIF TALENT:108
+	TIMES SOURCE:17 , 2.00
+
+;절벽, 빈유, 거유, 폭유, 超乳はここで処理
+IF TALENT:253
+	TIMES SOURCE:1 , 2.50
+ELSEIF TALENT:252
+	TIMES SOURCE:1 , 2.15
+ELSEIF TALENT:251
+	TIMES SOURCE:1 , 1.80
+ELSEIF TALENT:116
+	TIMES SOURCE:1 , 1.50
+ELSEIF TALENT:109
+	TIMES SOURCE:1 , 1.20
+ELSEIF TALENT:110
+	TIMES SOURCE:1 , 0.90
+ELSEIF TALENT:114
+	TIMES SOURCE:1 , 0.80
+ELSEIF TALENT:119
+	TIMES SOURCE:1 , 0.70
+ENDIF
+
+LOCAL:0 = SOURCE:17
+
+;PALAM:欲情をみる
+IF TFLAG:201 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:1
+	TIMES LOCAL:0 , 0.50
+ELSEIF PALAM:5 < PALAMLV:2
+	TIMES LOCAL:0 , 0.70
+ELSEIF PALAM:5 < PALAMLV:3
+	TIMES LOCAL:0 , 1.00
+ELSEIF PALAM:5 < PALAMLV:4
+	TIMES LOCAL:0 , 1.30
+ELSEIF PALAM:5 >= PALAMLV:4
+	TIMES LOCAL:0 , 1.80
+ENDIF
+
+LOCAL:1 = SOURCE:17
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES LOCAL:1 , 0.10
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:1 , 0.15
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:1 , 0.20
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:1 , 0.25
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:1 , 0.30
+ELSEIF ABL:11 == 5
+	TIMES LOCAL:1 , 0.40
+ELSE
+	TIMES LOCAL:1 , 0.50
+ENDIF
+
+;쾌감을부정, 억압, 저항
+IF TALENT:32 || TALENT:34 || TALENT:71
+	LOCAL:2 = SOURCE:17 / 3
+	;ABL:欲望をみる
+	IF ABL:11 == 0
+		TIMES LOCAL:2 , 1.00
+	ELSEIF ABL:11 == 1
+		TIMES LOCAL:2 , 0.85
+	ELSEIF ABL:11 == 2
+		TIMES LOCAL:2 , 0.70
+	ELSEIF ABL:11 == 3
+		TIMES LOCAL:2 , 0.40
+	ELSEIF ABL:11 == 4
+		TIMES LOCAL:2 , 0.30
+	ELSEIF ABL:11 == 5
+		TIMES LOCAL:2 , 0.10
+	ELSE
+		LOCAL:2 = 0
+	ENDIF
+ELSE
+	LOCAL:2 = 0
+ENDIF
+
+;가슴광
+IF TALENT:78
+	TIMES LOCAL:0 , 1.50
+	TIMES LOCAL:1 , 1.20
+	TIMES LOCAL:2 , 0.50
+ENDIF
+
+;음유
+IF TALENT:231
+	TIMES LOCAL:0 , 2.00
+ENDIF
+
+IF ABL:1 > 5
+	LOCAL:0 = LOCAL:0 * (ABL:1 + 5) / 10
+ENDIF
+
+;PALAM:快Ｂの上昇
+UP:14 += LOCAL:0
+;PALAM:欲情の上昇
+UP:5 += LOCAL:1
+;PALAM:抑鬱の上昇
+UP:13 += LOCAL:2
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_LOVE
+;情愛のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:3
+LOCAL:1 = SOURCE:3
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 0.10
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.25
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:0 , 0.40
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:0 , 0.60
+ELSEIF ABL:10 == 4
+	TIMES LOCAL:0 , 0.80
+ELSEIF ABL:10 == 5
+	TIMES LOCAL:0 , 1.00
+ELSE
+	TIMES LOCAL:0 , 1.20
+ENDIF
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	TIMES LOCAL:0 , 0.95
+ELSEIF ABL:16 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF ABL:16 == 2
+	TIMES LOCAL:0 , 1.05
+ELSEIF ABL:16 == 3
+	TIMES LOCAL:0 , 1.10
+ELSEIF ABL:16 == 4
+	TIMES LOCAL:0 , 1.15
+ELSEIF ABL:16 == 5
+	TIMES LOCAL:0 , 1.20
+ELSE
+	TIMES LOCAL:0 , 1.30
+ENDIF
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES LOCAL:1 , 0.00
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:1 , 0.05
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:1 , 0.10
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:1 , 0.20
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:1 , 0.30
+ELSEIF ABL:11 == 5
+	TIMES LOCAL:1 , 0.40
+ELSE
+	TIMES LOCAL:1 , 0.50
+ENDIF
+
+;PALAM:恭順の上昇
+UP:4 += LOCAL:0
+;PALAM:欲情の上昇
+UP:5 += LOCAL:1
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_IMPULSIVE
+;性行動のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:4
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	TIMES LOCAL:0 , 0.60
+ELSEIF ABL:16 == 1
+	TIMES LOCAL:0 , 0.80
+ELSEIF ABL:16 == 2
+	TIMES LOCAL:0 , 1.00
+ELSEIF ABL:16 == 3
+	TIMES LOCAL:0 , 1.20
+ELSEIF ABL:16 == 4
+	TIMES LOCAL:0 , 1.40
+ELSEIF ABL:16 == 5
+	TIMES LOCAL:0 , 1.70
+ELSE
+	TIMES LOCAL:0 , 2.00
+ENDIF
+
+;ABL:奉仕技術をみる
+IF ABL:13 == 0
+	TIMES LOCAL:0 , 0.95
+ELSEIF ABL:13 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF ABL:13 == 2
+	TIMES LOCAL:0 , 1.05
+ELSEIF ABL:13 == 3
+	TIMES LOCAL:0 , 1.10
+ELSEIF ABL:13 == 4
+	TIMES LOCAL:0 , 1.15
+ELSEIF ABL:13 == 5
+	TIMES LOCAL:0 , 1.20
+ELSE
+	TIMES LOCAL:0 , 1.30
+ENDIF
+
+;抑圧か抵抗がある場合はPALAM:抑鬱が上がる
+IF TALENT:32 || TALENT:34
+	LOCAL:1 = SOURCE:4 / 5
+	;ABL:奉仕精神をみる
+	IF ABL:16 == 0
+		TIMES LOCAL:1 , 1.80
+	ELSEIF ABL:16 == 1
+		TIMES LOCAL:1 , 1.30
+	ELSEIF ABL:16 == 2
+		TIMES LOCAL:1 , 0.90
+	ELSEIF ABL:16 == 3
+		TIMES LOCAL:1 , 0.70
+	ELSEIF ABL:16 == 4
+		TIMES LOCAL:1 , 0.50
+	ELSEIF ABL:16 == 5
+		TIMES LOCAL:1 , 0.30
+	ELSE
+		TIMES LOCAL:1 , 0.10
+	ENDIF
+ELSE
+	LOCAL:1 = 0
+ENDIF
+
+;PALAM:習得の上昇
+UP:7 += LOCAL:0
+;PALAM:抑鬱の上昇
+UP:13 += LOCAL:1
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_ACHIEVE
+;達成のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:5
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 0.50
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.80
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:0 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:0 , 1.20
+ELSEIF ABL:10 == 4
+	TIMES LOCAL:0 , 1.40
+ELSEIF ABL:10 == 5
+	TIMES LOCAL:0 , 1.60
+ELSEIF ABL:10 == 6
+	TIMES LOCAL:0 , 1.80
+ELSE
+	TIMES LOCAL:0 , 2.00
+ENDIF
+
+;ABL:奉仕精神をみる
+IF ABL:16 == 0
+	TIMES LOCAL:0 , 0.00
+ELSEIF ABL:16 == 1
+	TIMES LOCAL:0 , 0.40
+ELSEIF ABL:16 == 2
+	TIMES LOCAL:0 , 0.80
+ELSEIF ABL:16 == 3
+	TIMES LOCAL:0 , 1.20
+ELSEIF ABL:16 == 4
+	TIMES LOCAL:0 , 1.60
+ELSEIF ABL:16 == 5
+	TIMES LOCAL:0 , 2.00
+ELSE
+	TIMES LOCAL:0 , 2.40
+ENDIF
+
+;ABL:奉仕技術をみる
+IF ABL:13 == 0
+	TIMES LOCAL:0 , 0.95
+ELSEIF ABL:13 == 1
+	TIMES LOCAL:0 , 1.00
+ELSEIF ABL:13 == 2
+	TIMES LOCAL:0 , 1.05
+ELSEIF ABL:13 == 3
+	TIMES LOCAL:0 , 1.10
+ELSEIF ABL:13 == 4
+	TIMES LOCAL:0 , 1.15
+ELSEIF ABL:13 == 5
+	TIMES LOCAL:0 , 1.20
+ELSE
+	TIMES LOCAL:0 , 1.30
+ENDIF
+
+;PALAM:恭順の上昇
+UP:4 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_PAIN
+;痛覚のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:6
+LOCAL:1 = SOURCE:6
+LOCAL:2 = SOURCE:6
+LOCAL:3 = SOURCE:6
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:1 , 0.80
+	TIMES LOCAL:2 , 0.80
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:1 , 0.70
+	TIMES LOCAL:2 , 0.60
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:1 , 0.55
+	TIMES LOCAL:2 , 0.50
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:1 , 0.45
+	TIMES LOCAL:2 , 0.40
+ELSEIF ABL:10 == 4
+	TIMES LOCAL:1 , 0.35
+	TIMES LOCAL:2 , 0.20
+ELSEIF ABL:10 == 5
+	TIMES LOCAL:1 , 0.25
+	TIMES LOCAL:2 , 0.05
+ELSE
+	TIMES LOCAL:1 , 0.15
+	TIMES LOCAL:2 , 0.00
+ENDIF
+
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES LOCAL:2 , 1.00
+	TIMES LOCAL:3 , 0.00
+ELSEIF ABL:21 == 1
+	TIMES LOCAL:2 , 0.80
+	TIMES LOCAL:3 , 0.10
+ELSEIF ABL:21 == 2
+	TIMES LOCAL:2 , 0.50
+	TIMES LOCAL:3 , 0.20
+ELSEIF ABL:21 == 3
+	TIMES LOCAL:2 , 0.30
+	TIMES LOCAL:3 , 0.30
+ELSEIF ABL:21 == 4
+	TIMES LOCAL:2 , 0.10
+	TIMES LOCAL:3 , 0.45
+ELSEIF ABL:21 == 5
+	TIMES LOCAL:2 , 0.05
+	TIMES LOCAL:3 , 0.60
+ELSE
+	TIMES LOCAL:2 , 0.00
+	TIMES LOCAL:3 , 0.75
+ENDIF
+
+;調教者のABL:サドっ気をみる
+IF ABL:PLAYER:20 == 0
+	TIMES LOCAL:3 , 1.00
+ELSEIF ABL:PLAYER:20 == 1
+	TIMES LOCAL:3 , 1.10
+ELSEIF ABL:PLAYER:20 == 2
+	TIMES LOCAL:3 , 1.20
+ELSEIF ABL:PLAYER:20 == 3
+	TIMES LOCAL:3 , 1.30
+ELSEIF ABL:PLAYER:20 == 4
+	TIMES LOCAL:3 , 1.40
+ELSEIF ABL:PLAYER:20 == 5
+	TIMES LOCAL:3 , 1.50
+ELSE
+	TIMES LOCAL:3 , 1.60
+ENDIF
+
+;마조
+SIF TALENT:88
+	TIMES LOCAL:3 , 2.00
+
+;調教者がサド
+SIF TALENT:PLAYER:83
+	TIMES LOCAL:3 , 2.00
+
+;아픔에약함・強い
+IF TALENT:40
+	TIMES LOCAL:0 , 1.50
+	TIMES LOCAL:3 , 4.00
+ELSEIF TALENT:41
+	TIMES LOCAL:0 , 0.80
+	TIMES LOCAL:3 , 0.80
+ENDIF
+
+;조수によるプレイ
+SIF ASSIPLAY
+	TIMES LOCAL:2 , 0.40
+
+;PALAM:苦痛の上昇
+UP:9 += LOCAL:0
+;PALAM:恐怖の上昇
+UP:10 += LOCAL:1
+;PALAM:反感の上昇
+UP:11 += LOCAL:2
+;PALAM:欲情の上昇
+;マゾっ気があるとPALAM:欲情も上がる
+;そのとき調教者が【새드】だと効果的
+UP:5 += LOCAL:3
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_POISON
+;中毒充足のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:7
+LOCAL:1 = SOURCE:7
+
+;ABL:欲望を見る
+IF ABL:11 == 0
+	TIMES LOCAL:0 , 0.10
+	TIMES LOCAL:1 , 0.20
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:0 , 0.15
+	TIMES LOCAL:1 , 0.30
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:0 , 0.20
+	TIMES LOCAL:1 , 0.40
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:0 , 0.25
+	TIMES LOCAL:1 , 0.50
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:0 , 0.30
+	TIMES LOCAL:1 , 0.60
+ELSEIF ABL:11 == 5
+	TIMES LOCAL:0 , 0.35
+	TIMES LOCAL:1 , 0.70
+ELSEIF ABL:11 == 6
+	TIMES LOCAL:0 , 0.40
+	TIMES LOCAL:1 , 0.80
+ELSEIF ABL:11 == 7
+	TIMES LOCAL:0 , 0.45
+	TIMES LOCAL:1 , 0.90
+ELSE
+	TIMES LOCAL:0 , 0.50
+	TIMES LOCAL:1 , 1.00
+ENDIF
+
+;PALAM:恭順の上昇
+UP:4 += LOCAL:0
+;PALAM:欲情の上昇
+UP:5 += LOCAL:1
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_DIRTY
+;不潔のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:8
+LOCAL:1 = SOURCE:8
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 0.60
+	TIMES LOCAL:1 , 1.00
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.40
+	TIMES LOCAL:1 , 0.80
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:0 , 0.25
+	TIMES LOCAL:1 , 0.60
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:0 , 0.10
+	TIMES LOCAL:1 , 0.30
+ELSEIF ABL:10 == 4
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:1 , 0.10
+ELSE
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:1 , 0.00
+ENDIF
+
+;PALAM:反感の上昇
+UP:11 += LOCAL:0
+;PALAM:不快の上昇
+UP:12 += LOCAL:1
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_MOIST
+;液体追加のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:10
+
+UP:3 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_DESIRE
+;欲情追加のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:11
+
+UP:5 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_FLASHER
+;露出のソース
+;-------------------------------------------------
+;恥じらいと恥薄いはここで処理
+SIF TALENT:35
+	TIMES SOURCE:12 , 2.00
+SIF TALENT:36
+	TIMES SOURCE:12 , 0.50
+
+;潤滑アップの50％を露出のソースに加える
+;ただし液体追加のソースのぶんは引く
+SOURCE:12 += (UP:3-SOURCE:10) / 2
+
+LOCAL:0 = SOURCE:12
+LOCAL:1 = SOURCE:12
+LOCAL:2 = SOURCE:12
+
+;ABL:露出癖をみる
+IF ABL:17 == 0
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:2 , 1.00
+ELSEIF ABL:17 == 1
+	TIMES LOCAL:0 , 0.10
+	TIMES LOCAL:2 , 0.90
+ELSEIF ABL:17 == 2
+	TIMES LOCAL:0 , 0.20
+	TIMES LOCAL:2 , 0.70
+ELSEIF ABL:17 == 3
+	TIMES LOCAL:0 , 0.40
+	TIMES LOCAL:2 , 0.50
+ELSEIF ABL:17 == 4
+	TIMES LOCAL:0 , 0.60
+	TIMES LOCAL:2 , 0.30
+ELSEIF ABL:17 == 5
+	TIMES LOCAL:0 , 0.80
+	TIMES LOCAL:2 , 0.10
+ELSE
+	TIMES LOCAL:0 , 1.00
+	TIMES LOCAL:2 , 0.00
+ENDIF
+
+;PALAM:恥情をみる
+;一度に恥を掻けば掻くほど羞恥心は減っていく
+IF PALAM:8 < PALAMLV:1
+	TIMES LOCAL:1 , 1.00
+ELSEIF PALAM:8 < PALAMLV:2
+	TIMES LOCAL:1 , 0.90
+ELSEIF PALAM:8 < PALAMLV:3
+	TIMES LOCAL:1 , 0.70
+ELSEIF PALAM:8 < PALAMLV:4
+	TIMES LOCAL:1 , 0.50
+ELSEIF PALAM:8 >= PALAMLV:4
+	TIMES LOCAL:1 , 0.30
+ENDIF
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:2 , 0.50
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:2 , 0.30
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:2 , 0.15
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:2 , 0.05
+ELSE
+	TIMES LOCAL:2 , 0.00
+ENDIF
+
+;PALAM:欲情の上昇
+UP:5 += LOCAL:0
+;PALAM:恥情の上昇
+UP:8 += LOCAL:1
+;PALAM:反感の上昇
+UP:11 += LOCAL:2
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_SUBMIT
+;屈従のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:13
+LOCAL:1 = SOURCE:13
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 0.12
+	TIMES LOCAL:1 , 0.50
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.10
+	TIMES LOCAL:1 , 0.80
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:0 , 0.05
+	TIMES LOCAL:1 , 1.00
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:0 , 0.02
+	TIMES LOCAL:1 , 1.10
+ELSEIF ABL:10 == 4
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:1 , 1.20
+ELSEIF ABL:10 == 5
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:1 , 1.30
+ELSEIF ABL:10 == 6
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:1 , 1.40
+ELSE
+	TIMES LOCAL:0 , 0.00
+	TIMES LOCAL:1 , 1.50
+ENDIF
+
+;ABL:獣姦中毒をみる
+IF ABL:39 == 0
+	TIMES LOCAL:1 , 1.00
+ELSEIF ABL:39 == 1
+	TIMES LOCAL:1 , 1.10
+ELSEIF ABL:39 == 2
+	TIMES LOCAL:1 , 1.20
+ELSEIF ABL:39 == 3
+	TIMES LOCAL:1 , 1.50
+ELSEIF ABL:39 == 4
+	TIMES LOCAL:1 , 2.00
+ELSEIF ABL:39 == 5
+	TIMES LOCAL:1 , 3.00
+ELSE
+	TIMES LOCAL:1 , 4.00
+ENDIF
+
+;PALAM:抑鬱の上昇
+UP:13 += LOCAL:0
+;PALAM:屈服の上昇
+UP:6 += LOCAL:1
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_DEVIATE
+;逸脱のソース
+;-------------------------------------------------
+;好奇心と保守的はここで処理
+SIF TALENT:23
+	TIMES SOURCE:14 , 0.30
+SIF TALENT:24
+	TIMES SOURCE:14 , 3.00
+
+LOCAL:0 = SOURCE:14
+
+;ABL:従順をみる
+IF ABL:10 == 0
+	TIMES LOCAL:0 , 1.00
+ELSEIF ABL:10 == 1
+	TIMES LOCAL:0 , 0.80
+ELSEIF ABL:10 == 2
+	TIMES LOCAL:0 , 0.70
+ELSEIF ABL:10 == 3
+	TIMES LOCAL:0 , 0.40
+ELSEIF ABL:10 == 4
+	TIMES LOCAL:0 , 0.20
+ELSE
+	TIMES LOCAL:0 , 0.00
+ENDIF
+
+;ABL:欲望をみる
+IF ABL:11 == 0
+	TIMES LOCAL:0 , 0.90
+ELSEIF ABL:11 == 1
+	TIMES LOCAL:0 , 0.70
+ELSEIF ABL:11 == 2
+	TIMES LOCAL:0 , 0.50
+ELSEIF ABL:11 == 3
+	TIMES LOCAL:0 , 0.30
+ELSEIF ABL:11 == 4
+	TIMES LOCAL:0 , 0.10
+ELSE
+	TIMES LOCAL:0 , 0.00
+ENDIF
+
+;PALAM:反感の上昇
+UP:11 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_ANTI
+;反感追加のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:15
+
+;PALAM:反感の上昇
+UP:11 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_LIKE
+;恭順追加のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:16
+
+;PALAM:恭順の上昇
+UP:4 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@SOURCE_CHECK_UP_FREE
+;フリー追加のソース
+;-------------------------------------------------
+LOCAL:0 = SOURCE:18
+
+;PALAM:フリーの上昇
+UP:15 += LOCAL:0
+
+RETURN 0
+
+;-------------------------------------------------
+@LOVE_MOIST_CHECK_UP
+;愛液処理
+;-------------------------------------------------
+LOCAL:0 = UP:0 + UP:1 + UP:2 + UP:14
+;쾌Ｃ＋쾌Ｖ＋쾌Ａ＋快Ｂが合わせて100以上上昇ならその20%の液体のソースが加わる（オトコはダメ）
+IF LOCAL:0 > 100 && TALENT:122 == 0
+	;濡れやすいと濡れにくいはここで処理
+	SIF TALENT:42
+		TIMES LOCAL:0 , 3.00
+	SIF TALENT:43
+		TIMES LOCAL:0 , 0.40
+	SIF TALENT:170
+		TIMES LOCAL:0 , 0.10
+	SOURCE:10 += LOCAL:0 / 5
+ENDIF
+
+RETURN 0
+
+;-------------------------------------------------
+@PAIN_DAMAGE_CHECK_UP
+#DIM DMG
+;苦痛からくる体力・気力の減少
+;-------------------------------------------------
+DMG = UP:9/16
+;ABL:マゾっ気をみる
+IF ABL:21 == 0
+	TIMES DMG , 1.00
+ELSEIF ABL:21 == 1
+	TIMES DMG , 0.95
+ELSEIF ABL:21 == 2
+	TIMES DMG , 0.90
+ELSEIF ABL:21 == 3
+	TIMES DMG , 0.80
+ELSEIF ABL:21 == 4
+	TIMES DMG , 0.65
+ELSE
+	TIMES DMG , 0.50
+ENDIF
+
+;아픔에약함
+SIF TALENT:40
+	TIMES DMG , 1.20
+;아픔에강함
+SIF TALENT:41
+	TIMES DMG , 0.80
+
+LOSEBASE:0 += DMG
+LOSEBASE:1 += DMG
+
+RETURN 0
+
+
+;-------------------------------------------------
+@EX_CHECK_UP
+#DIM EX_C
+#DIM EX_V
+#DIM EX_A
+#DIM EX_B
+#DIM EX_F
+#DIM EX_L
+;절정処理
+;-------------------------------------------------
+EX_C = 0
+EX_V = 0
+EX_A = 0
+EX_B = 0
+EX_F = 0
+
+;절정Ｃ
+IF UP:0 + PALAM:0 >= PALAMLV:4 * 32
+	EX_C = 9
+	DOWN:0 = (PALAMLV:4 * 32 - 1000)
+	PRINTL 최강절정Ｃ
+ELSEIF UP:0 + PALAM:0 >= PALAMLV:4 * 8
+	EX_C = 4
+	DOWN:0 = (PALAMLV:4 * 8 - 1000)
+	PRINTL 초절정Ｃ
+ELSEIF UP:0 + PALAM:0 >= PALAMLV:4 * 2
+	EX_C = 2
+	DOWN:0 = (PALAMLV:4 * 2 - 1000)
+	PRINTL 강절정Ｃ
+ELSEIF UP:0 + PALAM:0 >= PALAMLV:4
+	EX_C = 1
+	DOWN:0 = (PALAMLV:4 - 1000)
+	PRINTL 절정Ｃ
+ENDIF
+;DOWN:0で下げても절정以上なら
+;その値-1になるように調整（10000で절정なら9999）
+SIF UP:0 + PALAM:0 - DOWN:0 >= PALAMLV:4
+	DOWN:0 = UP:0 + PALAM:0 - PALAMLV:4 + 1
+
+;절정Ｖ
+IF UP:1 + PALAM:1 >= PALAMLV:4 * 32
+	EX_V = 9
+	DOWN:1 = (PALAMLV:4 * 32 - 1000)
+	PRINTL 최강절정Ｖ
+ELSEIF UP:1 + PALAM:1 >= PALAMLV:4 * 8
+	EX_V = 4
+	DOWN:1 = (PALAMLV:4 * 8 - 1000)
+	PRINTL 초절정Ｖ
+ELSEIF UP:1 + PALAM:1 >= PALAMLV:4 * 2
+	EX_V = 2
+	DOWN:1 = (PALAMLV:4 * 2 - 1000)
+	PRINTL 강절정Ｖ
+ELSEIF UP:1 + PALAM:1 >= PALAMLV:4
+	EX_V = 1
+	DOWN:1 = (PALAMLV:4 - 1000)
+	PRINTL 절정Ｖ
+ENDIF
+;DOWN:1で下げても절정以上なら
+;その値-1になるように調整（10000で절정なら9999）
+SIF UP:1 + PALAM:1 - DOWN:1 >= PALAMLV:4
+	DOWN:1 = UP:1 + PALAM:1 - PALAMLV:4 + 1
+
+;절정Ａ
+IF UP:2 + PALAM:2 >= PALAMLV:4 * 32
+	EX_A = 9
+	DOWN:2 = (PALAMLV:4 * 32 - 1000)
+	PRINTL 최강절정Ａ
+ELSEIF UP:2 + PALAM:2 >= PALAMLV:4 * 8
+	EX_A = 4
+	DOWN:2 = (PALAMLV:4 * 8 - 1000)
+	PRINTL 초절정Ａ
+ELSEIF UP:2 + PALAM:2 >= PALAMLV:4 * 2
+	EX_A = 2
+	DOWN:2 = (PALAMLV:4 * 2 - 1000)
+	PRINTL 강절정Ａ
+ELSEIF UP:2 + PALAM:2 >= PALAMLV:4
+	EX_A = 1
+	DOWN:2 = (PALAMLV:4 - 1000)
+	PRINTL 절정Ａ
+ENDIF
+;DOWN:2で下げても절정以上なら
+;その値-1になるように調整（10000で절정なら9999）
+SIF UP:2 + PALAM:2 - DOWN:2 >= PALAMLV:4
+	DOWN:2 = UP:2 + PALAM:2 - PALAMLV:4 + 1
+
+;절정Ｂ
+IF UP:14 + PALAM:14 >= PALAMLV:4 * 32
+	EX_B = 9
+	DOWN:14 = (PALAMLV:4 * 32 - 1000)
+	PRINTL 최강절정Ｂ
+ELSEIF UP:14 + PALAM:14 >= PALAMLV:4 * 8
+	EX_B = 4
+	DOWN:14 = (PALAMLV:4 * 8 - 1000)
+	PRINTL 초절정Ｂ
+ELSEIF UP:14 + PALAM:14 >= PALAMLV:4 * 2
+	EX_B = 2
+	DOWN:14 = (PALAMLV:4 * 2 - 1000)
+	PRINTL 강절정Ｂ
+ELSEIF UP:14 + PALAM:14 >= PALAMLV:4
+	EX_B = 1
+	DOWN:14 = (PALAMLV:4 - 1000)
+	PRINTL 절정Ｂ
+ENDIF
+;DOWN:14で下げても절정以上なら
+;その値-1になるように調整（10000で절정なら9999）
+SIF UP:14 + PALAM:14 - DOWN:14 >= PALAMLV:4
+	DOWN:14 = UP:14 + PALAM:14 - PALAMLV:4 + 1
+
+;絶頂Ｆ
+IF UP:15 + PALAM:15 >= PALAMLV:4 * 32
+	EX_F = 9
+	DOWN:15 = (PALAMLV:4 * 32 - 1000)
+	PRINTFORML 최강절정 %CSTR:7%
+ELSEIF UP:15 + PALAM:15 >= PALAMLV:4 * 8
+	EX_F = 4
+	DOWN:15 = (PALAMLV:4 * 8 - 1000)
+	PRINTFORML 초절정 %CSTR:7%
+ELSEIF UP:15 + PALAM:15 >= PALAMLV:4 * 2
+	EX_F = 2
+	DOWN:15 = (PALAMLV:4 * 2 - 1000)
+	PRINTFORML 강절정 %CSTR:7%
+ELSEIF UP:15 + PALAM:15 >= PALAMLV:4
+	EX_F = 1
+	DOWN:15 = (PALAMLV:4 - 1000)
+	PRINTFORML 절정 %CSTR:7%
+ENDIF
+;DOWN:15で下げても絶頂以上なら
+;その値-1になるように調整（10000で절정なら9999）
+SIF UP:15 + PALAM:15 - DOWN:15 >= PALAMLV:4
+	DOWN:15 = UP:15 + PALAM:15 - PALAMLV:4 + 1
+
+LOCAL = EX_C + EX_V + EX_A + EX_B + EX_F
+CALL ECST_CHECK,LOCAL
+
+;精飲절정処理へ
+CALL SEIIN_START
+
+IF EX_C && EX_V && EX_A && EX_B && EX_F
+	PRINTL 5 중 절 정
+	PRINTL (각각 12배의 구슬을 얻을 수 있습니다)
+	EX_C *= 12
+	EX_V *= 12
+	EX_A *= 12
+	EX_B *= 12
+	EX_F *= 12
+ELSEIF EX_C && EX_V && EX_A && EX_B
+	PRINTL 4 중 절 정
+	PRINTL (각각 8배의 구슬을 얻을 수 있습니다)
+	EX_C *= 8
+	EX_V *= 8
+	EX_A *= 8
+	EX_B *= 8
+ELSEIF EX_F && EX_V && EX_A && EX_B
+	PRINTL 4 중 절 정
+	PRINTL (각각 8배의 구슬을 얻을 수 있습니다)
+	EX_F *= 8
+	EX_V *= 8
+	EX_A *= 8
+	EX_B *= 8
+ELSEIF EX_C && EX_F && EX_A && EX_B
+	PRINTL 4 중 절 정
+	PRINTL (각각 8배의 구슬을 얻을 수 있습니다)
+	EX_C *= 8
+	EX_F *= 8
+	EX_A *= 8
+	EX_B *= 8
+ELSEIF EX_C && EX_V && EX_F && EX_B
+	PRINTL 4 중 절 정
+	PRINTL (각각 8배의 구슬을 얻을 수 있습니다)
+	EX_C *= 8
+	EX_V *= 8
+	EX_F *= 8
+	EX_B *= 8
+ELSEIF EX_C && EX_V && EX_A && EX_F
+	PRINTL 4 중 절 정
+	PRINTL (각각 8배의 구슬을 얻을 수 있습니다)
+	EX_C *= 8
+	EX_V *= 8
+	EX_A *= 8
+	EX_F *= 8
+ELSEIF EX_C && EX_V && EX_A
+	PRINTL Ｃ＆Ｖ＆Ａ절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_C *= 4
+	EX_V *= 4
+	EX_A *= 4
+ELSEIF EX_B && EX_V && EX_A
+	PRINTL Ｂ＆Ｖ＆Ａ절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_B *= 4
+	EX_V *= 4
+	EX_A *= 4
+ELSEIF EX_C && EX_B && EX_A
+	PRINTL Ｃ＆Ｂ＆Ａ절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_C *= 4
+	EX_B *= 4
+	EX_A *= 4
+ELSEIF EX_C && EX_V && EX_B
+	PRINTL Ｃ＆Ｖ＆Ｂ절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_C *= 4
+	EX_V *= 4
+	EX_B *= 4
+ELSEIF EX_C && EX_V && EX_F
+	PRINTFORML Ｃ＆Ｖ＆%CSTR:7% 절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_C *= 4
+	EX_V *= 4
+	EX_F *= 4
+ELSEIF EX_C && EX_A && EX_F
+	PRINTFORML Ｃ＆Ａ＆%CSTR:7% 절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_C *= 4
+	EX_A *= 4
+	EX_F *= 4
+ELSEIF EX_C && EX_B && EX_F
+	PRINTFORML Ｃ＆Ｂ＆%CSTR:7% 절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_C *= 4
+	EX_B *= 4
+	EX_F *= 4
+ELSEIF EX_V && EX_A && EX_F
+	PRINTFORML Ｖ＆Ａ＆%CSTR:7% 절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_V *= 4
+	EX_A *= 4
+	EX_F *= 4
+ELSEIF EX_V && EX_B && EX_F
+	PRINTFORML Ｖ＆Ｂ＆%CSTR:7% 절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_V *= 4
+	EX_B *= 4
+	EX_F *= 4
+ELSEIF EX_A && EX_B && EX_F
+	PRINTFORML Ａ＆Ｂ＆%CSTR:7% 절정
+	PRINTL (각각 4배의 구슬을 얻을 수 있습니다)
+	EX_A *= 4
+	EX_B *= 4
+	EX_F *= 4
+ELSEIF EX_C && EX_V
+	PRINTL Ｃ＆Ｖ절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_C *= 2
+	EX_V *= 2
+ELSEIF EX_C && EX_A
+	PRINTL Ｃ＆Ａ절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_C *= 2
+	EX_A *= 2
+ELSEIF EX_V && EX_A
+	PRINTL Ｖ＆Ａ절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_V *= 2
+	EX_A *= 2
+ELSEIF EX_C && EX_B
+	PRINTL Ｃ＆Ｂ절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_C *= 2
+	EX_B *= 2
+ELSEIF EX_V && EX_B
+	PRINTL Ｖ＆Ｂ절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_V *= 2
+	EX_B *= 2
+ELSEIF EX_A && EX_B
+	PRINTL Ａ＆Ｂ절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_A *= 2
+	EX_B *= 2
+ELSEIF EX_C && EX_F
+	PRINTFORML Ｃ＆%CSTR:7% 절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_C *= 2
+	EX_F *= 2
+ELSEIF EX_V && EX_F
+	PRINTFORML Ｖ＆%CSTR:7% 절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_V *= 2
+	EX_F *= 2
+ELSEIF EX_A && EX_F
+	PRINTFORML Ａ＆%CSTR:7% 절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_A *= 2
+	EX_F *= 2
+ELSEIF EX_B && EX_F
+	PRINTFORML Ｂ＆%CSTR:7% 절정
+	PRINTL (각각 2배의 구슬을 얻을 수 있습니다)
+	EX_B *= 2
+	EX_F *= 2
+ENDIF
+
+
+IF EX_C
+	SOURCE:12 += 500 * EX_C
+	SOURCE:13 += 200 * EX_C
+	IF TALENT:230
+		LOSEBASE:0 += 10
+		LOSEBASE:1 += 5
+	ELSE
+		LOSEBASE:0 += 20
+		LOSEBASE:1 += 10
+	ENDIF
+
+	IF EX_C == 2
+		;屈服刻印１に相当
+		SIF TFLAG:200 < 1
+			TFLAG:200 = 1
+	ENDIF
+ENDIF
+IF EX_V
+	SOURCE:12 += 700 * EX_V
+	SOURCE:13 += 400 * EX_V
+	SOURCE:11 += 800 * EX_V
+	SOURCE:16 += 500 * EX_V
+	IF TALENT:232
+		LOSEBASE:0 += 20
+		LOSEBASE:1 += 10
+	ELSE
+		LOSEBASE:0 += 40
+		LOSEBASE:1 += 20
+	ENDIF
+
+	IF EX_V == 1
+		;屈服刻印１に相当
+		SIF TFLAG:200 < 1
+			TFLAG:200 = 1
+	ELSEIF EX_V == 2
+		;屈服刻印２に相当
+		SIF TFLAG:200 < 2
+			TFLAG:200 = 2
+	ENDIF
+ENDIF
+IF EX_A
+	SOURCE:12 += 1200 * EX_A
+	SOURCE:13 += 4500 * EX_A
+	SOURCE:11 += 3500 * EX_A
+	SOURCE:16 += 1500 * EX_A
+	IF TALENT:233
+		LOSEBASE:0 += 30
+		LOSEBASE:1 += 15
+	ELSE
+		LOSEBASE:0 += 60
+		LOSEBASE:1 += 30
+	ENDIF
+
+	;屈服刻印３に相当
+	SIF TFLAG:200 < 3
+		TFLAG:200 = 3
+ENDIF
+IF EX_B
+	SOURCE:12 += 500 * EX_B
+	SOURCE:13 += 200 * EX_B
+	IF TALENT:231
+		LOSEBASE:0 += 10
+		LOSEBASE:1 += 5
+	ELSE
+		LOSEBASE:0 += 20
+		LOSEBASE:1 += 10
+	ENDIF
+
+	IF EX_B == 2
+		;屈服刻印１に相当
+		SIF TFLAG:200 < 1
+			TFLAG:200 = 1
+	ENDIF
+ENDIF
+IF EX_F
+	SOURCE:12 += 1200 * EX_F
+	SOURCE:13 += 4500 * EX_F
+	SOURCE:11 += 3500 * EX_F
+	SOURCE:16 += 1500 * EX_F
+	
+	LOSEBASE:0 += 60
+	LOSEBASE:1 += 30
+
+	;屈服刻印３に相当
+	SIF TFLAG:200 < 3
+		TFLAG:200 = 3
+ENDIF
+;절정による欲望ＬＶアップ
+EX_L = 0
+;Ｃ절정かＢ절정で欲望ＬＶ１
+SIF EX_C || EX_B
+	EX_L = 1
+;Ｖ絶頂かＦ絶頂で欲望ＬＶ２
+SIF EX_V || EX_F
+	EX_L = 2
+;Ａ절정か, Ｃ＆Ｂ＆Ｖ절정か, 최강절정を含む二重절정で欲望ＬＶ３
+SIF EX_A || (EX_C && EX_B && EX_V) || (EX_C + EX_B + EX_V + EX_A) >= 20
+	EX_L = 3
+;四重절정か, 최강절정を含むか초절정を２つ含む三重절정か, 최강절정２つの二重절정で欲望ＬＶ４
+SIF (EX_C && EX_B && EX_V && EX_A) || (EX_C + EX_B + EX_V + EX_A) >= 36
+	EX_L = 4
+;최강절정を含むか초절정を２つ含むか초절정を１つと강절정を２つ含む四重절정か, 최강절정を２つ含む三重절정で欲望ＬＶ５
+SIF (EX_C + EX_B + EX_V + EX_A) >= 72
+	EX_L = 5
+;최강절정４つの四重절정で欲望ＬＶ１０
+SIF (EX_C + EX_B + EX_V + EX_A) >= 288
+	EX_L = 10
+;【자제심】か【일선넘지않음】があると１下がる
+SIF TALENT:20 || TALENT:27
+	EX_L -= 1
+
+IF ABL:11 < EX_L
+	ABL:11 = EX_L
+	PRINTFORML 그리고 %ABLNAME:11%이 LV{EX_L}이 되었다
+	;欲望の上昇による[억압][저항]의 소멸을 체크
+	SIF EX_L >= 3
+		CALL YOKUBO_UP_CHECK
+ENDIF
+
+;NOWEXにデータを入れる（절정時口上に使う）
+NOWEX:0 = EX_C
+NOWEX:1 = EX_V
+NOWEX:2 = EX_A
+NOWEX:3 = EX_B
+NOWEX:4 = EX_F
+
+;절정回数を増やす
+EX:0 += EX_C
+EX:1 += EX_V
+EX:2 += EX_A
+EX:3 += EX_B
+EX:4 += EX_F
+
+;절정経験を増やす
+EXP:2 += EX_C + EX_V + EX_A + EX_B + EX_F
+
+RETURN 0
+
+
+;-------------------------------------------------
+;조교 소스 보기（DOWN도 여기서）
+;-------------------------------------------------
+@SHOW_SOURCE
+;PRINTL 　
+SIF SOURCE:0 > 0
+	PRINTFORM 쾌ｃ({SOURCE:0})
+SIF SOURCE:1 > 0
+	PRINTFORM 쾌ｖ({SOURCE:1})
+SIF SOURCE:2 > 0
+	PRINTFORM 쾌ａ({SOURCE:2})
+SIF SOURCE:17 > 0
+	PRINTFORM 쾌Ｂ({SOURCE:17})
+SIF SOURCE:18 > 0
+	PRINTFORM 쾌 %CSTR:7%({SOURCE:18})
+SIF SOURCE:3 > 0
+	PRINTFORM 연모({SOURCE:3})
+SIF SOURCE:4 > 0
+	PRINTFORM 성행위({SOURCE:4})
+SIF SOURCE:5 > 0
+	PRINTFORM 달성({SOURCE:5})
+SIF SOURCE:6 > 0
+	PRINTFORM 고통({SOURCE:6})
+SIF SOURCE:7 > 0
+	PRINTFORM 중독 충족({SOURCE:7})
+SIF SOURCE:8 > 0
+	PRINTFORM 불결({SOURCE:8})
+SIF SOURCE:10 > 0
+	PRINTFORM 액체 추가({SOURCE:10})
+SIF SOURCE:11 > 0
+	PRINTFORM 욕정 추가({SOURCE:11})
+SIF SOURCE:16 > 0
+	PRINTFORM 복종 추가({SOURCE:16})
+SIF SOURCE:12 > 0
+	PRINTFORM 노출({SOURCE:12})
+SIF SOURCE:13 > 0
+	PRINTFORM 굴종({SOURCE:13})
+SIF SOURCE:14 > 0
+	PRINTFORM 일탈({SOURCE:14})
+SIF SOURCE:15 > 0
+	PRINTFORM 반감 추가({SOURCE:15})
+PRINTL 　
+;
+;
+;
+;-------------------------------------------------
+;파라미터 상승＆표시（UPCHECK과 교환）
+;-------------------------------------------------
+@PALAM_UP_CHECK
+#DIM UPCOUNT
+#DIM UPID
+
+FOR UPCOUNT,0,16
+	IF UPCOUNT <= 2
+		UPID = UPCOUNT
+	ELSEIF UPCOUNT == 3
+		UPID = 14
+	ELSEIF UPCOUNT == 15
+		UPID = 15
+	ELSE
+		UPID = UPCOUNT - 1
+	ENDIF
+	IF UP:UPID > 0 || DOWN:UPID > 0
+		IF UPID == 15
+			PRINTFORM 쾌 %CSTR:7%
+		ELSE
+			PRINTFORM %PALAMNAME:UPID%
+		ENDIF
+		N = PALAM:UPID
+		CALL FIGURE_INDENT_2
+		PRINTFORM {PALAM:UPID}
+		IF UP:UPID > 0
+			PRINTFORM +
+			N = UP:UPID
+			CALL FIGURE_INDENT_2
+			PRINTFORM {UP:UPID}
+		ELSE
+			PRINT        
+		ENDIF
+		IF DOWN:UPID > 0
+			PRINTFORM -
+			N = DOWN:UPID
+			CALL FIGURE_INDENT_2
+			PRINTFORM {DOWN:UPID}
+		ELSE
+			PRINT        
+		ENDIF
+		PRINTFORM =
+		N = PALAM:UPID + UP:UPID - DOWN:UPID
+		CALL FIGURE_INDENT_2
+		PRINTFORM {PALAM:UPID + UP:UPID - DOWN:UPID}
+		
+		PALAM:UPID += UP:UPID
+		PALAM:UPID -= DOWN:UPID
+
+		CALL PALAM_MESSAGE,UPID
+		PRINTL 
+	ENDIF
+	SIF UPID == 14 && (UP:0 > 0 || UP:1 > 0 || UP:2 > 0 || UP:14 > 0) 
+		PRINTL -------------------------------
+	SIF UPID == 3 && UP:3 > 0
+		PRINTL -------------------------------
+	SIF UPID == 10
+		PRINTL -------------------------------
+NEXT
+
+;-------------------------------------------------
+;파라미터 상승＆표시（UPCHECK과 교환）
+;-------------------------------------------------
+;ログはつけようと思ってオミット
+@PALAM_UP_CHECK_MINI
+#DIM UPCOUNT
+#DIM UPID
+#DIM UPNUM
+
+UPNUM = 0
+;PRINT 感情：
+
+FOR UPCOUNT,0,16
+	IF UPCOUNT <= 2
+		UPID = UPCOUNT
+	ELSEIF UPCOUNT == 3
+		UPID = 14
+	ELSE
+		UPID = UPCOUNT - 1
+	ENDIF
+	IF UP:UPID > 0 || DOWN:UPID > 0
+		PALAM:UPID += UP:UPID
+		PALAM:UPID -= DOWN:UPID
+		;CALL PALAM_MESSAGE_MINI,UPID
+		UPNUM++
+	ENDIF
+NEXT
+
+;SIF UPNUM == 0
+;	PRINT 無
+
+;PRINTL  
+
+;
+@PALAM_MESSAGE,ARG
+;쾌Ｃ, 쾌Ｖ, 쾌Ａ, 쾌Ｂ는 절정에서 크게 증감하므로, 별도의 메세지를 내놓을 의미가 없음
+;윤활
+IF ARG == 3
+	IF PALAM:ARG < PALAMLV:2
+		PRINT （그다지 젖어 있지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （적당하게 젖어 있습니다）
+	ELSE
+		PRINT （충분히 젖어 있습니다）
+	ENDIF
+;온순
+ELSEIF ARG == 4
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （호의를 갖고 있지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （호의를 가지고 있습니다）
+	ELSE
+		PRINT （신뢰를 받고 있습니다）
+	ENDIF
+;욕정
+ELSEIF ARG == 5
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （그다지 느끼지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （발정하고 있습니다）
+	ELSE
+		PRINT （쾌락의 포로가 되어 있습니다）
+	ENDIF
+;굴복
+ELSEIF ARG == 6
+	IF PALAM:ARG < PALAMLV:2
+		PRINT （아직 굽힐 생각은 없는 것 같습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （약간 무기력해져 있습니다）
+	ELSE
+		PRINT （마음까지 범해져 있습니다）
+	ENDIF
+;습득
+ELSEIF ARG == 7
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （잘 모르는 것 같습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （기쁘게 하는 방법을 배우고 있습니다）
+	ELSE
+		PRINT （충분히 요령을 잡은 것 같습니다）
+	ENDIF
+;치정
+ELSEIF ARG == 8
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （부끄러움을 느끼고 있지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT （수줍음을 느끼고 있습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （강한 수치심을 느끼고 있습니다）
+	ELSE
+		PRINT （죽고 싶을 만큼 부끄러워하고 있습니다）
+	ENDIF
+;고통
+ELSEIF ARG == 9
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （아픔을 느끼고 있지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT （조금 아파하고 있습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （아파서 견딜 수 없는 것 같습니다）
+	ELSE
+		PRINT （정신이 몽롱해질 정도로 아픈 것 같습니다）
+	ENDIF
+;공포
+ELSEIF ARG == 10
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （태연하게 있습니다）
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT （약간 무서워하고 있습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （무서워서 견딜 수 없는 것 같습니다）
+	ELSE
+		PRINT （미칠 것만 같은 공포입니다）
+	ENDIF
+;반감
+ELSEIF ARG == 11
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （미움 받지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:2
+		PRINT （조금 싫어하고 있습니다）
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT （미움받고 있습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （강한 증오를 느낍니다）
+	ELSE
+		PRINT （살의조차 안고 있습니다）
+	ENDIF
+;불쾌
+ELSEIF ARG == 12
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （불쾌감은 느끼고 있지 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:2
+		PRINT （좋은 기분이 아닙니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （기분 나쁜 것 같습니다）
+	ELSE
+		PRINT （불쾌감으로 미칠 것 같습니다）
+	ENDIF
+;억울
+ELSEIF ARG == 13
+	IF PALAM:ARG < PALAMLV:1
+		PRINT （낙담하지는 않습니다）
+	ELSEIF PALAM:ARG < PALAMLV:2
+		PRINT （약간 기력이 떨어진 것 같습니다）
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT （낙담하고 있습니다）
+	ELSE
+		PRINT （모든 것에 절망하고 있습니다）
+	ENDIF
+ENDIF
+
+@PALAM_MESSAGE_MINI,ARG
+;簡易版
+;윤활
+IF ARG == 3
+	IF PALAM:ARG < PALAMLV:2
+		PRINT 부족
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 윤활
+	ELSE
+		PRINT 젖음
+	ENDIF
+;온순
+ELSEIF ARG == 4
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 냉랭
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 친함
+	ELSE
+		PRINT 애정
+	ENDIF
+;욕정
+ELSEIF ARG == 5
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 없음
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 욕정
+	ELSE
+		PRINT 음탕
+	ENDIF
+;굴복
+ELSEIF ARG == 6
+	IF PALAM:ARG < PALAMLV:2
+		PRINT 반감
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 따름
+	ELSE
+		PRINT 굴복
+	ENDIF
+;습득
+ELSEIF ARG == 7
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 모름
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 익숙
+	ELSE
+		PRINT 터득
+	ENDIF
+;치정
+ELSEIF ARG == 8
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 떳떳
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT 숨음
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 노출
+	ELSE
+		PRINT 부끄러움
+	ENDIF
+;고통
+ELSEIF ARG == 9
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 견딤
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT 괴로움
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 아픔
+	ELSE
+		PRINT 격함
+	ENDIF
+;공포
+ELSEIF ARG == 10
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 평정
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT 겁냄
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 두려움
+	ELSE
+		PRINT 공포
+	ENDIF
+;반감
+ELSEIF ARG == 11
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 평범
+	ELSEIF PALAM:ARG < PALAMLV:2
+		PRINT 거부
+	ELSEIF PALAM:ARG < PALAMLV:3
+		PRINT 혐오
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 증오
+	ELSE
+		PRINT 살의
+	ENDIF
+;불쾌
+ELSEIF ARG == 12
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 쾌적
+	ELSEIF PALAM:ARG < PALAMLV:2
+		PRINT 더러움
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 불쾌
+	ELSE
+		PRINT 거부
+	ENDIF
+;억울
+ELSEIF ARG == 13
+	IF PALAM:ARG < PALAMLV:1
+		PRINT 양호
+	ELSEIF PALAM:ARG < PALAMLV:2
+		PRINT 고달픔
+	ELSEIF PALAM:ARG < PALAMLV:4
+		PRINT 억울
+	ELSE
+		PRINT 절망
+	ENDIF
+ENDIF
+
+;
+@FIGURE_INDENT_2
+SIF N < 100000
+	PRINT  
+SIF N < 10000
+	PRINT  
+SIF N < 1000
+	PRINT  
+SIF N < 100
+	PRINT  
+SIF N < 10
+	PRINT  
+RETURN 1
+
+;-------------------------------------------------
+;타겟의 체력 바를 상실분도 포함해서 표시
+;-------------------------------------------------
+@LOSELIFE_BAR
+SIF MAXBASE:0 <= 0
+	RETURN 0
+
+PRINT  체력
+A = (BASE:0*32) / MAXBASE:0
+SIF BASE:0 < 0
+	A = 0
+B = (LOSEBASE:0*32) / MAXBASE:0 + 1
+SIF BASE:0 < 0
+	B = 0
+PRINT [
+IF A > 0
+	REPEAT A
+		PRINT =
+	REND
+ENDIF
+IF B > 0
+	REPEAT B
+		PRINT -
+	REND
+ENDIF
+IF 32 - (A+B) > 0
+	REPEAT 32 - (A+B)
+		PRINT .
+	REND
+ENDIF
+PRINT ]
+
+;-------------------------------------------------
+;타겟의 기력 바를 상실분도 포함해서 표시
+;-------------------------------------------------
+@LOSEVITAL_BAR
+SIF MAXBASE:1 <= 0
+	RETURN 0
+PRINT  기력
+A = (BASE:1*32 + 16) / MAXBASE:1
+SIF BASE:1 < 0
+	A = 0
+B = (LOSEBASE:1*32 +16) / MAXBASE:1 + 1
+SIF BASE:1 < 0
+	B = 0
+PRINT [
+IF A > 0
+	REPEAT A
+		PRINT =
+	REND
+ENDIF
+IF B > 0
+	REPEAT B
+		PRINT -
+	REND
+ENDIF
+IF 32 - (A+B) > 0
+	REPEAT 32 - (A+B)
+		PRINT .
+	REND
+ENDIF
+PRINT ]
+
+;
+;
+;
+
+;-------------------------------------------------
+@SOURCE_CHECK_AUTO
+;-------------------------------------------------
+;自動調教ソース管理
+
+;-------------------------------------------------
+;調教者の能力のチェック
+;-------------------------------------------------
+CALL PLAYER_SKILL_CHECK
+CALL MASTER_SKILL_CHECK
+
+;-------------------------------------------------
+;快Ｃのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_C
+
+;-------------------------------------------------
+;快Ｖのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_V
+
+;-------------------------------------------------
+;快Ａのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_A
+
+;-------------------------------------------------
+;快Ｂのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_B
+
+;-------------------------------------------------
+;快Ｆのソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_FREE
+
+;-------------------------------------------------
+;気力０による上下の処理（快楽系）
+;-------------------------------------------------
+IF BASE:1 <= 0 && TFLAG:201 != 1
+	;UP:0,1,2は절정に絡むので先に処理してある
+	UP:0 /= 2
+	UP:1 /= 2
+	UP:2 /= 2
+	UP:14 /= 2
+ENDIF
+
+;-------------------------------------------------
+;素質などによる上下の処理（快楽系）
+;-------------------------------------------------
+CALL UP_TALENT_CVA_CHECK
+
+;-------------------------------------------------
+;愛液処理
+;-------------------------------------------------
+CALL LOVE_MOIST_CHECK_UP
+
+;-------------------------------------------------
+;절정処理
+;-------------------------------------------------
+CALL EX_CHECK_UP
+
+;-------------------------------------------------
+;調教対象の사정チェック（후타나리・남자）
+;-------------------------------------------------
+CALL TARGET_EJAC_CHECK
+
+;-------------------------------------------------
+;調教対象の噴乳チェック
+;-------------------------------------------------
+CALL TARGET_MILK_CHECK
+
+;-------------------------------------------------
+;調教対象のワーム出産チェック
+;-------------------------------------------------
+CALL TARGET_WORMBABY_CHECK
+
+;-------------------------------------------------
+;情愛のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_LOVE
+
+;-------------------------------------------------
+;性行動のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_IMPULSIVE
+
+;-------------------------------------------------
+;達成のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_ACHIEVE
+
+;-------------------------------------------------
+;痛覚のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_PAIN
+
+;-------------------------------------------------
+;中毒充足のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_POISON
+
+;-------------------------------------------------
+;不潔のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_DIRTY
+
+;-------------------------------------------------
+;液体追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_MOIST
+
+;-------------------------------------------------
+;欲情追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_DESIRE
+
+;-------------------------------------------------
+;露出のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_FLASHER
+
+;-------------------------------------------------
+;屈従のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_SUBMIT
+
+;-------------------------------------------------
+;逸脱のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_DEVIATE
+
+;-------------------------------------------------
+;反感追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_ANTI
+
+;-------------------------------------------------
+;恭順追加のソース
+;-------------------------------------------------
+CALL SOURCE_CHECK_UP_LIKE
+
+;-------------------------------------------------
+;素質などによる上下の処理
+;-------------------------------------------------
+CALL UP_TALENT_CHECK
+
+;-------------------------------------------------
+;自動調教回数による上下の処理
+;-------------------------------------------------
+;絶頂処理の前に置くと, すごく絶頂してしまうのでここに置く
+;自動調教は絶頂をコントロールしづらいための処置
+CALL AUTO_NUM_CHECK
+
+;-------------------------------------------------
+;気力０による上下の処理
+;-------------------------------------------------
+IF BASE:1 <= 0
+	;UP:0,1,2は절정に絡むので先に処理してある
+	UP:3 /= 2
+	UP:4 /= 2
+	UP:5 /= 2
+	UP:7 /= 2
+	UP:9 /= 2
+	UP:13 /= 2
+
+	LOSEBASE:0 *= 2
+	LOSEBASE:0 += 80
+ENDIF
+
+;-------------------------------------------------
+;苦痛からくる体力・気力の減少
+;-------------------------------------------------
+CALL PAIN_DAMAGE_CHECK_UP
+
+;-------------------------------------------------
+;体力・気力の減少
+;-------------------------------------------------
+BASE:0 -= LOSEBASE:0
+BASE:1 -= LOSEBASE:1
+
+;--------------------------------------------------------
+;절정時のおもらし処理
+;--------------------------------------------------------
+CALL PISSING_ECST_CHECK
+
+;-------------------------------------------------
+;각인 취득의 체크
+;-------------------------------------------------
+CALL MARK_GOT_CHECK
+;セリフ省略
+
+;-------------------------------------------------
+;가학쾌락경험, 피학쾌락경험, 봉사쾌락경험의 체크
+;-------------------------------------------------
+CALL EXP_GOT_CHECK
+
+;-------------------------------------------------
+;[즉각함락]의 체크
+;-------------------------------------------------
+CALL SOKUOCHI_CHECK
+
+;-------------------------------------------------
+;조교 소스 보기
+;-------------------------------------------------
+CALL SHOW_SOURCE
+
+;-------------------------------------------------
+;파라미터 상승＆표시（DOWN도 여기서）
+;-------------------------------------------------
+CALL PALAM_UP_CHECK_MINI
+
+RETURN 0
+
+
+;
+;
+;
