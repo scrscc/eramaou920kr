@@ -1,0 +1,114 @@
+﻿
+@MENU_BUTTON(ARG:2 = 0, ARGS:0, ARG:3, ARG:0 = 0, ARG:1 = 0x444444);メニューボタン用描画関数、ARG:2が通常色か暗くする(未選択時)のフラグ、ARGS:0が文字列で、ARG:3がコマンド数
+ARG:0 = GETDEFCOLOR()
+SIF ARG:2 == 1
+	SETCOLOR (ARG:0 - ARG:1)
+
+PRINTBUTTON ARGS:0, ARG:3
+
+SIF ARG:2 == 1
+	RESETCOLOR
+RETURN
+
+;下記カラーBAR関連は将来実装の参考用
+;-------------------------------------------------------------------------------
+;    BARの色違え版
+;-------------------------------------------------------------------------------
+;    例  PRINTFORM %PRINT_COLORBAR(40,100,8,%UNICODE(0x2584)%,%UNICODE(0x2584)%,,0x404040)% 
+;        [===     ]
+;    引数はBARとほぼ一緒 + ARGSで描写文字の変更が可能(指定しない場合はBARと同じ仕様)
+;    ARG:3はバーの色(0xFFFFFF形式で指定),ARG:4はバーの背景色(0xFFFFFF形式で指定)
+;===============================================================================
+@PRINT_COLORBAR(ARG, ARG:1, ARG:2, ARGS = "*", ARGS:1 = ".", ARG:3, ARG:4)
+#LOCALSIZE 5
+LOCAL:1 = ARG * ARG:2 / ARG:1
+LOCAL:2 = GETCOLOR()
+FOR LOCAL, 1, ARG:2 + 1
+	IF LOCAL:1 >= LOCAL
+		IF !LOCAL:3
+			SETCOLOR ARG:3
+			LOCAL:3 = 1
+		ENDIF
+		PRINTFORM %ARGS%
+	ELSE
+		IF !LOCAL:4
+			SETCOLOR ARG:4
+			LOCAL:4 = 1
+		ENDIF
+		PRINTFORM %ARGS:1%
+	ENDIF
+NEXT
+SETCOLOR LOCAL:2
+VARSET LOCAL
+
+;-------------------------------------------------------------------------------
+;    BARカラー化 (eramegatenより一部参照)
+;-------------------------------------------------------------------------------
+;    例  PRINTFORM %PRINT_COLORBAR(40,100,8,%UNICODE(0x2584)%,%UNICODE(0x2584)%,,0x404040,)% 
+;        [===     ]
+;	引数はBARとほぼ一緒 + ARGSで描写文字の変更が可能(指定しない場合はBARと同じ仕様)
+;	ARG:6はバー色(0xFFFFFF形式で指定),
+;	ARG:7はバー背景色(0xFFFFFF形式で指定),
+;	ARG:8はバーグラデーション幅(バー色数値に10進で四則演算)
+;===============================================================================
+@PRINT_COLORBAR2(ARG, ARG:1, ARG:2, ARGS = "*", ARGS:1 = ".", ARG:3, ARG:4, ARG:5 = 0)
+LOCAL:1 = ARG:1 / (ARG:2+ARG:2/32)
+LOCAL:2 = GETCOLOR()
+LOCAL:3 = COUNT
+
+REPEAT ARG:2
+ARG = ARG - LOCAL:1
+IF ARG >= 0
+	SETCOLOR ARG:3 - (ARG:5 * COUNT)
+	PRINTFORM %ARGS%
+ELSE
+	SETCOLOR ARG:4
+	PRINTFORM %ARGS:1%
+ENDIF
+REND
+COUNT = LOCAL:3
+SETCOLOR LOCAL:2
+
+;-------------------------------------------------
+;カスタムバー用色セット関数@BARCOLORSET
+;PRINT_COLORBARのARG:3に利用し、ARG;4にRESULTを使う
+;-------------------------------------------------
+@BARCOLORSET, ARGS
+#FUNCTION
+ ;LOCALに色を代入
+SELECTCASE ARGS
+	CASE "농적색"
+		RESULT:1 = 0x701000
+		RETURNF 0xF06050
+	CASE "적색"
+		RESULT:1 = 0x502020
+		RETURNF 0xC07070
+	CASE "청색"
+		RESULT:1 = 0x202050
+		RETURNF 0x7070C0
+	CASE "감색"
+		RESULT:1 = 0x000000
+		RETURNF 0x6666FF
+	CASE "녹색"
+		RESULT:1 = 0x205020
+		RETURNF 0x66DD66
+	CASE "자색"
+		RESULT:1 = 0x502050
+		RETURNF 0xC070C0
+	CASE "황색"
+		RESULT:1 = 0x505020
+		RETURNF 0xC0B050
+	CASE "분홍색"
+		RESULT:1 = 0x300020
+		RETURNF 0xFFCCFF
+	CASE "청록색"
+		RESULT:1 = 0x205050
+		RETURNF 0x70C0C0
+	CASE "회색"
+		RESULT:1 = 0x333333
+		RETURNF 0x666666
+	 ;白
+	 CASEELSE
+		RESULT:1 = 0x202020
+		RETURNF 0xC0C0C0
+ENDSELECT

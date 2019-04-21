@@ -1,0 +1,520 @@
+﻿;-------------------------------------------------------------------------------
+;    メインメニュー
+;-------------------------------------------------------------------------------
+;===============================================================================
+@DRAW_MAINMENU
+#Dim TEMP, 300
+
+;バグ対策
+SIF TARGET > CHARANUM - 1
+	TARGET = -1
+
+;バグ対策
+SIF ASSI > CHARANUM - 1
+	ASSI = -1
+
+;バグ対策
+SIF ASSI == TARGET
+	ASSI = -1
+
+IF TARGET >= 1
+	SIF CFLAG:TARGET:1 != 0
+		TARGET = -1
+ENDIF
+
+IF ASSI >= 1
+	SIF CFLAG:ASSI:1 != 0
+		ASSI = -1
+ENDIF
+
+;初めの二重線
+;SETFONT "ARIEL BLACK"
+DRAWLINEFORM %UNICODE(0x2550)%
+
+;FONTBOLD
+;PRINTFORML   %UNICODE(0x258c)%Main Menu
+;FONTREGULAR
+;SETFONT
+
+;一番上の段
+FONTBOLD
+ALIGNMENT RIGHT
+PRINT 　　
+PRINTFORM {DAY/365}년째　
+PRINTFORM {DAY:1}월 {DAY:2}일（
+PRINTV DAY+1
+PRINT 일째）
+SETCOLORBYNAME Yellow
+SIF DAY:2 == 15
+	PRINT 《만월》
+RESETCOLOR
+IF TIME == 0
+	PRINT  오전
+ELSE
+	PRINT  오후
+ENDIF
+PRINT 　　
+PRINTFORM (소지 포인트：{MONEY} pts.)
+PRINTL 　　
+ALIGNMENT LEFT
+FONTREGULAR
+;SETFONT
+
+;仕切り線 & 調教対象/조수 ボタン、押すと選択画面に
+DRAWLINEFORM %UNICODE(0x2500)%
+SETFONT "ARIEL BLACK"
+FONTBOLD
+PRINT 　
+IF Target >= 1
+	CALL MENU_BUTTON, 0, @"%UNICODE(0x258c)%Target", 496
+ELSE
+	CALL MENU_BUTTON, 1, @"%UNICODE(0x258c)%Target", 496
+ENDIF
+PRINT 　　　　　　　　　　　　　　　　　
+;下記PRINTは仮調整用
+PRINT 　　　　　　　　　　　　　　　
+IF ASSI >= 1
+	CALL MENU_BUTTON, 0, @"%UNICODE(0x258c)%Assistant", 497
+ELSE
+	CALL MENU_BUTTON, 1, @"%UNICODE(0x258c)%Assistant", 497
+ENDIF
+PRINTL 
+FONTREGULAR
+SETFONT
+
+;調教対象/조수名 ボタン、押すとステータス画面に
+SETFONT "ＭＳ ゴシック";等幅フォントに
+FONTBOLD
+
+PRINT 　
+IF TARGET >= 1 && TARGET < CHARANUM
+	PRINT  
+	PRINTBUTTON @"%SAVESTR:TARGET%", 498
+	LOCALS = %SAVESTR:TARGET%
+	STRLENS LOCALS
+	TEMP:2 = 18 - RESULT
+;	PRINTFORM {TEMP:2}
+	PRINTFORM %"",TEMP:2,LEFT%
+ENDIF
+sif target < 0
+PRINTFORM %"",36%
+sif target > 0
+PRINT 　　　　　　　　
+;下記PRINTは仮調整用
+PRINT 　　　　　　　　　　 
+IF ASSI >= 1 && ASSI < CHARANUM
+	PRINTBUTTON @"%SAVESTR:ASSI%", 499
+	LOCALS = %SAVESTR:ASSI%
+	STRLENS LOCALS
+	TEMP:2 = 18 - RESULT
+	PRINTFORM %"",TEMP:2,LEFT%
+	
+ENDIF
+PRINTFORML 
+
+IF TARGET >= 1
+	PRINT 　 
+	CALL LIFE_BAR,-1
+	;PRINT 　 
+	;CALL VITAL_BAR,-1
+ELSE
+	PRINTL 
+ENDIF
+FONTREGULAR
+SETFONT
+
+;仕切り線 & 各情報画面用ボタン 押すとその情報が描画される、切り替えはFLAG:36に代入して
+DRAWLINEFORM %UNICODE(0x2500)%
+SETFONT "ARIEL BLACK"
+FONTBOLD
+PRINT 　
+IF FLAG:36 == 0
+	CALL MENU_BUTTON, 0, @"%UNICODE(0x258c)%Items/Skills", 500
+ELSE
+	CALL MENU_BUTTON, 1, @"%UNICODE(0x258c)%Items/Skills", 500
+ENDIF
+PRINT 　　
+IF FLAG:36 == 1
+	CALL MENU_BUTTON, 0, @"%UNICODE(0x258c)%Traps", 501
+ELSE
+	CALL MENU_BUTTON, 1, @"%UNICODE(0x258c)%Traps", 501
+ENDIF
+PRINT 　　
+;将来拡張用あれこれ
+;PRINTFORM %UNICODE(0x258c)%Slaves
+;PRINT 　　
+;PRINTFORM %UNICODE(0x258c)%Monsters
+;PRINT 　　
+IF FLAG:36 == 4
+	CALL MENU_BUTTON, 0, @"%UNICODE(0x258c)%Dungeon", 504
+ELSE
+	CALL MENU_BUTTON, 1, @"%UNICODE(0x258c)%Dungeon", 504
+ENDIF
+PRINT 　　
+;PRINTFORM %UNICODE(0x258c)%Enemys
+;PRINT 　　
+;PRINTFORM %UNICODE(0x258c)%Invasion
+PRINTL 
+;RESETCOLOR
+FONTREGULAR
+SETFONT
+
+;各情報画面表示、処理が入り組むのが予想されるのでそれぞれ専用の関数に飛ばす、関数本体は現在は全てこのERB末に記載
+IF FLAG:36 == 0
+	CALL DRAW_HAVEITEMS
+ELSEIF FLAG:36 == 1
+	CALL DRAW_HAVETRAPS
+ELSEIF FLAG:36 == 4
+	CALL DRAW_DUNGEON_OVERVIEW
+ELSE
+	CALL DRAW_HAVEITEMS
+ENDIF
+
+;仕切り線 & コマンドパネルタイトル
+DRAWLINEFORM %UNICODE(0x2500)%
+SETFONT "ARIEL BLACK"
+FONTBOLD
+PRINT 　
+PRINTFORML %UNICODE(0x258c)%Commands
+FONTREGULAR
+SETFONT
+
+;노예がいるか？調教された노예はいるか？
+A = 0
+B = 0
+REPEAT CHARANUM
+	SIF CFLAG:COUNT:1 == 0 && COUNT != 0
+		A += 1
+	SIF CFLAG:COUNT:0 > 0 && COUNT != 0
+		B += 1
+REND
+
+;コマンドパネル
+SETFONT "ＭＳ ゴシック";等幅フォントに
+FONTBOLD
+
+PRINT 　
+IF A > 0
+	PRINTFORM %"[100] 조교한다", 18, LEFT%
+ELSE
+	PRINTFORM %"[---] 　　　　", 18, LEFT%
+ENDIF
+PRINT 　
+IF CHARANUM >= 1
+	PRINTFORM %"[101] 능력 확인", 18, LEFT%
+ELSE
+	PRINTFORM %"[---] 　　　　　", 18, LEFT%
+ENDIF
+PRINT 　
+IF FLAG:502 == 0
+	PRINTFORML %"[102] 던전", 18, LEFT%
+ELSE
+	PRINTFORML %"[102] 필드", 18, LEFT%
+ENDIF
+PRINT 　
+IF A > 0
+	PRINTFORM %"[103] 처형", 18, LEFT%
+ELSE
+	PRINTFORM %"[---] 　　", 18, LEFT%
+ENDIF
+PRINT 　
+IF A > 0
+	PRINTFORM %"[104] 영격", 18, LEFT%
+ELSE
+	PRINTFORM %"[---] 　　", 18, LEFT%
+ENDIF
+PRINT 　
+;IF A > 0
+	PRINTFORML %"[105] 능력치 업", 18, LEFT%
+;ELSE
+;	PRINTFORML %"[---] 　　　　　　", 18, LEFT%
+;ENDIF
+PRINT 　
+IF B > 0
+	PRINTFORM %"[106] 노예매각", 18, LEFT%
+ELSE
+	PRINTFORM %"[---] 　　　　", 18, LEFT%
+ENDIF
+PRINT 　
+	PRINTFORM %"[107] 구입", 18, LEFT%
+PRINT 　
+IF A > 0 && FLAG:37 == 1
+	PRINTFORML %"[108] 복장・장비", 18, LEFT%
+ELSE
+	PRINTFORML %"[---] 　　　", 18, LEFT%
+ENDIF
+PRINT 　
+	PRINTFORM %"[109] 침공", 18, LEFT%
+PRINT 　
+IF TALENT:0:325 == 1
+	PRINTFORM %"[110] 실험실", 18, LEFT%
+ELSE
+	PRINTFORM %"[---] 　　　", 18, LEFT%
+ENDIF
+PRINT 　
+IF FLAG:83 || FLAG:84
+	PRINTFORML %"[111] 시설・설비", 18, LEFT%
+ELSE
+	PRINTFORML %"[---] 　　　　　", 18, LEFT%
+ENDIF
+PRINT 　
+	PRINTFORM %"[199] 휴식", 18, LEFT%
+PRINT 　
+	PRINTFORM %"[200] 세이브", 18, LEFT%
+PRINT 　
+	PRINTFORML %"[300] 로드", 18, LEFT%
+PRINT 　
+	PRINTFORM %"[777] CONFIG", 18, LEFT%
+PRINT 　
+	PRINTFORML %"[888] 통신", 18, LEFT%
+
+FONTREGULAR
+SETFONT
+
+;下二重仕切り線
+;SETFONT "ARIEL BLACK"
+DRAWLINEFORM %UNICODE(0x2550)%
+;SETFONT
+
+RETURN 0
+
+;-------------------------------------------------------------------------------
+;    所持アイテム/スキル一覧
+;-------------------------------------------------------------------------------
+;===============================================================================
+@DRAW_HAVEITEMS(ARG:0 = 0, ARG:98, ARG:99)
+SETFONT "ＭＳ ゴシック";等幅フォントに
+IF ARG:0 == 0
+	PRINT 　 
+	PRINTFORM 기교Lv： {ABL:MASTER:12}Lv
+
+	PRINT 　　
+	PRINT 소지 지식： 
+	SIF TALENT:MASTER:55 == 1
+		PRINT 【조합지식】　
+
+	SIF TALENT:MASTER:325 == 1
+		PRINT 【마계지식】　
+
+	SIF TALENT:MASTER:327 == 1
+		PRINT 【음마지식】 
+
+	SIF TALENT:MASTER:328 == 1
+		PRINT 【마충지식】
+	PRINTL 
+ENDIF
+
+;REPEAT 100
+;	SIF ITEM:COUNT > 0
+;		PRINTFORM %ITEMNAME:COUNT%({ITEM:COUNT})
+;REND
+SETFONT "ＭＳ ゴシック";等幅フォントに
+ARG:98 = 0
+REPEAT 59
+	ARG:99 = COUNT
+	IF ARG:98 >= 5
+		PRINTFORML 　
+		ARG:98 = 0
+	ENDIF
+	IF ITEM:(ARG:99) > 0
+		SIF ARG:98 == 0
+			PRINT  
+		PRINT 　
+		PRINTFORM %ITEMNAME:(ARG:99) + @"({ITEM:(ARG:99)})",18,LEFT%
+		ARG:98 += 1
+	ENDIF
+REND
+PRINTL  
+ARG:98 = 0
+	SIF ITEM:91 > 0
+		PRINTFORM %ITEMNAME:91%({ITEM:91}) 
+REPEAT 40
+	ARG:99 = COUNT + 300
+	IF ARG:98 >= 5
+		PRINTFORML 　
+		ARG:98 = 0
+	ENDIF
+	IF ITEM:(ARG:99) > 0
+		SIF ARG:98 == 0
+			PRINT  
+		PRINT 　
+		PRINTFORM %ITEMNAME:(ARG:99) + @"({ITEM:(ARG:99)})",18,LEFT%
+		ARG:98 += 1
+	ENDIF
+REND
+PRINTL  
+SETFONT
+RETURN
+
+
+;-------------------------------------------------------------------------------
+;    所持罠一覧
+;-------------------------------------------------------------------------------
+;===============================================================================
+@DRAW_HAVETRAPS(ARG:0, ARG:98, ARG:99)
+
+SETFONT "ＭＳ ゴシック";等幅フォントに
+ARG:98 = 0
+REPEAT 31
+	ARG:99 = COUNT + 59
+	IF ARG:98 >= 5
+		PRINTFORML 　
+		ARG:98 = 0
+	ENDIF
+	IF ITEM:(ARG:99) > 0
+		SIF ARG:98 == 0
+			PRINT  
+		PRINT 　
+		PRINTFORM %ITEMNAME:(ARG:99) + @"({ITEM:(ARG:99)})",18,LEFT%
+		ARG:98 += 1
+	ENDIF
+REND
+PRINTL  
+SETFONT
+
+RETURN
+
+;-------------------------------------------------------------------------------
+;    ダンジョンの状況概要
+;-------------------------------------------------------------------------------
+;===============================================================================
+@DRAW_DUNGEON_OVERVIEW
+#DIM DYNAMIC TEMP, 500
+#DIM DYNAMIC TEMP1, 100
+PRINT 　 
+PRINTFORML 던전Lv： {CFLAG:0:9}Lv (경험치： {EXP:0:80})　　함정Lv：{FLAG:85}Lv　　현재의 용사 초기Lv： {FLAG:60 + 1}Lv
+REPEAT 99
+	TEMP:COUNT = 0
+REND
+
+SETFONT "ＭＳ ゴシック";等幅フォントに
+IF CHARANUM >= 1
+	REPEAT CHARANUM
+		;主人公は排除
+		SIF COUNT == 0
+			CONTINUE
+			;RETURN 0
+		;ダンジョン内に居ない子は排除
+		IF CFLAG:COUNT:1 == 2 || CFLAG:COUNT:1 == 3
+			IF CFLAG:COUNT:1 == 2
+				IF CFLAG:COUNT:501 <= 1 && CFLAG:COUNT:502 == 0
+					TEMP:10 += 1
+				ELSE
+					TEMP:(CFLAG:COUNT:501) += 1
+				ENDIF
+				TEMP:97 += 1
+			ENDIF
+			
+			IF CFLAG:COUNT:1 == 3
+				D = (CFLAG:COUNT:501) + 10
+				TEMP:D += 1
+				TEMP:96 += 1
+			ENDIF
+		ELSE
+			CONTINUE
+		ENDIF
+	REND
+ENDIF	
+	
+	
+	B = 0
+	C = 0
+	D = 0
+	Z = 0
+	R = 100
+
+		REPEAT 100
+		SIF Z >= 100 || R <= 0
+			BREAK
+			
+		Y = Z % 10
+		IF Y == 0
+			X = Z / 10
+			X += 1
+			D = X + 10
+			TEMP1:4 += 1
+			FONTBOLD
+			IF X != 10 && TEMP1:4 == 1
+				PRINT 　 
+				PRINTFORM 제{X}계층：　　　　　　　　　　　　　　　　　　　　　 
+				SIF X+1 != 10
+				PRINTFORM 제{X+1}계층：
+				PRINTFORML 
+			ELSEIF X == 10
+;				PRINT 　 
+;				PRINTFORM 근위병：
+			ELSE
+				TEMP1:4 = 0
+			ENDIF
+			FONTREGULAR
+		ENDIF
+		
+		A = Z + 100
+		B += ITEM:A
+		C += ITEM:A
+		Z += 1
+		R -= 1
+
+		Y = Z % 10
+		IF Y == 0
+			TEMP1:2 = X + 349
+			TEMP1:3 = FLAG:(TEMP1:2)
+			
+			IF X != 10
+				SIF TEMP1:4 == 1
+					PRINT 　  
+				PRINTFORM 부하{B, 4}체, 
+				SIF TEMP:X >= 1
+					SETCOLOR 0xFFFF00
+				PRINTFORM 용사：{TEMP:X, 2}인
+				RESETCOLOR
+				PRINTFORM , 
+				SIF TEMP:D >= 1
+					SETCOLOR 0x64A0FF
+				PRINTFORM 영격：{TEMP:D, 2}인　
+				RESETCOLOR
+				PRINTFORM 시설：
+				IF TEMP1:3 == 500
+					PRINTFORM 상점가　
+				ELSEIF TEMP1:3 == 501
+					PRINTFORM 습지　　
+				ELSEIF TEMP1:3 == 502
+					PRINTFORM 인간목장
+				ELSEIF TEMP1:3 == 503
+					PRINTFORM 냉동실　　
+				ELSEIF TEMP1:3 == 504
+					PRINTFORM 사막지대　　
+				ELSEIF TEMP1:3 == 505
+					PRINTFORM 미궁　　
+				ELSEIF TEMP1:3 == 506
+					PRINTFORM 박물관　
+				ELSEIF TEMP1:3 == 507
+					PRINTFORM 창관거리　
+				ELSE
+					PRINTFORM 없음　　
+				ENDIF
+				SIF TEMP1:4 == 1
+					PRINT 　　 
+
+			ELSEIF X == 10
+				PRINTFORM 근위병：
+				PRINTFORML {B, 4}체, 던전 바깥의 용사：{TEMP:10, 2}명　
+			ENDIF
+			B = 0
+			TEMP:98 += 1
+
+			IF TEMP:98 >= 2 && TEMP1:5 != 4
+				PRINTFORML 
+				TEMP:98 = 0
+				TEMP1:5 += 1
+			ENDIF
+		ENDIF
+	REND
+PRINT 　
+PRINTFORM 부하총계：{C, 5}마리, 용사총계：{TEMP:97, 2}명　, 요격총계：{TEMP:96, 2}명, 육변기：{FLAG:83, 5}대, 도구：：{FLAG:84, 5}개
+;CALL DUNGEON_FINAL_BATTLE, 1
+;SIF RESULT >= 1
+;	PRINTFORM 마왕실 영격 가능
+PRINTL  
+SETFONT
+RETURN 0
