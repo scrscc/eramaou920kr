@@ -13,6 +13,7 @@ IF TEQUIP:53
 ;ビデオ撮影がされていれば終了させる
 ;テープは終了時に数を減らす
 	TEQUIP:53 = 0
+	CFLAG:499 = 0
 	ITEM:28 -= 1
 ELSE
 ;ビデオ撮影してなければ初期化して開始
@@ -179,20 +180,24 @@ IF CFLAG:491 > VIDEO_MAX
 	PRINTL [2] 그만둔다
 	INPUT
 	IF RESULT == 2
+		TEQUIP:53 = 0
+		ITEM:28 -= 1
+		CFLAG:499 = 0
 		PRINTL ＜마력의 잔량이 없어졌습니다。수정구 촬영을 종료합니다＞
+
 	ELSEIF RESULT== 1
 		CFLAG:499 += 1
 		IF CFLAG:499 <= 5
 			MONEY -= 500
 			VIDEO_MAX = 10 + 4 * CFLAG:499
-			PRINTFORM 수정구의 마력이{VIDEO_MAX}회가 되었습니다
+			PRINTFORM 수정구의 마력이{VIDEO_MAX}회가 되었습니다.
 			PRINTL
 		ELSE
 			TEQUIP:53 = 0
 			ITEM:28 -= 1
 			CFLAG:499 = 0
 			PRINTL ＜이 이상은 충전할수 없습니다＞
-			PRINTL ＜마력의 잔량이 없어졌습니다。수정구 촬영을 종료합니다＞
+			PRINTL ＜마력의 잔량이 없어졌습니다。수정구 촬영을 종료합니다.＞
 		ENDIF
 	ENDIF
 ENDIF
