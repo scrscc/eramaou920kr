@@ -81,8 +81,8 @@ IF TFLAG:500 == 0
 			;ふたなり噴水
 			IF TALENT:A:121 || TALENT:A:122
 				PRINTFORMW %SAVESTR:A%의 격분한 남근은 예정대로 분수 장치로 바뀌어,  남근의 구멍에서 기세 좋게 물이 분출되고 있다…
-				SIF TALENT:A:130
 				;ふたなりかつ母乳体質な石噴水
+				SIF TALENT:A:130
 				PRINTFORMW 조금 만지는 것 만으로도 모유를 뿜어내고 있는 %SAVESTR:A%의 유두 또한 분수 장치로 교환되어, 발기한 그 끄트머리에서 물을 뿜어내고 있다…
 				;以下資質分岐
 				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
@@ -125,8 +125,8 @@ IF TFLAG:500 == 0
 					PRINTFORMW 분수상이 된 %SAVESTR:A%(은)는 오줌 싸는 소년과 같은 자세로 장식해지는 것이 되었다…
 				ENDIF
 			
+			;母乳体質なら胸噴水
 			ELSEIF TALENT:A:130
-				;母乳体質なら胸噴水
 				PRINTFORMW 항상 모유를 방울져 떨어트리고 있었던 %SAVESTR:A%의 유두는, %NAME:MASTER%의 의도대로 유두 끝부분으로부터 물이 뿜어 나오도록 바뀌었다…
 				SIF TALENT:A:57
 					;母乳体質でおむらし癖の小便少女噴水
@@ -513,8 +513,8 @@ ELSEIF TFLAG:500 == 5
 			;ふたなり噴水
 			IF TALENT:A:121 || TALENT:A:122
 				PRINTFORMW %SAVESTR:A%의 격분한 남근은 예정대로 분수 장치로 바뀌어,  남근의 구멍에서 기세 좋게 물이 분출되고 있었다…
-				SIF TALENT:A:130
 				;ふたなりかつ母乳体質な金属噴水
+				SIF TALENT:A:130
 				PRINTFORMW 조금 만지는 것 만으로도 모유를 뿜어내고 있는 %SAVESTR:A%의 유두 또한 분수 장치로 바뀌어, 발기한 그 끄트머리에서 물을 뿜어내고 있다…
 				;以下資質分岐
 				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
@@ -560,8 +560,8 @@ ELSEIF TFLAG:500 == 5
 			ELSEIF TALENT:A:130
 				;母乳体質なら胸噴水
 				PRINTFORMW 항상 모유를 방울져 떨어트리고 있었던 %SAVESTR:A%의 유두는, %NAME:MASTER%의 의도대로 유두 끝부분으로부터 물이 뿜어 나오도록 바뀌었다…
+				;母乳体質でおむらし癖の小便少女噴水
 				SIF TALENT:A:57
-					;母乳体質でおむらし癖の小便少女噴水
 					PRINTFORMW 그리고 오줌싸개 버릇이 있는 %SAVESTR:A%(은)는 요도가 있던 곳에서도 끝없이 “소변”을 계속 싸게 되었다…
 				IF MARK:3 == 3  &&  (TALENT:A:11 || TALENT:A:12 || TALENT:A:16 || TALENT:A:34)
 					;反発刻印Lv3+（반항적・굳건함・시건방짐・저항）

@@ -296,8 +296,8 @@ FOR TURN, 0, 99
 	IF RESULT > 0
 		;勇者が先攻
 		CALL ENEMY_ATTACK, ATKER, 0
+		;강제中断以外, 全滅しても攻撃を行う
 		SIF RESULT != 999
-			;강제中断以外, 全滅しても攻撃を行う
 			CALL MONSTER_ATTACK, ATKER, ATK_TURN
 		IF RESULT == 999
 			IF FLAG:5 & 32
@@ -308,8 +308,8 @@ FOR TURN, 0, 99
 	ELSE
 		;モンスターが先攻
 		CALL MONSTER_ATTACK, ATKER, ATK_TURN
+		;敗北も中断も無い場合, 勇者の後攻
 		SIF RESULT == 0
-			;敗北も中断も無い場合, 勇者の後攻
 			CALL ENEMY_ATTACK, ATKER, 1
 		IF RESULT == 999
 			IF FLAG:5 & 32
